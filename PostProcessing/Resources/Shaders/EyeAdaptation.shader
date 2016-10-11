@@ -7,7 +7,7 @@ Shader "Hidden/Post FX/Eye Adaptation"
 
     CGINCLUDE
 
-        #pragma target 5.0
+        #pragma target 4.5
         #include "UnityCG.cginc"
         #include "Common.cginc"
         #include "EyeAdaptation.cginc"
