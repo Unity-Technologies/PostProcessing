@@ -16,7 +16,7 @@ namespace UnityEditor.PostProcessing
 
         public VectorscopeMonitor()
         {
-            m_ComputeShader = (ComputeShader)EditorGUIUtility.LoadRequired("Post FX/Monitors/VectorscopeCompute.compute");
+            m_ComputeShader = EditorResources.Load<ComputeShader>("Monitors/VectorscopeCompute.compute");
         }
 
         public override void Dispose()

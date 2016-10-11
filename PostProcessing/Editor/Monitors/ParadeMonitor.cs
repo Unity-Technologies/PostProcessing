@@ -16,7 +16,7 @@ namespace UnityEditor.PostProcessing
 
         public ParadeMonitor()
         {
-            m_ComputeShader = (ComputeShader)EditorGUIUtility.LoadRequired("Post FX/Monitors/WaveformCompute.compute");
+            m_ComputeShader = EditorResources.Load<ComputeShader>("Monitors/WaveformCompute.compute");
         }
 
         public override void Dispose()

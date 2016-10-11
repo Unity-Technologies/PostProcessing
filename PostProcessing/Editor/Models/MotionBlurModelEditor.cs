@@ -31,7 +31,7 @@ namespace UnityEditor.PostProcessing
 
             public GraphDrawer()
             {
-                m_BlendingIcon = (Texture)EditorGUIUtility.LoadRequired("Post FX/UI/MotionBlendingIcon.png");
+                m_BlendingIcon = EditorResources.Load<Texture>("UI/MotionBlendingIcon.png");
 
                 m_LowerCenterStyle = new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.LowerCenter };
                 m_MiddleCenterStyle = new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleCenter };

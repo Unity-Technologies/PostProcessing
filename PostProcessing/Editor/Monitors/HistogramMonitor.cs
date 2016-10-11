@@ -18,7 +18,7 @@ namespace UnityEditor.PostProcessing
 
         public HistogramMonitor()
         {
-            m_ComputeShader = (ComputeShader)EditorGUIUtility.LoadRequired("Post FX/Monitors/HistogramCompute.compute");
+            m_ComputeShader = EditorResources.Load<ComputeShader>("Monitors/HistogramCompute.compute");
         }
 
         public override void Dispose()
