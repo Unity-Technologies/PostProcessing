@@ -85,10 +85,10 @@ namespace UnityEngine.PostProcessing
             // All the per-frame initialization logic has to be done in OnPreCull instead of Update
             // because [ImageEffectAllowedInSceneView] doesn't trigger Update events...
 
-            if (profile == null)
-                return;
-
             m_Camera = GetComponent<Camera>();
+
+            if (profile == null || m_Camera == null)
+                return;
 
 #if UNITY_EDITOR
             // Track the scene view camera to disable some effects we don't want to see in the
@@ -175,7 +175,7 @@ namespace UnityEngine.PostProcessing
 
         void OnPostRender()
         {
-            if (profile == null)
+            if (profile == null || m_Camera == null)
                 return;
 
             // TAA messes with the projection matrix, so reset it before the classic post-processing
@@ -188,7 +188,7 @@ namespace UnityEngine.PostProcessing
         [ImageEffectTransformsToLDR]
         void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            if (profile == null)
+            if (profile == null || m_Camera == null)
             {
                 Graphics.Blit(source, destination);
                 return;
@@ -277,7 +277,7 @@ namespace UnityEngine.PostProcessing
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            if (profile == null)
+            if (profile == null || m_Camera == null)
                 return;
 
             if (m_EyeAdaptation.active && profile.debugViews.IsModeActive(DebugMode.EyeAdaptation))
