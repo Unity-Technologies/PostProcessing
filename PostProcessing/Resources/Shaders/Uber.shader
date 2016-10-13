@@ -5,7 +5,8 @@ Shader "Hidden/Post FX/Uber Shader"
         _MainTex ("Texture", 2D) = "white" {}
         _AutoExposure ("", 2D) = "" {}
         _BloomTex ("", 2D) = "" {}
-        _Bloom_DirtTex("", 2D) = "" {}
+        _Bloom_DirtTex ("", 2D) = "" {}
+        _GrainTex ("", 2D) = "" {}
         _LogLut ("", 2D) = "" {}
         _UserLut ("", 2D) = "" {}
         _Vignette_Mask ("", 2D) = "" {}
@@ -23,12 +24,11 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
-        #pragma multi_compile __ GRAIN_FAST GRAIN_FILMIC
+        #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
 
         #include "UnityCG.cginc"
         #include "Bloom.cginc"
-        #include "Grain.cginc"
         #include "ColorGrading.cginc"
 
         // Auto exposure / eye adaptation
@@ -56,8 +56,9 @@ Shader "Hidden/Post FX/Uber Shader"
         half4 _UserLut_Params; // @see _LogLut_Params
 
         // Grain
-        half4 _Grain_Params1; // x: amount, y: size, z: lum_contrib, w: aspect
-        half3 _Grain_Params2; // x: cos_angle, y: sin_angle, z: time
+        half4 _Grain_Params1; // x: lum_contrib, y: intensityR, z: intensityG, w: intensityB
+        half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
+        sampler2D _GrainTex;
 
         // Vignette
         half3 _Vignette_Color;
@@ -95,7 +96,7 @@ Shader "Hidden/Post FX/Uber Shader"
 
         half4 FragUber(VaryingsFlipped i) : SV_Target
         {
-            half2 uv = i.uv;
+            float2 uv = i.uv;
             half autoExposure = 1.0;
 
             // Store the auto exposure value for later
@@ -117,13 +118,13 @@ Shader "Hidden/Post FX/Uber Shader"
             // TODO: Take advantage of TAA to get even smoother results
             #if CHROMATIC_ABERRATION
             {
-                half2 coords = 2.0 * uv - 1.0;
-                half2 end = uv - coords * dot(coords, coords) * _ChromaticAberration_Amount;
+                float2 coords = 2.0 * uv - 1.0;
+                float2 end = uv - coords * dot(coords, coords) * _ChromaticAberration_Amount;
 
-                half2 diff = end - uv;
+                float2 diff = end - uv;
                 int samples = clamp(int(length(_MainTex_TexelSize.zw * diff / 2.0)), 3, 16);
-                half2 delta = diff / samples;
-                half2 pos = uv;
+                float2 delta = diff / samples;
+                float2 pos = uv;
                 half3 sum = (0.0).xxx, filterSum = (0.0).xxx;
 
                 for (int i = 0; i < samples; i++)
@@ -219,9 +220,16 @@ Shader "Hidden/Post FX/Uber Shader"
             color = saturate(color);
 
             // Grain / dithering
-            #if (GRAIN_FAST || GRAIN_FILMIC)
+            #if (GRAIN)
             {
-                color = ApplyGrain(color, uv, _Grain_Params1, _Grain_Params2);
+                float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+
+                // Noisiness response curve based on scene luminance
+                float luminance = lerp(0.0, AcesLuminance(color), _Grain_Params1.x);
+                float lum = smoothstep(0.2, 0.0, luminance) + luminance;
+
+                grain = lerp(grain, 0.0, Pow4(lum));
+                color += grain * _Grain_Params1.yzw;
             }
             #endif
 
