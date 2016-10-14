@@ -28,6 +28,9 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Halves the resolution of the effect to increase performance.")]
             public bool downsampling;
 
+            [Tooltip("Forces compatibility with Forward rendered objects when working with the Deferred rendering path.")]
+            public bool forceForwardCompatibility;
+
             [Tooltip("Enables the ambient-only mode in that the effect only affects ambient lighting. This mode is only available with the Deferred rendering path and HDR rendering.")]
             public bool ambientOnly;
 
@@ -44,6 +47,7 @@ namespace UnityEngine.PostProcessing
                         radius = 0.3f,
                         sampleCount = SampleCount.Medium,
                         downsampling = true,
+                        forceForwardCompatibility = false,
                         ambientOnly = false,
                         highPrecision = false
                     };

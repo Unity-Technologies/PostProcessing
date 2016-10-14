@@ -97,7 +97,6 @@ namespace UnityEngine.PostProcessing
             //  - Temporal Antialiasing
             //  - Depth of Field
             //  - Motion blur
-            //  - Grain
             m_RenderingInSceneView = UnityEditor.SceneView.currentDrawingSceneView != null
                 && UnityEditor.SceneView.currentDrawingSceneView.camera == m_Camera;
 #endif

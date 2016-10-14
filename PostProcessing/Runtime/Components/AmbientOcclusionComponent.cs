@@ -39,7 +39,7 @@ namespace UnityEngine.PostProcessing
         {
             get
             {
-                if (context.isGBufferAvailable)
+                if (context.isGBufferAvailable && !model.settings.forceForwardCompatibility)
                     return OcclusionSource.GBuffer;
 
                 if (model.settings.highPrecision && !context.isGBufferAvailable)
@@ -51,7 +51,7 @@ namespace UnityEngine.PostProcessing
 
         bool ambientOnlySupported
         {
-            get { return context.isHdr && model.settings.ambientOnly && context.isGBufferAvailable; }
+            get { return context.isHdr && model.settings.ambientOnly && context.isGBufferAvailable && !model.settings.forceForwardCompatibility; }
         }
 
         public override bool active
