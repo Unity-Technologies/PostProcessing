@@ -193,16 +193,20 @@ half RotateHue(half value, half low, half hi)
 //
 half3 YrgbCurve(half3 c, sampler2D curveTex)
 {
+    const float kHalfPixel = (1.0 / 128.0) / 2.0;
+
     // Y
-    half mr = tex2D(curveTex, half2(c.r, 0.75)).a;
-    half mg = tex2D(curveTex, half2(c.g, 0.75)).a;
-    half mb = tex2D(curveTex, half2(c.b, 0.75)).a;
-    c = saturate(half3(mr, mg, mb));
+    c += kHalfPixel.xxx;
+    float mr = tex2D(curveTex, float2(c.r, 0.75)).a;
+    float mg = tex2D(curveTex, float2(c.g, 0.75)).a;
+    float mb = tex2D(curveTex, float2(c.b, 0.75)).a;
+    c = saturate(float3(mr, mg, mb));
 
     // RGB
-    half r = tex2D(curveTex, half2(c.r, 0.75)).r;
-    half g = tex2D(curveTex, half2(c.g, 0.75)).g;
-    half b = tex2D(curveTex, half2(c.b, 0.75)).b;
+    c += kHalfPixel.xxx;
+    float r = tex2D(curveTex, float2(c.r, 0.75)).r;
+    float g = tex2D(curveTex, float2(c.g, 0.75)).g;
+    float b = tex2D(curveTex, float2(c.b, 0.75)).b;
     return saturate(half3(r, g, b));
 }
 

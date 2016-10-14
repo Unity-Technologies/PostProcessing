@@ -84,7 +84,7 @@ Shader "Hidden/Post FX/Lut Generator"
         #endif
 
             // YRGB curves (done in linear/LDR for now)
-            color = saturate(YrgbCurve(color, _Curves));
+            color = YrgbCurve(color, _Curves);
 
             return color;
         }
