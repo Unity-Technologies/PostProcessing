@@ -185,8 +185,15 @@ namespace UnityEditor.PostProcessing
 
             EditorGUILayout.LabelField("Multiple Frame Blending", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-            m_GraphDrawer.DrawBlendingGraph(m_FrameBlending.floatValue);
+
+            float fbValue = m_FrameBlending.floatValue;
+            m_GraphDrawer.DrawBlendingGraph(fbValue);
             EditorGUILayout.PropertyField(m_FrameBlending);
+
+            if (fbValue > 0f)
+                EditorGUILayout.HelpBox("Multi-Frame Blending lowers precision of the final picture for optimization purposes.", MessageType.Info);
+
+
             EditorGUI.indentLevel--;
         }
     }
