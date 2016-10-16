@@ -50,8 +50,8 @@ half3 FilmicTonemap(half3 aces)
 {
 #if TONEMAPPING_USE_FULL_ACES
 
-    half3 oces = RRT(aces * 1.8);
-    half3 odt = ODT_RGBMonitor(oces);
+    half3 oces = RRT(aces);
+    half3 odt = ODT_RGBmonitor_100nits_dim(oces);
     return odt;
 
 #else

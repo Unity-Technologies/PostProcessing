@@ -62,7 +62,7 @@
     half4 color = tex2D(_MainTex, i.uv);
     half3 aces = unity_to_ACES(color.rgb);
     half3 oces = RRT(aces);
-    half3 odt = ODT_RGBMonitor(oces);
+    half3 odt = ODT_RGBmonitor_100nits_dim(oces);
     return half4(odt, color.a);
 
     If you want to customize the white point, uncomment the previous define and set uniforms accordingly:
@@ -765,16 +765,118 @@ static const half CINEMA_BLACK = CINEMA_WHITE / 2400.0;
 
 static const half ODT_SAT_FACTOR = 0.93;
 
+// <ACEStransformID>ODT.Academy.RGBmonitor_100nits_dim.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - sRGB</ACESuserName>
+
 //
-// RGB computer monitor (D60 simulation)
+// Output Device Transform - RGB computer monitor
+//
+
 //
 // Summary :
 //  This transform is intended for mapping OCES onto a desktop computer monitor
-//  typical of those used in motion picture visual effects production used to
-//  simulate the image appearance produced by odt_p3d60. These monitors may
-//  occasionally be referred to as "sRGB" displays, however, the monitor for
-//  which this transform is designed does not exactly match the specifications
-//  in IEC 61966-2-1:1999.
+//  typical of those used in motion picture visual effects production. These
+//  monitors may occasionally be referred to as "sRGB" displays, however, the
+//  monitor for which this transform is designed does not exactly match the
+//  specifications in IEC 61966-2-1:1999.
+//
+//  The assumed observer adapted white is D65, and the viewing environment is
+//  that of a dim surround.
+//
+//  The monitor specified is intended to be more typical of those found in
+//  visual effects production.
+//
+// Device Primaries :
+//  Primaries are those specified in Rec. ITU-R BT.709
+//  CIE 1931 chromaticities:  x         y         Y
+//              Red:          0.64      0.33
+//              Green:        0.3       0.6
+//              Blue:         0.15      0.06
+//              White:        0.3127    0.329     100 cd/m^2
+//
+// Display EOTF :
+//  The reference electro-optical transfer function specified in
+//  IEC 61966-2-1:1999.
+//
+// Signal Range:
+//    This transform outputs full range code values.
+//
+// Assumed observer adapted white point:
+//         CIE 1931 chromaticities:    x            y
+//                                     0.3127       0.329
+//
+// Viewing Environment:
+//   This ODT has a compensation for viewing environment variables more typical
+//   of those associated with video mastering.
+//
+half3 ODT_RGBmonitor_100nits_dim(half3 oces)
+{
+    // OCES to RGB rendering space
+    half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
+
+    // Apply the tonescale independently in rendering-space RGB
+    half3 rgbPost;
+    rgbPost.x = segmented_spline_c9_fwd(rgbPre.x);
+    rgbPost.y = segmented_spline_c9_fwd(rgbPre.y);
+    rgbPost.z = segmented_spline_c9_fwd(rgbPre.z);
+
+    // Scale luminance to linear code value
+    half3 linearCV = Y_2_linCV(rgbPost, CINEMA_WHITE, CINEMA_BLACK);
+
+     // Apply gamma adjustment to compensate for dim surround
+    linearCV = darkSurround_to_dimSurround(linearCV);
+
+    // Apply desaturation to compensate for luminance difference
+    //linearCV = mul(ODT_SAT_MAT, linearCV);
+    linearCV = lerp(dot(linearCV, AP1_RGB2Y).xxx, linearCV, ODT_SAT_FACTOR.xxx);
+
+    // Convert to display primary encoding
+    // Rendering space RGB to XYZ
+    half3 XYZ = mul(AP1_2_XYZ_MAT, linearCV);
+
+    // Apply CAT from ACES white point to assumed observer adapted white point
+    XYZ = mul(D60_2_D65_CAT, XYZ);
+
+    // CIE XYZ to display primaries
+    linearCV = mul(XYZ_2_REC709_MAT, XYZ);
+
+    // Handle out-of-gamut values
+    // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
+    linearCV = saturate(linearCV);
+
+    // TODO: Revisit when it is possible to deactivate Unity default framebuffer encoding
+    // with sRGB opto-electrical transfer function (OETF).
+    /*
+    // Encode linear code values with transfer function
+    half3 outputCV;
+    // moncurve_r with gamma of 2.4 and offset of 0.055 matches the EOTF found in IEC 61966-2-1:1999 (sRGB)
+    const half DISPGAMMA = 2.4;
+    const half OFFSET = 0.055;
+    outputCV.x = moncurve_r(linearCV.x, DISPGAMMA, OFFSET);
+    outputCV.y = moncurve_r(linearCV.y, DISPGAMMA, OFFSET);
+    outputCV.z = moncurve_r(linearCV.z, DISPGAMMA, OFFSET);
+
+    outputCV = linear_to_sRGB(linearCV);
+    */
+
+    // Unity already draws to a sRGB target
+    return linearCV;
+}
+
+// <ACEStransformID>ODT.Academy.RGBmonitor_D60sim_100nits_dim.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - sRGB (D60 sim.)</ACESuserName>
+
+//
+// Output Device Transform - RGB computer monitor (D60 simulation)
+//
+
+//
+// Summary :
+//  This transform is intended for mapping OCES onto a desktop computer monitor
+//  typical of those used in motion picture visual effects production. These
+//  monitors may occasionally be referred to as "sRGB" displays, however, the
+//  monitor for which this transform is designed does not exactly match the
+//  specifications in IEC 61966-2-1:1999.
 //
 //  The assumed observer adapted white is D60, and the viewing environment is
 //  that of a dim surround.
@@ -788,14 +890,14 @@ static const half ODT_SAT_FACTOR = 0.93;
 //              Red:          0.64      0.33
 //              Green:        0.3       0.6
 //              Blue:         0.15      0.06
-//              White:        0.3217    0.329     100 cd/m^2
+//              White:        0.3127    0.329     100 cd/m^2
 //
 // Display EOTF :
 //  The reference electro-optical transfer function specified in
 //  IEC 61966-2-1:1999.
 //
 // Signal Range:
-//    This tranform outputs full range code values.
+//    This transform outputs full range code values.
 //
 // Assumed observer adapted white point:
 //         CIE 1931 chromaticities:    x            y
@@ -805,7 +907,7 @@ static const half ODT_SAT_FACTOR = 0.93;
 //   This ODT has a compensation for viewing environment variables more typical
 //   of those associated with video mastering.
 //
-half3 ODT_RGBMonitor(half3 oces)
+half3 ODT_RGBmonitor_D60sim_100nits_dim(half3 oces)
 {
     // OCES to RGB rendering space
     half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
@@ -855,27 +957,32 @@ half3 ODT_RGBMonitor(half3 oces)
     // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
     linearCV = saturate(linearCV);
 
+    // TODO: Revisit when it is possible to deactivate Unity default framebuffer encoding
+    // with sRGB opto-electrical transfer function (OETF).
+    /*
     // Encode linear code values with transfer function
     half3 outputCV;
-    {
-        /*
-        // moncurve_r with gamma of 2.4 and offset of 0.055 matches the EOTF found in IEC 61966-2-1:1999 (sRGB)
-        const half DISPGAMMA = 2.4;
-        const half OFFSET = 0.055;
-        outputCV.x = moncurve_r(linearCV.x, DISPGAMMA, OFFSET);
-        outputCV.y = moncurve_r(linearCV.y, DISPGAMMA, OFFSET);
-        outputCV.z = moncurve_r(linearCV.z, DISPGAMMA, OFFSET);
-        */
+    // moncurve_r with gamma of 2.4 and offset of 0.055 matches the EOTF found in IEC 61966-2-1:1999 (sRGB)
+    const half DISPGAMMA = 2.4;
+    const half OFFSET = 0.055;
+    outputCV.x = moncurve_r(linearCV.x, DISPGAMMA, OFFSET);
+    outputCV.y = moncurve_r(linearCV.y, DISPGAMMA, OFFSET);
+    outputCV.z = moncurve_r(linearCV.z, DISPGAMMA, OFFSET);
 
-        outputCV = linear_to_sRGB(linearCV);
-    }
+    outputCV = linear_to_sRGB(linearCV);
+    */
 
     // Unity already draws to a sRGB target
     return linearCV;
 }
 
+// <ACEStransformID>ODT.Academy.Rec709_100nits_dim.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - Rec.709</ACESuserName>
+
 //
-// Rec.709 (BT.709)
+// Output Device Transform - Rec709
+//
+
 //
 // Summary :
 //  This transform is intended for mapping OCES onto a Rec.709 broadcast monitor
@@ -890,27 +997,27 @@ half3 ODT_RGBMonitor(half3 oces)
 //              Red:          0.64      0.33
 //              Green:        0.3       0.6
 //              Blue:         0.15      0.06
-//              White:        0.3217    0.329     100 cd/m^2
+//              White:        0.3127    0.329     100 cd/m^2
 //
 // Display EOTF :
 //  The reference electro-optical transfer function specified in
 //  Rec. ITU-R BT.1886.
 //
 // Signal Range:
-//    By default, this tranform outputs full range code values. If instead a
+//    By default, this transform outputs full range code values. If instead a
 //    SMPTE "legal" signal is desired, there is a runtime flag to output
 //    SMPTE legal signal. In ctlrender, this can be achieved by appending
 //    '-param1 legalRange 1' after the '-ctl odt.ctl' string.
 //
 // Assumed observer adapted white point:
 //         CIE 1931 chromaticities:    x            y
-//                                     0.3217       0.329
+//                                     0.3127       0.329
 //
 // Viewing Environment:
 //   This ODT has a compensation for viewing environment variables more typical
 //   of those associated with video mastering.
 //
-half3 ODT_Rec709(half3 oces)
+half3 ODT_Rec709_100nits_dim(half3 oces)
 {
     // OCES to RGB rendering space
     half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
@@ -923,6 +1030,117 @@ half3 ODT_Rec709(half3 oces)
 
     // Scale luminance to linear code value
     half3 linearCV = Y_2_linCV(rgbPost, CINEMA_WHITE, CINEMA_BLACK);
+
+    // Apply gamma adjustment to compensate for dim surround
+    linearCV = darkSurround_to_dimSurround(linearCV);
+
+    // Apply desaturation to compensate for luminance difference
+    //linearCV = mul(ODT_SAT_MAT, linearCV);
+    linearCV = lerp(dot(linearCV, AP1_RGB2Y).xxx, linearCV, ODT_SAT_FACTOR.xxx);
+
+    // Convert to display primary encoding
+    // Rendering space RGB to XYZ
+    half3 XYZ = mul(AP1_2_XYZ_MAT, linearCV);
+
+    // Apply CAT from ACES white point to assumed observer adapted white point
+    XYZ = mul(D60_2_D65_CAT, XYZ);
+
+    // CIE XYZ to display primaries
+    linearCV = mul(XYZ_2_REC709_MAT, XYZ);
+
+    // Handle out-of-gamut values
+    // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
+    linearCV = saturate(linearCV);
+
+    // Encode linear code values with transfer function
+    const half DISPGAMMA = 2.4;
+    const half L_W = 1.0;
+    const half L_B = 0.0;
+    half3 outputCV = linear_to_bt1886(linearCV, DISPGAMMA, L_W, L_B);
+
+    // TODO: Implement support for legal range.
+
+    // NOTE: Unity framebuffer encoding is encoded with sRGB opto-electrical transfer function (OETF)
+    // by default which will result in double perceptual encoding, thus for now if one want to use
+    // this ODT, he needs to decode its output with sRGB electro-optical transfer function (EOTF) to
+    // compensate for Unity default behaviour.
+
+    return outputCV;
+}
+
+// <ACEStransformID>ODT.Academy.Rec709_D60sim_100nits_dim.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - Rec.709 (D60 sim.)</ACESuserName>
+
+//
+// Output Device Transform - Rec709 (D60 simulation)
+//
+
+//
+// Summary :
+//  This transform is intended for mapping OCES onto a Rec.709 broadcast monitor
+//  that is calibrated to a D65 white point at 100 cd/m^2. The assumed observer
+//  adapted white is D60, and the viewing environment is a dim surround.
+//
+//  A possible use case for this transform would be cinema "soft-proofing".
+//
+// Device Primaries :
+//  Primaries are those specified in Rec. ITU-R BT.709
+//  CIE 1931 chromaticities:  x         y         Y
+//              Red:          0.64      0.33
+//              Green:        0.3       0.6
+//              Blue:         0.15      0.06
+//              White:        0.3127    0.329     100 cd/m^2
+//
+// Display EOTF :
+//  The reference electro-optical transfer function specified in
+//  Rec. ITU-R BT.1886.
+//
+// Signal Range:
+//    By default, this transform outputs full range code values. If instead a
+//    SMPTE "legal" signal is desired, there is a runtime flag to output
+//    SMPTE legal signal. In ctlrender, this can be achieved by appending
+//    '-param1 legalRange 1' after the '-ctl odt.ctl' string.
+//
+// Assumed observer adapted white point:
+//         CIE 1931 chromaticities:    x            y
+//                                     0.32168      0.33767
+//
+// Viewing Environment:
+//   This ODT has a compensation for viewing environment variables more typical
+//   of those associated with video mastering.
+//
+half3 ODT_Rec709_D60sim_100nits_dim(half3 oces)
+{
+    // OCES to RGB rendering space
+    half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
+
+    // Apply the tonescale independently in rendering-space RGB
+    half3 rgbPost;
+    rgbPost.x = segmented_spline_c9_fwd(rgbPre.x);
+    rgbPost.y = segmented_spline_c9_fwd(rgbPre.y);
+    rgbPost.z = segmented_spline_c9_fwd(rgbPre.z);
+
+    // Scale luminance to linear code value
+    half3 linearCV = Y_2_linCV(rgbPost, CINEMA_WHITE, CINEMA_BLACK);
+
+    // --- Compensate for different white point being darker  --- //
+    // This adjustment is to correct an issue that exists in ODTs where the device
+    // is calibrated to a white chromaticity other than D60. In order to simulate
+    // D60 on such devices, unequal code values must be sent to the display to achieve
+    // the chromaticities of D60. More specifically, in order to produce D60 on a device
+    // calibrated to a D65 white point (i.e. equal code values yield CIE x,y
+    // chromaticities of 0.3127, 0.329) the red channel must be slightly higher than
+    // that of green and blue in order to compensate for the relatively more "blue-ish"
+    // D65 white. This unequalness of color channels is the correct behavior but it
+    // means that as neutral highlights increase, the red channel will hit the
+    // device maximum first and clip, resulting in a small chromaticity shift as the
+    // green and blue channels continue to increase to their maximums.
+    // To avoid this clipping error, a slight scale factor is applied to allow the
+    // ODTs to simulate D60 within the D65 calibration white point.
+
+    // Scale and clamp white to avoid casted highlights due to D60 simulation
+    const half SCALE = 0.955;
+    linearCV = min(linearCV, 1.0) * SCALE;
 
     // Apply gamma adjustment to compensate for dim surround
     linearCV = darkSurround_to_dimSurround(linearCV);
@@ -948,11 +1166,23 @@ half3 ODT_Rec709(half3 oces)
     const half L_B = 0.0;
     half3 outputCV = linear_to_bt1886(linearCV, DISPGAMMA, L_W, L_B);
 
+    // TODO: Implement support for legal range.
+
+    // NOTE: Unity framebuffer encoding is encoded with sRGB opto-electrical transfer function (OETF)
+    // by default which will result in double perceptual encoding, thus for now if one want to use
+    // this ODT, he needs to decode its output with sRGB electro-optical transfer function (EOTF) to
+    // compensate for Unity default behaviour.
+
     return outputCV;
 }
 
+// <ACEStransformID>ODT.Academy.Rec2020_100nits_dim.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - Rec.2020</ACESuserName>
+
 //
-// Rec.2020 (BT.2020)
+// Output Device Transform - Rec2020
+//
+
 //
 // Summary :
 //  This transform is intended for mapping OCES onto a Rec.2020 broadcast
@@ -968,27 +1198,28 @@ half3 ODT_Rec709(half3 oces)
 //              Red:          0.708     0.292
 //              Green:        0.17      0.797
 //              Blue:         0.131     0.046
-//              White:        0.3217    0.329     100 cd/m^2
+//              White:        0.3127    0.329     100 cd/m^2
 //
 // Display EOTF :
 //  The reference electro-optical transfer function specified in
 //  Rec. ITU-R BT.1886.
 //
 // Signal Range:
-//    By default, this tranform outputs full range code values. If instead a
+//    By default, this transform outputs full range code values. If instead a
 //    SMPTE "legal" signal is desired, there is a runtime flag to output
 //    SMPTE legal signal. In ctlrender, this can be achieved by appending
 //    '-param1 legalRange 1' after the '-ctl odt.ctl' string.
 //
 // Assumed observer adapted white point:
 //         CIE 1931 chromaticities:    x            y
-//                                     0.3217       0.329
+//                                     0.3127       0.329
 //
 // Viewing Environment:
 //   This ODT has a compensation for viewing environment variables more typical
 //   of those associated with video mastering.
 //
-half3 ODT_Rec2020(half3 oces)
+
+half3 ODT_Rec2020_100nits_dim(half3 oces)
 {
     // OCES to RGB rendering space
     half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
@@ -1029,11 +1260,23 @@ half3 ODT_Rec2020(half3 oces)
     const half L_B = 0.0;
     half3 outputCV = linear_to_bt1886(linearCV, DISPGAMMA, L_W, L_B);
 
-    return linearCV;
+    // TODO: Implement support for legal range.
+
+    // NOTE: Unity framebuffer encoding is encoded with sRGB opto-electrical transfer function (OETF)
+    // by default which will result in double perceptual encoding, thus for now if one want to use
+    // this ODT, he needs to decode its output with sRGB electro-optical transfer function (EOTF) to
+    // compensate for Unity default behaviour.
+
+    return outputCV;
 }
 
+// <ACEStransformID>ODT.Academy.P3DCI_48nits.a1.0.3</ACEStransformID>
+// <ACESuserName>ACES 1.0 Output - P3-DCI</ACESuserName>
+
 //
-// P3DCI (D60 Simulation)
+// Output Device Transform - P3DCI (D60 Simulation)
+//
+
 //
 // Summary :
 //  This transform is intended for mapping OCES onto a P3 digital cinema
@@ -1058,7 +1301,7 @@ half3 ODT_Rec2020(half3 oces)
 // Viewing Environment:
 //  Environment specified in SMPTE RP 431-2-2007
 //
-half3 ODT_DciP3(half3 oces)
+half3 ODT_P3DCI_48nits(half3 oces)
 {
     // OCES to RGB rendering space
     half3 rgbPre = mul(AP0_2_AP1_MAT, oces);
@@ -1118,7 +1361,12 @@ half3 ODT_DciP3(half3 oces)
     const half DISPGAMMA = 2.6;
     half3 outputCV = pow(linearCV, 1.0 / DISPGAMMA);
 
-    return linearCV;
+    // NOTE: Unity framebuffer encoding is encoded with sRGB opto-electrical transfer function (OETF)
+    // by default which will result in double perceptual encoding, thus for now if one want to use
+    // this ODT, he needs to decode its output with sRGB electro-optical transfer function (EOTF) to
+    // compensate for Unity default behaviour.
+
+    return outputCV;
 }
 
 #endif // __ACES__
