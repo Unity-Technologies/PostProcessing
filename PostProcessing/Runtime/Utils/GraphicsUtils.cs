@@ -28,10 +28,10 @@ namespace UnityEngine.PostProcessing
 
                 var vertices = new[]
                 {
-                    new Vector3(-0.5f, -0.5f, 0f),
-                    new Vector3(0.5f,  0.5f, 0f),
-                    new Vector3(0.5f, -0.5f, 0f),
-                    new Vector3(-0.5f,  0.5f, 0f)
+                    new Vector3(-1f, -1f, 0f),
+                    new Vector3( 1f,  1f, 0f),
+                    new Vector3( 1f, -1f, 0f),
+                    new Vector3(-1f,  1f, 0f)
                 };
 
                 var uvs = new[]

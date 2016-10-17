@@ -395,7 +395,7 @@ float4 _BlitSourceTex_TexelSize;
 VaryingsDefault VertBlit(AttributesDefault v)
 {
     VaryingsDefault o;
-    o.pos = v.vertex * float4(2.0, 2.0, 0.0, 0.0) + float4(0.0, 0.0, 0.0, 1.0);
+    o.pos = v.vertex;
 #if UNITY_UV_STARTS_AT_TOP
     o.uv = v.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
 #else
