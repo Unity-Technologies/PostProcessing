@@ -19,7 +19,6 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _FullResolutionFiltering    = Shader.PropertyToID("_FullResolutionFiltering");
             internal static readonly int _HalfResolution             = Shader.PropertyToID("_HalfResolution");
             internal static readonly int _HighlightSuppression       = Shader.PropertyToID("_HighlightSuppression");
-
             internal static readonly int _PixelsPerMeterAtOneMeter   = Shader.PropertyToID("_PixelsPerMeterAtOneMeter");
             internal static readonly int _ScreenEdgeFading           = Shader.PropertyToID("_ScreenEdgeFading");
             internal static readonly int _ReflectionBlur             = Shader.PropertyToID("_ReflectionBlur");
@@ -29,27 +28,18 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _SSRMultiplier              = Shader.PropertyToID("_SSRMultiplier");
             internal static readonly int _FresnelFade                = Shader.PropertyToID("_FresnelFade");
             internal static readonly int _FresnelFadePower           = Shader.PropertyToID("_FresnelFadePower");
-
             internal static readonly int _ReflectionBufferSize       = Shader.PropertyToID("_ReflectionBufferSize");
             internal static readonly int _ScreenSize                 = Shader.PropertyToID("_ScreenSize");
             internal static readonly int _InvScreenSize              = Shader.PropertyToID("_InvScreenSize");
             internal static readonly int _ProjInfo                   = Shader.PropertyToID("_ProjInfo");
             internal static readonly int _CameraClipInfo             = Shader.PropertyToID("_CameraClipInfo");
-
             internal static readonly int _ProjectToPixelMatrix       = Shader.PropertyToID("_ProjectToPixelMatrix");
             internal static readonly int _WorldToCameraMatrix        = Shader.PropertyToID("_WorldToCameraMatrix");
             internal static readonly int _CameraToWorldMatrix        = Shader.PropertyToID("_CameraToWorldMatrix");
-
-            internal static readonly int _Axis                       = Shader.PropertyToID("_CameraToWorldMatrix");
+            internal static readonly int _Axis                       = Shader.PropertyToID("_Axis");
             internal static readonly int _CurrentMipLevel            = Shader.PropertyToID("_CurrentMipLevel");
-
             internal static readonly int _NormalAndRoughnessTexture  = Shader.PropertyToID("_NormalAndRoughnessTexture");
             internal static readonly int _HitPointTexture            = Shader.PropertyToID("_HitPointTexture");
-            internal static readonly int _ReflectionTexture0         = Shader.PropertyToID("_ReflectionTexture0");
-            internal static readonly int _ReflectionTexture1         = Shader.PropertyToID("_ReflectionTexture1");
-            internal static readonly int _ReflectionTexture2         = Shader.PropertyToID("_ReflectionTexture2");
-            internal static readonly int _ReflectionTexture3         = Shader.PropertyToID("_ReflectionTexture3");
-            internal static readonly int _ReflectionTexture4         = Shader.PropertyToID("_ReflectionTexture4");
             internal static readonly int _BlurTexture                = Shader.PropertyToID("_BlurTexture");
             internal static readonly int _FilteredReflections        = Shader.PropertyToID("_FilteredReflections");
             internal static readonly int _FinalReflectionTexture     = Shader.PropertyToID("_FinalReflectionTexture");
@@ -94,11 +84,11 @@ namespace UnityEngine.PostProcessing
 
         public override void OnEnable()
         {
-            m_ReflectionTextures[0] = Uniforms._ReflectionTexture0;
-            m_ReflectionTextures[1] = Uniforms._ReflectionTexture1;
-            m_ReflectionTextures[2] = Uniforms._ReflectionTexture2;
-            m_ReflectionTextures[3] = Uniforms._ReflectionTexture3;
-            m_ReflectionTextures[4] = Uniforms._ReflectionTexture4;
+            m_ReflectionTextures[0] = Shader.PropertyToID("_ReflectionTexture0");
+            m_ReflectionTextures[1] = Shader.PropertyToID("_ReflectionTexture1");
+            m_ReflectionTextures[2] = Shader.PropertyToID("_ReflectionTexture2");
+            m_ReflectionTextures[3] = Shader.PropertyToID("_ReflectionTexture3");
+            m_ReflectionTextures[4] = Shader.PropertyToID("_ReflectionTexture4");
         }
 
         public override string GetName()
