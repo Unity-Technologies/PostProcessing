@@ -46,7 +46,7 @@ namespace UnityEngine.PostProcessing
         public override CameraEvent GetCameraEvent()
         {
             return model.settings.taaSettings.renderQueue == AntialiasingModel.TaaQueue.BeforeTransparent
-                   ? CameraEvent.BeforeImageEffectsOpaque
+                   ? CameraEvent.AfterImageEffectsOpaque
                    : CameraEvent.BeforeImageEffects;
         }
 
