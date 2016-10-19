@@ -6,19 +6,19 @@ namespace UnityEngine.PostProcessing
     {
         #pragma warning disable 0169 // "field x is never used"
 
-        public BuiltinDebugViewsModel debugViews;
-        public AntialiasingModel antialiasing;
-        public AmbientOcclusionModel ambientOcclusion;
-        public ScreenSpaceReflectionModel screenSpaceReflection;
-        public DepthOfFieldModel depthOfField;
-        public MotionBlurModel motionBlur;
-        public EyeAdaptationModel eyeAdaptation;
-        public BloomModel bloom;
-        public ColorGradingModel colorGrading;
-        public UserLutModel userLut;
-        public ChromaticAberrationModel chromaticAberration;
-        public GrainModel grain;
-        public VignetteModel vignette;
+        public BuiltinDebugViewsModel debugViews = new BuiltinDebugViewsModel();
+        public AntialiasingModel antialiasing = new AntialiasingModel();
+        public AmbientOcclusionModel ambientOcclusion = new AmbientOcclusionModel();
+        public ScreenSpaceReflectionModel screenSpaceReflection = new ScreenSpaceReflectionModel();
+        public DepthOfFieldModel depthOfField = new DepthOfFieldModel();
+        public MotionBlurModel motionBlur = new MotionBlurModel();
+        public EyeAdaptationModel eyeAdaptation = new EyeAdaptationModel();
+        public BloomModel bloom = new BloomModel();
+        public ColorGradingModel colorGrading = new ColorGradingModel();
+        public UserLutModel userLut = new UserLutModel();
+        public ChromaticAberrationModel chromaticAberration = new ChromaticAberrationModel();
+        public GrainModel grain = new GrainModel();
+        public VignetteModel vignette = new VignetteModel();
 
 #if UNITY_EDITOR
         // Monitor settings
