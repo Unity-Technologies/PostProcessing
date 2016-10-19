@@ -43,15 +43,15 @@ half3 NeutralTonemap(half3 x, half4 params1, half4 params2)
 }
 
 //
-// Filmic tonemapping (pre-exposed ACES approximation, unless TONEMAPPING_USE_FULL_ACES is set to 1)
+// Filmic tonemapping (ACES fitting, unless TONEMAPPING_USE_FULL_ACES is set to 1)
 // Input is ACES2065-1 (AP0 w/ linear encoding)
 //
 half3 FilmicTonemap(half3 aces)
 {
 #if TONEMAPPING_USE_FULL_ACES
 
-    half3 oces = RRT(aces * 1.8);
-    half3 odt = ODT_RGBMonitor(oces);
+    half3 oces = RRT(aces);
+    half3 odt = ODT_RGBmonitor_100nits_dim(oces);
     return odt;
 
 #else
@@ -81,25 +81,38 @@ half3 FilmicTonemap(half3 aces)
     //acescg = mul(RRT_SAT_MAT, acescg);
     acescg = lerp(dot(acescg, AP1_RGB2Y).xxx, acescg, RRT_SAT_FACTOR.xxx);
 
-    // Quick'n'dirty approximation of the ACES tonemapper - pre-exposed RRT(ODT())
-    // Adapted from https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/ to
-    // fit our range & exposure.
-    const half a = 2.5;
-    const half b = 0.03;
-    const half c = 2.49;
-    const half d = 0.6;
-    const half e = 0.2;
+    // Luminance fitting of *RRT.a1.0.3 + ODT.Academy.RGBmonitor_100nits_dim.a1.0.3*.
+    // https://github.com/colour-science/colour-unity/blob/master/Assets/Colour/Notebooks/CIECAM02_Unity.ipynb
+    // RMSE: 0.0012846272106
+	const half a = 278.5085;
+	const half b = 10.7772;
+	const half c = 293.6045;
+	const half d = 88.7122;
+	const half e = 80.6889;
     half3 x = acescg;
-    half3 color = (x * (a * x + b)) / (x * (c * x + d) + e);
+    half3 rgbPost = (x * (a * x + b)) / (x * (c * x + d) + e);
+
+    // Scale luminance to linear code value
+    // half3 linearCV = Y_2_linCV(rgbPost, CINEMA_WHITE, CINEMA_BLACK);
 
     // Apply gamma adjustment to compensate for dim surround
-    color = darkSurround_to_dimSurround(color);
+    half3 linearCV = darkSurround_to_dimSurround(rgbPost);
 
     // Apply desaturation to compensate for luminance difference
-    //color = mul(ODT_SAT_MAT, color);
-    color = lerp(dot(color, AP1_RGB2Y).xxx, color, ODT_SAT_FACTOR.xxx);
+    //linearCV = mul(ODT_SAT_MAT, color);
+    linearCV = lerp(dot(linearCV, AP1_RGB2Y).xxx, linearCV, ODT_SAT_FACTOR.xxx);
 
-    return ACEScg_to_unity(color);
+    // Convert to display primary encoding
+    // Rendering space RGB to XYZ
+    half3 XYZ = mul(AP1_2_XYZ_MAT, linearCV);
+
+    // Apply CAT from ACES white point to assumed observer adapted white point
+    XYZ = mul(D60_2_D65_CAT, XYZ);
+
+    // CIE XYZ to display primaries
+    linearCV = mul(XYZ_2_REC709_MAT, XYZ);
+
+    return linearCV;
 
 #endif
 }
