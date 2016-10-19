@@ -84,11 +84,11 @@ half3 FilmicTonemap(half3 aces)
     // Luminance fitting of *RRT.a1.0.3 + ODT.Academy.RGBmonitor_100nits_dim.a1.0.3*.
     // https://github.com/colour-science/colour-unity/blob/master/Assets/Colour/Notebooks/CIECAM02_Unity.ipynb
     // RMSE: 0.0012846272106
-	const half a = 278.5085;
-	const half b = 10.7772;
-	const half c = 293.6045;
-	const half d = 88.7122;
-	const half e = 80.6889;
+    const half a = 278.5085;
+    const half b = 10.7772;
+    const half c = 293.6045;
+    const half d = 88.7122;
+    const half e = 80.6889;
     half3 x = acescg;
     half3 rgbPost = (x * (a * x + b)) / (x * (c * x + d) + e);
 
