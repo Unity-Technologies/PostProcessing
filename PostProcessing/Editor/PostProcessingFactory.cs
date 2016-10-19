@@ -10,7 +10,7 @@ namespace UnityEditor.PostProcessing
         [MenuItem("Assets/Create/Post-Processing Profile", priority = 201)]
         static void MenuCreatePostProcessingProfile()
         {
-            var icon = EditorResources.Load<Texture2D>("UI/Icon.png");
+            var icon = EditorGUIUtility.FindTexture("ScriptableObject Icon");
             ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, ScriptableObject.CreateInstance<DoCreatePostProcessingProfile>(), "New Post-Processing Profile.asset", icon, null);
         }
 
