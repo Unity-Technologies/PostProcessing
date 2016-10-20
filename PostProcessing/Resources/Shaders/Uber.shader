@@ -26,6 +26,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
+		#pragma multi_compile __ SHARPEN
 
         #include "UnityCG.cginc"
         #include "Bloom.cginc"
@@ -66,6 +67,10 @@ Shader "Hidden/Post FX/Uber Shader"
         half3 _Vignette_Settings; // x: intensity, y: smoothness, z: roundness
         sampler2D _Vignette_Mask;
         half _Vignette_Opacity; // [0;1]
+
+		// Sharpen
+		sampler2D _SharpenTex;
+		half3 _SharpenSettings;
 
         struct VaryingsFlipped
         {
@@ -145,6 +150,10 @@ Shader "Hidden/Post FX/Uber Shader"
                 color = tex2D(_MainTex, i.uvSPR).rgb;
             }
             #endif
+
+			#if SHARPEN
+			color.rgb += (color.rgb - tex2D(_SharpenTex, uv).rgb) * _SharpenSettings.x;
+			#endif
 
             // Apply auto exposure if any
             color *= autoExposure;
