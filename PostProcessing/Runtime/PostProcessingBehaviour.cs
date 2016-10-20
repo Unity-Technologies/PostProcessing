@@ -46,6 +46,7 @@ namespace UnityEngine.PostProcessing
         GrainComponent m_Grain;
         VignetteComponent m_Vignette;
         FxaaComponent m_Fxaa;
+		SharpenComponent m_Sharpen;
 
         void OnEnable()
         {
@@ -72,9 +73,10 @@ namespace UnityEngine.PostProcessing
             m_Grain = AddComponent(new GrainComponent());
             m_Vignette = AddComponent(new VignetteComponent());
             m_Fxaa = AddComponent(new FxaaComponent());
+	        m_Sharpen = AddComponent(new SharpenComponent());
 
-            // Prepare state observers
-            m_ComponentStates = new Dictionary<PostProcessingComponentBase, bool>();
+			// Prepare state observers
+			m_ComponentStates = new Dictionary<PostProcessingComponentBase, bool>();
 
             foreach (var component in m_Components)
                 m_ComponentStates.Add(component, false);
@@ -123,6 +125,7 @@ namespace UnityEngine.PostProcessing
             m_Grain.Init(context, profile.grain);
             m_Vignette.Init(context, profile.vignette);
             m_Fxaa.Init(context, profile.antialiasing);
+			m_Sharpen.Init(context,profile.sharpen);
 
             // Handles profile change and 'enable' state observers
             if (m_PreviousProfile != profile)
@@ -221,7 +224,13 @@ namespace UnityEngine.PostProcessing
                     autoExposure = m_EyeAdaptation.Prepare(src, uberMaterial);
                 }
 
-                if (m_Bloom.active)
+				if (m_Sharpen.active)
+				{
+					uberActive = true;
+					m_Sharpen.Prepare(src, uberMaterial, autoExposure);
+				}
+
+				if (m_Bloom.active)
                 {
                     uberActive = true;
                     m_Bloom.Prepare(src, uberMaterial, autoExposure);

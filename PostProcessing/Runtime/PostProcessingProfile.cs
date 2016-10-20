@@ -19,6 +19,7 @@ namespace UnityEngine.PostProcessing
         public ChromaticAberrationModel chromaticAberration;
         public GrainModel grain;
         public VignetteModel vignette;
+	    public SharpenModel sharpen;
 
 #if UNITY_EDITOR
         // Monitor settings
