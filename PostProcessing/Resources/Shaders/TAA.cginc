@@ -55,6 +55,11 @@ struct OutputSolver
 {
     float4 first : SV_Target0;
     float4 second : SV_Target1;
+
+//#if DEJITTER_DEPTH
+    float4 third : SV_Target2;
+    float4 fourth : SV_Target3;
+//#endif
 };
 
 sampler2D _HistoryTex;
@@ -67,6 +72,9 @@ sampler2D _CameraMotionVectorsTexture;
 #else
     sampler2D _CameraDepthTexture;
 #endif
+
+sampler2D _DepthHistory1Tex;
+sampler2D _DepthHistory2Tex;
 
 float4 _HistoryTex_TexelSize;
 float4 _CameraDepthTexture_TexelSize;
@@ -98,40 +106,50 @@ VaryingsSolver VertSolver(AttributesDefault input)
     return output;
 }
 
-float2 GetClosestFragment(in float2 uv)
+float GetDepth(float2 uv)
+{
+#if TAA_USE_GATHER4_FOR_DEPTH_SAMPLE
+    return _CameraDepthTexture.Sample(sampler_CameraDepthTexture, uv).r;
+#else
+    return SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv);
+#endif
+}
+
+float2 GetClosestFragment(float2 uv, out float depth)
 {
     const float2 k = _CameraDepthTexture_TexelSize.xy;
+    depth = GetDepth(uv);
 
     #if TAA_USE_GATHER4_FOR_DEPTH_SAMPLE
         const float4 neighborhood = _CameraDepthTexture.Gather(sampler_CameraDepthTexture, uv, int2(1, 1));
-        float3 result = float3(0., 0., _CameraDepthTexture.Sample(sampler_CameraDepthTexture, uv).r);
+        float3 result = float3(0., 0., depth);
     #else
         const float4 neighborhood = float4(
-            tex2D(_CameraDepthTexture, uv - k).r,
-            tex2D(_CameraDepthTexture, uv + float2(k.x, -k.y)).r,
-            tex2D(_CameraDepthTexture, uv + float2(-k.x, k.y)).r,
-            tex2D(_CameraDepthTexture, uv + k).r
+            GetDepth(uv - k),
+            GetDepth(uv + float2( k.x, -k.y)),
+            GetDepth(uv + float2(-k.x,  k.y)),
+            GetDepth(uv + k)
         );
-        float3 result = float3(0., 0., tex2D(_CameraDepthTexture, uv).r);
+        float3 result = float3(0., 0., depth);
     #endif
 
     #if TAA_USE_EXPERIMENTAL_OPTIMIZATIONS
         result = lerp(result, float3(-1., -1., neighborhood.x), step(neighborhood.x, result.z));
-        result = lerp(result, float3(1., -1., neighborhood.y), step(neighborhood.y, result.z));
-        result = lerp(result, float3(-1., 1., neighborhood.z), step(neighborhood.z, result.z));
-        result = lerp(result, float3(1., 1., neighborhood.w), step(neighborhood.w, result.z));
+        result = lerp(result, float3( 1., -1., neighborhood.y), step(neighborhood.y, result.z));
+        result = lerp(result, float3(-1.,  1., neighborhood.z), step(neighborhood.z, result.z));
+        result = lerp(result, float3( 1.,  1., neighborhood.w), step(neighborhood.w, result.z));
     #else
         if (neighborhood.x < result.z)
             result = float3(-1., -1., neighborhood.x);
 
         if (neighborhood.y < result.z)
-            result = float3(1., -1., neighborhood.y);
+            result = float3( 1., -1., neighborhood.y);
 
         if (neighborhood.z < result.z)
-            result = float3(-1., 1., neighborhood.z);
+            result = float3(-1.,  1., neighborhood.z);
 
         if (neighborhood.w < result.z)
-            result = float3(1., 1., neighborhood.w);
+            result = float3( 1.,  1., neighborhood.w);
     #endif
 
     return (uv + result.xy * k);
@@ -139,7 +157,7 @@ float2 GetClosestFragment(in float2 uv)
 
 // Adapted from Playdead's TAA implementation
 // https://github.com/playdeadgames/temporal
-float4 ClipToAABB(in float4 color, in float p, in float3 minimum, in float3 maximum)
+float4 ClipToAABB(float4 color, float p, float3 minimum, float3 maximum)
 {
     // note: only clips towards aabb center (but fast!)
     float3 center = .5 * (maximum + minimum);
@@ -168,10 +186,16 @@ float4 ClipToAABB(in float4 color, in float p, in float3 minimum, in float3 maxi
 
 OutputSolver FragSolver(VaryingsSolver input)
 {
+    float currentDepth;
+
 #if TAA_DILATE_MOTION_VECTOR_SAMPLE
-    float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw)).xy;
+    float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw, currentDepth)).xy;
 #else
     float2 motion = tex2D(_CameraMotionVectorsTexture, input.uv.zw).xy;
+
+    //#if DEJITTER_DEPTH
+        currentDepth = GetDepth(input.uv.zw);
+    //#endif
 #endif
 
     const float2 k = TAA_COLOR_NEIGHBORHOOD_SAMPLE_SPREAD * _MainTex_TexelSize.xy;
@@ -288,7 +312,7 @@ OutputSolver FragSolver(VaryingsSolver input)
     #endif
 
     float4 average = (corners + color) * .142857;
-
+    
     #if TAA_TONEMAP_COLOR_AND_HISTORY_SAMPLES
         average = FastToneMap(average);
 
@@ -369,6 +393,19 @@ OutputSolver FragSolver(VaryingsSolver input)
 
     output.second = color;
 
+#if DEJITTER_DEPTH
+    // ALl of this is a big hack... FIXME
+
+    float4 history1 = tex2D(_DepthHistory1Tex, input.uv.zw);
+    float4 history2 = tex2D(_DepthHistory2Tex, input.uv.zw);
+    float motionLength = length(motion); // `motion` may be dilated... Probably should use raw movec instead ?
+    float dmin = min(min(min(min(min(min(min(history1.y, history1.z), history1.w), history2.x), history2.y), history2.z), history2.w), currentDepth);
+    float o = lerp(dmin, currentDepth, motionLength > (1.0 - currentDepth) * 0.0002);
+
+    output.third = float4(o, currentDepth, history1.yz);
+    output.fourth = float4(history1.w, history2.xyz);
+#endif
+
     return output;
 }
 
@@ -381,40 +418,11 @@ float4 FragAlphaClear(VaryingsDefault input) : SV_Target
 }
 
 // -----------------------------------------------------------------------------
-// Blitting helper
+// Depth history clearance
 
-struct OutputBlit
+float4 FragDepthHistoryClear(VaryingsDefault input) : SV_Target
 {
-    float4 first : SV_Target0;
-    float4 second : SV_Target1;
-};
-
-sampler2D _BlitSourceTex;
-float4 _BlitSourceTex_TexelSize;
-
-VaryingsDefault VertBlit(AttributesDefault v)
-{
-    VaryingsDefault o;
-    o.pos = v.vertex;
-#if UNITY_UV_STARTS_AT_TOP
-    o.uv = v.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
-#else
-    o.uv = v.texcoord;
-#endif
-    o.uvSPR = UnityStereoScreenSpaceUVAdjust(v.texcoord.xy, _MainTex_ST);
-    return o;
-}
-
-OutputBlit FragBlit(VaryingsDefault input)
-{
-    OutputBlit output;
-
-    float4 color = tex2D(_BlitSourceTex, input.uv);
-
-    output.first = color;
-    output.second = color;
-
-    return output;
+    return GetDepth(input.uv).xxxx;
 }
 
 #endif // __TAA__

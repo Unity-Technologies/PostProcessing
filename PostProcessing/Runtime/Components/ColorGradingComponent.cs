@@ -36,7 +36,11 @@ namespace UnityEngine.PostProcessing
 
         public override bool active
         {
-            get { return model.enabled; }
+            get
+            {
+                return model.enabled
+                       && !context.interrupted;
+            }
         }
 
         // An analytical model of chromaticity of the standard illuminant, by Judd et al.

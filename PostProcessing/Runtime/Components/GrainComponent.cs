@@ -16,7 +16,8 @@ namespace UnityEngine.PostProcessing
             {
                 return model.enabled
                        && model.settings.intensity > 0f
-                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
+                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf)
+                       && !context.interrupted;
             }
         }
 
@@ -72,7 +73,7 @@ namespace UnityEngine.PostProcessing
 
             uberMaterial.SetTexture(Uniforms._GrainTex, m_GrainLookupRT);
 
-            float intensity = settings.intensity * 0.25f;
+            float intensity = settings.intensity * 0.1f;
 
             if (!settings.colored)
             {

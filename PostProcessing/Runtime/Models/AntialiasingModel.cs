@@ -170,22 +170,12 @@ namespace UnityEngine.PostProcessing
         #endregion
 
         #region TAA Settings
-        public enum TaaQueue
-        {
-            BeforeTransparent,
-            AfterTransparent
-        }
-
         [Serializable]
         public struct TaaSettings
         {
             [Tooltip("The diameter (in texels) inside which jitter samples are spread. Smaller values result in crisper but more aliased output, while larger values result in more stable but blurrier output.")]
-            [Range(0.1f, 3f)]
+            [Range(0.1f, 1f)]
             public float jitterSpread;
-
-            [Tooltip("Number of temporal samples. A larger value results in a smoother image but takes longer to converge; whereas a smaller value converges fast but allows for less subpixel information.")]
-            [Range(4, 64)]
-            public int sampleCount;
 
             [Tooltip("Controls the amount of sharpening applied to the color buffer.")]
             [Range(0f, 3f)]
@@ -199,9 +189,6 @@ namespace UnityEngine.PostProcessing
             [Range(0f, 1f)]
             public float motionBlending;
 
-            [Tooltip("When to apply temporal anti-aliasing. \"Before Transparent\" is generally recommended for games that make heavy use of particle effects and other VFX components, \"After Transparent\" will give a smoother look.")]
-            public TaaQueue renderQueue;
-
             public static TaaSettings defaultSettings
             {
                 get
@@ -209,11 +196,9 @@ namespace UnityEngine.PostProcessing
                     return new TaaSettings
                     {
                         jitterSpread = 0.75f,
-                        sampleCount = 8,
                         sharpen = 0.3f,
                         stationaryBlending = 0.95f,
-                        motionBlending = 0.85f,
-                        renderQueue = TaaQueue.BeforeTransparent
+                        motionBlending = 0.85f
                     };
                 }
             }

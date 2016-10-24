@@ -83,8 +83,10 @@ namespace UnityEngine.PostProcessing
 
             public void ProcessImage(PostProcessingContext context, CommandBuffer cb, ref Settings settings, RenderTargetIdentifier source, RenderTargetIdentifier destination, Material material)
             {
+                const float kMaxBlurRadius = 5f;
+
                 // Calculate the maximum blur radius in pixels.
-                int maxBlurPixels = (int)(settings.maxBlurRadius * context.height / 100);
+                int maxBlurPixels = (int)(kMaxBlurRadius * context.height / 100);
 
                 // Calculate the TileMax size.
                 // It should be a multiple of 8 and larger than maxBlur.
@@ -343,7 +345,8 @@ namespace UnityEngine.PostProcessing
                 var settings = model.settings;
                 return model.enabled
                        && ((settings.shutterAngle > 0f && reconstructionFilter.IsSupported()) || settings.frameBlending > 0f)
-                       && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2; // No movecs on GLES2 platforms
+                       && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2 // No movecs on GLES2 platforms
+                       && !context.interrupted;
             }
         }
 
@@ -367,7 +370,7 @@ namespace UnityEngine.PostProcessing
 
         public override CameraEvent GetCameraEvent()
         {
-            return CameraEvent.BeforeImageEffectsOpaque;
+            return CameraEvent.BeforeImageEffects;
         }
 
         public override void OnEnable()

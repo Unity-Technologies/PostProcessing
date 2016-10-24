@@ -1,5 +1,10 @@
 Shader "Hidden/Post FX/Temporal Anti-aliasing"
 {
+    Properties
+    {
+        _MainTex("", 2D) = "black"
+    }
+
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -11,6 +16,7 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 5.0
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
+                #pragma multi_compile __ DEJITTER_DEPTH
                 #include "TAA.cginc"
             ENDCG
         }
@@ -27,17 +33,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
             ENDCG
         }
 
-        // MRT Blit
-        Pass
-        {
-            CGPROGRAM
-                #pragma target 5.0
-                #pragma vertex VertBlit
-                #pragma fragment FragBlit
-                #include "TAA.cginc"
-            ENDCG
-        }
-
         // Alpha Clear
         Pass
         {
@@ -45,6 +40,17 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 5.0
                 #pragma vertex VertDefault
                 #pragma fragment FragAlphaClear
+                #include "TAA.cginc"
+            ENDCG
+        }
+
+        // Depth history clear
+        Pass
+        {
+            CGPROGRAM
+                #pragma target 5.0
+                #pragma vertex VertDefault
+                #pragma fragment FragDepthHistoryClear
                 #include "TAA.cginc"
             ENDCG
         }
@@ -61,6 +67,7 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 3.0
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
+                #pragma multi_compile __ DEJITTER_DEPTH
                 #include "TAA.cginc"
             ENDCG
         }
@@ -77,13 +84,13 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
             ENDCG
         }
 
-        // MRT Blit
+        // Alpha Clear
         Pass
         {
             CGPROGRAM
                 #pragma target 3.0
-                #pragma vertex VertBlit
-                #pragma fragment FragBlit
+                #pragma vertex VertDefault
+                #pragma fragment FragAlphaClear
                 #include "TAA.cginc"
             ENDCG
         }
@@ -94,7 +101,7 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
             CGPROGRAM
                 #pragma target 3.0
                 #pragma vertex VertDefault
-                #pragma fragment FragAlphaClear
+                #pragma fragment FragDepthHistoryClear
                 #include "TAA.cginc"
             ENDCG
         }

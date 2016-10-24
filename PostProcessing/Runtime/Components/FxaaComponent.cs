@@ -13,7 +13,8 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && model.settings.method == AntialiasingModel.Method.Fxaa;
+                       && model.settings.method == AntialiasingModel.Method.Fxaa
+                       && !context.interrupted;
             }
         }
 

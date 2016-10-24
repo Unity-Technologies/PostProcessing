@@ -36,12 +36,12 @@ namespace UnityEngine.PostProcessing
                     return new Settings
                     {
                         colored = false,
-                        intensity = 0.12f,
+                        intensity = 0.1f,
                         weightR = 1f,
                         weightG = 1f,
                         weightB = 1f,
                         size = 1.6f,
-                        luminanceContribution = 0.75f
+                        luminanceContribution = 0.1f
                     };
                 }
             }

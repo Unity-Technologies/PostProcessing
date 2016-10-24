@@ -10,7 +10,7 @@ namespace UnityEngine.PostProcessing
     [ImageEffectAllowedInSceneView]
 #endif
     [RequireComponent(typeof(Camera)), DisallowMultipleComponent, ExecuteInEditMode]
-	[AddComponentMenu("Effects/Post-Processing Behaviour", -1)]
+    [AddComponentMenu("Effects/Post-Processing Behaviour", -1)]
     public class PostProcessingBehaviour : MonoBehaviour
     {
         // Inspector fields
@@ -27,18 +27,17 @@ namespace UnityEngine.PostProcessing
         Camera m_Camera;
         PostProcessingProfile m_PreviousProfile;
 
-#if UNITY_EDITOR
         bool m_RenderingInSceneView;
-#endif
+        RenderTexture m_JitteredDepthHistory;
 
         // Effect components
         BuiltinDebugViewsComponent m_DebugViews;
         AmbientOcclusionComponent m_AmbientOcclusion;
         ScreenSpaceReflectionComponent m_ScreenSpaceReflection;
-        DepthOfFieldComponent m_DepthOfField;
         MotionBlurComponent m_MotionBlur;
         TaaComponent m_Taa;
         EyeAdaptationComponent m_EyeAdaptation;
+        DepthOfFieldComponent m_DepthOfField;
         BloomComponent m_Bloom;
         ChromaticAberrationComponent m_ChromaticAberration;
         ColorGradingComponent m_ColorGrading;
@@ -61,10 +60,10 @@ namespace UnityEngine.PostProcessing
             m_DebugViews = AddComponent(new BuiltinDebugViewsComponent());
             m_AmbientOcclusion = AddComponent(new AmbientOcclusionComponent());
             m_ScreenSpaceReflection = AddComponent(new ScreenSpaceReflectionComponent());
-            m_DepthOfField = AddComponent(new DepthOfFieldComponent());
             m_MotionBlur = AddComponent(new MotionBlurComponent());
             m_Taa = AddComponent(new TaaComponent());
             m_EyeAdaptation = AddComponent(new EyeAdaptationComponent());
+            m_DepthOfField = AddComponent(new DepthOfFieldComponent());
             m_Bloom = AddComponent(new BloomComponent());
             m_ChromaticAberration = AddComponent(new ChromaticAberrationComponent());
             m_ColorGrading = AddComponent(new ColorGradingComponent());
@@ -112,10 +111,10 @@ namespace UnityEngine.PostProcessing
             m_DebugViews.Init(context, profile.debugViews);
             m_AmbientOcclusion.Init(context, profile.ambientOcclusion);
             m_ScreenSpaceReflection.Init(context, profile.screenSpaceReflection);
-            m_DepthOfField.Init(context, profile.depthOfField);
             m_MotionBlur.Init(context, profile.motionBlur);
             m_Taa.Init(context, profile.antialiasing);
             m_EyeAdaptation.Init(context, profile.eyeAdaptation);
+            m_DepthOfField.Init(context, profile.depthOfField);
             m_Bloom.Init(context, profile.bloom);
             m_ChromaticAberration.Init(context, profile.chromaticAberration);
             m_ColorGrading.Init(context, profile.colorGrading);
@@ -145,10 +144,7 @@ namespace UnityEngine.PostProcessing
             context.camera.depthTextureMode = flags;
 
             // Temporal antialiasing jittering, needs to happen before culling
-#if UNITY_EDITOR
-            if(!m_RenderingInSceneView)
-#endif
-            if (m_Taa.active && !profile.debugViews.willInterrupt)
+            if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
                 m_Taa.SetProjectionMatrix();
         }
 
@@ -162,14 +158,8 @@ namespace UnityEngine.PostProcessing
             TryExecuteCommandBuffer(m_AmbientOcclusion);
             TryExecuteCommandBuffer(m_ScreenSpaceReflection);
 
-#if UNITY_EDITOR
             if (!m_RenderingInSceneView)
-#endif
-            {
-                TryExecuteCommandBuffer(m_DepthOfField);
                 TryExecuteCommandBuffer(m_MotionBlur);
-                TryExecuteCommandBuffer(m_Taa);
-            }
         }
 
         void OnPostRender()
@@ -177,8 +167,6 @@ namespace UnityEngine.PostProcessing
             if (profile == null || m_Camera == null)
                 return;
 
-            // TAA messes with the projection matrix, so reset it before the classic post-processing
-            // chain kicks in with OnRenderImage()
             m_Camera.ResetProjectionMatrix();
         }
 
@@ -195,13 +183,23 @@ namespace UnityEngine.PostProcessing
 
             // Uber shader setup
             bool uberActive = false;
-            bool fxaaActive = m_Fxaa.active && !m_Context.interrupted;
+            bool fxaaActive = m_Fxaa.active;
+            bool taaActive = m_Taa.active && !m_RenderingInSceneView;
+            bool dofActive = m_DepthOfField.active && !m_RenderingInSceneView;
 
             var uberMaterial = m_MaterialFactory.Get("Hidden/Post FX/Uber Shader");
             uberMaterial.shaderKeywords = null;
 
             var src = source;
             var dst = destination;
+
+            if (taaActive)
+            {
+                bool genDejitteredDepth = dofActive;
+                var tempRT = m_RenderTextureFactory.Get(src);
+                m_Taa.Render(src, tempRT, genDejitteredDepth);
+                src = tempRT;
+            }
 
 #if UNITY_EDITOR
             // Render to a dedicated target when monitors are enabled so they can show information
@@ -212,47 +210,50 @@ namespace UnityEngine.PostProcessing
                 dst = m_RenderTextureFactory.Get(src);
 #endif
 
-            if (!m_Context.interrupted)
+            Texture autoExposure = null;
+            if (m_EyeAdaptation.active)
             {
-                Texture autoExposure = null;
-                if (m_EyeAdaptation.active)
-                {
-                    uberActive = true;
-                    autoExposure = m_EyeAdaptation.Prepare(src, uberMaterial);
-                }
-
-                if (m_Bloom.active)
-                {
-                    uberActive = true;
-                    m_Bloom.Prepare(src, uberMaterial, autoExposure);
-                }
-
-                uberActive |= TryPrepareUberImageEffect(m_ChromaticAberration, uberMaterial);
-                uberActive |= TryPrepareUberImageEffect(m_ColorGrading, uberMaterial);
-                uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
-                uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
-                uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
-
-                // Render to destination
-                if (uberActive)
-                {
-                    if (!GraphicsUtils.isLinearColorSpace)
-                        uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
-
-                    var input = src;
-                    var output = dst;
-                    if (fxaaActive)
-                    {
-                        output = m_RenderTextureFactory.Get(src);
-                        src = output;
-                    }
-
-                    Graphics.Blit(input, output, uberMaterial, 0);
-                }
-
-                if (fxaaActive)
-                    m_Fxaa.Render(src, dst);
+                uberActive = true;
+                autoExposure = m_EyeAdaptation.Prepare(src, uberMaterial);
             }
+
+            if (dofActive)
+            {
+                uberActive = true;
+                m_DepthOfField.Prepare(src, uberMaterial, m_Taa.dejitteredDepth);
+            }
+
+            if (m_Bloom.active)
+            {
+                uberActive = true;
+                m_Bloom.Prepare(src, uberMaterial, autoExposure);
+            }
+
+            uberActive |= TryPrepareUberImageEffect(m_ChromaticAberration, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_ColorGrading, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
+
+            // Render to destination
+            if (uberActive)
+            {
+                if (!GraphicsUtils.isLinearColorSpace)
+                    uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+
+                var input = src;
+                var output = dst;
+                if (fxaaActive)
+                {
+                    output = m_RenderTextureFactory.Get(src);
+                    src = output;
+                }
+
+                Graphics.Blit(input, output, uberMaterial, 0);
+            }
+
+            if (fxaaActive)
+                m_Fxaa.Render(src, dst);
 
             if (!uberActive && !fxaaActive)
                 Graphics.Blit(src, dst);
@@ -419,7 +420,7 @@ namespace UnityEngine.PostProcessing
         void TryExecuteCommandBuffer<T>(PostProcessingComponentCommandBuffer<T> component)
             where T : PostProcessingModel
         {
-            if (component.active && !m_Context.interrupted)
+            if (component.active)
             {
                 var cb = GetCommandBuffer<T>(component.GetCameraEvent(), component.GetName());
                 cb.Clear();
@@ -431,7 +432,7 @@ namespace UnityEngine.PostProcessing
         bool TryPrepareUberImageEffect<T>(PostProcessingComponentRenderTexture<T> component, Material material)
             where T : PostProcessingModel
         {
-            if (!component.active && !m_Context.interrupted)
+            if (!component.active)
                 return false;
 
             component.Prepare(material);

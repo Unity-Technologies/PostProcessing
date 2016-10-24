@@ -20,6 +20,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ EYE_ADAPTATION
         #pragma multi_compile __ CHROMATIC_ABERRATION
+        #pragma multi_compile __ DEPTH_OF_FIELD DEPTH_OF_FIELD_COC_VIEW
         #pragma multi_compile __ BLOOM
         #pragma multi_compile __ BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
@@ -37,6 +38,10 @@ Shader "Hidden/Post FX/Uber Shader"
         // Chromatic aberration
         half _ChromaticAberration_Amount;
         sampler2D _ChromaticAberration_Spectrum;
+
+        // Depth of field
+        sampler2D _DepthOfFieldTex;
+        float4 _DepthOfFieldTex_TexelSize;
 
         // Bloom
         sampler2D _BloomTex;
@@ -156,6 +161,32 @@ Shader "Hidden/Post FX/Uber Shader"
             }
             #endif
 
+            // Depth of field
+            #if DEPTH_OF_FIELD
+            {
+                // 9-tap tent filter
+                float4 duv = _DepthOfFieldTex_TexelSize.xyxy * float4(1.0, 1.0, -1.0, 0.0);
+                half4 acc;
+
+                acc  = tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.xy);
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.wy) * 2.0;
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.zy);
+
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.zw) * 2.0;
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR) * 4.0;
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.xw) * 2.0;
+
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.zy);
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.wy) * 2.0;
+                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.xy);
+
+                acc /= 16.0;
+
+                // Composite
+                color = color * acc.a + acc.rgb * autoExposure;
+            }
+            #endif
+
             // HDR Bloom
             #if BLOOM
             {
@@ -225,10 +256,10 @@ Shader "Hidden/Post FX/Uber Shader"
                 float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
-                float luminance = lerp(0.0, AcesLuminance(color), _Grain_Params1.x);
+                float luminance = lerp(0.0, saturate(AcesLuminance(color)), _Grain_Params1.x);
                 float lum = smoothstep(0.2, 0.0, luminance) + luminance;
 
-                grain = lerp(grain, 0.0, Pow4(lum));
+                grain = lerp((0.0).xxx, grain, Pow4(lum).xxx);
                 color += grain * _Grain_Params1.yzw;
             }
             #endif
@@ -278,6 +309,22 @@ Shader "Hidden/Post FX/Uber Shader"
 
                 #pragma vertex VertUber
                 #pragma fragment FragUber
+
+            ENDCG
+        }
+
+        // (1) Dejittered depth debug
+        Pass
+        {
+            CGPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment Frag
+
+                float4 Frag(VaryingsDefault i) : SV_Target0
+                {
+                    return float4(tex2D(_MainTex, i.uv).xxx, 1.0);
+                }
 
             ENDCG
         }
