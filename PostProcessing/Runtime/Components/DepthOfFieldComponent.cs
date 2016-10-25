@@ -88,7 +88,8 @@ namespace UnityEngine.PostProcessing
             var rcpAspect = (float)source.height / source.width;
             material.SetFloat(Uniforms._RcpAspect, rcpAspect);
 
-            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
+            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
+            source.filterMode = FilterMode.Point;
 
             // Pass #1 - Downsampling, prefiltering and CoC calculation
             Graphics.Blit(source, rt1, material, 0);
@@ -97,7 +98,7 @@ namespace UnityEngine.PostProcessing
             var pass = rt1;
             if (antialiasCoC)
             {
-                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
+                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
 
                 if (m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2)
                 {
@@ -123,7 +124,7 @@ namespace UnityEngine.PostProcessing
             }
 
             // Pass #3 - Bokeh simulation
-            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
+            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
             Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
 
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
@@ -143,6 +144,7 @@ namespace UnityEngine.PostProcessing
                 context.renderTextureFactory.Release(pass);
 
             context.renderTextureFactory.Release(rt1);
+            source.filterMode = FilterMode.Bilinear;
         }
 
         public override void OnDisable()
