@@ -16,7 +16,6 @@ Shader "Hidden/Post FX/Depth Of Field"
                 #pragma vertex VertDOF
                 #pragma fragment FragPrefilter
                 #pragma target 3.0
-                #pragma multi_compile __ DEJITTER_DEPTH
                 #include "DepthOfField.cginc"
             ENDCG
         }
@@ -58,6 +57,26 @@ Shader "Hidden/Post FX/Depth Of Field"
                 #pragma vertex VertDOF
                 #pragma fragment FragBlur
                 #define KERNEL_VERYLARGE
+                #include "DepthOfField.cginc"
+            ENDCG
+        }
+
+        // (5) CoC antialiasing
+        Pass
+        {
+            CGPROGRAM
+                #pragma vertex VertDOF
+                #pragma fragment FragAntialiasCoC
+                #include "DepthOfField.cginc"
+            ENDCG
+        }
+
+        // (6) CoC history clearing
+        Pass
+        {
+            CGPROGRAM
+                #pragma vertex VertDOF
+                #pragma fragment FragClearCoCHistory
                 #include "DepthOfField.cginc"
             ENDCG
         }

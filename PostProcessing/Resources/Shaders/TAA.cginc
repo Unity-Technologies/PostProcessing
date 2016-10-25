@@ -55,11 +55,6 @@ struct OutputSolver
 {
     float4 first : SV_Target0;
     float4 second : SV_Target1;
-
-//#if DEJITTER_DEPTH
-    float4 third : SV_Target2;
-    float4 fourth : SV_Target3;
-//#endif
 };
 
 sampler2D _HistoryTex;
@@ -115,10 +110,10 @@ float GetDepth(float2 uv)
 #endif
 }
 
-float2 GetClosestFragment(float2 uv, out float depth)
+float2 GetClosestFragment(float2 uv)
 {
     const float2 k = _CameraDepthTexture_TexelSize.xy;
-    depth = GetDepth(uv);
+    float depth = GetDepth(uv);
 
     #if TAA_USE_GATHER4_FOR_DEPTH_SAMPLE
         const float4 neighborhood = _CameraDepthTexture.Gather(sampler_CameraDepthTexture, uv, int2(1, 1));
@@ -186,16 +181,10 @@ float4 ClipToAABB(float4 color, float p, float3 minimum, float3 maximum)
 
 OutputSolver FragSolver(VaryingsSolver input)
 {
-    float currentDepth;
-
 #if TAA_DILATE_MOTION_VECTOR_SAMPLE
-    float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw, currentDepth)).xy;
+    float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw)).xy;
 #else
     float2 motion = tex2D(_CameraMotionVectorsTexture, input.uv.zw).xy;
-
-    //#if DEJITTER_DEPTH
-        currentDepth = GetDepth(input.uv.zw);
-    //#endif
 #endif
 
     const float2 k = TAA_COLOR_NEIGHBORHOOD_SAMPLE_SPREAD * _MainTex_TexelSize.xy;
@@ -392,19 +381,6 @@ OutputSolver FragSolver(VaryingsSolver input)
 #endif
 
     output.second = color;
-
-#if DEJITTER_DEPTH
-    // ALl of this is a big hack... FIXME
-
-    float4 history1 = tex2D(_DepthHistory1Tex, input.uv.zw);
-    float4 history2 = tex2D(_DepthHistory2Tex, input.uv.zw);
-    float motionLength = length(motion); // `motion` may be dilated... Probably should use raw movec instead ?
-    float dmin = min(min(min(min(min(min(min(history1.y, history1.z), history1.w), history2.x), history2.y), history2.z), history2.w), currentDepth);
-    float o = lerp(dmin, currentDepth, motionLength > (1.0 - currentDepth) * 0.0002);
-
-    output.third = float4(o, currentDepth, history1.yz);
-    output.fourth = float4(history1.w, history2.xyz);
-#endif
 
     return output;
 }

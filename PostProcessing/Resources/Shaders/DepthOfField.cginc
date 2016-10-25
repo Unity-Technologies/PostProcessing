@@ -9,7 +9,7 @@
 #pragma target 3.0
 
 sampler2D_float _CameraDepthTexture;
-sampler2D_float _DejitteredDepth;
+sampler2D_float _HistoryCoC;
 
 // Camera parameters
 float _Distance;
@@ -59,18 +59,10 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
     half3 c3 = tex2D(_MainTex, i.uv + duv.xy).rgb;
 
     // Sample linear depths.
-#if DEJITTER_DEPTH
-    float d0 = LinearEyeDepth(tex2D(_DejitteredDepth, i.uvAlt - duv.xy).x);
-    float d1 = LinearEyeDepth(tex2D(_DejitteredDepth, i.uvAlt - duv.zy).x);
-    float d2 = LinearEyeDepth(tex2D(_DejitteredDepth, i.uvAlt + duv.zy).x);
-    float d3 = LinearEyeDepth(tex2D(_DejitteredDepth, i.uvAlt + duv.xy).x);
-#else
     float d0 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvAlt - duv.xy));
     float d1 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvAlt - duv.zy));
     float d2 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvAlt + duv.zy));
     float d3 = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvAlt + duv.xy));
-#endif
-
     float4 depths = float4(d0, d1, d2, d3);
 
     // Calculate the radiuses of CoCs at these sample points.
@@ -103,6 +95,32 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
 #endif
 
     return half4(avg, coc);
+}
+
+// Very simple temporal antialiasing on CoC to reduce jitter (mostly visible on the front plane)
+struct Output
+{
+    half4 base : SV_Target0;
+    half history : SV_Target1;
+};
+
+Output FragAntialiasCoC(VaryingsDOF i)
+{
+    half4 base = tex2D(_MainTex, i.uv);
+    half hCoC = tex2D(_HistoryCoC, i.uv).r;
+    half CoC = base.a;
+    half nCoC = (hCoC + CoC) / 2.0; // TODO: Smarter CoC AA
+
+    Output output;
+    output.base = half4(base.rgb, nCoC);
+    output.history = nCoC;
+    return output;
+}
+
+// CoC history clearing
+half4 FragClearCoCHistory(VaryingsDOF i) : SV_Target
+{
+    return tex2D(_MainTex, i.uv).aaaa;
 }
 
 // Bokeh filter with disk-shaped kernels

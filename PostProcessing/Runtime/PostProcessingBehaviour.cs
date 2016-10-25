@@ -195,9 +195,8 @@ namespace UnityEngine.PostProcessing
 
             if (taaActive)
             {
-                bool genDejitteredDepth = dofActive;
                 var tempRT = m_RenderTextureFactory.Get(src);
-                m_Taa.Render(src, tempRT, genDejitteredDepth);
+                m_Taa.Render(src, tempRT);
                 src = tempRT;
             }
 
@@ -220,7 +219,7 @@ namespace UnityEngine.PostProcessing
             if (dofActive)
             {
                 uberActive = true;
-                m_DepthOfField.Prepare(src, uberMaterial, m_Taa.dejitteredDepth);
+                m_DepthOfField.Prepare(src, uberMaterial, taaActive);
             }
 
             if (m_Bloom.active)

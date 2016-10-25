@@ -13,6 +13,8 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _RcpMaxCoC = Shader.PropertyToID("_RcpMaxCoC");
             internal static readonly int _RcpAspect = Shader.PropertyToID("_RcpAspect");
             internal static readonly int _DejitteredDepth = Shader.PropertyToID("_DejitteredDepth");
+            internal static readonly int _MainTex = Shader.PropertyToID("_MainTex");
+            internal static readonly int _HistoryCoC = Shader.PropertyToID("_HistoryCoC");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Depth Of Field";
@@ -31,6 +33,9 @@ namespace UnityEngine.PostProcessing
         {
             return DepthTextureMode.Depth;
         }
+
+        RenderTexture m_CoCHistory;
+        RenderBuffer[] m_MRT = new RenderBuffer[2];
 
         // Height of the 35mm full-frame format (36mm x 24mm)
         const float k_FilmHeight = 0.024f;
@@ -57,7 +62,7 @@ namespace UnityEngine.PostProcessing
             return Mathf.Min(0.05f, radiusInPixels / screenHeight);
         }
 
-        public void Prepare(RenderTexture source, Material uberMaterial, RenderTexture dejitteredDepth)
+        public void Prepare(RenderTexture source, Material uberMaterial, bool antialiasCoC)
         {
             var settings = model.settings;
 
@@ -80,24 +85,59 @@ namespace UnityEngine.PostProcessing
             var rcpAspect = (float)source.height / source.width;
             material.SetFloat(Uniforms._RcpAspect, rcpAspect);
 
-            if (dejitteredDepth != null)
-            {
-                material.SetTexture(Uniforms._DejitteredDepth, dejitteredDepth);
-                material.EnableKeyword("DEJITTER_DEPTH");
-            }
+            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
+            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
 
             // Pass #1 - Downsampling, prefiltering and CoC calculation
-            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
             Graphics.Blit(source, rt1, material, 0);
 
-            // Pass #2 - Bokeh simulation
-            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
-            Graphics.Blit(rt1, rt2, material, 1 + (int)settings.kernelSize);
+            // Pass #2 - CoC Antialiasing
+            var pass = rt1;
+            if (antialiasCoC)
+            {
+                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
+
+                if (m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2)
+                {
+                    m_CoCHistory = RenderTexture.GetTemporary(context.width / 2, context.height / 2, 0, RenderTextureFormat.RHalf);
+                    m_CoCHistory.filterMode = FilterMode.Point;
+                    m_CoCHistory.name = "CoC History";
+                    Graphics.Blit(rt1, m_CoCHistory, material, 6);
+                }
+
+                var tempCoCHistory = RenderTexture.GetTemporary(context.width / 2, context.height / 2, 0, RenderTextureFormat.RHalf);
+                tempCoCHistory.filterMode = FilterMode.Point;
+                tempCoCHistory.name = "CoC History";
+
+                m_MRT[0] = pass.colorBuffer;
+                m_MRT[1] = tempCoCHistory.colorBuffer;
+                material.SetTexture(Uniforms._MainTex, rt1);
+                material.SetTexture(Uniforms._HistoryCoC, m_CoCHistory);
+                Graphics.SetRenderTarget(m_MRT, rt1.depthBuffer);
+                GraphicsUtils.Blit(material, 5);
+
+                RenderTexture.ReleaseTemporary(m_CoCHistory);
+                m_CoCHistory = tempCoCHistory;
+            }
+
+            // Pass #3 - Bokeh simulation
+            Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
 
             context.renderTextureFactory.Release(rt1);
 
+            if (antialiasCoC)
+                context.renderTextureFactory.Release(pass);
+
             uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt2);
             uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
+        }
+
+        public override void OnDisable()
+        {
+            if (m_CoCHistory != null)
+                RenderTexture.ReleaseTemporary(m_CoCHistory);
+
+            m_CoCHistory = null;
         }
     }
 }

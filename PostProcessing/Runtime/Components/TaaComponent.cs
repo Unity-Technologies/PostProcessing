@@ -16,20 +16,14 @@ namespace UnityEngine.PostProcessing
         }
 
         const string k_ShaderString = "Hidden/Post FX/Temporal Anti-aliasing";
-        const int k_SampleCount = 7; // Don't touch this as it'll break depth dejittering
+        const int k_SampleCount = 8;
 
-        readonly RenderBuffer[] m_MRT2 = new RenderBuffer[2];
-        readonly RenderBuffer[] m_MRT4 = new RenderBuffer[4];
+        readonly RenderBuffer[] m_MRT = new RenderBuffer[2];
 
         int m_SampleIndex;
         bool m_ResetHistory;
 
         RenderTexture m_HistoryTexture;
-
-        RenderTexture m_DepthHistory1;
-        RenderTexture m_DepthHistory2;
-
-        public RenderTexture dejitteredDepth { get { return m_DepthHistory1; } }
 
         public override bool active
         {
@@ -76,7 +70,7 @@ namespace UnityEngine.PostProcessing
             material.SetVector(Uniforms._Jitter, jitter);
         }
 
-        public void Render(RenderTexture source, RenderTexture destination, bool dejitterDepth)
+        public void Render(RenderTexture source, RenderTexture destination)
         {
             var material = context.materialFactory.Get(k_ShaderString);
             material.shaderKeywords = null;
@@ -103,73 +97,14 @@ namespace UnityEngine.PostProcessing
             var tempHistory = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
             tempHistory.name = "TAA History";
 
-            var mrt = dejitterDepth ? m_MRT4 : m_MRT2;
+            m_MRT[0] = destination.colorBuffer;
+            m_MRT[1] = tempHistory.colorBuffer;
 
-            mrt[0] = destination.colorBuffer;
-            mrt[1] = tempHistory.colorBuffer;
-
-            RenderTexture tempDepthHistory1 = null, tempDepthHistory2 = null;
-            if (dejitterDepth)
-            {
-                if (m_ResetHistory || m_DepthHistory1 == null || m_DepthHistory1.width != source.width || m_DepthHistory1.height != source.height)
-                {
-                    if (m_DepthHistory1)
-                        RenderTexture.ReleaseTemporary(m_DepthHistory1);
-
-                    m_DepthHistory1 = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
-                    m_DepthHistory1.name = "Depth History 2";
-
-                    Graphics.Blit(source, m_DepthHistory1, material, 3);
-                }
-
-                if (m_ResetHistory || m_DepthHistory2 == null || m_DepthHistory2.width != source.width || m_DepthHistory2.height != source.height)
-                {
-                    if (m_DepthHistory2)
-                        RenderTexture.ReleaseTemporary(m_DepthHistory2);
-
-                    m_DepthHistory2 = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
-                    m_DepthHistory2.name = "Depth History 1";
-
-                    Graphics.Blit(source, m_DepthHistory2, material, 3);
-                }
-
-                material.SetTexture(Uniforms._DepthHistory1Tex, m_DepthHistory1);
-                material.SetTexture(Uniforms._DepthHistory2Tex, m_DepthHistory2);
-                material.EnableKeyword("DEJITTER_DEPTH");
-
-                tempDepthHistory1 = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGBHalf);
-                tempDepthHistory1.name = "Depth History 1";
-                tempDepthHistory2 = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGBHalf);
-                tempDepthHistory2.name = "Depth History 2";
-
-                mrt[2] = tempDepthHistory1.colorBuffer;
-                mrt[3] = tempDepthHistory2.colorBuffer;
-            }
-
-            Graphics.SetRenderTarget(mrt, destination.depthBuffer);
+            Graphics.SetRenderTarget(m_MRT, destination.depthBuffer);
             GraphicsUtils.Blit(material, context.camera.orthographic ? 1 : 0);
 
             RenderTexture.ReleaseTemporary(m_HistoryTexture);
             m_HistoryTexture = tempHistory;
-
-            if (dejitterDepth)
-            {
-                RenderTexture.ReleaseTemporary(m_DepthHistory1);
-                RenderTexture.ReleaseTemporary(m_DepthHistory2);
-                m_DepthHistory1 = tempDepthHistory1;
-                m_DepthHistory2 = tempDepthHistory2;
-            }
-
-            if (!dejitterDepth)
-            {
-                if (m_DepthHistory1)
-                    RenderTexture.ReleaseTemporary(m_DepthHistory1);
-                if (m_DepthHistory2)
-                    RenderTexture.ReleaseTemporary(m_DepthHistory2);
-
-                m_DepthHistory1 = null;
-                m_DepthHistory2 = null;
-            }
 
             m_ResetHistory = false;
         }
@@ -263,15 +198,7 @@ namespace UnityEngine.PostProcessing
             if (m_HistoryTexture != null)
                 RenderTexture.ReleaseTemporary(m_HistoryTexture);
 
-            if (m_DepthHistory1 != null)
-                RenderTexture.ReleaseTemporary(m_DepthHistory1);
-
-            if (m_DepthHistory2 != null)
-                RenderTexture.ReleaseTemporary(m_DepthHistory2);
-
             m_HistoryTexture = null;
-            m_DepthHistory1 = null;
-            m_DepthHistory2 = null;
             m_SampleIndex = 0;
         }
     }
