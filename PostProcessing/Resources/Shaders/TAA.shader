@@ -42,17 +42,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #include "TAA.cginc"
             ENDCG
         }
-
-        // Depth history clear
-        Pass
-        {
-            CGPROGRAM
-                #pragma target 5.0
-                #pragma vertex VertDefault
-                #pragma fragment FragDepthHistoryClear
-                #include "TAA.cginc"
-            ENDCG
-        }
     }
 
     SubShader
@@ -89,17 +78,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 3.0
                 #pragma vertex VertDefault
                 #pragma fragment FragAlphaClear
-                #include "TAA.cginc"
-            ENDCG
-        }
-
-        // Alpha Clear
-        Pass
-        {
-            CGPROGRAM
-                #pragma target 3.0
-                #pragma vertex VertDefault
-                #pragma fragment FragDepthHistoryClear
                 #include "TAA.cginc"
             ENDCG
         }
