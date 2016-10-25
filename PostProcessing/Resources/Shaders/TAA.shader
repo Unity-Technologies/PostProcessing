@@ -16,7 +16,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 5.0
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
-                #pragma multi_compile __ DEJITTER_DEPTH
                 #include "TAA.cginc"
             ENDCG
         }
@@ -67,7 +66,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma target 3.0
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
-                #pragma multi_compile __ DEJITTER_DEPTH
                 #include "TAA.cginc"
             ENDCG
         }
