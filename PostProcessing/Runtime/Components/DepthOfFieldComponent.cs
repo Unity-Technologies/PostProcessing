@@ -89,7 +89,6 @@ namespace UnityEngine.PostProcessing
             material.SetFloat(Uniforms._RcpAspect, rcpAspect);
 
             var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
-            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
 
             // Pass #1 - Downsampling, prefiltering and CoC calculation
             Graphics.Blit(source, rt1, material, 0);
@@ -124,10 +123,8 @@ namespace UnityEngine.PostProcessing
             }
 
             // Pass #3 - Bokeh simulation
+            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
             Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
-
-            if (antialiasCoC)
-                context.renderTextureFactory.Release(pass);
 
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
             {
@@ -141,6 +138,9 @@ namespace UnityEngine.PostProcessing
                 uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt2);
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
             }
+
+            if (antialiasCoC)
+                context.renderTextureFactory.Release(pass);
 
             context.renderTextureFactory.Release(rt1);
         }
