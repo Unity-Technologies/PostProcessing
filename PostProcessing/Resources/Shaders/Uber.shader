@@ -42,6 +42,7 @@ Shader "Hidden/Post FX/Uber Shader"
         // Depth of field
         sampler2D _DepthOfFieldTex;
         float4 _DepthOfFieldTex_TexelSize;
+        float _MaxCoC;
 
         // Bloom
         sampler2D _BloomTex;
@@ -184,6 +185,28 @@ Shader "Hidden/Post FX/Uber Shader"
 
                 // Composite
                 color = color * acc.a + acc.rgb * autoExposure;
+            }
+            #elif DEPTH_OF_FIELD_COC_VIEW
+            {
+                // CoC radius
+                half4 src = tex2D(_DepthOfFieldTex, uv);
+                half coc = src.a / _MaxCoC;
+
+                // Visualize CoC (blue -> red -> green)
+                half3 rgb = lerp(half3(1.0, 0.0, 0.0), half3(0.8, 0.8, 1.0), max(0.0, -coc));
+                rgb = lerp(rgb, half3(0.8, 1.0, 0.8), max(0.0, coc));
+
+                // Black and white image overlay
+                rgb *= dot(src.rgb, 0.5 / 3.0) + 0.5;
+
+                // Gamma correction
+                #if !UNITY_COLORSPACE_GAMMA
+                {
+                    rgb = GammaToLinearSpace(rgb);
+                }
+                #endif
+
+                color = rgb;
             }
             #endif
 

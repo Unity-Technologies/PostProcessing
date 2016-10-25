@@ -2,6 +2,8 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.PostProcessing
 {
+    using DebugMode = BuiltinDebugViewsModel.Mode;
+
     public sealed class DepthOfFieldComponent : PostProcessingComponentRenderTexture<DepthOfFieldModel>
     {
         static class Uniforms
@@ -124,13 +126,23 @@ namespace UnityEngine.PostProcessing
             // Pass #3 - Bokeh simulation
             Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
 
-            context.renderTextureFactory.Release(rt1);
-
             if (antialiasCoC)
                 context.renderTextureFactory.Release(pass);
 
-            uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt2);
-            uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
+            if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
+            {
+                uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
+                uberMaterial.SetFloat(Uniforms._MaxCoC, maxCoC);
+                uberMaterial.EnableKeyword("DEPTH_OF_FIELD_COC_VIEW");
+                context.Interrupt();
+            }
+            else
+            {
+                uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt2);
+                uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
+            }
+
+            context.renderTextureFactory.Release(rt1);
         }
 
         public override void OnDisable()

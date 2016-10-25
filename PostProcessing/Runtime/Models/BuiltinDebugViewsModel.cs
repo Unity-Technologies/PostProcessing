@@ -73,7 +73,7 @@ namespace UnityEngine.PostProcessing
 
             AmbientOcclusion,
             EyeAdaptation,
-            FocusPlane, // TODO: Implement focus plane debugging
+            FocusPlane,
             PreGradingLog,
             LogLut,
             UserLut
