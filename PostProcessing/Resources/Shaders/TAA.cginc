@@ -130,6 +130,7 @@ OutputSolver FragSolver(VaryingsSolver input)
 #if TAA_DILATE_MOTION_VECTOR_SAMPLE
     float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw)).xy;
 #else
+    // Don't dilate in ortho !
     float2 motion = tex2D(_CameraMotionVectorsTexture, input.uv.zw).xy;
 #endif
 
@@ -149,9 +150,11 @@ OutputSolver FragSolver(VaryingsSolver input)
 
     float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
+    // Sharpen output
     color += (color - (corners * 0.166667)) * 2.718282 * _SharpenParameters.x;
     color = max(0.0, color);
 
+    // Tonemap color and history samples
     float4 average = FastToneMap((corners + color) * 0.142857);
 
     topLeft = FastToneMap(topLeft);
@@ -161,6 +164,7 @@ OutputSolver FragSolver(VaryingsSolver input)
 
     float4 history = tex2D(_HistoryTex, input.uv.zw - motion);
 
+// Only use this variant for arch viz or scenes that don't have any animated objects (camera animation is fine)
 #if TAA_USE_STABLE_BUT_GHOSTY_VARIANT
     float4 luma = float4(Luminance(topLeft.rgb), Luminance(bottomRight.rgb), Luminance(average.rgb), Luminance(color.rgb));
     float nudge = lerp(6.28318530718, 0.5, saturate(2.0 * history.a)) * max(abs(luma.z - luma.w), abs(luma.x - luma.y));
@@ -176,10 +180,14 @@ OutputSolver FragSolver(VaryingsSolver input)
 #endif
 
     history = FastToneMap(history);
+
+    // Clip history samples
     history = ClipToAABB(history, history.a, minimum.xyz, maximum.xyz);
 
+    // Store fragment motion history
     color.a = saturate(smoothstep(0.002 * _MainTex_TexelSize.z, 0.0035 * _MainTex_TexelSize.z, length(motion)));
 
+    // Blend method
     float weight = clamp(lerp(TAA_FINAL_BLEND_STATIC_FACTOR, TAA_FINAL_BLEND_DYNAMIC_FACTOR,
         length(motion) * TAA_MOTION_AMPLIFICATION), TAA_FINAL_BLEND_DYNAMIC_FACTOR, TAA_FINAL_BLEND_STATIC_FACTOR);
 
