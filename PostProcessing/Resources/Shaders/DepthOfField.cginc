@@ -5,6 +5,7 @@
 #include "Common.cginc"
 #include "DiskKernels.cginc"
 
+#define PREFILTER_LUMA_WEIGHT 1
 #pragma target 3.0
 
 sampler2D_float _CameraDepthTexture;
