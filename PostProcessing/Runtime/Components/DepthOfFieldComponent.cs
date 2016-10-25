@@ -88,7 +88,7 @@ namespace UnityEngine.PostProcessing
             var rcpAspect = (float)source.height / source.width;
             material.SetFloat(Uniforms._RcpAspect, rcpAspect);
 
-            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
+            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
 
             // Pass #1 - Downsampling, prefiltering and CoC calculation
             Graphics.Blit(source, rt1, material, 0);
@@ -97,7 +97,7 @@ namespace UnityEngine.PostProcessing
             var pass = rt1;
             if (antialiasCoC)
             {
-                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Point);
+                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf, filterMode: FilterMode.Bilinear);
 
                 if (m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2)
                 {
