@@ -14,7 +14,6 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _MaxCoC = Shader.PropertyToID("_MaxCoC");
             internal static readonly int _RcpMaxCoC = Shader.PropertyToID("_RcpMaxCoC");
             internal static readonly int _RcpAspect = Shader.PropertyToID("_RcpAspect");
-            internal static readonly int _DejitteredDepth = Shader.PropertyToID("_DejitteredDepth");
             internal static readonly int _MainTex = Shader.PropertyToID("_MainTex");
             internal static readonly int _HistoryCoC = Shader.PropertyToID("_HistoryCoC");
         }

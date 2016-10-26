@@ -11,8 +11,6 @@ namespace UnityEngine.PostProcessing
             internal static int _FinalBlendParameters = Shader.PropertyToID("_FinalBlendParameters");
             internal static int _HistoryTex           = Shader.PropertyToID("_HistoryTex");
             internal static int _MainTex              = Shader.PropertyToID("_MainTex");
-            internal static int _DepthHistory1Tex     = Shader.PropertyToID("_DepthHistory1Tex");
-            internal static int _DepthHistory2Tex     = Shader.PropertyToID("_DepthHistory2Tex");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Temporal Anti-aliasing";
