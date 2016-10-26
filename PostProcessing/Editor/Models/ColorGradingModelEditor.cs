@@ -89,6 +89,15 @@ namespace UnityEditor.PostProcessing
         CurveEditor m_CurveEditor;
         Dictionary<SerializedProperty, Color> m_CurveDict;
 
+		// Neutral tonemapping curve helper
+        const int k_CurveResolution = 24;
+        const float k_NeutralRangeX = 2f;
+        const float k_NeutralRangeY = 1f;
+        Vector3[] m_RectVertices = new Vector3[4];
+        Vector3[] m_LineVertices = new Vector3[2];
+        Vector3[] m_CurveVertices = new Vector3[k_CurveResolution];
+	    Rect m_NeutralCurveRect;
+
         public override void OnEnable()
         {
             // Tonemapping settings
@@ -214,6 +223,8 @@ namespace UnityEditor.PostProcessing
 
             if (tid == (int)Tonemapper.Neutral)
             {
+	            DrawNeutralTonemappingCurve();
+
                 EditorGUILayout.PropertyField(m_Tonemapping.neutralBlackIn, EditorGUIHelper.GetContent("Black In"));
                 EditorGUILayout.PropertyField(m_Tonemapping.neutralWhiteIn, EditorGUIHelper.GetContent("White In"));
                 EditorGUILayout.PropertyField(m_Tonemapping.neutralBlackOut, EditorGUIHelper.GetContent("Black Out"));
@@ -224,6 +235,129 @@ namespace UnityEditor.PostProcessing
 
             m_Tonemapping.tonemapper.intValue = tid;
         }
+
+	    void DrawNeutralTonemappingCurve()
+	    {
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Space(EditorGUI.indentLevel * 15f);
+                m_NeutralCurveRect = GUILayoutUtility.GetRect(128, 80);
+            }
+
+			// Background
+			m_RectVertices[0] = PointInRect(             0f,              0f);
+            m_RectVertices[1] = PointInRect(k_NeutralRangeX,              0f);
+            m_RectVertices[2] = PointInRect(k_NeutralRangeX, k_NeutralRangeY);
+            m_RectVertices[3] = PointInRect(             0f, k_NeutralRangeY);
+
+            Handles.DrawSolidRectangleWithOutline(
+                m_RectVertices,
+                Color.white * 0.1f,
+                Color.white * 0.4f
+                );
+
+            // Horizontal lines
+            for (var i = 1; i < k_NeutralRangeY; i++)
+                DrawLine(0, i, k_NeutralRangeX, i, 0.4f);
+
+            // Vertical lines
+            for (var i = 1; i < k_NeutralRangeX; i++)
+                DrawLine(i, 0, i, k_NeutralRangeY, 0.4f);
+
+			// Label
+            Handles.Label(
+                PointInRect(0, k_NeutralRangeY) + Vector3.right,
+                "Neutral Tonemapper", EditorStyles.miniLabel
+                );
+
+			// Precompute some values
+            var tonemap = ((ColorGradingModel)target).settings.tonemapping;
+
+		    const float scaleFactor = 20f;
+            const float scaleFactorHalf = scaleFactor * 0.5f;
+
+            float inBlack = tonemap.neutralBlackIn * scaleFactor + 1f;
+            float outBlack = tonemap.neutralBlackOut * scaleFactorHalf + 1f;
+            float inWhite = tonemap.neutralWhiteIn / scaleFactor;
+            float outWhite = 1f - tonemap.neutralWhiteOut / scaleFactor;
+            float blackRatio = inBlack / outBlack;
+            float whiteRatio = inWhite / outWhite;
+
+            const float a = 0.2f;
+            float b = Mathf.Max(0f, Mathf.LerpUnclamped(0.57f, 0.37f, blackRatio));
+            float c = Mathf.LerpUnclamped(0.01f, 0.24f, whiteRatio);
+            float d = Mathf.Max(0f, Mathf.LerpUnclamped(0.02f, 0.20f, blackRatio));
+            const float e = 0.02f;
+            const float f = 0.30f;
+		    float whiteLevel = tonemap.neutralWhiteLevel;
+		    float whiteClip = tonemap.neutralWhiteClip / scaleFactorHalf;
+
+			// Tonemapping curve
+            var vcount = 0;
+            while (vcount < k_CurveResolution)
+            {
+                float x = k_NeutralRangeX * vcount / (k_CurveResolution - 1);
+                float y = NeutralTonemap(x, a, b, c, d, e, f, whiteLevel, whiteClip);
+
+                if (y < k_NeutralRangeY)
+                {
+                    m_CurveVertices[vcount++] = PointInRect(x, y);
+                }
+                else
+                {
+                    if (vcount > 1)
+                    {
+                        // Extend the last segment to the top edge of the rect.
+                        var v1 = m_CurveVertices[vcount - 2];
+                        var v2 = m_CurveVertices[vcount - 1];
+                        var clip = (m_NeutralCurveRect.y - v1.y) / (v2.y - v1.y);
+                        m_CurveVertices[vcount - 1] = v1 + (v2 - v1) * clip;
+                    }
+                    break;
+                }
+            }
+
+            if (vcount > 1)
+            {
+                Handles.color = Color.white * 0.9f;
+                Handles.DrawAAPolyLine(2.0f, vcount, m_CurveVertices);
+            }
+	    }
+
+		void DrawLine(float x1, float y1, float x2, float y2, float grayscale)
+        {
+            m_LineVertices[0] = PointInRect(x1, y1);
+            m_LineVertices[1] = PointInRect(x2, y2);
+            Handles.color = Color.white * grayscale;
+            Handles.DrawAAPolyLine(2f, m_LineVertices);
+        }
+
+		Vector3 PointInRect(float x, float y)
+        {
+            x = Mathf.Lerp(m_NeutralCurveRect.x, m_NeutralCurveRect.xMax, x / k_NeutralRangeX);
+            y = Mathf.Lerp(m_NeutralCurveRect.yMax, m_NeutralCurveRect.y, y / k_NeutralRangeY);
+            return new Vector3(x, y, 0);
+        }
+
+		float NeutralCurve(float x, float a, float b, float c, float d, float e, float f)
+		{
+			return ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f;
+		}
+
+	    float NeutralTonemap(float x, float a, float b, float c, float d, float e, float f, float whiteLevel, float whiteClip)
+	    {
+			x = Mathf.Max(0f, x);
+
+			// Tonemap
+			float whiteScale = 1f / NeutralCurve(whiteLevel, a, b, c, d, e, f);
+			x = NeutralCurve(x * whiteScale, a, b, c, d, e, f);
+			x *= whiteScale;
+
+			// Post-curve white point adjustment
+			x /= whiteClip;
+
+			return x;
+	    }
 
         void DoBasicGUI()
         {
