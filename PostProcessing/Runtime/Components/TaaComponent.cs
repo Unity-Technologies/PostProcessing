@@ -58,7 +58,7 @@ namespace UnityEngine.PostProcessing
                 : GetPerspectiveProjectionMatrix(jitter);
 
 #if UNITY_5_5_OR_NEWER
-            context.camera.useJitteredProjectionMatrixForTransparentRendering = true;
+            context.camera.useJitteredProjectionMatrixForTransparentRendering = false;
 #endif
 
             jitter.x /= context.width;
