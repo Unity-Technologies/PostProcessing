@@ -5,6 +5,11 @@ Shader "Hidden/Post FX/Depth Of Field"
         _MainTex ("", 2D) = "black"
     }
 
+    CGINCLUDE
+        #pragma exclude_renderers d3d11_9x
+        #pragma target 3.0
+    ENDCG
+
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -15,7 +20,6 @@ Shader "Hidden/Post FX/Depth Of Field"
             CGPROGRAM
                 #pragma vertex VertDOF
                 #pragma fragment FragPrefilter
-                #pragma target 3.0
                 #include "DepthOfField.cginc"
             ENDCG
         }

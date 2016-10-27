@@ -6,7 +6,6 @@
 #include "DiskKernels.cginc"
 
 #define PREFILTER_LUMA_WEIGHT 1
-#pragma target 3.0
 
 sampler2D_float _CameraDepthTexture;
 sampler2D_float _HistoryCoC;
@@ -101,7 +100,7 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
 struct Output
 {
     half4 base : SV_Target0;
-    half history : SV_Target1;
+    half4 history : SV_Target1;
 };
 
 Output FragAntialiasCoC(VaryingsDOF i)
@@ -113,7 +112,7 @@ Output FragAntialiasCoC(VaryingsDOF i)
 
     Output output;
     output.base = half4(base.rgb, nCoC);
-    output.history = nCoC;
+    output.history = nCoC.xxxx;
     return output;
 }
 
