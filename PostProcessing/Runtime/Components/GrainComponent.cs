@@ -7,7 +7,7 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _Grain_Params1 = Shader.PropertyToID("_Grain_Params1");
             internal static readonly int _Grain_Params2 = Shader.PropertyToID("_Grain_Params2");
             internal static readonly int _GrainTex = Shader.PropertyToID("_GrainTex");
-            internal static readonly int _Params = Shader.PropertyToID("_Params");
+            internal static readonly int _Phase = Shader.PropertyToID("_Phase");
         }
 
         public override bool active
@@ -35,22 +35,21 @@ namespace UnityEngine.PostProcessing
 
             uberMaterial.EnableKeyword("GRAIN");
 
+            float rndOffsetX;
+            float rndOffsetY;
+
 #if POSTFX_DEBUG_STATIC_GRAIN
             // Chosen by a fair dice roll
             float time = 4f;
-            float rndXOffset = 0f;
-            float rndYOffset = 0f;
+            rndOffsetX = 0f;
+            rndOffsetY = 0f;
 #else
             float time = Time.realtimeSinceStartup;
-            float rndXOffset = Random.value;
-            float rndYOffset = Random.value;
+            rndOffsetX = Random.value;
+            rndOffsetY = Random.value;
 #endif
 
-            // Used for sample rotation in Filmic mode and position offset in Fast mode
-            const float kRotationOffset = 1.425f;
-            float c = Mathf.Cos(time + kRotationOffset);
-            float s = Mathf.Sin(time + kRotationOffset);
-
+            // Generate the grain lut for the current frame first
             if (m_GrainLookupRT == null || !m_GrainLookupRT.IsCreated())
             {
                 GraphicsUtils.Destroy(m_GrainLookupRT);
@@ -67,24 +66,14 @@ namespace UnityEngine.PostProcessing
             }
 
             var grainMaterial = context.materialFactory.Get("Hidden/Post FX/Grain Generator");
-            grainMaterial.SetVector(Uniforms._Params, new Vector4(settings.size, time / 20f, c, s));
+            grainMaterial.SetFloat(Uniforms._Phase, time / 20f);
 
             Graphics.Blit((Texture)null, m_GrainLookupRT, grainMaterial, settings.colored ? 1 : 0);
 
+            // Send everything to the uber shader
             uberMaterial.SetTexture(Uniforms._GrainTex, m_GrainLookupRT);
-
-            float intensity = settings.intensity * 0.1f;
-
-            if (!settings.colored)
-            {
-                uberMaterial.SetVector(Uniforms._Grain_Params1, new Vector4(settings.luminanceContribution, intensity, intensity, intensity));
-            }
-            else
-            {
-                uberMaterial.SetVector(Uniforms._Grain_Params1, new Vector4(settings.luminanceContribution, settings.weightR * intensity, settings.weightG * intensity, settings.weightB * intensity));
-            }
-
-            uberMaterial.SetVector(Uniforms._Grain_Params2, new Vector4((float)context.width / (float)m_GrainLookupRT.width, (float)context.height / (float)m_GrainLookupRT.height, rndXOffset, rndYOffset));
+            uberMaterial.SetVector(Uniforms._Grain_Params1, new Vector2(settings.luminanceContribution, settings.intensity * 20f));
+            uberMaterial.SetVector(Uniforms._Grain_Params2, new Vector4((float)context.width / (float)m_GrainLookupRT.width / settings.size, (float)context.height / (float)m_GrainLookupRT.height / settings.size, rndOffsetX, rndOffsetY));
         }
     }
 }

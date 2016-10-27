@@ -62,7 +62,7 @@ Shader "Hidden/Post FX/Uber Shader"
         half4 _UserLut_Params; // @see _LogLut_Params
 
         // Grain
-        half4 _Grain_Params1; // x: lum_contrib, y: intensityR, z: intensityG, w: intensityB
+        half2 _Grain_Params1; // x: lum_contrib, y: intensity
         half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
         sampler2D _GrainTex;
 
@@ -273,17 +273,16 @@ Shader "Hidden/Post FX/Uber Shader"
 
             color = saturate(color);
 
-            // Grain / dithering
+            // Grain
             #if (GRAIN)
             {
                 float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
-                float luminance = lerp(0.0, saturate(AcesLuminance(color)), _Grain_Params1.x);
-                float lum = smoothstep(0.2, 0.0, luminance) + luminance;
+                float lum = 1.0 - sqrt(AcesLuminance(color));
+                lum = lerp(1.0, lum, _Grain_Params1.x);
 
-                grain = lerp((0.0).xxx, grain, Pow4(lum).xxx);
-                color += grain * _Grain_Params1.yzw;
+                color += color * grain * _Grain_Params1.y * lum;
             }
             #endif
 
