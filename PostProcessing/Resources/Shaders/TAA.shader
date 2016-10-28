@@ -1,5 +1,10 @@
 Shader "Hidden/Post FX/Temporal Anti-aliasing"
 {
+    Properties
+    {
+        _MainTex("", 2D) = "black"
+    }
+
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -23,17 +28,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
                 #define TAA_DILATE_MOTION_VECTOR_SAMPLE 0
-                #include "TAA.cginc"
-            ENDCG
-        }
-
-        // MRT Blit
-        Pass
-        {
-            CGPROGRAM
-                #pragma target 5.0
-                #pragma vertex VertBlit
-                #pragma fragment FragBlit
                 #include "TAA.cginc"
             ENDCG
         }
@@ -73,17 +67,6 @@ Shader "Hidden/Post FX/Temporal Anti-aliasing"
                 #pragma vertex VertSolver
                 #pragma fragment FragSolver
                 #define TAA_DILATE_MOTION_VECTOR_SAMPLE 0
-                #include "TAA.cginc"
-            ENDCG
-        }
-
-        // MRT Blit
-        Pass
-        {
-            CGPROGRAM
-                #pragma target 3.0
-                #pragma vertex VertBlit
-                #pragma fragment FragBlit
                 #include "TAA.cginc"
             ENDCG
         }

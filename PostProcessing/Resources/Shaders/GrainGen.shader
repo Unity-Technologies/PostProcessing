@@ -1,80 +1,78 @@
-﻿Shader "Hidden/Post FX/Grain Generator"
+Shader "Hidden/Post FX/Grain Generator"
 {
     CGINCLUDE
-
+        
+        #pragma exclude_renderers d3d11_9x
+        #pragma target 3.0
         #include "UnityCG.cginc"
         #include "Common.cginc"
 
-        float4 _Params; // x: size, y: time, z: cos_angle, w: sin_angle
+        float _Phase;
 
-        float3 Rnm(float2 tc, float time)
+        // Implementation based on Timothy Lottes' "Large Grain"
+        // Reference code: https://www.shadertoy.com/view/4sSXDW
+        // Other article of interest: http://devlog-martinsh.blogspot.fr/2013/05/image-imperfections-and-film-grain-post.html
+        float Noise(float2 n, float x)
         {
-            float noise = sin(dot(tc + time.xx, float2(12.9898, 78.233))) * 43758.5453;
-            return frac(noise.xxx * float3(1.0, 1.2154, 1.3647)) * 2.0 - 1.0;
+            n += x;
+            return frac(sin(dot(n.xy, float2(12.9898, 78.233))) * 43758.5453);
         }
 
-        float Fade(float t)
+        float Step1(float2 uv, float n)
         {
-            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+            float b = 2.0, c = -12.0;
+            return (1.0 / (4.0 + b * 4.0 + abs(c))) * (
+                Noise(uv + float2(-1.0, -1.0), n) +
+                Noise(uv + float2( 0.0, -1.0), n) * b +
+                Noise(uv + float2( 1.0, -1.0), n) +
+                Noise(uv + float2(-1.0,  0.0), n) * b +
+                Noise(uv + float2( 0.0,  0.0), n) * c +
+                Noise(uv + float2( 1.0,  0.0), n) * b +
+                Noise(uv + float2(-1.0,  1.0), n) +
+                Noise(uv + float2( 0.0,  1.0), n) * b +
+                Noise(uv + float2( 1.0,  1.0), n)
+            );
         }
 
-        // 2d gradient noise
-        float PNoise(float2 p, float time)
+        float Step2(float2 uv, float n)
         {
-            const float kPermTexUnit = 1.0 / 256.0;
-            const float kPermTexUnitHalf = 0.5 / 256.0;
-
-            float2 pi = kPermTexUnit * floor(p) + kPermTexUnitHalf;
-            float2 pf = frac(p);
-
-            float perm00 = Rnm(pi, time).z;
-            float2 grad000 = Rnm(float2(perm00, kPermTexUnitHalf), time).xy * 4.0 - 1.0;
-            float n000 = dot(grad000, pf);
-
-            float perm01 = Rnm(pi + float2(0.0, kPermTexUnit), time).z;
-            half2 grad010 = Rnm(float2(perm01, kPermTexUnitHalf), time).xy * 4.0 - 1.0;
-            float n010 = dot(grad010, pf - float2(0.0, 1.0));
-
-            float perm10 = Rnm(pi + float2(kPermTexUnit, 0.0), time).z;
-            float2 grad100 = Rnm(float2(perm10, kPermTexUnitHalf), time).xy * 4.0 - 1.0;
-            float n100 = dot(grad100, pf - float2(1.0, 0.0));
-
-            float perm11 = Rnm(pi + float2(kPermTexUnit, kPermTexUnit), time).z;
-            float2 grad110 = Rnm(float2(perm11, kPermTexUnitHalf), time).xy * 4.0 - 1.0;
-            float n110 = dot(grad110, pf - float2(1.0, 1.0));
-
-            float2 n_x = lerp(float2(n000, n010), float2(n100, n110), Fade(pf.x));
-
-            return lerp(n_x.x, n_x.y, Fade(pf.y));
+            float b = 2.0, c = 4.0;
+            return (1.0 / (4.0 + b * 4.0 + abs(c))) * (
+                Step1(uv + float2(-1.0, -1.0), n) +
+                Step1(uv + float2( 0.0, -1.0), n) * b +
+                Step1(uv + float2( 1.0, -1.0), n) +
+                Step1(uv + float2(-1.0,  0.0), n) * b +
+                Step1(uv + float2( 0.0,  0.0), n) * c +
+                Step1(uv + float2( 1.0,  0.0), n) * b +
+                Step1(uv + float2(-1.0,  1.0), n) +
+                Step1(uv + float2( 0.0,  1.0), n) * b +
+                Step1(uv + float2( 1.0,  1.0), n)
+            );
         }
 
-        float2 CoordRot(float2 tc, float2 angle)
+        float Step3BW(float2 uv)
         {
-            float s = angle.y;
-            float c = angle.x;
-            tc = tc * 2.0 - 1.0;
-            float2 rot = float2((tc.x * c) - (tc.y * s), (tc.y * c) + (tc.x * s));
-            return rot * 0.5 + 0.5;
+            return Step2(uv, frac(_Phase));
+        }
+
+        float3 Step3(float2 uv)
+        {
+            float a = Step2(uv, 0.07 * frac(_Phase));
+            float b = Step2(uv, 0.11 * frac(_Phase));
+            float c = Step2(uv, 0.13 * frac(_Phase));
+            return float3(a, b, c);
         }
 
         float4 FragGrain(VaryingsDefault i) : SV_Target
         {
-            float2 rotCoords = CoordRot(i.uv, _Params.zw);
-            float n = PNoise(rotCoords * (192.0).xx / _Params.x, _Params.y);
-            return n.xxxx;
+            float grain = Step3BW(i.uv * float2(192.0, 192.0));
+            return float4(grain.xxx, 1.0);
         }
 
         float4 FragGrainColored(VaryingsDefault i) : SV_Target
         {
-            float2 rotCoordsR = CoordRot(i.uv, _Params.zw);
-            float2 rotCoordsG = CoordRot(i.uv + (0.1).xx, _Params.zw);
-            float2 rotCoordsB = CoordRot(i.uv - (0.1).xx, _Params.zw);
-
-            float r = PNoise(rotCoordsR * (192.0).xx / _Params.x, _Params.y);
-            float g = PNoise(rotCoordsG * (192.0).xx / _Params.x, _Params.y);
-            float b = PNoise(rotCoordsB * (192.0).xx / _Params.x, _Params.y);
-
-            return float4(r, g, b, 1.0);
+            float3 grain = Step3(i.uv * float2(192.0, 192.0));
+            return float4(grain, 1.0);
         }
 
     ENDCG

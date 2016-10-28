@@ -14,11 +14,9 @@ namespace UnityEditor.PostProcessing
         SerializedProperty m_FxaaPreset;
 
         SerializedProperty m_TaaJitterSpread;
-        SerializedProperty m_TaaSampleCount;
         SerializedProperty m_TaaSharpen;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
-        SerializedProperty m_TaaQueue;
 
         static string[] s_MethodNames =
         {
@@ -33,11 +31,9 @@ namespace UnityEditor.PostProcessing
             m_FxaaPreset = FindSetting((Settings x) => x.fxaaSettings.preset);
 
             m_TaaJitterSpread = FindSetting((Settings x) => x.taaSettings.jitterSpread);
-            m_TaaSampleCount = FindSetting((Settings x) => x.taaSettings.sampleCount);
             m_TaaSharpen = FindSetting((Settings x) => x.taaSettings.sharpen);
             m_TaaStationaryBlending = FindSetting((Settings x) => x.taaSettings.stationaryBlending);
             m_TaaMotionBlending = FindSetting((Settings x) => x.taaSettings.motionBlending);
-            m_TaaQueue = FindSetting((Settings x) => x.taaSettings.renderQueue);
         }
 
         public override void OnInspectorGUI()
@@ -56,7 +52,6 @@ namespace UnityEditor.PostProcessing
                 EditorGUILayout.LabelField("Jitter", EditorStyles.boldLabel);
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(m_TaaJitterSpread, EditorGUIHelper.GetContent("Spread"));
-                EditorGUILayout.PropertyField(m_TaaSampleCount);
                 EditorGUI.indentLevel--;
 
                 EditorGUILayout.Space();
@@ -70,7 +65,6 @@ namespace UnityEditor.PostProcessing
                 EditorGUILayout.Space();
 
                 EditorGUILayout.PropertyField(m_TaaSharpen);
-                EditorGUILayout.PropertyField(m_TaaQueue);
             }
         }
     }

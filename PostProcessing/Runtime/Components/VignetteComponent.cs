@@ -13,7 +13,11 @@ namespace UnityEngine.PostProcessing
 
         public override bool active
         {
-            get { return model.enabled; }
+            get
+            {
+                return model.enabled
+                       && !context.interrupted;
+            }
         }
 
         public override void Prepare(Material uberMaterial)

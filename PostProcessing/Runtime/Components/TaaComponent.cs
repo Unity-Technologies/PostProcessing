@@ -2,26 +2,26 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.PostProcessing
 {
-    public sealed class TaaComponent : PostProcessingComponentCommandBuffer<AntialiasingModel>
+    public sealed class TaaComponent : PostProcessingComponentRenderTexture<AntialiasingModel>
     {
         static class Uniforms
         {
             internal static int _Jitter               = Shader.PropertyToID("_Jitter");
             internal static int _SharpenParameters    = Shader.PropertyToID("_SharpenParameters");
             internal static int _FinalBlendParameters = Shader.PropertyToID("_FinalBlendParameters");
-            internal static int _MainTex              = Shader.PropertyToID("_MainTex");
             internal static int _HistoryTex           = Shader.PropertyToID("_HistoryTex");
-            internal static int _BlitSourceTex        = Shader.PropertyToID("_BlitSourceTex");
+            internal static int _MainTex              = Shader.PropertyToID("_MainTex");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Temporal Anti-aliasing";
+        const int k_SampleCount = 8;
 
-        RenderTexture m_History;
-        RenderTargetIdentifier m_HistoryIdentifier;
-        readonly RenderTargetIdentifier[] m_MRT = new RenderTargetIdentifier[2];
+        readonly RenderBuffer[] m_MRT = new RenderBuffer[2];
 
         int m_SampleIndex;
-        bool m_ResetHistory = true;
+        bool m_ResetHistory;
+
+        RenderTexture m_HistoryTexture;
 
         public override bool active
         {
@@ -29,30 +29,15 @@ namespace UnityEngine.PostProcessing
             {
                 return model.enabled
                        && model.settings.method == AntialiasingModel.Method.Taa
-                       && SystemInfo.supportsMotionVectors;
+                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf)
+                       && SystemInfo.supportsMotionVectors
+                       && !context.interrupted;
             }
         }
 
         public override DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
-        }
-
-        public override string GetName()
-        {
-            return "Temporal Anti-Aliasing";
-        }
-
-        public override CameraEvent GetCameraEvent()
-        {
-            return model.settings.taaSettings.renderQueue == AntialiasingModel.TaaQueue.BeforeTransparent
-                   ? CameraEvent.AfterImageEffectsOpaque
-                   : CameraEvent.BeforeImageEffects;
-        }
-
-        public override void OnEnable()
-        {
-            ResetHistory();
         }
 
         public void ResetHistory()
@@ -73,8 +58,7 @@ namespace UnityEngine.PostProcessing
                 : GetPerspectiveProjectionMatrix(jitter);
 
 #if UNITY_5_5_OR_NEWER
-            context.camera.useJitteredProjectionMatrixForTransparentRendering =
-                settings.renderQueue != AntialiasingModel.TaaQueue.BeforeTransparent;
+            context.camera.useJitteredProjectionMatrixForTransparentRendering = false;
 #endif
 
             jitter.x /= context.width;
@@ -84,49 +68,43 @@ namespace UnityEngine.PostProcessing
             material.SetVector(Uniforms._Jitter, jitter);
         }
 
-        public override void PopulateCommandBuffer(CommandBuffer cb)
+        public void Render(RenderTexture source, RenderTexture destination)
         {
-            var format = context.isHdr ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
             var material = context.materialFactory.Get(k_ShaderString);
+            material.shaderKeywords = null;
+
             var settings = model.settings.taaSettings;
 
-            if (m_History == null || m_History.width != context.width || m_History.height != context.height || !m_History.IsCreated())
+            if (m_ResetHistory || m_HistoryTexture == null || m_HistoryTexture.width != source.width || m_HistoryTexture.height != source.height)
             {
-                OnDisable();
+                if (m_HistoryTexture)
+                    RenderTexture.ReleaseTemporary(m_HistoryTexture);
 
-                m_History = RenderTexture.GetTemporary(context.width, context.height, 0, format, RenderTextureReadWrite.Default);
-                m_History.filterMode = FilterMode.Bilinear;
-                m_History.hideFlags = HideFlags.HideAndDontSave;
+                m_HistoryTexture = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
+                m_HistoryTexture.name = "TAA History";
 
-                m_HistoryIdentifier = new RenderTargetIdentifier(m_History);
-                ResetHistory();
+                Graphics.Blit(source, m_HistoryTexture, material, 2);
             }
 
             const float kMotionAmplification = 100f * 60f;
             material.SetVector(Uniforms._SharpenParameters, new Vector4(settings.sharpen, 0f, 0f, 0f));
             material.SetVector(Uniforms._FinalBlendParameters, new Vector4(settings.stationaryBlending, settings.motionBlending, kMotionAmplification, 0f));
+            material.SetTexture(Uniforms._MainTex, source);
+            material.SetTexture(Uniforms._HistoryTex, m_HistoryTexture);
 
-            if (m_ResetHistory)
-            {
-                cb.SetGlobalTexture(Uniforms._MainTex, BuiltinRenderTextureType.CameraTarget);
-                cb.Blit(BuiltinRenderTextureType.CameraTarget, m_HistoryIdentifier, material, 3);
-                m_ResetHistory = false;
-            }
+            var tempHistory = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
+            tempHistory.name = "TAA History";
 
-            int tempTexture = Uniforms._BlitSourceTex;
-            cb.GetTemporaryRT(tempTexture, context.width, context.height, 0, FilterMode.Bilinear, format);
+            m_MRT[0] = destination.colorBuffer;
+            m_MRT[1] = tempHistory.colorBuffer;
 
-            cb.SetGlobalTexture(Uniforms._HistoryTex, m_HistoryIdentifier);
-            cb.SetGlobalTexture(Uniforms._MainTex, BuiltinRenderTextureType.CameraTarget);
-            cb.Blit(BuiltinRenderTextureType.CameraTarget, tempTexture, material, context.camera.orthographic ? 1 : 0);
+            Graphics.SetRenderTarget(m_MRT, destination.depthBuffer);
+            GraphicsUtils.Blit(material, context.camera.orthographic ? 1 : 0);
 
-            m_MRT[0] = BuiltinRenderTextureType.CameraTarget;
-            m_MRT[1] = m_HistoryIdentifier;
+            RenderTexture.ReleaseTemporary(m_HistoryTexture);
+            m_HistoryTexture = tempHistory;
 
-            cb.SetRenderTarget(m_MRT, BuiltinRenderTextureType.CameraTarget);
-            cb.DrawMesh(GraphicsUtils.quad, Matrix4x4.identity, material, 0, 2);
-
-            cb.ReleaseTemporaryRT(tempTexture);
+            m_ResetHistory = false;
         }
 
         float GetHaltonValue(int index, int radix)
@@ -151,7 +129,7 @@ namespace UnityEngine.PostProcessing
                     GetHaltonValue(m_SampleIndex & 1023, 2),
                     GetHaltonValue(m_SampleIndex & 1023, 3));
 
-            if (++m_SampleIndex >= model.settings.taaSettings.sampleCount)
+            if (++m_SampleIndex >= k_SampleCount)
                 m_SampleIndex = 0;
 
             return offset;
@@ -215,11 +193,10 @@ namespace UnityEngine.PostProcessing
 
         public override void OnDisable()
         {
-            if (m_History != null)
-                RenderTexture.ReleaseTemporary(m_History);
+            if (m_HistoryTexture != null)
+                RenderTexture.ReleaseTemporary(m_HistoryTexture);
 
-            m_History = null;
-            m_HistoryIdentifier = 0;
+            m_HistoryTexture = null;
             m_SampleIndex = 0;
         }
     }

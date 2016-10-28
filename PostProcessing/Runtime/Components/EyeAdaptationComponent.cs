@@ -35,7 +35,8 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && SystemInfo.supportsComputeShaders;
+                       && SystemInfo.supportsComputeShaders
+                       && !context.interrupted;
             }
         }
 

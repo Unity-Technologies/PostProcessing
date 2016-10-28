@@ -90,7 +90,7 @@ inline half4 SafeHDR(half4 c) { return min(c, HALF_MAX); }
 #if (SHADER_TARGET < 50 && !defined(SHADER_API_PSSL))
 float rcp(float value)
 {
-    return 1. / value;
+    return 1.0 / value;
 }
 #endif
 
