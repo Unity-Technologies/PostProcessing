@@ -8,6 +8,7 @@ namespace UnityEditor.PostProcessing
 {
     using Settings = ColorGradingModel.Settings;
     using Tonemapper = ColorGradingModel.Tonemapper;
+	using ColorWheelMode = ColorGradingModel.ColorWheelMode;
 
     [PostProcessingModelEditor(typeof(ColorGradingModel))]
     public class ColorGradingModelEditor : PostProcessingModelEditor
@@ -48,6 +49,7 @@ namespace UnityEditor.PostProcessing
 
         struct ColorWheelsSettings
         {
+	        public SerializedProperty mode;
             public SerializedProperty log;
             public SerializedProperty linear;
         }
@@ -138,6 +140,7 @@ namespace UnityEditor.PostProcessing
             // Color wheels
             m_ColorWheels = new ColorWheelsSettings
             {
+				mode = FindSetting((Settings x) => x.colorWheels.mode),
                 log = FindSetting((Settings x) => x.colorWheels.log),
                 linear = FindSetting((Settings x) => x.colorWheels.linear)
             };
@@ -400,15 +403,28 @@ namespace UnityEditor.PostProcessing
 
         void DoColorWheelsGUI()
         {
-            EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(m_ColorWheels.linear);
-            var rect = GUILayoutUtility.GetLastRect();
-            WheelSetTitle(rect, "Linear Controls");
+	        int wheelMode = m_ColorWheels.mode.intValue;
 
-            EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(m_ColorWheels.log);
-            rect = GUILayoutUtility.GetLastRect();
-            WheelSetTitle(rect, "Log Controls");
+	        using (new EditorGUILayout.HorizontalScope())
+	        {
+		        GUILayout.Space(15);
+		        if (GUILayout.Toggle(wheelMode == (int)ColorWheelMode.Linear, "Linear", EditorStyles.miniButtonLeft)) wheelMode = (int)ColorWheelMode.Linear;
+		        if (GUILayout.Toggle(wheelMode == (int)ColorWheelMode.Log, "Log", EditorStyles.miniButtonRight)) wheelMode = (int)ColorWheelMode.Log;
+	        }
+
+	        m_ColorWheels.mode.intValue = wheelMode;
+	        EditorGUILayout.Space();
+
+	        if (wheelMode == (int)ColorWheelMode.Linear)
+	        {
+		        EditorGUILayout.PropertyField(m_ColorWheels.linear);
+		        WheelSetTitle(GUILayoutUtility.GetLastRect(), "Linear Controls");
+	        }
+			else if (wheelMode == (int)ColorWheelMode.Log)
+			{
+				EditorGUILayout.PropertyField(m_ColorWheels.log);
+				WheelSetTitle(GUILayoutUtility.GetLastRect(), "Log Controls");
+			}
         }
 
         static void WheelSetTitle(Rect position, string label)
