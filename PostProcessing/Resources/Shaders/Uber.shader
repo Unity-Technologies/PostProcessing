@@ -210,28 +210,6 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = rgb;
-
-                /*
-                // CoC radius
-                half4 src = tex2D(_DepthOfFieldTex, uv);
-                half coc = src.a / _MaxCoC;
-
-                // Visualize CoC (blue -> red -> green)
-                half3 rgb = lerp(half3(1.0, 0.0, 0.0), half3(0.8, 0.8, 1.0), max(0.0, -coc));
-                rgb = lerp(rgb, half3(0.8, 1.0, 0.8), max(0.0, coc));
-
-                // Black and white image overlay
-                rgb *= dot(src.rgb, 0.5 / 3.0) + 0.5;
-
-                // Gamma correction
-                #if !UNITY_COLORSPACE_GAMMA
-                {
-                    rgb = GammaToLinearSpace(rgb);
-                }
-                #endif
-
-                color = rgb;
-                */
             }
             #endif
 
