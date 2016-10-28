@@ -98,7 +98,7 @@ namespace UnityEngine.PostProcessing
             m_MRT[0] = destination.colorBuffer;
             m_MRT[1] = tempHistory.colorBuffer;
 
-            Graphics.SetRenderTarget(m_MRT, destination.depthBuffer);
+            Graphics.SetRenderTarget(m_MRT, source.depthBuffer);
             GraphicsUtils.Blit(material, context.camera.orthographic ? 1 : 0);
 
             RenderTexture.ReleaseTemporary(m_HistoryTexture);
