@@ -8,14 +8,15 @@ namespace UnityEngine.PostProcessing
     {
         static class Uniforms
         {
-            internal static readonly int _DepthOfFieldTex = Shader.PropertyToID("_DepthOfFieldTex");
-            internal static readonly int _Distance = Shader.PropertyToID("_Distance");
-            internal static readonly int _LensCoeff = Shader.PropertyToID("_LensCoeff");
-            internal static readonly int _MaxCoC = Shader.PropertyToID("_MaxCoC");
-            internal static readonly int _RcpMaxCoC = Shader.PropertyToID("_RcpMaxCoC");
-            internal static readonly int _RcpAspect = Shader.PropertyToID("_RcpAspect");
-            internal static readonly int _MainTex = Shader.PropertyToID("_MainTex");
-            internal static readonly int _HistoryCoC = Shader.PropertyToID("_HistoryCoC");
+            internal static readonly int _DepthOfFieldTex    = Shader.PropertyToID("_DepthOfFieldTex");
+            internal static readonly int _Distance           = Shader.PropertyToID("_Distance");
+            internal static readonly int _LensCoeff          = Shader.PropertyToID("_LensCoeff");
+            internal static readonly int _MaxCoC             = Shader.PropertyToID("_MaxCoC");
+            internal static readonly int _RcpMaxCoC          = Shader.PropertyToID("_RcpMaxCoC");
+            internal static readonly int _RcpAspect          = Shader.PropertyToID("_RcpAspect");
+            internal static readonly int _MainTex            = Shader.PropertyToID("_MainTex");
+            internal static readonly int _HistoryCoC         = Shader.PropertyToID("_HistoryCoC");
+	        internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Depth Of Field";
@@ -129,7 +130,7 @@ namespace UnityEngine.PostProcessing
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
             {
                 uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
-                uberMaterial.SetFloat(Uniforms._MaxCoC, maxCoC);
+                uberMaterial.SetVector(Uniforms._DepthOfFieldParams, new Vector2(s1, coeff));
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD_COC_VIEW");
                 context.Interrupt();
             }

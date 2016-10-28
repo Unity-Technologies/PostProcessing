@@ -40,9 +40,10 @@ Shader "Hidden/Post FX/Uber Shader"
         sampler2D _ChromaticAberration_Spectrum;
 
         // Depth of field
+        sampler2D_float _CameraDepthTexture;
         sampler2D _DepthOfFieldTex;
         float4 _DepthOfFieldTex_TexelSize;
-        float _MaxCoC;
+        float2 _DepthOfFieldParams; // x: distance, y: f^2 / (N * (S1 - f) * film_width * 2)
 
         // Bloom
         sampler2D _BloomTex;
@@ -188,6 +189,29 @@ Shader "Hidden/Post FX/Uber Shader"
             }
             #elif DEPTH_OF_FIELD_COC_VIEW
             {
+                // Calculate the radiuses of CoC.
+                half4 src = tex2D(_DepthOfFieldTex, uv);
+                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvFlippedSPR));
+                float coc = (depth - _DepthOfFieldParams.x) * _DepthOfFieldParams.y / depth;
+                coc *= 80;
+
+                // Visualize CoC (gray -> red -> white)
+                half3 rgb = lerp(half3(1, 0, 0), half3(0.5, 0.5, 0.5), saturate(-coc));
+                rgb = lerp(rgb, half3(1, 1, 1), saturate(coc));
+
+                // Black and white image overlay
+                rgb *= AcesLuminance(color) + 0.5;
+
+                // Gamma correction
+                #if !UNITY_COLORSPACE_GAMMA
+                {
+                    rgb = GammaToLinearSpace(rgb);
+                }
+                #endif
+
+                color = rgb;
+
+                /*
                 // CoC radius
                 half4 src = tex2D(_DepthOfFieldTex, uv);
                 half coc = src.a / _MaxCoC;
@@ -207,6 +231,7 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = rgb;
+                */
             }
             #endif
 
