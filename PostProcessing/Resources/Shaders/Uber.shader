@@ -195,9 +195,9 @@ Shader "Hidden/Post FX/Uber Shader"
                 float coc = (depth - _DepthOfFieldParams.x) * _DepthOfFieldParams.y / depth;
                 coc *= 80;
 
-                // Visualize CoC (gray -> red -> white)
-                half3 rgb = lerp(half3(1, 0, 0), half3(0.5, 0.5, 0.5), saturate(-coc));
-                rgb = lerp(rgb, half3(1, 1, 1), saturate(coc));
+                // Visualize CoC (white -> red -> gray)
+                half3 rgb = lerp(half3(1, 0, 0), half3(1.0, 1.0, 1.0), saturate(-coc));
+                rgb = lerp(rgb, half3(0.4, 0.4, 0.4), saturate(coc));
 
                 // Black and white image overlay
                 rgb *= AcesLuminance(color) + 0.5;
