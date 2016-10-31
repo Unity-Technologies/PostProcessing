@@ -18,6 +18,7 @@ Shader "Hidden/Post FX/Depth Of Field"
         Pass
         {
             CGPROGRAM
+                #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
                 #pragma vertex VertDOF
                 #pragma fragment FragPrefilter
                 #include "DepthOfField.cginc"
