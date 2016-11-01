@@ -86,6 +86,7 @@ namespace UnityEditor.PostProcessing
             else
             {
                 CheckActiveEffect(mode == (int)Mode.AmbientOcclusion && !profile.ambientOcclusion.enabled, "Ambient Occlusion");
+                CheckActiveEffect(mode == (int)Mode.FocusPlane && !profile.depthOfField.enabled, "Depth Of Field");
                 CheckActiveEffect(mode == (int)Mode.EyeAdaptation && !profile.eyeAdaptation.enabled, "Eye Adaptation");
                 CheckActiveEffect((mode == (int)Mode.LogLut || mode == (int)Mode.PreGradingLog) && !profile.colorGrading.enabled, "Color Grading");
                 CheckActiveEffect(mode == (int)Mode.UserLut && !profile.userLut.enabled, "User Lut");
