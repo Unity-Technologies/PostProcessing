@@ -58,7 +58,7 @@ namespace UnityEngine.PostProcessing
         {
             // Estimate the allowable maximum radius of CoC from the kernel
             // size (the equation below was empirically derived).
-            float radiusInPixels = (float)model.settings.kernelSize * 4f + 10f;
+            float radiusInPixels = (float)model.settings.kernelSize * 4f + 6f;
 
             // Applying a 5% limit to the CoC radius to keep the size of
             // TileMax/NeighborMax small enough.
@@ -127,23 +127,25 @@ namespace UnityEngine.PostProcessing
             var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
             Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
 
+            // Pass #4 - Postfilter blur
+            Graphics.Blit(rt2, rt1, material, 7);
+
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
             {
-                uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
                 uberMaterial.SetVector(Uniforms._DepthOfFieldParams, new Vector2(s1, coeff));
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD_COC_VIEW");
                 context.Interrupt();
             }
             else
             {
-                uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt2);
+                uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
             }
 
             if (antialiasCoC)
                 context.renderTextureFactory.Release(pass);
 
-            context.renderTextureFactory.Release(rt1);
+            context.renderTextureFactory.Release(rt2);
             source.filterMode = FilterMode.Bilinear;
         }
 

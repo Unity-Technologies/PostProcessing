@@ -85,6 +85,16 @@ Shader "Hidden/Post FX/Depth Of Field"
                 #include "DepthOfField.cginc"
             ENDCG
         }
+
+        // (7) Postfilter blur
+        Pass
+        {
+            CGPROGRAM
+                #pragma vertex VertDOF
+                #pragma fragment FragPostBlur
+                #include "DepthOfField.cginc"
+            ENDCG
+        }
     }
 
     FallBack Off
