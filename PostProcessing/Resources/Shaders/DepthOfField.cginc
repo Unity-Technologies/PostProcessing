@@ -89,6 +89,9 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
     // Output CoC = average of CoCs
     half coc = dot(cocs, 0.25);
 
+    // Premultiply CoC again.
+    avg *= smoothstep(0, _MainTex_TexelSize.y * 2, abs(coc));
+
 #if defined(UNITY_COLORSPACE_GAMMA)
     avg = GammaToLinearSpace(avg);
 #endif
@@ -144,8 +147,13 @@ half4 FragBlur(VaryingsDOF i) : SV_Target
 
         // Compare the CoC to the sample distance.
         // Add a small margin to smooth out.
-        half bgWeight = saturate((bgCoC - dist + 0.005) / 0.01);
-        half fgWeight = saturate((-samp.a - dist + 0.005) / 0.01);
+        const half margin = _MainTex_TexelSize.y * 2;
+        half bgWeight = saturate((bgCoC   - dist + margin) / margin);
+        half fgWeight = saturate((-samp.a - dist + margin) / margin);
+
+        // Cut influence from focused areas because they're darkened by CoC
+        // premultiplying. This is only needed for near field.
+        fgWeight *= step(_MainTex_TexelSize.y, -samp.a);
 
         // Accumulation
         bgAcc += half4(samp.rgb, 1.0) * bgWeight;
@@ -172,6 +180,28 @@ half4 FragBlur(VaryingsDOF i) : SV_Target
     half alpha = (1.0 - saturate(bgAcc.a)) * (1.0 - saturate(fgAcc.a));
 
     return half4(rgb, alpha);
+}
+
+// Postfilter blur
+half4 FragPostBlur(VaryingsDOF i) : SV_Target
+{
+    // 9-tap tent filter
+    float4 duv = _MainTex_TexelSize.xyxy * float4(1, 1, -1, 0);
+    half4 acc;
+
+    acc  = tex2D(_MainTex, i.uv - duv.xy);
+    acc += tex2D(_MainTex, i.uv - duv.wy) * 2;
+    acc += tex2D(_MainTex, i.uv - duv.zy);
+
+    acc += tex2D(_MainTex, i.uv + duv.zw) * 2;
+    acc += tex2D(_MainTex, i.uv         ) * 4;
+    acc += tex2D(_MainTex, i.uv + duv.xw) * 2;
+
+    acc += tex2D(_MainTex, i.uv + duv.zy);
+    acc += tex2D(_MainTex, i.uv + duv.wy) * 2;
+    acc += tex2D(_MainTex, i.uv + duv.xy);
+
+    return acc / 16;
 }
 
 #endif // __DEPTH_OF_FIELD__

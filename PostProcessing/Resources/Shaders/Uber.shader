@@ -166,26 +166,8 @@ Shader "Hidden/Post FX/Uber Shader"
             // Depth of field
             #if DEPTH_OF_FIELD
             {
-                // 9-tap tent filter
-                float4 duv = _DepthOfFieldTex_TexelSize.xyxy * float4(1.0, 1.0, -1.0, 0.0);
-                half4 acc;
-
-                acc  = tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.xy);
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.wy) * 2.0;
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR - duv.zy);
-
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.zw) * 2.0;
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR) * 4.0;
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.xw) * 2.0;
-
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.zy);
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.wy) * 2.0;
-                acc += tex2D(_DepthOfFieldTex, i.uvFlippedSPR + duv.xy);
-
-                acc /= 16.0;
-
-                // Composite
-                color = color * acc.a + acc.rgb * autoExposure;
+                half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
+                color = color * dof.a + dof.rgb * autoExposure;
             }
             #elif DEPTH_OF_FIELD_COC_VIEW
             {
