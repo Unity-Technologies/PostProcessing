@@ -229,7 +229,8 @@ namespace UnityEditor.PostProcessing
 
         public bool OnGUI(Rect rect)
         {
-            m_Dirty = false;
+            if (Event.current.type == EventType.Repaint)
+                m_Dirty = false;
 
             GUI.BeginClip(rect);
             {
@@ -646,6 +647,8 @@ namespace UnityEditor.PostProcessing
 
             if (serializedObject != null)
                 serializedObject.ApplyModifiedProperties();
+
+            Invalidate();
         }
 
         void EditCreateKeyframe(AnimationCurve curve, Vector3 position, bool createOnCurve, float zeroKeyConstantValue)
