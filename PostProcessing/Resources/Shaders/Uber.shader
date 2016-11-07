@@ -319,21 +319,5 @@ Shader "Hidden/Post FX/Uber Shader"
 
             ENDCG
         }
-
-        // (1) Dejittered depth debug
-        Pass
-        {
-            CGPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-
-                float4 Frag(VaryingsDefault i) : SV_Target0
-                {
-                    return float4(tex2D(_MainTex, i.uv).xxx, 1.0);
-                }
-
-            ENDCG
-        }
     }
 }
