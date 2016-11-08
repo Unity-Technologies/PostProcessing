@@ -236,6 +236,7 @@ Shader "Hidden/Post FX/Builtin Debug Views"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragMovecsImaging
+                #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
 
             ENDCG
         }
@@ -243,6 +244,8 @@ Shader "Hidden/Post FX/Builtin Debug Views"
         // (4) - Motion vectors - Arrows
         Pass
         {
+            Blend SrcAlpha OneMinusSrcAlpha
+
             CGPROGRAM
 
                 #pragma vertex VertArrows
