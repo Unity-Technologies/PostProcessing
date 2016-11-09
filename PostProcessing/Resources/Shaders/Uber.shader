@@ -114,6 +114,9 @@ Shader "Hidden/Post FX/Uber Shader"
             #endif
 
             half3 color = (0.0).xxx;
+            #if DEPTH_OF_FIELD && CHROMATIC_ABERRATION
+            half4 dof = (0.0).xxxx;
+            #endif
 
             //
             // HDR effects
@@ -134,6 +137,17 @@ Shader "Hidden/Post FX/Uber Shader"
                 float2 pos = uv;
                 half3 sum = (0.0).xxx, filterSum = (0.0).xxx;
 
+                #if DEPTH_OF_FIELD
+                float2 dofDelta = delta;
+                float2 dofPos = pos;
+                if (_MainTex_TexelSize.y < 0.0)
+                {
+                    dofDelta.y = -dofDelta.y;
+                    dofPos.y = 1.0 - dofPos.y;
+                }
+                half4 dofSum = (0.0).xxxx;
+                #endif
+
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
@@ -143,9 +157,18 @@ Shader "Hidden/Post FX/Uber Shader"
                     sum += s * filter;
                     filterSum += filter;
                     pos += delta;
+
+                    #if DEPTH_OF_FIELD
+                    half4 sdof = tex2Dlod(_DepthOfFieldTex, float4(UnityStereoScreenSpaceUVAdjust(dofPos, _MainTex_ST), 0, 0)).rgba;
+                    dofSum += sdof * half4(filter, 1);
+                    dofPos += dofDelta;
+                    #endif
                 }
 
                 color = sum / filterSum;
+                #if DEPTH_OF_FIELD
+                dof = dofSum / half4(filterSum, samples);
+                #endif
             }
             #else
             {
@@ -166,7 +189,9 @@ Shader "Hidden/Post FX/Uber Shader"
             // Depth of field
             #if DEPTH_OF_FIELD
             {
+                #if !CHROMATIC_ABERRATION
                 half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
+                #endif
                 color = color * dof.a + dof.rgb * autoExposure;
             }
             #elif DEPTH_OF_FIELD_COC_VIEW
