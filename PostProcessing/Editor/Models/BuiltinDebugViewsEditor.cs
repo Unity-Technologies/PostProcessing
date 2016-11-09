@@ -70,6 +70,10 @@ namespace UnityEditor.PostProcessing
 
                 EditorGUILayout.LabelField("Motion Vectors (overlay)", EditorStyles.boldLabel);
                 EditorGUI.indentLevel++;
+
+                if (m_MotionVectors.motionImageOpacity.floatValue > 0f)
+                    EditorGUILayout.HelpBox("Please keep opacity to 0 if you're subject to motion sickness.", MessageType.Warning);
+
                 EditorGUILayout.PropertyField(m_MotionVectors.motionImageOpacity, EditorGUIHelper.GetContent("Opacity"));
                 EditorGUILayout.PropertyField(m_MotionVectors.motionImageAmplitude, EditorGUIHelper.GetContent("Amplitude"));
                 EditorGUI.indentLevel--;
