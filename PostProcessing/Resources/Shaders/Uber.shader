@@ -27,6 +27,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
+        #pragma multi_compile __ ENABLE_DITHERING
 
         #include "UnityCG.cginc"
         #include "Bloom.cginc"
@@ -276,6 +277,15 @@ Shader "Hidden/Post FX/Uber Shader"
                 color = saturate(LinearToLogC(color));
             }
             #endif
+
+            #if ENABLE_DITHERING
+            {
+			    // Interleaved Gradient Noise from http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare (slide 122)
+			    half3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+			    half gradient = frac(magic.z * frac(dot(i.uv / _MainTex_TexelSize, magic.xy))) / 255.0;
+			    color.rgb -= gradient.xxx;
+		    }
+			#endif
 
             //
             // All the following effects happen in LDR

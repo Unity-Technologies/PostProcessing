@@ -87,6 +87,7 @@ namespace UnityEditor.PostProcessing
         ChannelMixerSettings m_ChannelMixer;
         ColorWheelsSettings m_ColorWheels;
         CurvesSettings m_Curves;
+		SerializedProperty m_Dither;
 
         CurveEditor m_CurveEditor;
         Dictionary<SerializedProperty, Color> m_CurveDict;
@@ -179,6 +180,8 @@ namespace UnityEditor.PostProcessing
             AddCurve(m_Curves.hueVSsat, new Color(1f, 1f, 1f), 0, true);
             AddCurve(m_Curves.satVSsat, new Color(1f, 1f, 1f), 0, false);
             AddCurve(m_Curves.lumVSsat, new Color(1f, 1f, 1f), 0, false);
+
+			m_Dither = FindSetting((Settings x) => x.useDithering);
         }
 
         void AddCurve(SerializedProperty prop, Color color, uint minPointCount, bool loop)
@@ -210,6 +213,7 @@ namespace UnityEditor.PostProcessing
             DoGUIFor("Trackballs", DoColorWheelsGUI);
             EditorGUILayout.Space();
             DoGUIFor("Grading Curves", DoCurvesGUI);
+			EditorGUILayout.PropertyField(m_Dither);
         }
 
         void DoGUIFor(string title, Action func)
