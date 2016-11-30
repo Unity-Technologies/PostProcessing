@@ -111,7 +111,7 @@ Output FragAntialiasCoC(VaryingsDOF i)
     half4 base = tex2D(_MainTex, i.uv);
     half hCoC = tex2D(_HistoryCoC, i.uv).r;
     half CoC = base.a;
-    half nCoC = (hCoC + CoC) / 2.0; // TODO: Smarter CoC AA
+    half nCoC = hCoC * CoC < 0.0 ? CoC : (hCoC + CoC) / 2.0; // TODO: Smarter CoC AA
 
     Output output;
     output.base = half4(base.rgb, nCoC);
