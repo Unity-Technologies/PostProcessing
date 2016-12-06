@@ -4,7 +4,9 @@ namespace UnityEngine.PostProcessing
 {
     public class PostProcessingProfile : ScriptableObject
     {
-        #pragma warning disable 0169 // "field x is never used"
+#pragma warning disable 0169 // "field x is never used"
+
+        public DepthTextureMode DefaultDepthTextureMode = DepthTextureMode.None;
 
         public BuiltinDebugViewsModel debugViews = new BuiltinDebugViewsModel();
         public AntialiasingModel antialiasing = new AntialiasingModel();
