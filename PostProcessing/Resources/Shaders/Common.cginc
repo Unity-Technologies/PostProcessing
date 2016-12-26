@@ -58,6 +58,12 @@ inline half Min3(half x, half y, half z) { return min(x, min(y, z)); }
 inline half Max3(half3 x) { return max(x.x, max(x.y, x.z)); }
 inline half Max3(half x, half y, half z) { return max(x, max(y, z)); }
 
+inline half Min4(half4 x) { return min(x.x, min(x.y, min(x.z, x.w))); }
+inline half Min4(half x, half y, half z, half w) { return min(x, min(y, min(z, w))); }
+
+inline half Max4(half4 x) { return max(x.x, max(x.y, max(x.z, x.w))); }
+inline half Max4(half x, half y, half z, half w) { return max(x, max(y, min(z, w))); }
+
 inline half  Pow2(half  x) { return x * x; }
 inline half2 Pow2(half2 x) { return x * x; }
 inline half3 Pow2(half3 x) { return x * x; }

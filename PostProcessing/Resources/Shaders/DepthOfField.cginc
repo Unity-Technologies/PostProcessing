@@ -87,7 +87,9 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
     avg /= dot(weights, 1.0);
 
     // Output CoC = average of CoCs
-    half coc = dot(cocs, 0.25);
+    half cocmin = Min4(cocs);
+    half cocmax = Max4(cocs);
+    half coc = -cocmin > cocmax ? cocmin : cocmax;
 
     // Premultiply CoC again.
     avg *= smoothstep(0, _MainTex_TexelSize.y * 2, abs(coc));
@@ -187,21 +189,35 @@ half4 FragPostBlur(VaryingsDOF i) : SV_Target
 {
     // 9-tap tent filter
     float4 duv = _MainTex_TexelSize.xyxy * float4(1, 1, -1, 0);
-    half4 acc;
 
-    acc  = tex2D(_MainTex, i.uv - duv.xy);
-    acc += tex2D(_MainTex, i.uv - duv.wy) * 2;
-    acc += tex2D(_MainTex, i.uv - duv.zy);
+    half4 c0 = tex2D(_MainTex, i.uv - duv.xy);
+    half4 c1 = tex2D(_MainTex, i.uv - duv.wy);
+    half4 c2 = tex2D(_MainTex, i.uv - duv.zy);
 
-    acc += tex2D(_MainTex, i.uv + duv.zw) * 2;
-    acc += tex2D(_MainTex, i.uv         ) * 4;
-    acc += tex2D(_MainTex, i.uv + duv.xw) * 2;
+    half4 c3 = tex2D(_MainTex, i.uv + duv.zw);
+    half4 c4 = tex2D(_MainTex, i.uv         );
+    half4 c5 = tex2D(_MainTex, i.uv + duv.xw);
 
-    acc += tex2D(_MainTex, i.uv + duv.zy);
-    acc += tex2D(_MainTex, i.uv + duv.wy) * 2;
-    acc += tex2D(_MainTex, i.uv + duv.xy);
+    half4 c6 = tex2D(_MainTex, i.uv + duv.zy);
+    half4 c7 = tex2D(_MainTex, i.uv + duv.wy);
+    half4 c8 = tex2D(_MainTex, i.uv + duv.xy);
 
-    return acc / 16;
+    half4 acc = c0 * 1 + c1 * 2 + c2 * 1 +
+                c3 * 2 + c4 * 4 + c5 * 2 +
+                c6 * 1 + c7 * 2 + c8 * 1;
+
+    half aa =
+        c0.a * c0.a * 1 + c1.a * c1.a * 2 + c2.a * c2.a * 1 +
+        c3.a * c3.a * 2 + c4.a * c4.a * 4 + c5.a * c5.a * 2 +
+        c6.a * c6.a * 1 + c7.a * c7.a * 2 + c8.a * c8.a * 1;
+
+    half wb = 1.2;
+    half a = (wb * acc.a - aa) / (wb * 16 - acc.a);
+
+    acc /= 16;
+
+    half3 rgb = acc.rgb * (1 + saturate(acc.a - a));
+    return half4(rgb, a);
 }
 
 #endif // __DEPTH_OF_FIELD__
