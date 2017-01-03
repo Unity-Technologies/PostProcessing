@@ -27,7 +27,7 @@ namespace UnityEngine.PostProcessing
         Camera m_Camera;
         PostProcessingProfile m_PreviousProfile;
 
-        bool m_RenderingInSceneView;
+        bool m_RenderingInSceneView = false;
         RenderTexture m_JitteredDepthHistory;
 
         // Effect components
