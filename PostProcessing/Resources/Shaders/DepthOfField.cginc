@@ -9,6 +9,7 @@
 
 sampler2D_float _CameraDepthTexture;
 sampler2D_float _HistoryCoC;
+float _HistoryWeight;
 
 // Camera parameters
 float _Distance;
@@ -46,8 +47,27 @@ VaryingsDOF VertDOF(AttributesDefault v)
     return o;
 }
 
-// Downsampling, prefiltering and CoC calculation
-half4 FragPrefilter(VaryingsDOF i) : SV_Target
+// Prefilter: CoC calculation, downsampling and premultiplying.
+
+#if defined(PREFILTER_TAA)
+
+// TAA enabled: use MRT to update the history buffer in the same pass.
+struct PrefilterOutput
+{
+    half4 base : SV_Target0;
+    half4 history : SV_Target1;
+};
+#define PrefilterSemantics
+
+#else
+
+// No TAA
+#define PrefilterOutput half4
+#define PrefilterSemantics :SV_Target
+
+#endif
+
+PrefilterOutput FragPrefilter(VaryingsDOF i) PrefilterSemantics
 {
     float3 duv = _MainTex_TexelSize.xyx * float3(0.5, 0.5, -0.5);
 
@@ -67,6 +87,12 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
     // Calculate the radiuses of CoCs at these sample points.
     float4 cocs = (depths - _Distance) * _LensCoeff / depths;
     cocs = clamp(cocs, -_MaxCoC, _MaxCoC);
+
+#if defined(PREFILTER_TAA)
+    // Get the average with the history to avoid temporal aliasing.
+    half hcoc = tex2D(_HistoryCoC, i.uv).r;
+    cocs = lerp(cocs, hcoc, _HistoryWeight);
+#endif
 
     // Premultiply CoC to reduce background bleeding.
     float4 weights = saturate(abs(cocs) * _RcpMaxCoC);
@@ -96,33 +122,14 @@ half4 FragPrefilter(VaryingsDOF i) : SV_Target
     avg = GammaToLinearSpace(avg);
 #endif
 
-    return half4(avg, coc);
-}
-
-// Very simple temporal antialiasing on CoC to reduce jitter (mostly visible on the front plane)
-struct Output
-{
-    half4 base : SV_Target0;
-    half4 history : SV_Target1;
-};
-
-Output FragAntialiasCoC(VaryingsDOF i)
-{
-    half4 base = tex2D(_MainTex, i.uv);
-    half hCoC = tex2D(_HistoryCoC, i.uv).r;
-    half CoC = base.a;
-    half nCoC = hCoC * CoC < 0.0 ? CoC : (hCoC + CoC) / 2.0; // TODO: Smarter CoC AA
-
-    Output output;
-    output.base = half4(base.rgb, nCoC);
-    output.history = nCoC.xxxx;
+#if defined(PREFILTER_TAA)
+    PrefilterOutput output;
+    output.base = half4(avg, coc);
+    output.history = coc.xxxx;
     return output;
-}
-
-// CoC history clearing
-half4 FragClearCoCHistory(VaryingsDOF i) : SV_Target
-{
-    return tex2D(_MainTex, i.uv).aaaa;
+#else
+    return half4(avg, coc);
+#endif
 }
 
 // Bokeh filter with disk-shaped kernels
