@@ -76,9 +76,9 @@ inline half4 Pow4(half4 x) { return x * x * x * x; }
 #endif
 
 // Returns the largest vector of v1 and v2
-inline half2 MaxV(half2 v1, half2 v2) { return lerp(v1, v2, dot(v1, v1) < dot(v2, v2)); }
-inline half3 MaxV(half3 v1, half3 v2) { return lerp(v1, v2, dot(v1, v1) < dot(v2, v2)); }
-inline half4 MaxV(half4 v1, half4 v2) { return lerp(v1, v2, dot(v1, v1) < dot(v2, v2)); }
+inline half2 MaxV(half2 v1, half2 v2) { return dot(v1, v1) < dot(v2, v2) ? v2 : v1; }
+inline half3 MaxV(half3 v1, half3 v2) { return dot(v1, v1) < dot(v2, v2) ? v2 : v1; }
+inline half4 MaxV(half4 v1, half4 v2) { return dot(v1, v1) < dot(v2, v2) ? v2 : v1; }
 
 // Clamp HDR value within a safe range
 inline half  SafeHDR(half  c) { return min(c, HALF_MAX); }
