@@ -60,7 +60,7 @@ Shader "Hidden/Post FX/Bloom"
         VaryingsMultitex VertMultitex(AttributesDefault v)
         {
             VaryingsMultitex o;
-            o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+            o.pos = UnityObjectToClipPos(v.vertex);
             o.uvMain = UnityStereoScreenSpaceUVAdjust(v.texcoord.xy, _MainTex_ST);
             o.uvBase = o.uvMain;
 
