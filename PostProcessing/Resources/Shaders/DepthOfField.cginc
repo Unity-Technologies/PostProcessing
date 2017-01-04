@@ -34,12 +34,12 @@ VaryingsDOF VertDOF(AttributesDefault v)
 #endif
 
     VaryingsDOF o;
-#if defined(UNITY_SINGLE_PASS_STEREO)
     o.pos = UnityObjectToClipPos(v.vertex);
+
+#if defined(UNITY_SINGLE_PASS_STEREO)
     o.uv = UnityStereoScreenSpaceUVAdjust(v.texcoord, _MainTex_ST);
     o.uvAlt = UnityStereoScreenSpaceUVAdjust(uvAlt, _MainTex_ST);
 #else
-    o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
     o.uv = v.texcoord;
     o.uvAlt = uvAlt;
 #endif

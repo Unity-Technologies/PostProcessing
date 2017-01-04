@@ -86,7 +86,7 @@ Shader "Hidden/Post FX/Uber Shader"
         VaryingsFlipped VertUber(AttributesDefault v)
         {
             VaryingsFlipped o;
-            o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+            o.pos = UnityObjectToClipPos(v.vertex);
             o.uv = v.texcoord.xy;
             o.uvSPR = UnityStereoScreenSpaceUVAdjust(v.texcoord.xy, _MainTex_ST);
             o.uvFlipped = v.texcoord.xy;
