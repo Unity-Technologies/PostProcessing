@@ -25,7 +25,18 @@ Shader "Hidden/Post FX/Depth Of Field"
             ENDCG
         }
 
-        // (1-4) Bokeh filter with disk-shaped kernels
+        // (1) Pass 0 + temporal antialiasing
+        Pass
+        {
+            CGPROGRAM
+                #pragma vertex VertDOF
+                #pragma fragment FragPrefilter
+                #define PREFILTER_TAA
+                #include "DepthOfField.cginc"
+            ENDCG
+        }
+
+        // (2-5) Bokeh filter with disk-shaped kernels
         Pass
         {
             CGPROGRAM
@@ -66,27 +77,7 @@ Shader "Hidden/Post FX/Depth Of Field"
             ENDCG
         }
 
-        // (5) CoC antialiasing
-        Pass
-        {
-            CGPROGRAM
-                #pragma vertex VertDOF
-                #pragma fragment FragAntialiasCoC
-                #include "DepthOfField.cginc"
-            ENDCG
-        }
-
-        // (6) CoC history clearing
-        Pass
-        {
-            CGPROGRAM
-                #pragma vertex VertDOF
-                #pragma fragment FragClearCoCHistory
-                #include "DepthOfField.cginc"
-            ENDCG
-        }
-
-        // (7) Postfilter blur
+        // (6) Postfilter blur
         Pass
         {
             CGPROGRAM

@@ -16,7 +16,8 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _RcpAspect          = Shader.PropertyToID("_RcpAspect");
             internal static readonly int _MainTex            = Shader.PropertyToID("_MainTex");
             internal static readonly int _HistoryCoC         = Shader.PropertyToID("_HistoryCoC");
-	        internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
+            internal static readonly int _HistoryWeight      = Shader.PropertyToID("_HistoryWeight");
+            internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Depth Of Field";
@@ -92,43 +93,36 @@ namespace UnityEngine.PostProcessing
             source.filterMode = FilterMode.Point;
 
             // Pass #1 - Downsampling, prefiltering and CoC calculation
-            Graphics.Blit(source, rt1, material, 0);
-
-            // Pass #2 - CoC Antialiasing
-            var pass = rt1;
-            if (antialiasCoC)
+            if (!antialiasCoC)
             {
-                pass = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
-
-                if (m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2)
-                {
-                    m_CoCHistory = RenderTexture.GetTemporary(context.width / 2, context.height / 2, 0, RenderTextureFormat.RHalf);
-                    m_CoCHistory.filterMode = FilterMode.Point;
-                    m_CoCHistory.name = "CoC History";
-                    Graphics.Blit(rt1, m_CoCHistory, material, 6);
-                }
+                Graphics.Blit(source, rt1, material, 0);
+            }
+            else
+            {
+                var initial = m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2;
 
                 var tempCoCHistory = RenderTexture.GetTemporary(context.width / 2, context.height / 2, 0, RenderTextureFormat.RHalf);
                 tempCoCHistory.filterMode = FilterMode.Point;
                 tempCoCHistory.name = "CoC History";
 
-                m_MRT[0] = pass.colorBuffer;
+                m_MRT[0] = rt1.colorBuffer;
                 m_MRT[1] = tempCoCHistory.colorBuffer;
-                material.SetTexture(Uniforms._MainTex, rt1);
+                material.SetTexture(Uniforms._MainTex, source);
                 material.SetTexture(Uniforms._HistoryCoC, m_CoCHistory);
+                material.SetFloat(Uniforms._HistoryWeight, initial ? 0 : 0.5f);
                 Graphics.SetRenderTarget(m_MRT, rt1.depthBuffer);
-                GraphicsUtils.Blit(material, 5);
+                GraphicsUtils.Blit(material, 1);
 
                 RenderTexture.ReleaseTemporary(m_CoCHistory);
                 m_CoCHistory = tempCoCHistory;
             }
 
-            // Pass #3 - Bokeh simulation
+            // Pass #2 - Bokeh simulation
             var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
-            Graphics.Blit(pass, rt2, material, 1 + (int)settings.kernelSize);
+            Graphics.Blit(rt1, rt2, material, 2 + (int)settings.kernelSize);
 
-            // Pass #4 - Postfilter blur
-            Graphics.Blit(rt2, rt1, material, 7);
+            // Pass #3 - Postfilter blur
+            Graphics.Blit(rt2, rt1, material, 6);
 
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
             {
@@ -141,9 +135,6 @@ namespace UnityEngine.PostProcessing
                 uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
             }
-
-            if (antialiasCoC)
-                context.renderTextureFactory.Release(pass);
 
             context.renderTextureFactory.Release(rt2);
             source.filterMode = FilterMode.Bilinear;

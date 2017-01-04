@@ -19,7 +19,7 @@ Shader "Hidden/Post FX/Blit"
         Varyings VertBlit(AttributesDefault v)
         {
             Varyings o;
-            o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+            o.vertex = UnityObjectToClipPos(v.vertex);
             o.uv = UnityStereoScreenSpaceUVAdjust(v.texcoord, _MainTex_ST);
             return o;
         }

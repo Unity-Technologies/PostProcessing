@@ -28,7 +28,6 @@ namespace UnityEngine.PostProcessing
         PostProcessingProfile m_PreviousProfile;
 
         bool m_RenderingInSceneView = false;
-        RenderTexture m_JitteredDepthHistory;
 
         // Effect components
         BuiltinDebugViewsComponent m_DebugViews;
