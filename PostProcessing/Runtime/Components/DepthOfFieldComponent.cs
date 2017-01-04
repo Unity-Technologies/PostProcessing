@@ -17,7 +17,7 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _MainTex            = Shader.PropertyToID("_MainTex");
             internal static readonly int _HistoryCoC         = Shader.PropertyToID("_HistoryCoC");
             internal static readonly int _HistoryWeight      = Shader.PropertyToID("_HistoryWeight");
-	        internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
+            internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Depth Of Field";
@@ -136,7 +136,6 @@ namespace UnityEngine.PostProcessing
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
             }
 
-            context.renderTextureFactory.Release(rt1);
             context.renderTextureFactory.Release(rt2);
             source.filterMode = FilterMode.Bilinear;
         }
