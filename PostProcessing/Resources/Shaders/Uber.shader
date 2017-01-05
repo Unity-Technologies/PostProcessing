@@ -285,29 +285,6 @@ Shader "Hidden/Post FX/Uber Shader"
             }
             #endif
 
-            // HDR Dithering
-            #if DITHERING
-            {
-                float4 dth = color.rgbb * _Dithering_ColorRange;
-
-                float2 co=uv.xy * lerp(1, _Time%4+color.rg+color.b, _Dithering_Animate);
-                dth.a = saturate(pow(frac(sin(dot(co,float2(12.9898,78.233))) * 43758.5453), 1.0 - (1.0/_Dithering_ColorRange)));
-
-                // Ensure that dithering doesn't brighten dark areas, and apply the dithering
-                float curAmount=lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.r), _Dithering_NoiseRangeLimit);
-                    dth.r = lerp(dth.r, dth.r + curAmount, dth.a);
-                curAmount = lerp(_Dithering_Amount,clamp(_Dithering_Amount, 0, dth.g), _Dithering_NoiseRangeLimit);
-                    dth.g = lerp(dth.g, dth.g + curAmount, dth.a);
-                curAmount = lerp(_Dithering_Amount,clamp(_Dithering_Amount, 0, dth.b), _Dithering_NoiseRangeLimit);
-                    dth.b = lerp(dth.b, dth.b + curAmount, dth.a);
-
-                if(_Dithering_LimitColorRange==1)
-                    dth=trunc(dth);
-                dth /= _Dithering_ColorRange;
-                color = dth.rgb;
-            }
-            #endif
-
             //
             // All the following effects happen in LDR
             // ---------------------------------------------------------
@@ -352,6 +329,29 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = lerp(color, colorGraded, _UserLut_Params.w);
+            }
+            #endif
+
+            // HDR Dithering
+            #if DITHERING
+            {
+                float4 dth = color.rgbb * _Dithering_ColorRange;
+
+                float2 co=uv.xy * lerp(1, _Time%4+color.rg+color.b, _Dithering_Animate);
+                dth.a = saturate(pow(frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453), 1.0 - (1.0/_Dithering_ColorRange)));
+
+                // Ensure that dithering doesn't brighten dark areas, and apply the dithering
+                float curAmount=lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.r), _Dithering_NoiseRangeLimit);
+                    dth.r = lerp(dth.r, dth.r + curAmount, dth.a);
+                curAmount = lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.g), _Dithering_NoiseRangeLimit);
+                    dth.g = lerp(dth.g, dth.g + curAmount, dth.a);
+                curAmount = lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.b), _Dithering_NoiseRangeLimit);
+                    dth.b = lerp(dth.b, dth.b + curAmount, dth.a);
+
+                if(_Dithering_LimitColorRange == 1)
+                    dth=trunc(dth);
+                dth /= _Dithering_ColorRange;
+                color = dth.rgb;
             }
             #endif
 

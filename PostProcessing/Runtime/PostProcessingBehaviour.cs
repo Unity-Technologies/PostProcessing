@@ -67,8 +67,8 @@ namespace UnityEngine.PostProcessing
             m_Bloom = AddComponent(new BloomComponent());
             m_ChromaticAberration = AddComponent(new ChromaticAberrationComponent());
             m_ColorGrading = AddComponent(new ColorGradingComponent());
-            m_Dithering = AddComponent(new DitheringComponent());
             m_UserLut = AddComponent(new UserLutComponent());
+            m_Dithering = AddComponent(new DitheringComponent());
             m_Grain = AddComponent(new GrainComponent());
             m_Vignette = AddComponent(new VignetteComponent());
             m_Fxaa = AddComponent(new FxaaComponent());
@@ -119,8 +119,8 @@ namespace UnityEngine.PostProcessing
             m_Bloom.Init(context, profile.bloom);
             m_ChromaticAberration.Init(context, profile.chromaticAberration);
             m_ColorGrading.Init(context, profile.colorGrading);
-            m_Dithering.Init(context, profile.dithering);
             m_UserLut.Init(context, profile.userLut);
+            m_Dithering.Init(context, profile.dithering);
             m_Grain.Init(context, profile.grain);
             m_Vignette.Init(context, profile.vignette);
             m_Fxaa.Init(context, profile.antialiasing);
