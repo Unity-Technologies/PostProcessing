@@ -30,7 +30,6 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
 
         #include "UnityCG.cginc"
-        #include "Common.cginc"
         #include "Bloom.cginc"
         #include "ColorGrading.cginc"
 
