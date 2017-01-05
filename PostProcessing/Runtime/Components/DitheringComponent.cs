@@ -6,9 +6,7 @@
         {
             internal static readonly int _Dithering_Amount = Shader.PropertyToID("_Dithering_Amount");
             internal static readonly int _Dithering_ColorRange = Shader.PropertyToID("_Dithering_ColorRange");
-            internal static readonly int _Dithering_Animate = Shader.PropertyToID("_Dithering_Animate");
             internal static readonly int _Dithering_NoiseRangeLimit = Shader.PropertyToID("_Dithering_NoiseRangeLimit");
-            internal static readonly int _Dithering_LimitColorRange = Shader.PropertyToID("_Dithering_LimitColorRange");
         }
 
         public override bool active
@@ -30,7 +28,7 @@
 
             if(settings.colorDepth != depth || settings.limitAutomatically != limitAutomatically)
             {
-                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, (float)settings.colorDepth), 1d/3d));
+                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, settings.colorDepth), 1d/3d));
                 depth = settings.colorDepth;
 
                 if(settings.limitAutomatically)
@@ -49,11 +47,15 @@
                 ditherRangeLimit=settings.ditherRangeLimit;
 
             uberMaterial.EnableKeyword("DITHERING");
+            if(settings.animatedNoise){
+                uberMaterial.EnableKeyword("DITHERING_ANIMATED");                
+            }
+            if(settings.previewColorDepth){
+                uberMaterial.EnableKeyword("DITHERING_LIMIT_COLOR_RANGE");
+            }
             uberMaterial.SetFloat(Uniforms._Dithering_Amount, settings.ditheringAmount);
             uberMaterial.SetFloat(Uniforms._Dithering_ColorRange, colorsPerChannel);
-            uberMaterial.SetInt(Uniforms._Dithering_Animate, settings.animatedNoise ? 1 : 0);
             uberMaterial.SetFloat(Uniforms._Dithering_NoiseRangeLimit, ditherRangeLimit);
-            uberMaterial.SetInt(Uniforms._Dithering_LimitColorRange, settings.previewColorDepth ? 1 : 0);
         }
     }
 }
