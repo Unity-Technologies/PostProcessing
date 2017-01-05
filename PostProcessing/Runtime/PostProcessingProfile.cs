@@ -17,6 +17,7 @@ namespace UnityEngine.PostProcessing
         public ColorGradingModel colorGrading = new ColorGradingModel();
         public UserLutModel userLut = new UserLutModel();
         public ChromaticAberrationModel chromaticAberration = new ChromaticAberrationModel();
+        public DitheringModel dithering = new DitheringModel();
         public GrainModel grain = new GrainModel();
         public VignetteModel vignette = new VignetteModel();
 

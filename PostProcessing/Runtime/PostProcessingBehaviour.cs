@@ -40,6 +40,7 @@ namespace UnityEngine.PostProcessing
         BloomComponent m_Bloom;
         ChromaticAberrationComponent m_ChromaticAberration;
         ColorGradingComponent m_ColorGrading;
+        DitheringComponent m_Dithering;
         UserLutComponent m_UserLut;
         GrainComponent m_Grain;
         VignetteComponent m_Vignette;
@@ -66,6 +67,7 @@ namespace UnityEngine.PostProcessing
             m_Bloom = AddComponent(new BloomComponent());
             m_ChromaticAberration = AddComponent(new ChromaticAberrationComponent());
             m_ColorGrading = AddComponent(new ColorGradingComponent());
+            m_Dithering = AddComponent(new DitheringComponent());
             m_UserLut = AddComponent(new UserLutComponent());
             m_Grain = AddComponent(new GrainComponent());
             m_Vignette = AddComponent(new VignetteComponent());
@@ -117,6 +119,7 @@ namespace UnityEngine.PostProcessing
             m_Bloom.Init(context, profile.bloom);
             m_ChromaticAberration.Init(context, profile.chromaticAberration);
             m_ColorGrading.Init(context, profile.colorGrading);
+            m_Dithering.Init(context, profile.dithering);
             m_UserLut.Init(context, profile.userLut);
             m_Grain.Init(context, profile.grain);
             m_Vignette.Init(context, profile.vignette);
@@ -230,6 +233,7 @@ namespace UnityEngine.PostProcessing
             uberActive |= TryPrepareUberImageEffect(m_ChromaticAberration, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_ColorGrading, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
 

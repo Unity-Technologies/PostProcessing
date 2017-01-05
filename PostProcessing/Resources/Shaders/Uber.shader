@@ -25,10 +25,12 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
+        #pragma multi_compile __ DITHERING
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
 
         #include "UnityCG.cginc"
+        #include "Common.cginc"
         #include "Bloom.cginc"
         #include "ColorGrading.cginc"
 
@@ -57,6 +59,13 @@ Shader "Hidden/Post FX/Uber Shader"
         sampler2D _LogLut;
         half3 _LogLut_Params; // x: 1 / lut_width, y: 1 / lut_height, z: lut_height - 1
         half _ExposureEV; // EV (exp2)
+
+        // Dithering
+        half _Dithering_Amount;
+        int _Dithering_Animate;
+        half _Dithering_ColorRange;
+        float _Dithering_NoiseRangeLimit;
+        int _Dithering_LimitColorRange;
 
         // User lut
         sampler2D _UserLut;
@@ -273,6 +282,29 @@ Shader "Hidden/Post FX/Uber Shader"
             {
                 color *= _ExposureEV;
                 color = saturate(LinearToLogC(color));
+            }
+            #endif
+
+            // HDR Dithering
+            #if DITHERING
+            {
+                float4 dth = color.rgbb * _Dithering_ColorRange;
+
+                float2 co=uv.xy * lerp(1, _Time%4+color.rg+color.b, _Dithering_Animate);
+                dth.a = saturate(pow(frac(sin(dot(co,float2(12.9898,78.233))) * 43758.5453), 1.0 - (1.0/_Dithering_ColorRange)));
+
+                // Ensure that dithering doesn't brighten dark areas, and apply the dithering
+                float curAmount=lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.r), _Dithering_NoiseRangeLimit);
+                    dth.r = lerp(dth.r, dth.r + curAmount, dth.a);
+                curAmount = lerp(_Dithering_Amount,clamp(_Dithering_Amount, 0, dth.g), _Dithering_NoiseRangeLimit);
+                    dth.g = lerp(dth.g, dth.g + curAmount, dth.a);
+                curAmount = lerp(_Dithering_Amount,clamp(_Dithering_Amount, 0, dth.b), _Dithering_NoiseRangeLimit);
+                    dth.b = lerp(dth.b, dth.b + curAmount, dth.a);
+
+                if(_Dithering_LimitColorRange==1)
+                    dth=trunc(dth);
+                dth /= _Dithering_ColorRange;
+                color = dth.rgb;
             }
             #endif
 
