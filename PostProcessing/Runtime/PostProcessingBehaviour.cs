@@ -40,8 +40,8 @@ namespace UnityEngine.PostProcessing
         BloomComponent m_Bloom;
         ChromaticAberrationComponent m_ChromaticAberration;
         ColorGradingComponent m_ColorGrading;
-        DitheringComponent m_Dithering;
         UserLutComponent m_UserLut;
+        DitheringComponent m_Dithering;
         GrainComponent m_Grain;
         VignetteComponent m_Vignette;
         FxaaComponent m_Fxaa;
