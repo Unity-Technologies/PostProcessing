@@ -63,7 +63,7 @@ Shader "Hidden/Post FX/Uber Shader"
         half _Dithering_Amount;
         int _Dithering_Animate;
         half _Dithering_ColorRange;
-        float _Dithering_NoiseRangeLimit;
+        half _Dithering_NoiseRangeLimit;
         int _Dithering_LimitColorRange;
 
         // User lut
@@ -331,16 +331,16 @@ Shader "Hidden/Post FX/Uber Shader"
             }
             #endif
 
-            // HDR Dithering
+            // Dithering
             #if DITHERING
             {
-                float4 dth = color.rgbb * _Dithering_ColorRange;
+                half4 dth = color.rgbb * _Dithering_ColorRange;
 
-                float2 co=uv.xy * lerp(1, _Time%4+color.rg+color.b, _Dithering_Animate);
-                dth.a = saturate(pow(frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453), 1.0 - (1.0/_Dithering_ColorRange)));
+                half2 co=uv.xy + lerp(1, cos(_Time), _Dithering_Animate);
+                dth.a = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
 
                 // Ensure that dithering doesn't brighten dark areas, and apply the dithering
-                float curAmount=lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.r), _Dithering_NoiseRangeLimit);
+                half curAmount=lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.r), _Dithering_NoiseRangeLimit);
                     dth.r = lerp(dth.r, dth.r + curAmount, dth.a);
                 curAmount = lerp(_Dithering_Amount, clamp(_Dithering_Amount, 0, dth.g), _Dithering_NoiseRangeLimit);
                     dth.g = lerp(dth.g, dth.g + curAmount, dth.a);

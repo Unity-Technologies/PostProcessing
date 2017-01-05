@@ -30,7 +30,7 @@
 
             if(settings.colorDepth != depth || settings.limitAutomatically != limitAutomatically)
             {
-                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, settings.colorDepth), 1d/3d));
+                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, (float)settings.colorDepth), 1d/3d));
                 depth = settings.colorDepth;
 
                 if(settings.limitAutomatically)
