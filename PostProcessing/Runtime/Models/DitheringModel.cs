@@ -20,7 +20,7 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Should the noise be static or animated? (Animated noise looks best in most cases.)")]
             public bool animatedNoise;
 
-            [Tooltip("Should \"Dither Range Limit\" be determined automatically?\n(Note: While this option will give good results, it is based on arbitrary math, so the results aren't guaranteed to be optimal.)")]
+            [Tooltip("Should \"Dither Range Limit\" be determined automatically?")]
             public bool limitAutomatically;
 
             [Range(0,1),Tooltip("Balance between dithering and color correctness in dark areas.\n 0: Dither everywhere, but brightens the dark colors.\n 1: Preserves color luminance, but looks worse with low color depth.")]

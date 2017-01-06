@@ -26,7 +26,6 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ DITHERING
-        #pragma multi_compile __ DITHERING_ANIMATED
         #pragma multi_compile __ DITHERING_LIMIT_COLOR_RANGE
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
@@ -61,14 +60,13 @@ Shader "Hidden/Post FX/Uber Shader"
         half3 _LogLut_Params; // x: 1 / lut_width, y: 1 / lut_height, z: lut_height - 1
         half _ExposureEV; // EV (exp2)
 
-        // Dithering
-        half _Dithering_Amount;
-        half _Dithering_ColorRange;
-        half _Dithering_NoiseRangeLimit;
-
         // User lut
         sampler2D _UserLut;
         half4 _UserLut_Params; // @see _LogLut_Params
+
+        // Dithering
+        half4 _Dithering_Params; // x: amount, y: dithering range limit, z: xoffset, w: yoffset
+        half _Dithering_ColorRange;
 
         // Grain
         half2 _Grain_Params1; // x: lum_contrib, y: intensity
@@ -334,12 +332,7 @@ Shader "Hidden/Post FX/Uber Shader"
             // Dithering
             #if DITHERING
             {
-                half2 co = uv.xy;
-                #if DITHERING_ANIMATED
-                {
-                    co += cos(_Time);
-                }
-                #endif
+                half2 co = uv.xy + _Dithering_Params.zw;
                 
                 // Noise, based on: http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
                 half a = 12.9898;
@@ -352,11 +345,11 @@ Shader "Hidden/Post FX/Uber Shader"
 
                 // Ensure that dithering doesn't brighten dark areas, and apply the dithering
                 color *= _Dithering_ColorRange;
-                half curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.r), _Dithering_NoiseRangeLimit);
+                half curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.r), _Dithering_Params.y);
                     color.r = lerp(color.r, color.r + curAmount, dth);
-                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.g), _Dithering_NoiseRangeLimit);
+                curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.g), _Dithering_Params.y);
                     color.g = lerp(color.g, color.g + curAmount, dth);
-                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.b), _Dithering_NoiseRangeLimit);
+                curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.b), _Dithering_Params.y);
                     color.b = lerp(color.b, color.b + curAmount, dth);
 
                 #if DITHERING_LIMIT_COLOR_RANGE

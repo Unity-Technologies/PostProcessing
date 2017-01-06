@@ -4,9 +4,8 @@
     {
         static class Uniforms
         {
-            internal static readonly int _Dithering_Amount = Shader.PropertyToID("_Dithering_Amount");
+            internal static readonly int _Dithering_Params     = Shader.PropertyToID("_Dithering_Params");
             internal static readonly int _Dithering_ColorRange = Shader.PropertyToID("_Dithering_ColorRange");
-            internal static readonly int _Dithering_NoiseRangeLimit = Shader.PropertyToID("_Dithering_NoiseRangeLimit");
         }
 
         public override bool active
@@ -28,34 +27,44 @@
 
             if(settings.colorDepth != depth || settings.limitAutomatically != limitAutomatically)
             {
-                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, settings.colorDepth), 1d/3d));
+                colorsPerChannel = (float)(System.Math.Pow(System.Math.Pow(2, settings.colorDepth), 1d / 3d));
                 depth = settings.colorDepth;
 
                 if(settings.limitAutomatically)
                 {
                     if(settings.colorDepth > 7)
-                        ditherRangeLimit = Mathf.Clamp01(Mathf.Pow(1.0f - 1.0f / (colorsPerChannel * .38f), 4));
+                        ditherRangeLimit = Mathf.Clamp01(Mathf.Pow(1.0f - 1.0f / (colorsPerChannel * 0.37f), 4));
                     else
-                        ditherRangeLimit = Mathf.Lerp(.025f, .1f, (float)settings.colorDepth / 8);
+                        ditherRangeLimit = Mathf.Lerp(0.02f, 0.1f, (float)settings.colorDepth / 8);
                 }
-                limitAutomatically=settings.limitAutomatically;
+                limitAutomatically = settings.limitAutomatically;
             }
+
+            if(settings.limitAutomatically)
+            {
+                ditherRangeLimit = settings.ditherRangeLimit;
+            }
+
             if(settings.detectBitDepth){
                 // TODO: Detect the display's color bit depth
             }
-            if(!limitAutomatically)
-                ditherRangeLimit=settings.ditherRangeLimit;
 
-            uberMaterial.EnableKeyword("DITHERING");
-            if(settings.animatedNoise){
-                uberMaterial.EnableKeyword("DITHERING_ANIMATED");                
+            float rndOffsetX = 0;
+            float rndOffsetY = 0;
+
+            if(settings.animatedNoise)
+            {
+                rndOffsetX = Random.value;
+                rndOffsetY = Random.value;
             }
-            if(settings.previewColorDepth){
+            
+            uberMaterial.EnableKeyword("DITHERING");
+            if(settings.previewColorDepth)
+            {
                 uberMaterial.EnableKeyword("DITHERING_LIMIT_COLOR_RANGE");
             }
-            uberMaterial.SetFloat(Uniforms._Dithering_Amount, settings.ditheringAmount);
+            uberMaterial.SetVector(Uniforms._Dithering_Params,new Vector4(settings.ditheringAmount, ditherRangeLimit, rndOffsetX, rndOffsetY));
             uberMaterial.SetFloat(Uniforms._Dithering_ColorRange, colorsPerChannel);
-            uberMaterial.SetFloat(Uniforms._Dithering_NoiseRangeLimit, ditherRangeLimit);
         }
     }
 }
