@@ -8,7 +8,7 @@ namespace UnityEngine.PostProcessing
         [Serializable]
         public struct Settings
         {
-            [Range(3,42),Tooltip("Display bit depth. This is affects how dithering is applied.")]
+            [Range(3,48),Tooltip("Bit depth of the display. This is affects how dithering is applied.")]
             public int colorDepth;
             
             [Tooltip("Automatically set the bit depth to match the display. (Currently doesn't do anything)")]
@@ -23,10 +23,10 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Should \"Dither Range Limit\" be determined automatically?")]
             public bool limitAutomatically;
 
-            [Range(0,1),Tooltip("Balance between dithering and color correctness in dark areas.\n 0: Dither everywhere, but brightens the dark colors.\n 1: Preserves color luminance, but looks worse with low color depth.")]
+            [Range(0,1),Tooltip("Balance between dithering and color correctness in dark areas.\n 0: Dither the entire image, but brightens the dark colors.\n 1: Preserves luminance in dark areas, but looks worse with low color depth.")]
             public float ditherRangeLimit;
 
-            [Tooltip("Limit the output image color depth to the current setting. (Check this option when \"Detect Bit Depth\" is turned off. This is mostly intended for testing.)")]
+            [Tooltip("Limits the output image color depth to the current setting.")]
             public bool previewColorDepth;
 
             public static Settings defaultSettings

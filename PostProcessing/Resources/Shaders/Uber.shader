@@ -332,25 +332,18 @@ Shader "Hidden/Post FX/Uber Shader"
             // Dithering
             #if DITHERING
             {
-                half2 co = uv.xy + _Dithering_Params.zw;
-                
-                // Noise, based on: http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
-                half a = 12.9898;
-                half b = 78.233;
-                half c = 43758.5453;
-                half dt= dot(co.xy, half2(a,b));
-                half sn= dt % 3.141592653589793;
-                half dth = frac(sin(sn) * c);
-                //dth.a = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
-
-                // Ensure that dithering doesn't brighten dark areas, and apply the dithering
                 color *= _Dithering_ColorRange;
-                half curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.r), _Dithering_Params.y);
-                    color.r = lerp(color.r, color.r + curAmount, dth);
-                curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.g), _Dithering_Params.y);
-                    color.g = lerp(color.g, color.g + curAmount, dth);
-                curAmount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.b), _Dithering_Params.y);
-                    color.b = lerp(color.b, color.b + curAmount, dth);
+                
+                // Noise is based on: http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
+                half noise = frac(sin(dot(uv + _Dithering_Params.zw, half2(12.9898, 78.233)) % 3.14) * 43758.5453);
+
+                // 'amount' is used to control how much the dithering should brighten dark areas
+                half amount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.r), _Dithering_Params.y);
+                   color.r += amount * noise;
+                     amount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.g), _Dithering_Params.y);
+                   color.g += amount * noise;
+                     amount = lerp(_Dithering_Params.x, min(_Dithering_Params.x, color.b), _Dithering_Params.y);
+                   color.b += amount * noise;
 
                 #if DITHERING_LIMIT_COLOR_RANGE
                 {
