@@ -334,8 +334,6 @@ Shader "Hidden/Post FX/Uber Shader"
             // Dithering
             #if DITHERING
             {
-                
-                half4 dth = color.rgbb * _Dithering_ColorRange;
                 half2 co = uv.xy;
                 #if DITHERING_ANIMATED
                 {
@@ -349,25 +347,25 @@ Shader "Hidden/Post FX/Uber Shader"
                 half c = 43758.5453;
                 half dt= dot(co.xy, half2(a,b));
                 half sn= dt % 3.141592653589793;
-                dth.a = frac(sin(sn) * c);
+                half dth = frac(sin(sn) * c);
                 //dth.a = frac(sin(dot(co, float2(12.9898, 78.233))) * 43758.5453);
 
                 // Ensure that dithering doesn't brighten dark areas, and apply the dithering
-                half curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, dth.r), _Dithering_NoiseRangeLimit);
-                    dth.r = lerp(dth.r, dth.r + curAmount, dth.a);
-                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, dth.g), _Dithering_NoiseRangeLimit);
-                    dth.g = lerp(dth.g, dth.g + curAmount, dth.a);
-                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, dth.b), _Dithering_NoiseRangeLimit);
-                    dth.b = lerp(dth.b, dth.b + curAmount, dth.a);
+                color *= _Dithering_ColorRange;
+                half curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.r), _Dithering_NoiseRangeLimit);
+                    color.r = lerp(color.r, color.r + curAmount, dth);
+                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.g), _Dithering_NoiseRangeLimit);
+                    color.g = lerp(color.g, color.g + curAmount, dth);
+                curAmount = lerp(_Dithering_Amount, min(_Dithering_Amount, color.b), _Dithering_NoiseRangeLimit);
+                    color.b = lerp(color.b, color.b + curAmount, dth);
 
                 #if DITHERING_LIMIT_COLOR_RANGE
                 {
-                    dth = trunc(dth);
+                    color = trunc(color);
                 }
                 #endif
 
-                dth /= _Dithering_ColorRange;
-                color = dth.rgb;
+                color /= _Dithering_ColorRange;
             }
             #endif
 
