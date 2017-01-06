@@ -33,14 +33,14 @@
                 if(settings.limitAutomatically)
                 {
                     if(settings.colorDepth > 7)
-                        ditherRangeLimit = Mathf.Clamp01(Mathf.Pow(1.0f - 1.0f / (colorsPerChannel * 0.37f), 4));
+                        ditherRangeLimit = Mathf.Clamp01(Mathf.Pow(1.0f - 1.0f / (colorsPerChannel * 0.34f), 4));
                     else
-                        ditherRangeLimit = Mathf.Lerp(0.02f, 0.1f, (float)settings.colorDepth / 8);
+                        ditherRangeLimit = Mathf.Lerp(0.015f, 0.08f, (float)settings.colorDepth / 8);
                 }
                 limitAutomatically = settings.limitAutomatically;
             }
 
-            if(settings.limitAutomatically)
+            if(!settings.limitAutomatically)
             {
                 ditherRangeLimit = settings.ditherRangeLimit;
             }
