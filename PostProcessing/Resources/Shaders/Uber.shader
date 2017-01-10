@@ -86,7 +86,7 @@ Shader "Hidden/Post FX/Uber Shader"
         VaryingsFlipped VertUber(AttributesDefault v)
         {
             VaryingsFlipped o;
-            o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+            o.pos = UnityObjectToClipPos(v.vertex);
             o.uv = v.texcoord.xy;
             o.uvSPR = UnityStereoScreenSpaceUVAdjust(v.texcoord.xy, _MainTex_ST);
             o.uvFlipped = v.texcoord.xy;
@@ -125,7 +125,6 @@ Shader "Hidden/Post FX/Uber Shader"
             // Chromatic Aberration
             // Inspired by the method described in "Rendering Inside" [Playdead 2016]
             // https://twitter.com/pixelmager/status/717019757766123520
-            // TODO: Take advantage of TAA to get even smoother results
             #if CHROMATIC_ABERRATION
             {
                 float2 coords = 2.0 * uv - 1.0;
