@@ -78,6 +78,8 @@ namespace UnityEngine.PostProcessing
 
             foreach (var component in m_Components)
                 m_ComponentStates.Add(component, false);
+
+            useGUILayout = false;
         }
 
         void OnPreCull()
