@@ -27,8 +27,7 @@ namespace UnityEngine.PostProcessing
         Camera m_Camera;
         PostProcessingProfile m_PreviousProfile;
 
-        bool m_RenderingInSceneView;
-        RenderTexture m_JitteredDepthHistory;
+        bool m_RenderingInSceneView = false;
 
         // Effect components
         BuiltinDebugViewsComponent m_DebugViews;
@@ -77,6 +76,8 @@ namespace UnityEngine.PostProcessing
 
             foreach (var component in m_Components)
                 m_ComponentStates.Add(component, false);
+
+            useGUILayout = false;
         }
 
         void OnPreCull()
