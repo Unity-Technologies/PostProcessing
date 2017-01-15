@@ -25,7 +25,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
-        #pragma multi_compile __ DITHERING
+        #pragma multi_compile __ DITHERING DITHERING_DISABLED
         #pragma multi_compile __ DITHERING_CUSTOM_BIT_DEPTH
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
@@ -65,7 +65,7 @@ Shader "Hidden/Post FX/Uber Shader"
         half4 _UserLut_Params; // @see _LogLut_Params
 
         // Dithering
-        half3 _Dithering_Params; // x: xoffset, y: yoffset, z: amount
+        half2 _Dithering_Params; // x: xoffset, y: yoffset, z: amount
         half3 _Dithering_RangeLimit;
         half3 _Dithering_ColorRange;
 
@@ -333,26 +333,30 @@ Shader "Hidden/Post FX/Uber Shader"
             // Dithering
             #if DITHERING
             {
-                color.rgb *= _Dithering_ColorRange.rgb;
-                
+                color *= _Dithering_ColorRange;
                 // Noise is based on: http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
                 half noise = frac(sin(dot(uv + _Dithering_Params.xy, half2(12.9898, 78.233)) % 3.141592) * 43758.5453);
 
                 // '_Dithering_RangeLimit' determines how much the noise will brighten the frst 'bit' for each color
-                half amount = lerp(_Dithering_Params.z, min(_Dithering_Params.z, color.r), _Dithering_RangeLimit.x);
+                half amount = lerp(1.0, min(1.0, color.r), _Dithering_RangeLimit.x);
                    color.r += amount * noise;
-                     amount = lerp(_Dithering_Params.z, min(_Dithering_Params.z, color.g), _Dithering_RangeLimit.y);
+                     amount = lerp(1.0, min(1.0, color.g), _Dithering_RangeLimit.y);
                    color.g += amount * noise;
-                     amount = lerp(_Dithering_Params.z, min(_Dithering_Params.z, color.b), _Dithering_RangeLimit.z);
+                     amount = lerp(1.0, min(1.0, color.b), _Dithering_RangeLimit.z);
                    color.b += amount * noise;
 
                 #if DITHERING_CUSTOM_BIT_DEPTH
                 {
-                    color = trunc(color);
+                    color = floor(color);
                 }
                 #endif
 
-                color.rgb /= _Dithering_ColorRange.rgb;
+                color /= _Dithering_ColorRange;
+            }
+            // Color depth preview for dithering
+            #elif DITHERING_DISABLED
+            {
+                color = floor(color * _Dithering_ColorRange) / _Dithering_ColorRange;
             }
             #endif
 

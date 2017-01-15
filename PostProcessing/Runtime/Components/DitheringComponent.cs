@@ -27,6 +27,15 @@
         {
             var settings = model.settings;
 
+            if (settings.depthSelectionMode == 2)   // 2 = "Automatic" color depth
+            {
+                // TODO: Detect the display's bit depth, and set the 'bitsPerChannel_R/G/B' accordingly
+            }
+            else
+            {
+                uberMaterial.EnableKeyword("DITHERING_CUSTOM_BIT_DEPTH");
+            }
+            
             if (settings.bitsPerChannel_R != depthR || settings.bitsPerChannel_G != depthG || settings.bitsPerChannel_B != depthB)
             {
                 colorsPerChannel = new Vector3((float)System.Math.Pow(2d, settings.bitsPerChannel_R), 
@@ -54,26 +63,31 @@
                 depthB = settings.bitsPerChannel_B;
             }
 
-            if (settings.depthSelectionMode == 2)   // 2 = "Automatic" color depth
-            {
-                // TODO: Detect the display's bit depth, and set the 'bitsPerChannel_R/G/B' accordingly
-            }
-
             float rndOffsetX = 0;
             float rndOffsetY = 0;
 
-            if (settings.animatedNoise)
+            switch (settings.ditheringMode)
             {
-                rndOffsetX = Random.value;
-                rndOffsetY = Random.value;
+                case 0:
+                {
+                    uberMaterial.EnableKeyword("DITHERING_DISABLED");
+                    break;
+                }
+                case 1:
+                {
+                    uberMaterial.EnableKeyword("DITHERING");
+                    break;
+                }
+                case 2:
+                {
+                    uberMaterial.EnableKeyword("DITHERING");
+                    rndOffsetX = Random.value;
+                    rndOffsetY = Random.value;
+                    break;
+                }
             }
-            
-            uberMaterial.EnableKeyword("DITHERING");
-            if (settings.depthSelectionMode != 2)
-            {
-                uberMaterial.EnableKeyword("DITHERING_CUSTOM_BIT_DEPTH");
-            }
-            uberMaterial.SetVector(Uniforms._Dithering_Params, new Vector4(rndOffsetX, rndOffsetY, settings.amount));
+
+            uberMaterial.SetVector(Uniforms._Dithering_Params, new Vector2(rndOffsetX, rndOffsetY));
             uberMaterial.SetVector(Uniforms._Dithering_RangeLimit, ditherRangeLimit);
             uberMaterial.SetVector(Uniforms._Dithering_ColorRange, colorsPerChannel);
         }

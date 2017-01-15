@@ -8,13 +8,11 @@ namespace UnityEngine.PostProcessing
         [Serializable]
         public struct Settings
         {
-            public int depthSelectionMode;
+            public int depthSelectionMode; // 0: Single Slider, 1: RGB Sliders, 2: Automatic
 
             public int bitsPerChannel_R, bitsPerChannel_G, bitsPerChannel_B;
 
-            public bool animatedNoise;
-
-            public float amount;
+            public int ditheringMode; // 0: Disabled, 1: Static, 2: Animated
 
             public static Settings defaultSettings
             {
@@ -26,8 +24,7 @@ namespace UnityEngine.PostProcessing
                         bitsPerChannel_R = 11,
                         bitsPerChannel_G = 11,
                         bitsPerChannel_B = 10,
-                        animatedNoise = true,
-                        amount = 1f
+                        ditheringMode = 2
                     };
                 }
             }
