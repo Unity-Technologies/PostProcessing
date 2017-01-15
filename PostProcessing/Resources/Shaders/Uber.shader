@@ -65,7 +65,7 @@ Shader "Hidden/Post FX/Uber Shader"
         half4 _UserLut_Params; // @see _LogLut_Params
 
         // Dithering
-        half2 _Dithering_Params; // x: xoffset, y: yoffset, z: amount
+        half2 _Dithering_Params; // x: xoffset, y: yoffset
         half3 _Dithering_RangeLimit;
         half3 _Dithering_ColorRange;
 
