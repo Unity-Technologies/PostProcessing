@@ -189,6 +189,9 @@ namespace UnityEngine.PostProcessing
             [Range(0f, 1f)]
             public float motionBlending;
 
+            [Tooltip("DEBUG")]
+            public bool useStableVariant;
+
             public static TaaSettings defaultSettings
             {
                 get
@@ -198,7 +201,8 @@ namespace UnityEngine.PostProcessing
                         jitterSpread = 0.75f,
                         sharpen = 0.3f,
                         stationaryBlending = 0.95f,
-                        motionBlending = 0.85f
+                        motionBlending = 0.85f,
+                        useStableVariant = false
                     };
                 }
             }

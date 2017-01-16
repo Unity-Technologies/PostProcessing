@@ -12,7 +12,7 @@
 
 #define TAA_USE_GATHER4_FOR_DEPTH_SAMPLE (SHADER_TARGET >= 41)
 
-#define TAA_USE_STABLE_BUT_GHOSTY_VARIANT 0
+//#define TAA_USE_STABLE_BUT_GHOSTY_VARIANT 0
 
 #if !defined(TAA_DILATE_MOTION_VECTOR_SAMPLE)
     #define TAA_DILATE_MOTION_VECTOR_SAMPLE 1
@@ -53,6 +53,10 @@ float4 _CameraDepthTexture_TexelSize;
 float2 _Jitter;
 float4 _SharpenParameters;
 float4 _FinalBlendParameters;
+
+//Debug
+float _StableVariant;
+//End Debug
 
 VaryingsSolver VertSolver(AttributesDefault input)
 {
@@ -128,56 +132,63 @@ float4 ClipToAABB(float4 color, float p, float3 minimum, float3 maximum)
 OutputSolver FragSolver(VaryingsSolver input)
 {
 #if TAA_DILATE_MOTION_VECTOR_SAMPLE
-    float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw)).xy;
+	float2 motion = tex2D(_CameraMotionVectorsTexture, GetClosestFragment(input.uv.zw)).xy;
 #else
-    // Don't dilate in ortho !
-    float2 motion = tex2D(_CameraMotionVectorsTexture, input.uv.zw).xy;
+	// Don't dilate in ortho !
+	float2 motion = tex2D(_CameraMotionVectorsTexture, input.uv.zw).xy;
 #endif
 
-    const float2 k = _MainTex_TexelSize.xy;
-    float2 uv = input.uv.xy;
+	const float2 k = _MainTex_TexelSize.xy;
+	float2 uv = input.uv.xy;
 
 #if UNITY_UV_STARTS_AT_TOP
-    uv -= _MainTex_TexelSize.y < 0 ? _Jitter * float2(1.0, -1.0) : _Jitter;
+	uv -= _MainTex_TexelSize.y < 0 ? _Jitter * float2(1.0, -1.0) : _Jitter;
 #else
-    uv -= _Jitter;
+	uv -= _Jitter;
 #endif
 
-    float4 color = tex2D(_MainTex, uv);
+	float4 color = tex2D(_MainTex, uv);
 
-    float4 topLeft = tex2D(_MainTex, uv - k * 0.5);
-    float4 bottomRight = tex2D(_MainTex, uv + k * 0.5);
+	float4 topLeft = tex2D(_MainTex, uv - k * 0.5);
+	float4 bottomRight = tex2D(_MainTex, uv + k * 0.5);
 
-    float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
+	float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
-    // Sharpen output
-    color += (color - (corners * 0.166667)) * 2.718282 * _SharpenParameters.x;
-    color = max(0.0, color);
+	// Sharpen output
+	color += (color - (corners * 0.166667)) * 2.718282 * _SharpenParameters.x;
+	color = max(0.0, color);
 
-    // Tonemap color and history samples
-    float4 average = FastToneMap((corners + color) * 0.142857);
+	// Tonemap color and history samples
+	float4 average = FastToneMap((corners + color) * 0.142857);
 
-    topLeft = FastToneMap(topLeft);
-    bottomRight = FastToneMap(bottomRight);
+	topLeft = FastToneMap(topLeft);
+	bottomRight = FastToneMap(bottomRight);
 
-    color = FastToneMap(color);
+	color = FastToneMap(color);
 
-    float4 history = tex2D(_HistoryTex, input.uv.zw - motion);
+	float4 history = tex2D(_HistoryTex, input.uv.zw - motion);
 
-// Only use this variant for arch viz or scenes that don't have any animated objects (camera animation is fine)
-#if TAA_USE_STABLE_BUT_GHOSTY_VARIANT
-    float4 luma = float4(Luminance(topLeft.rgb), Luminance(bottomRight.rgb), Luminance(average.rgb), Luminance(color.rgb));
-    float nudge = lerp(6.28318530718, 0.5, saturate(2.0 * history.a)) * max(abs(luma.z - luma.w), abs(luma.x - luma.y));
+	// Only use this variant for arch viz or scenes that don't have any animated objects (camera animation is fine)
 
-    float4 minimum = lerp(bottomRight, topLeft, step(luma.x, luma.y)) - nudge;
-    float4 maximum = lerp(topLeft, bottomRight, step(luma.x, luma.y)) + nudge;
-#else
-    float2 luma = float2(Luminance(average.rgb), Luminance(color.rgb));
-    float nudge = 4.0 * abs(luma.x - luma.y);
+	float4 minimum = float4(0, 0, 0, 0);
+	float4 maximum = float4(0, 0, 0, 0);
 
-    float4 minimum = min(bottomRight, topLeft) - nudge;
-    float4 maximum = max(topLeft, bottomRight) + nudge;
-#endif
+	if (_StableVariant == 1)
+	{
+		float4 luma = float4(Luminance(topLeft.rgb), Luminance(bottomRight.rgb), Luminance(average.rgb), Luminance(color.rgb));
+		float nudge = lerp(6.28318530718, 0.5, saturate(2.0 * history.a)) * max(abs(luma.z - luma.w), abs(luma.x - luma.y));
+
+		minimum = lerp(bottomRight, topLeft, step(luma.x, luma.y)) - nudge;
+		maximum = lerp(topLeft, bottomRight, step(luma.x, luma.y)) + nudge;
+	}
+	else
+	{
+		float2 luma = float2(Luminance(average.rgb), Luminance(color.rgb));
+		float nudge = 4.0 * abs(luma.x - luma.y);
+
+		minimum = min(bottomRight, topLeft) - nudge;
+		maximum = max(topLeft, bottomRight) + nudge;
+	}
 
     history = FastToneMap(history);
 
