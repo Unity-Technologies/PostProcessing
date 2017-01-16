@@ -98,31 +98,32 @@ float2 GetClosestFragment(float2 uv)
 
 // Adapted from Playdead's TAA implementation
 // https://github.com/playdeadgames/temporal
-float4 ClipToAABB(float4 color, float p, float3 minimum, float3 maximum)
+float4 ClipToAABB(float4 color, float4 p, float3 minimum, float3 maximum)
 {
-    // note: only clips towards aabb center (but fast!)
-    float3 center  = 0.5 * (maximum + minimum);
-    float3 extents = 0.5 * (maximum - minimum);
+    float4 r = color - p;
 
-    // This is actually `distance`, however the keyword is reserved
-    float4 offset = color - float4(center, p);
-    float3 repeat = abs(offset.xyz / extents);
+    maximum = maximum - p.xyz;
+    minimum = minimum - p.xyz;
 
-    repeat.x = max(repeat.x, max(repeat.y, repeat.z));
+    if (r.x > maximum.x + 0.00000001)
+        r *= (maximum.x / r.x);
 
-    if (repeat.x > 1.0)
-    {
-        // `color` is not intersecting (nor inside) the AABB; it's clipped to the closest extent
-        return float4(center, p) + offset / repeat.x;
-    }
-    else
-    {
-        // `color` is intersecting (or inside) the AABB.
+    if (r.y > maximum.y + 0.00000001)
+        r *= (maximum.y / r.y);
 
-        // Note: for whatever reason moving this return statement from this else into a higher
-        // scope makes the NVIDIA drivers go beyond bonkers
-        return color;
-    }
+    if (r.z > maximum.z + 0.00000001)
+        r *= (maximum.z / r.z);
+
+    if (r.x < minimum.x - 0.00000001)
+        r *= (minimum.x / r.x);
+
+    if (r.y < minimum.y - 0.00000001)
+        r *= (minimum.y / r.y);
+
+    if (r.z < minimum.z - 0.00000001)
+        r *= (minimum.z / r.z);
+
+    return p + r;
 }
 
 OutputSolver FragSolver(VaryingsSolver input)
@@ -182,7 +183,7 @@ OutputSolver FragSolver(VaryingsSolver input)
     history = FastToneMap(history);
 
     // Clip history samples
-    history = ClipToAABB(history, history.a, minimum.xyz, maximum.xyz);
+    history = ClipToAABB(history, clamp(color, minimum, maximum), minimum.xyz, maximum.xyz);
 
     // Store fragment motion history
     color.a = saturate(smoothstep(0.002 * _MainTex_TexelSize.z, 0.0035 * _MainTex_TexelSize.z, length(motion)));
