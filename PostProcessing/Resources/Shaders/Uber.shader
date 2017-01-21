@@ -338,12 +338,12 @@ Shader "Hidden/Post FX/Uber Shader"
                 half noise = frac(sin(dot(uv + _Dithering_Params.xy, half2(12.9898, 78.233)) % 3.141592) * 43758.5453);
 
                 // '_Dithering_RangeLimit' determines how much the noise will brighten the frst 'bit' for each color
-                half amount = lerp(1.0, min(1.0, color.r), _Dithering_RangeLimit.x);
-                   color.r += amount * noise;
-                     amount = lerp(1.0, min(1.0, color.g), _Dithering_RangeLimit.y);
-                   color.g += amount * noise;
-                     amount = lerp(1.0, min(1.0, color.b), _Dithering_RangeLimit.z);
-                   color.b += amount * noise;
+                half amount = lerp(0.0, 1.0 - min(1.0, color.r), _Dithering_RangeLimit.x);
+                   color.r += noise - amount;
+                     amount = lerp(0.0, 1.0 - min(1.0, color.g), _Dithering_RangeLimit.y);
+                   color.g += noise - amount;
+                     amount = lerp(0.0, 1.0 - min(1.0, color.b), _Dithering_RangeLimit.z);
+                   color.b += noise - amount;
 
                 #if DITHERING_CUSTOM_BIT_DEPTH
                 {

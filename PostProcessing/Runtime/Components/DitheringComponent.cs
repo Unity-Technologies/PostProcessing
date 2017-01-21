@@ -22,49 +22,77 @@
         int depthR;
         int depthG;
         int depthB;
+        int mode;
 
         public override void Prepare(Material uberMaterial)
         {
             var settings = model.settings;
 
-            if (settings.depthSelectionMode == 2)   // 2 = "Automatic" color depth
+
+            if (settings.bitsPerChannel_R != depthR || settings.bitsPerChannel_G != depthG || settings.bitsPerChannel_B != depthB || settings.depthSelectionMode != mode)
             {
-                // TODO: Detect the display's bit depth, and set the 'bitsPerChannel_R/G/B' accordingly
+                mode = settings.depthSelectionMode;
+
+                if (mode == 2) // 2 = "Automatic" color depth
+                {
+                    // TODO: Detect the bit depth of the display
+                    depthR = 11;
+                    depthG = 11;
+                    depthB = 10;
+                }
+                else
+                {
+                    depthR = settings.bitsPerChannel_R;
+                    depthG = settings.bitsPerChannel_G;
+                    depthB = settings.bitsPerChannel_B;
+                }
+
+                // Limit dithering range for more accurate results
+                if (depthR > 6)
+                {
+                    ditherRangeLimit.x = Mathf.Lerp(0.45f, 0, 1.0f - (1.0f / ((float)depthR - 8)));
+                }
+                else
+                {
+                    ditherRangeLimit.x = Mathf.Lerp(0.015f, 0.18f, Mathf.Pow((float)depthR / 6, 2));
+                }
+
+                if (depthG > 6)
+                {
+                    ditherRangeLimit.y = Mathf.Lerp(0.45f, 0, 1.0f - (1.0f / ((float)depthG - 8)));
+                }
+                else
+                {
+                    ditherRangeLimit.y = Mathf.Lerp(0.015f, 0.18f, Mathf.Pow((float)depthG / 6, 2));
+                }
+
+                if (depthB > 6)
+                {
+                    ditherRangeLimit.z = Mathf.Lerp(0.45f, 0, 1.0f - (1.0f / ((float)depthB - 8)));
+                }
+                else
+                {
+                    ditherRangeLimit.z = Mathf.Lerp(0.015f, 0.18f, Mathf.Pow((float)depthB / 6, 2));
+                }
+
+                colorsPerChannel = new Vector3((float)System.Math.Pow(2d, depthR), 
+                                               (float)System.Math.Pow(2d, depthG), 
+                                               (float)System.Math.Pow(2d, depthB));
+            }
+
+            if (settings.depthSelectionMode == 2)
+            {
+                // Values need to be reset to avoid the above 'if' statement running when unnecessary
+                depthR = settings.bitsPerChannel_R;
+                depthG = settings.bitsPerChannel_G;
+                depthB = settings.bitsPerChannel_B;
             }
             else
             {
                 uberMaterial.EnableKeyword("DITHERING_CUSTOM_BIT_DEPTH");
             }
-            
-            if (settings.bitsPerChannel_R != depthR || settings.bitsPerChannel_G != depthG || settings.bitsPerChannel_B != depthB)
-            {
-                colorsPerChannel = new Vector3((float)System.Math.Pow(2d, settings.bitsPerChannel_R), 
-                                               (float)System.Math.Pow(2d, settings.bitsPerChannel_G), 
-                                               (float)System.Math.Pow(2d, settings.bitsPerChannel_B));
 
-                // Limit dithering range for more accurate results
-                if (settings.bitsPerChannel_R > 6)
-                    ditherRangeLimit.x = Mathf.Clamp01(Mathf.Pow(1f - 1f / (colorsPerChannel.x * .34f), 4));
-                else
-                    ditherRangeLimit.x = Mathf.Lerp(0.013f, 1, Mathf.Pow((float)settings.bitsPerChannel_R / 6, 3));
-
-                if (settings.bitsPerChannel_G > 6)
-                    ditherRangeLimit.y = Mathf.Clamp01(Mathf.Pow(1f - 1f / (colorsPerChannel.y * .34f), 4));
-                else
-                    ditherRangeLimit.y = Mathf.Lerp(0.013f, 1, Mathf.Pow((float)settings.bitsPerChannel_G / 6, 3));
-
-                if (settings.bitsPerChannel_B > 6)
-                    ditherRangeLimit.z = Mathf.Clamp01(Mathf.Pow(1f - 1f / (colorsPerChannel.z * .34f), 4));
-                else
-                    ditherRangeLimit.z = Mathf.Lerp(0.013f, 1, Mathf.Pow((float)settings.bitsPerChannel_B / 6, 3));
-
-                depthR = settings.bitsPerChannel_R;
-                depthG = settings.bitsPerChannel_G;
-                depthB = settings.bitsPerChannel_B;
-            }
-
-            float rndOffsetX = 0;
-            float rndOffsetY = 0;
+            Vector2 rndOffset = Vector2.zero;
 
             switch (settings.ditheringMode)
             {
@@ -81,13 +109,12 @@
                 case 2:
                 {
                     uberMaterial.EnableKeyword("DITHERING");
-                    rndOffsetX = Random.value;
-                    rndOffsetY = Random.value;
+                    rndOffset = new Vector2(Random.value, Random.value);
                     break;
                 }
             }
 
-            uberMaterial.SetVector(Uniforms._Dithering_Params, new Vector2(rndOffsetX, rndOffsetY));
+            uberMaterial.SetVector(Uniforms._Dithering_Params, rndOffset);
             uberMaterial.SetVector(Uniforms._Dithering_RangeLimit, ditherRangeLimit);
             uberMaterial.SetVector(Uniforms._Dithering_ColorRange, colorsPerChannel);
         }

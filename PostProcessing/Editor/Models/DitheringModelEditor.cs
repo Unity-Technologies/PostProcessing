@@ -72,28 +72,31 @@ namespace UnityEditor.PostProcessing
                 }
                 case 2:
                 {
-                    EditorGUILayout.HelpBox("Automatic color depth detection is not currently implemented.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("Automatic color depth detection is not currently implemented. (Defaulting to 32-bit)", MessageType.Warning);
                     break;
                 }
             }
 
-            int depth = m_BitsPerChannel_R.intValue + 
-                        m_BitsPerChannel_G.intValue + 
-                        m_BitsPerChannel_B.intValue;
-            int comma = 0;
-            string numberOfColors = "" + System.Math.Pow(2d, depth);
-
-            for (int i = numberOfColors.Length-1; i > 0; i--)
+            if (depthSelectionMode != 2)
             {
-                comma++;
-                if (comma == 3)
-                {
-                    numberOfColors = numberOfColors.Insert(i, ",");
-                    comma = 0;
-                }
-            }
+                int depth = m_BitsPerChannel_R.intValue + 
+                            m_BitsPerChannel_G.intValue + 
+                            m_BitsPerChannel_B.intValue;
+                int comma = 0;
+                string numberOfColors = "" + System.Math.Pow(2d, depth);
 
-            EditorGUILayout.HelpBox("Using " + depth + "-bit color.\nTotal number of colors: " + numberOfColors, MessageType.None);
+                for (int i = numberOfColors.Length-1; i > 0; i--)
+                {
+                    comma++;
+                    if (comma == 3)
+                    {
+                        numberOfColors = numberOfColors.Insert(i, ",");
+                        comma = 0;
+                    }
+                }
+
+                EditorGUILayout.HelpBox("Using " + depth + "-bit color.\nTotal number of colors: " + numberOfColors, MessageType.None);
+            }
 
             EditorGUI.indentLevel--;
 
