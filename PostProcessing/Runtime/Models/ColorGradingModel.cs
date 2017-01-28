@@ -265,6 +265,8 @@ namespace UnityEngine.PostProcessing
             public ChannelMixerSettings channelMixer;
             public ColorWheelsSettings colorWheels;
             public CurvesSettings curves;
+			[Tooltip("Use dithering to try and minimize color banding in dark areas.")]
+			public bool useDithering;
 
             public static Settings defaultSettings
             {

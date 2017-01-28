@@ -401,6 +401,12 @@ namespace UnityEngine.PostProcessing
 
             float ev = Mathf.Exp(model.settings.basic.postExposure * 0.69314718055994530941723212145818f);
             uberMaterial.SetFloat(Uniforms._ExposureEV, ev);
+
+			// Dither
+			if (model.settings.useDithering)
+			{
+				uberMaterial.EnableKeyword("ENABLE_DITHERING");
+			}
         }
 
         public void OnGUI()
