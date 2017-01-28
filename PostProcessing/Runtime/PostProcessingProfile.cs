@@ -16,6 +16,7 @@ namespace UnityEngine.PostProcessing
         public BloomModel bloom = new BloomModel();
         public ColorGradingModel colorGrading = new ColorGradingModel();
         public UserLutModel userLut = new UserLutModel();
+        public DitheringModel dithering = new DitheringModel();
         public ChromaticAberrationModel chromaticAberration = new ChromaticAberrationModel();
         public GrainModel grain = new GrainModel();
         public VignetteModel vignette = new VignetteModel();
