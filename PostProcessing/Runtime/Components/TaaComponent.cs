@@ -19,8 +19,8 @@ namespace UnityEngine.PostProcessing
 
         readonly RenderBuffer[] m_MRT = new RenderBuffer[2];
 
-        int m_SampleIndex;
-        bool m_ResetHistory;
+        int m_SampleIndex = 0;
+        bool m_ResetHistory = true;
 
         RenderTexture m_HistoryTexture;
 
@@ -204,6 +204,7 @@ namespace UnityEngine.PostProcessing
 
             m_HistoryTexture = null;
             m_SampleIndex = 0;
+	        ResetHistory();
         }
     }
 }

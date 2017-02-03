@@ -620,13 +620,13 @@ half3 Y_2_linCV(half3 Y, half Ymax, half Ymin)
 
 half3 XYZ_2_xyY(half3 XYZ)
 {
-    half divisor = max(dot(XYZ, (1.0).xxx), 1e-10);
+    half divisor = max(dot(XYZ, (1.0).xxx), 1e-4);
     return half3(XYZ.xy / divisor, XYZ.y);
 }
 
 half3 xyY_2_XYZ(half3 xyY)
 {
-    half m = xyY.z / max(xyY.y, 1e-10);
+    half m = xyY.z / max(xyY.y, 1e-4);
     half3 XYZ = half3(xyY.xz, (1.0 - xyY.x - xyY.y));
     XYZ.xz *= m;
     return XYZ;
