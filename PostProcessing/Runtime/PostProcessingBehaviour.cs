@@ -195,6 +195,9 @@ namespace UnityEngine.PostProcessing
             var uberMaterial = m_MaterialFactory.Get("Hidden/Post FX/Uber Shader");
             uberMaterial.shaderKeywords = null;
 
+            if (!GraphicsUtils.isLinearColorSpace)
+                uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+
             var src = source;
             var dst = destination;
 
@@ -235,30 +238,36 @@ namespace UnityEngine.PostProcessing
 
             uberActive |= TryPrepareUberImageEffect(m_ChromaticAberration, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_ColorGrading, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
 
-            // Render to destination
-            if (uberActive)
+            var fxaaMaterial = fxaaActive
+                ? m_MaterialFactory.Get("Hidden/Post FX/FXAA")
+                : null;
+
+            if (fxaaActive)
             {
-                if (!GraphicsUtils.isLinearColorSpace)
-                    uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+                fxaaMaterial.shaderKeywords = null;
+                TryPrepareUberImageEffect(m_Grain, fxaaMaterial);
+                TryPrepareUberImageEffect(m_Dithering, fxaaMaterial);
 
-                var input = src;
-                var output = dst;
-                if (fxaaActive)
+                if (uberActive)
                 {
-                    output = m_RenderTextureFactory.Get(src);
+                    var output = m_RenderTextureFactory.Get(src);
+                    Graphics.Blit(src, output, uberMaterial, 0);
                     src = output;
                 }
 
-                Graphics.Blit(input, output, uberMaterial, 0);
-            }
-
-            if (fxaaActive)
                 m_Fxaa.Render(src, dst);
+            }
+            else
+            {
+                uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
+                uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
+
+                if (uberActive)
+                    Graphics.Blit(src, dst, uberMaterial, 0);
+            }
 
             if (!uberActive && !fxaaActive)
                 Graphics.Blit(src, dst);
