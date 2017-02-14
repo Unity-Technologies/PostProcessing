@@ -288,19 +288,6 @@ Shader "Hidden/Post FX/Uber Shader"
 
             color = saturate(color);
 
-            // Grain
-            #if GRAIN
-            {
-                float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
-
-                // Noisiness response curve based on scene luminance
-                float lum = 1.0 - sqrt(AcesLuminance(color));
-                lum = lerp(1.0, lum, _Grain_Params1.x);
-
-                color += color * grain * _Grain_Params1.y * lum;
-            }
-            #endif
-
             // Back to gamma space if needed
             #if UNITY_COLORSPACE_GAMMA
             {
@@ -326,6 +313,19 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = lerp(color, colorGraded, _UserLut_Params.w);
+            }
+            #endif
+
+            // Grain
+            #if GRAIN
+            {
+                float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+
+                // Noisiness response curve based on scene luminance
+                float lum = 1.0 - sqrt(AcesLuminance(color));
+                lum = lerp(1.0, lum, _Grain_Params1.x);
+
+                color += color * grain * _Grain_Params1.y * lum;
             }
             #endif
 
