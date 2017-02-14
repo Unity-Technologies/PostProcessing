@@ -23,17 +23,17 @@ namespace UnityEngine.PostProcessing
 
         const int k_TextureCount = 64;
 
-        public override void OnEnable()
+        public override void OnDisable()
+        {
+            noiseTextures = null;
+        }
+
+        void LoadNoiseTextures()
         {
             noiseTextures = new Texture2D[k_TextureCount];
 
             for (int i = 0; i < k_TextureCount; i++)
                 noiseTextures[i] = Resources.Load<Texture2D>("Bluenoise64/LDR_LLL1_" + i);
-        }
-
-        public override void OnDisable()
-        {
-            noiseTextures = null;
         }
 
         public override void Prepare(Material uberMaterial)
@@ -42,7 +42,6 @@ namespace UnityEngine.PostProcessing
             float rndOffsetY;
 
 #if POSTFX_DEBUG_STATIC_DITHERING
-            // Chosen by a fair dice roll
             textureIndex = 0;
             rndOffsetX = 0f;
             rndOffsetY = 0f;
@@ -53,6 +52,9 @@ namespace UnityEngine.PostProcessing
             rndOffsetX = Random.value;
             rndOffsetY = Random.value;
 #endif
+
+            if (noiseTextures == null)
+                LoadNoiseTextures();
 
             var noiseTex = noiseTextures[textureIndex];
 
