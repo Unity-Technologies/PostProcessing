@@ -171,7 +171,8 @@ namespace UnityEngine.PostProcessing
             if (profile == null || m_Camera == null)
                 return;
 
-            m_Camera.ResetProjectionMatrix();
+            if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
+                m_Camera.ResetProjectionMatrix();
         }
 
         // Classic render target pipeline for RT-based effects
