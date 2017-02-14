@@ -43,6 +43,7 @@ namespace UnityEngine.PostProcessing
         UserLutComponent m_UserLut;
         GrainComponent m_Grain;
         VignetteComponent m_Vignette;
+        DitheringComponent m_Dithering;
         FxaaComponent m_Fxaa;
 
         void OnEnable()
@@ -69,6 +70,7 @@ namespace UnityEngine.PostProcessing
             m_UserLut = AddComponent(new UserLutComponent());
             m_Grain = AddComponent(new GrainComponent());
             m_Vignette = AddComponent(new VignetteComponent());
+            m_Dithering = AddComponent(new DitheringComponent());
             m_Fxaa = AddComponent(new FxaaComponent());
 
             // Prepare state observers
@@ -122,6 +124,7 @@ namespace UnityEngine.PostProcessing
             m_UserLut.Init(context, profile.userLut);
             m_Grain.Init(context, profile.grain);
             m_Vignette.Init(context, profile.vignette);
+            m_Dithering.Init(context, profile.dithering);
             m_Fxaa.Init(context, profile.antialiasing);
 
             // Handles profile change and 'enable' state observers
@@ -234,6 +237,7 @@ namespace UnityEngine.PostProcessing
             uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
 
             // Render to destination
             if (uberActive)

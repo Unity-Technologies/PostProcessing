@@ -11,6 +11,7 @@ Shader "Hidden/Post FX/Uber Shader"
         _UserLut ("", 2D) = "" {}
         _Vignette_Mask ("", 2D) = "" {}
         _ChromaticAberration_Spectrum ("", 2D) = "" {}
+        _DitheringTex ("", 2D) = "" {}
     }
 
     CGINCLUDE
@@ -27,6 +28,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
+        #pragma multi_compile __ DITHERING
 
         #include "UnityCG.cginc"
         #include "Bloom.cginc"
@@ -66,6 +68,10 @@ Shader "Hidden/Post FX/Uber Shader"
         half2 _Grain_Params1; // x: lum_contrib, y: intensity
         half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
         sampler2D _GrainTex;
+
+        // Dithering
+        sampler2D _DitheringTex;
+        float4 _DitheringCoords;
 
         // Vignette
         half3 _Vignette_Color;
@@ -283,7 +289,7 @@ Shader "Hidden/Post FX/Uber Shader"
             color = saturate(color);
 
             // Grain
-            #if (GRAIN)
+            #if GRAIN
             {
                 float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
@@ -320,6 +326,17 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = lerp(color, colorGraded, _UserLut_Params.w);
+            }
+            #endif
+
+            // Blue noise dithering 
+            #if DITHERING
+            {
+                // Symmetric triangular distribution on [-1,1] with maximal density at 0
+                float noise = tex2D(_DitheringTex, uv * _DitheringCoords.xy + _DitheringCoords.zw).a * 2.0 - 1.0;
+                noise = sign(noise) * (1.0 - sqrt(1.0 - abs(noise))) / 255.0;
+
+                color += noise;
             }
             #endif
 
