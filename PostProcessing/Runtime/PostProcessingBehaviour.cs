@@ -195,9 +195,6 @@ namespace UnityEngine.PostProcessing
             var uberMaterial = m_MaterialFactory.Get("Hidden/Post FX/Uber Shader");
             uberMaterial.shaderKeywords = null;
 
-            if (!GraphicsUtils.isLinearColorSpace)
-                uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
-
             var src = source;
             var dst = destination;
 
@@ -266,7 +263,12 @@ namespace UnityEngine.PostProcessing
                 uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
 
                 if (uberActive)
+                {
+                    if (!GraphicsUtils.isLinearColorSpace)
+                        uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+
                     Graphics.Blit(src, dst, uberMaterial, 0);
+                }
             }
 
             if (!uberActive && !fxaaActive)
