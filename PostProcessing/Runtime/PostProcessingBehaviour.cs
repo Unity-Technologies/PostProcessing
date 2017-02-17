@@ -33,6 +33,7 @@ namespace UnityEngine.PostProcessing
         BuiltinDebugViewsComponent m_DebugViews;
         AmbientOcclusionComponent m_AmbientOcclusion;
         ScreenSpaceReflectionComponent m_ScreenSpaceReflection;
+        FogComponent m_FogComponent;
         MotionBlurComponent m_MotionBlur;
         TaaComponent m_Taa;
         EyeAdaptationComponent m_EyeAdaptation;
@@ -60,6 +61,7 @@ namespace UnityEngine.PostProcessing
             m_DebugViews = AddComponent(new BuiltinDebugViewsComponent());
             m_AmbientOcclusion = AddComponent(new AmbientOcclusionComponent());
             m_ScreenSpaceReflection = AddComponent(new ScreenSpaceReflectionComponent());
+            m_FogComponent = AddComponent(new FogComponent());
             m_MotionBlur = AddComponent(new MotionBlurComponent());
             m_Taa = AddComponent(new TaaComponent());
             m_EyeAdaptation = AddComponent(new EyeAdaptationComponent());
@@ -114,6 +116,7 @@ namespace UnityEngine.PostProcessing
             m_DebugViews.Init(context, profile.debugViews);
             m_AmbientOcclusion.Init(context, profile.ambientOcclusion);
             m_ScreenSpaceReflection.Init(context, profile.screenSpaceReflection);
+            m_FogComponent.Init(context, profile.fog);
             m_MotionBlur.Init(context, profile.motionBlur);
             m_Taa.Init(context, profile.antialiasing);
             m_EyeAdaptation.Init(context, profile.eyeAdaptation);
@@ -161,6 +164,7 @@ namespace UnityEngine.PostProcessing
             TryExecuteCommandBuffer(m_DebugViews);
             TryExecuteCommandBuffer(m_AmbientOcclusion);
             TryExecuteCommandBuffer(m_ScreenSpaceReflection);
+            TryExecuteCommandBuffer(m_FogComponent);
 
             if (!m_RenderingInSceneView)
                 TryExecuteCommandBuffer(m_MotionBlur);
