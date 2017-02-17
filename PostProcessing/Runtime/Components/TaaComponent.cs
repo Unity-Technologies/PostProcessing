@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Rendering;
 
 namespace UnityEngine.PostProcessing
 {
@@ -207,7 +206,7 @@ namespace UnityEngine.PostProcessing
 
             m_HistoryTexture = null;
             m_SampleIndex = 0;
-	        ResetHistory();
+            ResetHistory();
         }
     }
 }
