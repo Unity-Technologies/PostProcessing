@@ -19,6 +19,7 @@ namespace UnityEngine.PostProcessing
         public ChromaticAberrationModel chromaticAberration = new ChromaticAberrationModel();
         public GrainModel grain = new GrainModel();
         public VignetteModel vignette = new VignetteModel();
+        public DitheringModel dithering = new DitheringModel();
 
 #if UNITY_EDITOR
         // Monitor settings
