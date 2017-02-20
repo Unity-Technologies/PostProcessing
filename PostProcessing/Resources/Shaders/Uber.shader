@@ -33,6 +33,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #include "UnityCG.cginc"
         #include "Bloom.cginc"
         #include "ColorGrading.cginc"
+        #include "UberSecondPass.cginc"
 
         // Auto exposure / eye adaptation
         sampler2D _AutoExposure;
@@ -63,15 +64,6 @@ Shader "Hidden/Post FX/Uber Shader"
         // User lut
         sampler2D _UserLut;
         half4 _UserLut_Params; // @see _LogLut_Params
-
-        // Grain
-        half2 _Grain_Params1; // x: lum_contrib, y: intensity
-        half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
-        sampler2D _GrainTex;
-
-        // Dithering
-        sampler2D _DitheringTex;
-        float4 _DitheringCoords;
 
         // Vignette
         half3 _Vignette_Color;
@@ -288,19 +280,6 @@ Shader "Hidden/Post FX/Uber Shader"
 
             color = saturate(color);
 
-            // Grain
-            #if GRAIN
-            {
-                float3 grain = tex2D(_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
-
-                // Noisiness response curve based on scene luminance
-                float lum = 1.0 - sqrt(AcesLuminance(color));
-                lum = lerp(1.0, lum, _Grain_Params1.x);
-
-                color += color * grain * _Grain_Params1.y * lum;
-            }
-            #endif
-
             // Back to gamma space if needed
             #if UNITY_COLORSPACE_GAMMA
             {
@@ -329,16 +308,7 @@ Shader "Hidden/Post FX/Uber Shader"
             }
             #endif
 
-            // Blue noise dithering 
-            #if DITHERING
-            {
-                // Symmetric triangular distribution on [-1,1] with maximal density at 0
-                float noise = tex2D(_DitheringTex, uv * _DitheringCoords.xy + _DitheringCoords.zw).a * 2.0 - 1.0;
-                noise = sign(noise) * (1.0 - sqrt(1.0 - abs(noise))) / 255.0;
-
-                color += noise;
-            }
-            #endif
+            color = UberSecondPass(color, uv);
 
             // Done !
             return half4(color, 1.0);

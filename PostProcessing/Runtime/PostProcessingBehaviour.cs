@@ -16,6 +16,9 @@ namespace UnityEngine.PostProcessing
         // Inspector fields
         public PostProcessingProfile profile;
 
+        public Func<Vector2, Matrix4x4> jitteredMatrixFunc;
+        Matrix4x4 nonJitteredProjectionMatrix;
+
         // Internal helpers
         Dictionary<Type, KeyValuePair<CameraEvent, CommandBuffer>> m_CommandBuffers;
         List<PostProcessingComponentBase> m_Components;
@@ -149,7 +152,10 @@ namespace UnityEngine.PostProcessing
 
             // Temporal antialiasing jittering, needs to happen before culling
             if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
-                m_Taa.SetProjectionMatrix();
+            {
+                nonJitteredProjectionMatrix = m_Context.camera.projectionMatrix;
+                m_Taa.SetProjectionMatrix(jitteredMatrixFunc);
+            }
         }
 
         void OnPreRender()
@@ -171,7 +177,8 @@ namespace UnityEngine.PostProcessing
             if (profile == null || m_Camera == null)
                 return;
 
-            m_Camera.ResetProjectionMatrix();
+            if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
+                m_Context.camera.projectionMatrix = nonJitteredProjectionMatrix;
         }
 
         // Classic render target pipeline for RT-based effects
@@ -234,30 +241,41 @@ namespace UnityEngine.PostProcessing
 
             uberActive |= TryPrepareUberImageEffect(m_ChromaticAberration, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_ColorGrading, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
             uberActive |= TryPrepareUberImageEffect(m_Vignette, uberMaterial);
-            uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
+            uberActive |= TryPrepareUberImageEffect(m_UserLut, uberMaterial);
 
-            // Render to destination
-            if (uberActive)
+            var fxaaMaterial = fxaaActive
+                ? m_MaterialFactory.Get("Hidden/Post FX/FXAA")
+                : null;
+
+            if (fxaaActive)
             {
-                if (!GraphicsUtils.isLinearColorSpace)
-                    uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+                fxaaMaterial.shaderKeywords = null;
+                TryPrepareUberImageEffect(m_Grain, fxaaMaterial);
+                TryPrepareUberImageEffect(m_Dithering, fxaaMaterial);
 
-                var input = src;
-                var output = dst;
-                if (fxaaActive)
+                if (uberActive)
                 {
-                    output = m_RenderTextureFactory.Get(src);
+                    var output = m_RenderTextureFactory.Get(src);
+                    Graphics.Blit(src, output, uberMaterial, 0);
                     src = output;
                 }
 
-                Graphics.Blit(input, output, uberMaterial, 0);
-            }
-
-            if (fxaaActive)
                 m_Fxaa.Render(src, dst);
+            }
+            else
+            {
+                uberActive |= TryPrepareUberImageEffect(m_Grain, uberMaterial);
+                uberActive |= TryPrepareUberImageEffect(m_Dithering, uberMaterial);
+
+                if (uberActive)
+                {
+                    if (!GraphicsUtils.isLinearColorSpace)
+                        uberMaterial.EnableKeyword("UNITY_COLORSPACE_GAMMA");
+
+                    Graphics.Blit(src, dst, uberMaterial, 0);
+                }
+            }
 
             if (!uberActive && !fxaaActive)
                 Graphics.Blit(src, dst);
