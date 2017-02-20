@@ -13,6 +13,7 @@ namespace UnityEditor.PostProcessing
         SerializedProperty m_Density;
         SerializedProperty m_Start;
         SerializedProperty m_End;
+        SerializedProperty m_ExcludeSkybox;
 
         public override void OnEnable()
         {
@@ -21,11 +22,13 @@ namespace UnityEditor.PostProcessing
             m_Density = FindSetting((Settings x) => x.density);
             m_Start = FindSetting((Settings x) => x.start);
             m_End = FindSetting((Settings x) => x.end);
+            m_ExcludeSkybox = FindSetting((Settings x) => x.excludeSkybox);
         }
 
         public override void OnInspectorGUI()
         {
             EditorGUILayout.PropertyField(m_Color);
+            EditorGUILayout.PropertyField(m_ExcludeSkybox);
             EditorGUILayout.PropertyField(m_Mode);
 
             EditorGUI.indentLevel++;

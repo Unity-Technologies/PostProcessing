@@ -61,6 +61,18 @@ Shader "Hidden/Post FX/Fog"
 
             float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
             depth = Linear01Depth(depth);
+            float dist = ComputeDistance(depth) - _Start;
+            half fog = 1.0 - ComputeFog(dist);
+
+            return lerp(color, _FogColor, fog);
+        }
+
+        half4 FragFogExcludeSkybox(Varyings i) : SV_Target
+        {
+            half4 color = tex2D(_MainTex, i.uv);
+
+            float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
+            depth = Linear01Depth(depth);
             float skybox = depth < SKYBOX_THREASHOLD_VALUE;
             float dist = ComputeDistance(depth) - _Start;
             half fog = 1.0 - ComputeFog(dist);
@@ -80,6 +92,16 @@ Shader "Hidden/Post FX/Fog"
 
                 #pragma vertex VertFog
                 #pragma fragment FragFog
+
+            ENDCG
+        }
+
+        Pass
+        {
+            CGPROGRAM
+
+                #pragma vertex VertFog
+                #pragma fragment FragFogExcludeSkybox
 
             ENDCG
         }

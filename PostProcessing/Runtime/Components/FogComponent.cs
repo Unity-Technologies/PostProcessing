@@ -84,7 +84,7 @@ namespace UnityEngine.PostProcessing
 
             cb.GetTemporaryRT(Uniforms._TempRT, context.width, context.height, 24, FilterMode.Bilinear, fbFormat);
             cb.Blit(BuiltinRenderTextureType.CameraTarget, Uniforms._TempRT);
-            cb.Blit(Uniforms._TempRT, BuiltinRenderTextureType.CameraTarget, material);
+            cb.Blit(Uniforms._TempRT, BuiltinRenderTextureType.CameraTarget, material, settings.excludeSkybox ? 1 : 0);
             cb.ReleaseTemporaryRT(Uniforms._TempRT);
         }
     }

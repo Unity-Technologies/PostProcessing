@@ -23,6 +23,9 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Controls the distance from the camera where the fog will completely obscure objects in the Scene.")]
             public float end;
 
+            [Tooltip("Should the fog affect the skybox?")]
+            public bool excludeSkybox;
+
             public static Settings defaultSettings
             {
                 get
@@ -33,7 +36,8 @@ namespace UnityEngine.PostProcessing
                         mode = FogMode.Exponential,
                         density = 0.001f,
                         start = 0f,
-                        end = 600f
+                        end = 600f,
+                        excludeSkybox = true
                     };
                 }
             }
