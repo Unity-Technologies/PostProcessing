@@ -345,6 +345,7 @@ namespace UnityEngine.PostProcessing
         {
             m_Taa.ResetHistory();
             m_MotionBlur.ResetHistory();
+            m_EyeAdaptation.ResetHistory();
         }
 
         #region State management

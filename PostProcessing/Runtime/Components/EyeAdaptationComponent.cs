@@ -40,6 +40,11 @@ namespace UnityEngine.PostProcessing
             }
         }
 
+        public void ResetHistory()
+        {
+            m_FirstFrame = true;
+        }
+
         public override void OnEnable()
         {
             m_FirstFrame = true;
