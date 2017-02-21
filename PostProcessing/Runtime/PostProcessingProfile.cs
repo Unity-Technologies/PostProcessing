@@ -10,6 +10,7 @@ namespace UnityEngine.PostProcessing
         public AntialiasingModel antialiasing = new AntialiasingModel();
         public AmbientOcclusionModel ambientOcclusion = new AmbientOcclusionModel();
         public ScreenSpaceReflectionModel screenSpaceReflection = new ScreenSpaceReflectionModel();
+        public FogModel fog = new FogModel();
         public DepthOfFieldModel depthOfField = new DepthOfFieldModel();
         public MotionBlurModel motionBlur = new MotionBlurModel();
         public EyeAdaptationModel eyeAdaptation = new EyeAdaptationModel();
