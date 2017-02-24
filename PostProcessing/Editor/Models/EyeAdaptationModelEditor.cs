@@ -38,7 +38,6 @@ namespace UnityEditor.PostProcessing
             if (!GraphicsUtils.supportsDX11)
             {
                 EditorGUILayout.HelpBox("This effect requires support for compute shaders. Enabling it won't do anything on unsupported platforms.", MessageType.Warning);
-                return;
             }
 
             EditorGUILayout.PropertyField(m_LogMin, EditorGUIHelper.GetContent("Histogram Log Min"));

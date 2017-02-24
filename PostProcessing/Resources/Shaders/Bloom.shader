@@ -43,8 +43,8 @@ Shader "Hidden/Post FX/Bloom"
         sampler2D _AutoExposure;
 
         float _PrefilterOffs;
-        half _Threshold;
-        half3 _Curve;
+        float _Threshold;
+        float3 _Curve;
         float _SampleScale;
 
         // -----------------------------------------------------------------------------
