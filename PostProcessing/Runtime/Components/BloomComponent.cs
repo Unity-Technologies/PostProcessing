@@ -129,7 +129,6 @@ namespace UnityEngine.PostProcessing
             context.renderTextureFactory.Release(prefiltered);
 
             // Push everything to the uber material
-            uberMaterial.EnableKeyword("BLOOM");
             uberMaterial.SetTexture(Uniforms._BloomTex, bloomTex);
             uberMaterial.SetVector(Uniforms._Bloom_Settings, new Vector2(sampleScale, bloom.intensity));
 
@@ -138,6 +137,10 @@ namespace UnityEngine.PostProcessing
                 uberMaterial.SetTexture(Uniforms._Bloom_DirtTex, lensDirt.texture);
                 uberMaterial.SetFloat(Uniforms._Bloom_DirtIntensity, lensDirt.intensity);
                 uberMaterial.EnableKeyword("BLOOM_LENS_DIRT");
+            }
+            else
+            {
+                uberMaterial.EnableKeyword("BLOOM");
             }
         }
     }

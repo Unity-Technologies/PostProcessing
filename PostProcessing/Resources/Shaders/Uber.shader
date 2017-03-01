@@ -22,8 +22,7 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma multi_compile __ EYE_ADAPTATION
         #pragma multi_compile __ CHROMATIC_ABERRATION
         #pragma multi_compile __ DEPTH_OF_FIELD DEPTH_OF_FIELD_COC_VIEW
-        #pragma multi_compile __ BLOOM
-        #pragma multi_compile __ BLOOM_LENS_DIRT
+        #pragma multi_compile __ BLOOM BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ GRAIN
@@ -218,7 +217,7 @@ Shader "Hidden/Post FX/Uber Shader"
             #endif
 
             // HDR Bloom
-            #if BLOOM
+            #if BLOOM || BLOOM_LENS_DIRT
             {
                 half3 bloom = UpsampleFilter(_BloomTex, i.uvFlippedSPR, _BloomTex_TexelSize.xy, _Bloom_Settings.x) * _Bloom_Settings.y;
                 color += bloom;

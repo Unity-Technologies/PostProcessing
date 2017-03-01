@@ -17,7 +17,6 @@ namespace UnityEngine.PostProcessing
         public PostProcessingProfile profile;
 
         public Func<Vector2, Matrix4x4> jitteredMatrixFunc;
-        Matrix4x4 nonJitteredProjectionMatrix;
 
         // Internal helpers
         Dictionary<Type, KeyValuePair<CameraEvent, CommandBuffer>> m_CommandBuffers;
@@ -155,10 +154,7 @@ namespace UnityEngine.PostProcessing
 
             // Temporal antialiasing jittering, needs to happen before culling
             if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
-            {
-                nonJitteredProjectionMatrix = m_Context.camera.projectionMatrix;
                 m_Taa.SetProjectionMatrix(jitteredMatrixFunc);
-            }
         }
 
         void OnPreRender()
@@ -182,7 +178,7 @@ namespace UnityEngine.PostProcessing
                 return;
 
             if (!m_RenderingInSceneView && m_Taa.active && !profile.debugViews.willInterrupt)
-                m_Context.camera.projectionMatrix = nonJitteredProjectionMatrix;
+                m_Context.camera.ResetProjectionMatrix();
         }
 
         // Classic render target pipeline for RT-based effects
