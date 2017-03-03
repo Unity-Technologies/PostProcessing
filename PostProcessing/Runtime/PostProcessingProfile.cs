@@ -7,10 +7,10 @@ namespace UnityEngine.PostProcessing
         #pragma warning disable 0169 // "field x is never used"
 
         public BuiltinDebugViewsModel debugViews = new BuiltinDebugViewsModel();
+        public FogModel fog = new FogModel();
         public AntialiasingModel antialiasing = new AntialiasingModel();
         public AmbientOcclusionModel ambientOcclusion = new AmbientOcclusionModel();
         public ScreenSpaceReflectionModel screenSpaceReflection = new ScreenSpaceReflectionModel();
-        public FogModel fog = new FogModel();
         public DepthOfFieldModel depthOfField = new DepthOfFieldModel();
         public MotionBlurModel motionBlur = new MotionBlurModel();
         public EyeAdaptationModel eyeAdaptation = new EyeAdaptationModel();
