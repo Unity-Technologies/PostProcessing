@@ -41,31 +41,18 @@ namespace UnityEngine.PostProcessing
             return CameraEvent.BeforeImageEffectsOpaque;
         }
 
-        public override void Init(PostProcessingContext pcontext, FogModel pmodel)
-        {
-            base.Init(pcontext, pmodel);
-
-            var settings = model.settings;
-            RenderSettings.fog = model.enabled;
-            RenderSettings.fogColor = settings.color;
-            RenderSettings.fogMode = settings.mode;
-            RenderSettings.fogDensity = settings.density;
-            RenderSettings.fogStartDistance = settings.start;
-            RenderSettings.fogEndDistance = settings.end;
-        }
-
         public override void PopulateCommandBuffer(CommandBuffer cb)
         {
             var settings = model.settings;
 
             var material = context.materialFactory.Get(k_ShaderString);
             material.shaderKeywords = null;
-            material.SetColor(Uniforms._FogColor, settings.color);
-            material.SetFloat(Uniforms._Density, settings.density);
-            material.SetFloat(Uniforms._Start, settings.start);
-            material.SetFloat(Uniforms._End, settings.end);
+            material.SetColor(Uniforms._FogColor, RenderSettings.fogColor);
+            material.SetFloat(Uniforms._Density, RenderSettings.fogDensity);
+            material.SetFloat(Uniforms._Start, RenderSettings.fogStartDistance);
+            material.SetFloat(Uniforms._End, RenderSettings.fogEndDistance);
 
-            switch (settings.mode)
+            switch (RenderSettings.fogMode)
             {
                 case FogMode.Linear:
                     material.EnableKeyword("FOG_LINEAR");
