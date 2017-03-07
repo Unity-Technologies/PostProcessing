@@ -66,7 +66,7 @@ Shader "Hidden/Post FX/Uber Shader"
         // Vignette
         half3 _Vignette_Color;
         half2 _Vignette_Center; // UV space
-        half3 _Vignette_Settings; // x: intensity, y: smoothness, z: roundness
+        half4 _Vignette_Settings; // x: intensity, y: smoothness, z: roundness, w: rounded
         sampler2D _Vignette_Mask;
         half _Vignette_Opacity; // [0;1]
 
@@ -227,7 +227,7 @@ Shader "Hidden/Post FX/Uber Shader"
             #if VIGNETTE_CLASSIC
             {
                 half2 d = abs(uv - _Vignette_Center) * _Vignette_Settings.x;
-                d.x *= _ScreenParams.x / _ScreenParams.y;
+                d.x *= lerp(1.0, _ScreenParams.x / _ScreenParams.y, _Vignette_Settings.w);
                 d = pow(d, _Vignette_Settings.z); // Roundness
                 half vfactor = pow(saturate(1.0 - dot(d, d)), _Vignette_Settings.y);
                 color *= lerp(_Vignette_Color, (1.0).xxx, vfactor);
