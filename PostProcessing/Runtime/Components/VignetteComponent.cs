@@ -32,12 +32,6 @@ namespace UnityEngine.PostProcessing
                 float roundness = (1f - settings.roundness) * 6f + settings.roundness;
                 uberMaterial.SetVector(Uniforms._Vignette_Settings, new Vector3(settings.intensity * 3f, settings.smoothness * 5f, roundness));
             }
-            else if (settings.mode == VignetteModel.Mode.Round)
-            {
-                uberMaterial.SetVector(Uniforms._Vignette_Center, settings.center);
-                uberMaterial.EnableKeyword("VIGNETTE_ROUND");
-                uberMaterial.SetVector(Uniforms._Vignette_Settings, new Vector3(settings.intensity * 3f, settings.smoothness * 5f, 1f));
-            }
             else if (settings.mode == VignetteModel.Mode.Masked)
             {
                 if (settings.mask != null && settings.opacity > 0f)

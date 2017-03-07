@@ -220,12 +220,14 @@ namespace UnityEngine.PostProcessing
                 dst = m_RenderTextureFactory.Get(src);
 #endif
 
-            Texture autoExposure = null;
+            Texture autoExposure = GraphicsUtils.whiteTexture;
             if (m_EyeAdaptation.active)
             {
                 uberActive = true;
                 autoExposure = m_EyeAdaptation.Prepare(src, uberMaterial);
             }
+
+            uberMaterial.SetTexture("_AutoExposure", autoExposure);
 
             if (dofActive)
             {

@@ -79,11 +79,7 @@ Shader "Hidden/Post FX/Bloom"
         {
             float autoExposure = 1.0;
             uv = UnityStereoScreenSpaceUVAdjust(uv, _MainTex_ST);
-
-        #if EYE_ADAPTATION
             autoExposure = tex2D(_AutoExposure, uv).r;
-        #endif
-
             return tex2D(tex, uv) * autoExposure;
         }
 
@@ -151,7 +147,6 @@ Shader "Hidden/Post FX/Bloom"
         Pass
         {
             CGPROGRAM
-                #pragma multi_compile __ EYE_ADAPTATION
                 #pragma multi_compile __ ANTI_FLICKER
                 #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
                 #pragma vertex VertDefault

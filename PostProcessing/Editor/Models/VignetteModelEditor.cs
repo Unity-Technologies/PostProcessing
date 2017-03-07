@@ -35,7 +35,7 @@ namespace UnityEditor.PostProcessing
             EditorGUILayout.PropertyField(m_Mode);
             EditorGUILayout.PropertyField(m_Color);
 
-            if (m_Mode.intValue <= (int)VignetteMode.Round)
+            if (m_Mode.intValue < (int)VignetteMode.Masked)
             {
                 EditorGUILayout.PropertyField(m_Center);
                 EditorGUILayout.PropertyField(m_Intensity);

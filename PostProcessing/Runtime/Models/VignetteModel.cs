@@ -8,7 +8,6 @@ namespace UnityEngine.PostProcessing
         public enum Mode
         {
             Classic,
-            Round,
             Masked
         }
 

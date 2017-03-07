@@ -37,12 +37,8 @@ namespace UnityEngine.PostProcessing
             var material = context.materialFactory.Get("Hidden/Post FX/Bloom");
             material.shaderKeywords = null;
 
-            // Apply auto exposure before the prefiltering pass if needed
-            if (autoExposure != null)
-            {
-                material.EnableKeyword("EYE_ADAPTATION");
-                material.SetTexture(Uniforms._AutoExposure, autoExposure);
-            }
+            // Apply auto exposure before the prefiltering pass
+            material.SetTexture(Uniforms._AutoExposure, autoExposure);
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
