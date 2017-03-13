@@ -47,7 +47,7 @@ Shader "Post Processing/Custom Motion Vector Texture"
                     v2f o;
                     o.vertex = UnityObjectToClipPos(v.vertex);
                     o.uv = TRANSFORM_TEX(v.uv, _MotionTex);
-                    o.normal = mul((float3x3)UNITY_MATRIX_MVP, v.normal);
+                    o.normal = UnityObjectToClipPos(v.normal);
                     o.normal = o.normal * 0.5 + 0.5;
                     o.tangent = mul(UNITY_MATRIX_MV, v.tangent);
                     o.transposedTangent = (mul(UNITY_MATRIX_IT_MV, v.tangent)) * 0.5 + 0.5;
