@@ -19,14 +19,13 @@ Shader "Hidden/Post FX/Uber Shader"
         #pragma target 3.0
 
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-        #pragma multi_compile __ EYE_ADAPTATION
         #pragma multi_compile __ CHROMATIC_ABERRATION
         #pragma multi_compile __ DEPTH_OF_FIELD DEPTH_OF_FIELD_COC_VIEW
         #pragma multi_compile __ BLOOM BLOOM_LENS_DIRT
         #pragma multi_compile __ COLOR_GRADING COLOR_GRADING_LOG_VIEW
         #pragma multi_compile __ USER_LUT
         #pragma multi_compile __ GRAIN
-        #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_ROUND VIGNETTE_MASKED
+        #pragma multi_compile __ VIGNETTE_CLASSIC VIGNETTE_MASKED
         #pragma multi_compile __ DITHERING
 
         #include "UnityCG.cginc"
@@ -67,7 +66,7 @@ Shader "Hidden/Post FX/Uber Shader"
         // Vignette
         half3 _Vignette_Color;
         half2 _Vignette_Center; // UV space
-        half3 _Vignette_Settings; // x: intensity, y: smoothness, z: roundness
+        half4 _Vignette_Settings; // x: intensity, y: smoothness, z: roundness, w: rounded
         sampler2D _Vignette_Mask;
         half _Vignette_Opacity; // [0;1]
 
@@ -101,14 +100,7 @@ Shader "Hidden/Post FX/Uber Shader"
         half4 FragUber(VaryingsFlipped i) : SV_Target
         {
             float2 uv = i.uv;
-            half autoExposure = 1.0;
-
-            // Store the auto exposure value for later
-            #if EYE_ADAPTATION
-            {
-                autoExposure = tex2D(_AutoExposure, uv).r;
-            }
-            #endif
+            half autoExposure = tex2D(_AutoExposure, uv).r;
 
             half3 color = (0.0).xxx;
             #if DEPTH_OF_FIELD && CHROMATIC_ABERRATION
@@ -235,16 +227,8 @@ Shader "Hidden/Post FX/Uber Shader"
             #if VIGNETTE_CLASSIC
             {
                 half2 d = abs(uv - _Vignette_Center) * _Vignette_Settings.x;
+                d.x *= lerp(1.0, _ScreenParams.x / _ScreenParams.y, _Vignette_Settings.w);
                 d = pow(d, _Vignette_Settings.z); // Roundness
-                half vfactor = pow(saturate(1.0 - dot(d, d)), _Vignette_Settings.y);
-                color *= lerp(_Vignette_Color, (1.0).xxx, vfactor);
-            }
-
-            // Perfectly round vignette
-            #elif VIGNETTE_ROUND
-            {
-                half2 d = abs(uv - _Vignette_Center) * _Vignette_Settings.x;
-                d.x *= _ScreenParams.x / _ScreenParams.y;
                 half vfactor = pow(saturate(1.0 - dot(d, d)), _Vignette_Settings.y);
                 color *= lerp(_Vignette_Color, (1.0).xxx, vfactor);
             }
