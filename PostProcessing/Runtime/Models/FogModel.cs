@@ -10,6 +10,8 @@ namespace UnityEngine.PostProcessing
         {
             [Tooltip("Should the fog affect the skybox?")]
             public bool excludeSkybox;
+            [Tooltip("Should the fog sample the skybox instead of using the fog color?")]
+            public bool fadeToSkybox;
 
             public static Settings defaultSettings
             {
@@ -17,7 +19,8 @@ namespace UnityEngine.PostProcessing
                 {
                     return new Settings
                     {
-                        excludeSkybox = true
+                        excludeSkybox = true,
+                        fadeToSkybox = false
                     };
                 }
             }
