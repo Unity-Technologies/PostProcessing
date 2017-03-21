@@ -73,11 +73,17 @@ float2 GetClosestFragment(float2 uv)
         SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv + k)
         );
 
+#if defined(UNITY_REVERSED_Z)
+    #define COMPARE_DEPTH(a, b) step(b, a)
+#else
+    #define COMPARE_DEPTH(a, b) step(a, b)
+#endif
+
     float3 result = float3(0.0, 0.0, SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv));
-    result = lerp(result, float3(-1.0, -1.0, neighborhood.x), step(neighborhood.x, result.z));
-    result = lerp(result, float3( 1.0, -1.0, neighborhood.y), step(neighborhood.y, result.z));
-    result = lerp(result, float3(-1.0,  1.0, neighborhood.z), step(neighborhood.z, result.z));
-    result = lerp(result, float3( 1.0,  1.0, neighborhood.w), step(neighborhood.w, result.z));
+    result = lerp(result, float3(-1.0, -1.0, neighborhood.x), COMPARE_DEPTH(neighborhood.x, result.z));
+    result = lerp(result, float3( 1.0, -1.0, neighborhood.y), COMPARE_DEPTH(neighborhood.y, result.z));
+    result = lerp(result, float3(-1.0,  1.0, neighborhood.z), COMPARE_DEPTH(neighborhood.z, result.z));
+    result = lerp(result, float3( 1.0,  1.0, neighborhood.w), COMPARE_DEPTH(neighborhood.w, result.z));
 
     return (uv + result.xy * k);
 }
