@@ -88,48 +88,46 @@ namespace UnityEngine.PostProcessing
                 quad.MarkDynamic();
             }
 
-            if (model.settings.fadeToSkybox)
+            Material skybox = RenderSettings.skybox;
+            Texture cubemap = null;
+            int pass = (int)model.settings.skyboxBehaviour;
+            if (model.settings.skyboxBehaviour == FogModel.Settings.SkyboxBehaviour.FadeTo
+                && skybox != null && (cubemap = skybox.GetTexture(Uniforms._Tex)) != null)
             {
-                var skybox = RenderSettings.skybox;
-                if (skybox != null)
-                {
-                    var cubemap = skybox.GetTexture(Uniforms._Tex);
-                    if (cubemap != null)
-                    {
-                        material.EnableKeyword("FOG_SKY");
+                // Calculate vectors towards frustum corners.
+                var cam = context.camera;
+                var camtr = cam.transform;
+                var camNear = cam.nearClipPlane;
+                var camFar = cam.farClipPlane;
 
-                        // Calculate vectors towards frustum corners.
-                        var cam = context.camera;
-                        var camtr = cam.transform;
-                        var camNear = cam.nearClipPlane;
-                        var camFar = cam.farClipPlane;
+                var tanHalfFov = Mathf.Tan(cam.fieldOfView * Mathf.Deg2Rad / 2);
+                var toRight = camtr.right * camNear * tanHalfFov * cam.aspect;
+                var toTop = camtr.up * camNear * tanHalfFov;
 
-                        var tanHalfFov = Mathf.Tan(cam.fieldOfView * Mathf.Deg2Rad / 2);
-                        var toRight = camtr.right * camNear * tanHalfFov * cam.aspect;
-                        var toTop = camtr.up * camNear * tanHalfFov;
+                var origin = camtr.forward * camNear;
+                var v_tl = origin - toRight + toTop;
+                var v_tr = origin + toRight + toTop;
+                var v_br = origin + toRight - toTop;
+                var v_bl = origin - toRight - toTop;
 
-                        var origin = camtr.forward * camNear;
-                        var v_tl = origin - toRight + toTop;
-                        var v_tr = origin + toRight + toTop;
-                        var v_br = origin + toRight - toTop;
-                        var v_bl = origin - toRight - toTop;
+                var v_s = v_tl.magnitude * camFar / camNear;
 
-                        var v_s = v_tl.magnitude * camFar / camNear;
+                texcoord1[0] = v_tl.normalized * v_s;
+                texcoord1[1] = v_tr.normalized * v_s;
+                texcoord1[2] = v_br.normalized * v_s;
+                texcoord1[3] = v_bl.normalized * v_s;
 
-                        texcoord1[0] = v_tl.normalized * v_s;
-                        texcoord1[1] = v_tr.normalized * v_s;
-                        texcoord1[2] = v_br.normalized * v_s;
-                        texcoord1[3] = v_bl.normalized * v_s;
+                quad.SetUVs(1, texcoord1);
 
-                        quad.SetUVs(1, texcoord1);
-
-                        float exposure = skybox.GetFloat(Uniforms._Exposure);
-                        float rotation = Mathf.Deg2Rad * skybox.GetFloat(Uniforms._Rotation);
-                        material.SetVector(Uniforms._SkyExposure_Rotation, new Vector2(exposure, -rotation));
-                        material.SetColor(Uniforms._SkyTint, skybox.GetColor(Uniforms._Tint).linear);
-                        material.SetTexture(Uniforms._SkyCubemap, cubemap);
-                    }
-                }
+                float exposure = skybox.GetFloat(Uniforms._Exposure);
+                float rotation = Mathf.Deg2Rad * skybox.GetFloat(Uniforms._Rotation);
+                material.SetVector(Uniforms._SkyExposure_Rotation, new Vector2(exposure, -rotation));
+                material.SetColor(Uniforms._SkyTint, skybox.GetColor(Uniforms._Tint).linear);
+                material.SetTexture(Uniforms._SkyCubemap, cubemap);
+            }
+            else if (pass == 2)
+            {
+                pass = 1; // default to exclude
             }
 
             switch (RenderSettings.fogMode)
@@ -153,7 +151,7 @@ namespace UnityEngine.PostProcessing
             cb.Blit(BuiltinRenderTextureType.CameraTarget, Uniforms._TempRT);
             cb.SetGlobalTexture(Uniforms._MainTex, Uniforms._TempRT);
             cb.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-            cb.DrawMesh(quad, Matrix4x4.identity, material, 0, settings.excludeSkybox ? 1 : 0);
+            cb.DrawMesh(quad, Matrix4x4.identity, material, 0, (int)settings.skyboxBehaviour);
             cb.ReleaseTemporaryRT(Uniforms._TempRT);
         }
     }
