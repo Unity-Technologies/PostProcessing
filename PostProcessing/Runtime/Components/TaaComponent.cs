@@ -29,7 +29,6 @@ namespace UnityEngine.PostProcessing
             {
                 return model.enabled
                        && model.settings.method == AntialiasingModel.Method.Taa
-                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf)
                        && SystemInfo.supportsMotionVectors
                        && !context.interrupted;
             }
