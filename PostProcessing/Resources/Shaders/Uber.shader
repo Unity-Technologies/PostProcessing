@@ -175,14 +175,7 @@ Shader "Hidden/Post FX/Uber Shader"
             #endif
 
             // Depth of field
-            #if DEPTH_OF_FIELD
-            {
-                #if !CHROMATIC_ABERRATION
-                half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
-                #endif
-                color = color * dof.a + dof.rgb * autoExposure;
-            }
-            #elif DEPTH_OF_FIELD_COC_VIEW
+            #if DEPTH_OF_FIELD_COC_VIEW
             {
                 // Calculate the radiuses of CoC.
                 half4 src = tex2D(_DepthOfFieldTex, uv);
@@ -205,6 +198,13 @@ Shader "Hidden/Post FX/Uber Shader"
                 #endif
 
                 color = rgb;
+            }
+            #elif DEPTH_OF_FIELD
+            {
+                #if !CHROMATIC_ABERRATION
+                half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
+                #endif
+                color = color * dof.a + dof.rgb * autoExposure;
             }
             #endif
 
@@ -243,17 +243,17 @@ Shader "Hidden/Post FX/Uber Shader"
             #endif
 
             // HDR color grading & tonemapping
-            #if COLOR_GRADING
+            #if COLOR_GRADING_LOG_VIEW
+            {
+                color *= _ExposureEV;
+                color = saturate(LinearToLogC(color));
+            }
+            #elif COLOR_GRADING
             {
                 color *= _ExposureEV; // Exposure is in ev units (or 'stops')
 
                 half3 colorLogC = saturate(LinearToLogC(color));
                 color = ApplyLut2d(_LogLut, colorLogC, _LogLut_Params);
-            }
-            #elif COLOR_GRADING_LOG_VIEW
-            {
-                color *= _ExposureEV;
-                color = saturate(LinearToLogC(color));
             }
             #endif
 
