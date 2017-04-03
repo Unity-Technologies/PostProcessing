@@ -43,8 +43,9 @@ Shader "Hidden/Post FX/Uber Shader"
         // Depth of field
         sampler2D_float _CameraDepthTexture;
         sampler2D _DepthOfFieldTex;
+        sampler2D _DepthOfFieldCoCTex;
         float4 _DepthOfFieldTex_TexelSize;
-        float2 _DepthOfFieldParams; // x: distance, y: f^2 / (N * (S1 - f) * film_width * 2)
+        float3 _DepthOfFieldParams; // x: distance, y: f^2 / (N * (S1 - f) * film_width * 2), z: max coc
 
         // Bloom
         sampler2D _BloomTex;
@@ -204,7 +205,12 @@ Shader "Hidden/Post FX/Uber Shader"
                 #if !CHROMATIC_ABERRATION
                 half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
                 #endif
-                color = color * dof.a + dof.rgb * autoExposure;
+                // Far field alpha.
+                half coc = tex2D(_DepthOfFieldCoCTex, i.uvFlippedSPR);
+                coc = (coc - 0.5) * 2 * _DepthOfFieldParams.z;
+                float alpha = smoothstep(_MainTex_TexelSize.y * 2, _MainTex_TexelSize.y * 4, coc);
+                // lerp(lerp(color, dof, alpha), dof, dof.a)
+                color = lerp(color, dof.rgb * autoExposure, alpha + dof.a - alpha * dof.a);
             }
             #endif
 

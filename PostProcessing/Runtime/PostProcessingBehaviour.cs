@@ -232,7 +232,7 @@ namespace UnityEngine.PostProcessing
             if (dofActive)
             {
                 uberActive = true;
-                m_DepthOfField.Prepare(src, uberMaterial, taaActive);
+                m_DepthOfField.Prepare(src, uberMaterial, taaActive, m_Taa.jitterVector, m_Taa.model.settings.taaSettings.motionBlending);
             }
 
             if (m_Bloom.active)
