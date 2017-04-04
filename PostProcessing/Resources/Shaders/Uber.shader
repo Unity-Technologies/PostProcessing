@@ -106,6 +106,7 @@ Shader "Hidden/Post FX/Uber Shader"
             half3 color = (0.0).xxx;
             #if DEPTH_OF_FIELD && CHROMATIC_ABERRATION
             half4 dof = (0.0).xxxx;
+            half ffa = 0.0; // far field alpha
             #endif
 
             //
@@ -135,6 +136,7 @@ Shader "Hidden/Post FX/Uber Shader"
                     dofPos.y = 1.0 - dofPos.y;
                 }
                 half4 dofSum = (0.0).xxxx;
+                half ffaSum = 0.0;
                 #endif
 
                 for (int i = 0; i < samples; i++)
@@ -148,8 +150,12 @@ Shader "Hidden/Post FX/Uber Shader"
                     pos += delta;
 
                     #if DEPTH_OF_FIELD
-                    half4 sdof = tex2Dlod(_DepthOfFieldTex, float4(UnityStereoScreenSpaceUVAdjust(dofPos, _MainTex_ST), 0, 0)).rgba;
+                    float4 uvDof = float4(UnityStereoScreenSpaceUVAdjust(dofPos, _MainTex_ST), 0, 0);
+                    half4 sdof = tex2Dlod(_DepthOfFieldTex, uvDof).rgba;
+                    half scoc = tex2Dlod(_DepthOfFieldCoCTex, uvDof).r;
+                    scoc = (scoc - 0.5) * 2 * _DepthOfFieldParams.z;
                     dofSum += sdof * half4(filter, 1);
+                    ffaSum += smoothstep(_MainTex_TexelSize.y * 2, _MainTex_TexelSize.y * 4, scoc);
                     dofPos += dofDelta;
                     #endif
                 }
@@ -157,6 +163,7 @@ Shader "Hidden/Post FX/Uber Shader"
                 color = sum / filterSum;
                 #if DEPTH_OF_FIELD
                 dof = dofSum / half4(filterSum, samples);
+                ffa = ffaSum / samples;
                 #endif
             }
             #else
@@ -204,13 +211,13 @@ Shader "Hidden/Post FX/Uber Shader"
             {
                 #if !CHROMATIC_ABERRATION
                 half4 dof = tex2D(_DepthOfFieldTex, i.uvFlippedSPR);
-                #endif
-                // Far field alpha.
                 half coc = tex2D(_DepthOfFieldCoCTex, i.uvFlippedSPR);
                 coc = (coc - 0.5) * 2 * _DepthOfFieldParams.z;
-                float alpha = smoothstep(_MainTex_TexelSize.y * 2, _MainTex_TexelSize.y * 4, coc);
-                // lerp(lerp(color, dof, alpha), dof, dof.a)
-                color = lerp(color, dof.rgb * autoExposure, alpha + dof.a - alpha * dof.a);
+                // Convert CoC to far field alpha value.
+                float ffa = smoothstep(_MainTex_TexelSize.y * 2, _MainTex_TexelSize.y * 4, coc);
+                #endif
+                // lerp(lerp(color, dof, ffa), dof, dof.a)
+                color = lerp(color, dof.rgb * autoExposure, ffa + dof.a - ffa * dof.a);
             }
             #endif
 
