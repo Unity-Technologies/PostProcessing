@@ -25,7 +25,7 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Number of sample points, which affects quality and performance.")]
             public SampleCount sampleCount;
 
-            [Tooltip("Halves the resolution of the effect to increase performance.")]
+            [Tooltip("Halves the resolution of the effect to increase performance at the cost of visual quality.")]
             public bool downsampling;
 
             [Tooltip("Forces compatibility with Forward rendered objects when working with the Deferred rendering path.")]
