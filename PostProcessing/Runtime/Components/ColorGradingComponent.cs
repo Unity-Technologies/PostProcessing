@@ -33,8 +33,6 @@ namespace UnityEngine.PostProcessing
         const float k_CurveStep = 1f / k_CurvePrecision;
 
         Texture2D m_GradingCurves;
-
-
         Color[] m_pixels = new Color[k_CurvePrecision * 2];
 
         public override bool active
