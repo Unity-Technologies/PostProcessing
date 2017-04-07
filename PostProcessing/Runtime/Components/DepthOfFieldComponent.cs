@@ -84,6 +84,12 @@ namespace UnityEngine.PostProcessing
             var colorFormat = RenderTextureFormat.ARGBHalf;
             var cocFormat = SelectFormat(RenderTextureFormat.R8, RenderTextureFormat.RHalf);
 
+            // Avoid using R8 on OSX with Metal. #896121, https://goo.gl/MgKqu6
+            #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal)
+                cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
+            #endif
+
             // Material setup
             var f = CalculateFocalLength();
             var s1 = Mathf.Max(settings.focusDistance, f);
