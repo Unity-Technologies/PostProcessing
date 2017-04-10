@@ -14,7 +14,7 @@ namespace UnityEngine.PostProcessing
         [Serializable]
         public struct Settings
         {
-            [Tooltip("Use the \"Classic\" mode for parametric controls. Use \"Round\" to get a perfectly round vignette no matter what the aspect ratio is. Use the \"Masked\" mode to use your own texture mask.")]
+            [Tooltip("Use the \"Classic\" mode for parametric controls. Use the \"Masked\" mode to use your own texture mask.")]
             public Mode mode;
 
             [ColorUsage(false)]

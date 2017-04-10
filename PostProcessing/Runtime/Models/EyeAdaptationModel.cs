@@ -26,7 +26,7 @@ namespace UnityEngine.PostProcessing
             [Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
             public float maxLuminance;
 
-            [Min(0f), Tooltip("Exposure bias. Use this to control the global exposure of the scene.")]
+            [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
             public float keyValue;
 
             [Tooltip("Set this to true to let Unity handle the key value automatically based on average luminance.")]
