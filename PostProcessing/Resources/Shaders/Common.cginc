@@ -16,7 +16,12 @@
 // -----------------------------------------------------------------------------
 // Uniforms
 
+#if defined(SEPARATE_TEXTURE_SAMPLER)
+Texture2D _MainTex;
+SamplerState sampler_MainTex;
+#else
 sampler2D _MainTex;
+#endif
 float4 _MainTex_TexelSize;
 float4 _MainTex_ST;
 

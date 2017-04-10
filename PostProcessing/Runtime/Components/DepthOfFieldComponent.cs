@@ -9,14 +9,15 @@ namespace UnityEngine.PostProcessing
         static class Uniforms
         {
             internal static readonly int _DepthOfFieldTex    = Shader.PropertyToID("_DepthOfFieldTex");
+            internal static readonly int _DepthOfFieldCoCTex = Shader.PropertyToID("_DepthOfFieldCoCTex");
             internal static readonly int _Distance           = Shader.PropertyToID("_Distance");
             internal static readonly int _LensCoeff          = Shader.PropertyToID("_LensCoeff");
             internal static readonly int _MaxCoC             = Shader.PropertyToID("_MaxCoC");
             internal static readonly int _RcpMaxCoC          = Shader.PropertyToID("_RcpMaxCoC");
             internal static readonly int _RcpAspect          = Shader.PropertyToID("_RcpAspect");
             internal static readonly int _MainTex            = Shader.PropertyToID("_MainTex");
-            internal static readonly int _HistoryCoC         = Shader.PropertyToID("_HistoryCoC");
-            internal static readonly int _HistoryWeight      = Shader.PropertyToID("_HistoryWeight");
+            internal static readonly int _CoCTex             = Shader.PropertyToID("_CoCTex");
+            internal static readonly int _TaaParams          = Shader.PropertyToID("_TaaParams");
             internal static readonly int _DepthOfFieldParams = Shader.PropertyToID("_DepthOfFieldParams");
         }
 
@@ -28,7 +29,6 @@ namespace UnityEngine.PostProcessing
             {
                 return model.enabled
                        && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf)
-                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf)
                        && !context.interrupted;
             }
         }
@@ -39,7 +39,6 @@ namespace UnityEngine.PostProcessing
         }
 
         RenderTexture m_CoCHistory;
-        RenderBuffer[] m_MRT = new RenderBuffer[2];
 
         // Height of the 35mm full-frame format (36mm x 24mm)
         const float k_FilmHeight = 0.024f;
@@ -66,78 +65,94 @@ namespace UnityEngine.PostProcessing
             return Mathf.Min(0.05f, radiusInPixels / screenHeight);
         }
 
-        public void Prepare(RenderTexture source, Material uberMaterial, bool antialiasCoC)
+        bool CheckHistory(int width, int height)
+        {
+            return m_CoCHistory != null && m_CoCHistory.IsCreated() &&
+                m_CoCHistory.width == width && m_CoCHistory.height == height;
+        }
+
+        RenderTextureFormat SelectFormat(RenderTextureFormat primary, RenderTextureFormat secondary)
+        {
+            if (SystemInfo.SupportsRenderTextureFormat(primary)) return primary;
+            if (SystemInfo.SupportsRenderTextureFormat(secondary)) return secondary;
+            return RenderTextureFormat.Default;
+        }
+
+        public void Prepare(RenderTexture source, Material uberMaterial, bool antialiasCoC, Vector2 taaJitter, float taaBlending)
         {
             var settings = model.settings;
+            var colorFormat = RenderTextureFormat.ARGBHalf;
+            var cocFormat = SelectFormat(RenderTextureFormat.R8, RenderTextureFormat.RHalf);
+
+            // Avoid using R8 on OSX with Metal. #896121, https://goo.gl/MgKqu6
+            #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal)
+                cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
+            #endif
 
             // Material setup
-            var material = context.materialFactory.Get(k_ShaderString);
-            material.shaderKeywords = null;
-
-            var s1 = settings.focusDistance;
             var f = CalculateFocalLength();
-            s1 = Mathf.Max(s1, f);
-            material.SetFloat(Uniforms._Distance, s1);
-
+            var s1 = Mathf.Max(settings.focusDistance, f);
+            var aspect = (float)source.width / source.height;
             var coeff = f * f / (settings.aperture * (s1 - f) * k_FilmHeight * 2);
-            material.SetFloat(Uniforms._LensCoeff, coeff);
-
             var maxCoC = CalculateMaxCoCRadius(source.height);
+
+            var material = context.materialFactory.Get(k_ShaderString);
+            material.SetFloat(Uniforms._Distance, s1);
+            material.SetFloat(Uniforms._LensCoeff, coeff);
             material.SetFloat(Uniforms._MaxCoC, maxCoC);
             material.SetFloat(Uniforms._RcpMaxCoC, 1f / maxCoC);
+            material.SetFloat(Uniforms._RcpAspect, 1f / aspect);
 
-            var rcpAspect = (float)source.height / source.width;
-            material.SetFloat(Uniforms._RcpAspect, rcpAspect);
+            // CoC calculation pass
+            var rtCoC = context.renderTextureFactory.Get(context.width, context.height, 0, cocFormat);
+            Graphics.Blit(null, rtCoC, material, 0);
 
-            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
-            source.filterMode = FilterMode.Point;
-
-            // Pass #1 - Downsampling, prefiltering and CoC calculation
-            if (!antialiasCoC)
+            if (antialiasCoC)
             {
-                Graphics.Blit(source, rt1, material, 0);
-            }
-            else
-            {
-                var initial = m_CoCHistory == null || !m_CoCHistory.IsCreated() || m_CoCHistory.width != context.width / 2 || m_CoCHistory.height != context.height / 2;
+                // CoC temporal filter pass
+                material.SetTexture(Uniforms._CoCTex, rtCoC);
 
-                var tempCoCHistory = RenderTexture.GetTemporary(context.width / 2, context.height / 2, 0, RenderTextureFormat.RHalf);
-                tempCoCHistory.filterMode = FilterMode.Point;
-                tempCoCHistory.name = "CoC History";
+                var blend = CheckHistory(context.width, context.height) ? taaBlending : 0f;
+                material.SetVector(Uniforms._TaaParams, new Vector3(taaJitter.x, taaJitter.y, blend));
 
-                m_MRT[0] = rt1.colorBuffer;
-                m_MRT[1] = tempCoCHistory.colorBuffer;
-                material.SetTexture(Uniforms._MainTex, source);
-                material.SetTexture(Uniforms._HistoryCoC, m_CoCHistory);
-                material.SetFloat(Uniforms._HistoryWeight, initial ? 0 : 0.5f);
-                Graphics.SetRenderTarget(m_MRT, rt1.depthBuffer);
-                GraphicsUtils.Blit(material, 1);
+                var rtFiltered = RenderTexture.GetTemporary(context.width, context.height, 0, cocFormat);
+                Graphics.Blit(m_CoCHistory, rtFiltered, material, 1);
 
-                RenderTexture.ReleaseTemporary(m_CoCHistory);
-                m_CoCHistory = tempCoCHistory;
+                context.renderTextureFactory.Release(rtCoC);
+                if (m_CoCHistory != null) RenderTexture.ReleaseTemporary(m_CoCHistory);
+
+                m_CoCHistory = rtCoC = rtFiltered;
             }
 
-            // Pass #2 - Bokeh simulation
-            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, RenderTextureFormat.ARGBHalf);
-            Graphics.Blit(rt1, rt2, material, 2 + (int)settings.kernelSize);
+            // Downsampling and prefiltering pass
+            var rt1 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, colorFormat);
+            material.SetTexture(Uniforms._CoCTex, rtCoC);
+            Graphics.Blit(source, rt1, material, 2);
 
-            // Pass #3 - Postfilter blur
-            Graphics.Blit(rt2, rt1, material, 6);
+            // Bokeh simulation pass
+            var rt2 = context.renderTextureFactory.Get(context.width / 2, context.height / 2, 0, colorFormat);
+            Graphics.Blit(rt1, rt2, material, 3 + (int)settings.kernelSize);
+
+            // Postfilter pass
+            Graphics.Blit(rt2, rt1, material, 7);
+
+            // Give the results to the uber shader.
+            uberMaterial.SetVector(Uniforms._DepthOfFieldParams, new Vector3(s1, coeff, maxCoC));
 
             if (context.profile.debugViews.IsModeActive(DebugMode.FocusPlane))
             {
-                uberMaterial.SetVector(Uniforms._DepthOfFieldParams, new Vector2(s1, coeff));
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD_COC_VIEW");
                 context.Interrupt();
             }
             else
             {
                 uberMaterial.SetTexture(Uniforms._DepthOfFieldTex, rt1);
+                uberMaterial.SetTexture(Uniforms._DepthOfFieldCoCTex, rtCoC);
                 uberMaterial.EnableKeyword("DEPTH_OF_FIELD");
             }
 
             context.renderTextureFactory.Release(rt2);
-            source.filterMode = FilterMode.Bilinear;
         }
 
         public override void OnDisable()
