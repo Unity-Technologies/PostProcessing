@@ -18,6 +18,8 @@ namespace UnityEditor.PostProcessing
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
 
+        SerializedProperty m_TaaStableVariant;
+
         static string[] s_MethodNames =
         {
             "Fast Approximate Anti-aliasing",
@@ -34,6 +36,8 @@ namespace UnityEditor.PostProcessing
             m_TaaSharpen = FindSetting((Settings x) => x.taaSettings.sharpen);
             m_TaaStationaryBlending = FindSetting((Settings x) => x.taaSettings.stationaryBlending);
             m_TaaMotionBlending = FindSetting((Settings x) => x.taaSettings.motionBlending);
+
+            m_TaaStableVariant = FindSetting((Settings x) => x.taaSettings.useStableVariant);
         }
 
         public override void OnInspectorGUI()
@@ -65,6 +69,13 @@ namespace UnityEditor.PostProcessing
                 EditorGUILayout.Space();
 
                 EditorGUILayout.PropertyField(m_TaaSharpen);
+
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Debug", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(m_TaaStableVariant, EditorGUIHelper.GetContent("Use Stable Variant"));
+                EditorGUI.indentLevel--;
             }
         }
     }
