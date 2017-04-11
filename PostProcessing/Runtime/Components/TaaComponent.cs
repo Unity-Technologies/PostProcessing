@@ -11,7 +11,6 @@ namespace UnityEngine.PostProcessing
             internal static int _FinalBlendParameters = Shader.PropertyToID("_FinalBlendParameters");
             internal static int _HistoryTex           = Shader.PropertyToID("_HistoryTex");
             internal static int _MainTex              = Shader.PropertyToID("_MainTex");
-            internal static int _StableVariant        = Shader.PropertyToID("_StableVariant");
         }
 
         const string k_ShaderString = "Hidden/Post FX/Temporal Anti-aliasing";
@@ -87,11 +86,6 @@ namespace UnityEngine.PostProcessing
             material.shaderKeywords = null;
 
             var settings = model.settings.taaSettings;
-
-            //Debug
-            int i = settings.useStableVariant ? 1 : 0;
-            material.SetFloat(Uniforms._StableVariant, i);
-            //End debug
 
             if (m_ResetHistory || m_HistoryTexture == null || m_HistoryTexture.width != source.width || m_HistoryTexture.height != source.height)
             {
