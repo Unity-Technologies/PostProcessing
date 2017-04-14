@@ -14,6 +14,7 @@ namespace UnityEditor.PostProcessing
         SerializedProperty m_ForceForwardCompatibility;
         SerializedProperty m_AmbientOnly;
         SerializedProperty m_HighPrecision;
+        SerializedProperty m_Color;
 
         public override void OnEnable()
         {
@@ -24,11 +25,13 @@ namespace UnityEditor.PostProcessing
             m_ForceForwardCompatibility = FindSetting((Settings x) => x.forceForwardCompatibility);
             m_AmbientOnly = FindSetting((Settings x) => x.ambientOnly);
             m_HighPrecision = FindSetting((Settings x) => x.highPrecision);
+            m_Color = FindSetting((Settings x) => x.color);
         }
 
         public override void OnInspectorGUI()
         {
             EditorGUILayout.PropertyField(m_Intensity);
+            EditorGUILayout.PropertyField(m_Color);
             EditorGUILayout.PropertyField(m_Radius);
             EditorGUILayout.PropertyField(m_SampleCount);
             EditorGUILayout.PropertyField(m_Downsampling);

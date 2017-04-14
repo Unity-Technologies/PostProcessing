@@ -19,6 +19,9 @@ namespace UnityEngine.PostProcessing
             [Range(0, 4), Tooltip("Degree of darkness produced by the effect.")]
             public float intensity;
 
+            [Tooltip("Color of the effect.")]
+            public Color color;
+
             [Min(1e-4f), Tooltip("Radius of sample points, which affects extent of darkened areas.")]
             public float radius;
 
@@ -44,6 +47,7 @@ namespace UnityEngine.PostProcessing
                     return new Settings
                     {
                         intensity = 1f,
+                        color = Color.black,
                         radius = 0.3f,
                         sampleCount = SampleCount.Medium,
                         downsampling = true,
