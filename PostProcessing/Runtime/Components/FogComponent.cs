@@ -47,7 +47,8 @@ namespace UnityEngine.PostProcessing
 
             var material = context.materialFactory.Get(k_ShaderString);
             material.shaderKeywords = null;
-            material.SetColor(Uniforms._FogColor, RenderSettings.fogColor);
+            var fogColor = GraphicsUtils.isLinearColorSpace ? RenderSettings.fogColor.linear : RenderSettings.fogColor;
+            material.SetColor(Uniforms._FogColor, fogColor);
             material.SetFloat(Uniforms._Density, RenderSettings.fogDensity);
             material.SetFloat(Uniforms._Start, RenderSettings.fogStartDistance);
             material.SetFloat(Uniforms._End, RenderSettings.fogEndDistance);
