@@ -61,7 +61,7 @@ Shader "Hidden/Post FX/Fog"
 
             float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
             depth = Linear01Depth(depth);
-            float dist = ComputeDistance(depth) - _Start;
+            float dist = ComputeDistance(depth);
             half fog = 1.0 - ComputeFog(dist);
 
             return lerp(color, _FogColor, fog);
@@ -74,7 +74,7 @@ Shader "Hidden/Post FX/Fog"
             float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv);
             depth = Linear01Depth(depth);
             float skybox = depth < SKYBOX_THREASHOLD_VALUE;
-            float dist = ComputeDistance(depth) - _Start;
+            float dist = ComputeDistance(depth);
             half fog = 1.0 - ComputeFog(dist);
 
             return lerp(color, _FogColor, fog * skybox);
