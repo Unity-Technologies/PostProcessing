@@ -162,6 +162,8 @@ namespace UnityEditor.PostProcessing
             if (!m_ConcreteTarget.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.None))
                 EditorGUILayout.HelpBox("A debug view is currently enabled. Changes done to an effect might not be visible.", MessageType.Info);
 
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("DefaultDepthTextureMode"));
+
             foreach (var editor in m_CustomEditors)
             {
                 EditorGUI.BeginChangeCheck();
