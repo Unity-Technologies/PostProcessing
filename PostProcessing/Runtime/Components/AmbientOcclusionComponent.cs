@@ -9,6 +9,7 @@ namespace UnityEngine.PostProcessing
         static class Uniforms
         {
             internal static readonly int _Intensity         = Shader.PropertyToID("_Intensity");
+            internal static readonly int _Color             = Shader.PropertyToID("_OneMinusColor");
             internal static readonly int _Radius            = Shader.PropertyToID("_Radius");
             internal static readonly int _FogParams         = Shader.PropertyToID("_FogParams");
             internal static readonly int _Downsample        = Shader.PropertyToID("_Downsample");
@@ -100,6 +101,7 @@ namespace UnityEngine.PostProcessing
             var material = context.materialFactory.Get(k_ShaderString);
             material.shaderKeywords = null;
             material.SetFloat(Uniforms._Intensity, settings.intensity);
+            material.SetColor(Uniforms._Color, Color.white - settings.color);
             material.SetFloat(Uniforms._Radius, settings.radius);
             material.SetFloat(Uniforms._Downsample, settings.downsampling ? 0.5f : 1f);
             material.SetInt(Uniforms._SampleCount, (int)settings.sampleCount);

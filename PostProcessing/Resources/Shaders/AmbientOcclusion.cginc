@@ -67,6 +67,7 @@ float4 _OcclusionTexture_TexelSize;
 
 // Other parameters
 half _Intensity;
+fixed3 _OneMinusColor;
 float _Radius;
 float _Downsample;
 float3 _FogParams; // x: density, y: start, z: end
@@ -443,9 +444,9 @@ half4 FragComposition(VaryingsMultitex i) : SV_Target
     half4 color = tex2D(_MainTex, i.uvSPR);
 
 #if !defined(DEBUG_COMPOSITION)
-    color.rgb *= 1.0 - EncodeAO(ao);
+    color.rgb *= 1.0 - EncodeAO(ao) * _OneMinusColor;
 #else
-    color.rgb = 1.0 - EncodeAO(ao);
+    color.rgb = 1.0 - EncodeAO(ao) * _OneMinusColor;
 #endif
 
     return color;
@@ -482,7 +483,7 @@ CompositionOutput FragCompositionGBuffer(VaryingsDefault i)
 
     CompositionOutput o;
     o.gbuffer0 = half4(0.0, 0.0, 0.0, ao);
-    o.gbuffer3 = half4((half3)EncodeAO(ao), 0.0);
+    o.gbuffer3 = half4((half3)EncodeAO(ao) * _OneMinusColor, 0.0);
     return o;
 }
 
