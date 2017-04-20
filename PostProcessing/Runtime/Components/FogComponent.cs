@@ -38,7 +38,7 @@ namespace UnityEngine.PostProcessing
 
         public override CameraEvent GetCameraEvent()
         {
-            return CameraEvent.BeforeImageEffectsOpaque;
+            return CameraEvent.AfterImageEffectsOpaque;
         }
 
         public override void PopulateCommandBuffer(CommandBuffer cb)
