@@ -10,6 +10,7 @@ namespace UnityEngine.PostProcessing
         {
             internal static readonly int _Intensity         = Shader.PropertyToID("_Intensity");
             internal static readonly int _Radius            = Shader.PropertyToID("_Radius");
+            internal static readonly int _FogParams         = Shader.PropertyToID("_FogParams");
             internal static readonly int _Downsample        = Shader.PropertyToID("_Downsample");
             internal static readonly int _SampleCount       = Shader.PropertyToID("_SampleCount");
             internal static readonly int _OcclusionTexture1 = Shader.PropertyToID("_OcclusionTexture1");
@@ -102,6 +103,28 @@ namespace UnityEngine.PostProcessing
             material.SetFloat(Uniforms._Radius, settings.radius);
             material.SetFloat(Uniforms._Downsample, settings.downsampling ? 0.5f : 1f);
             material.SetInt(Uniforms._SampleCount, (int)settings.sampleCount);
+
+            if (!context.isGBufferAvailable && RenderSettings.fog)
+            {
+                material.SetVector(Uniforms._FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
+
+                switch (RenderSettings.fogMode)
+                {
+                    case FogMode.Linear:
+                        material.EnableKeyword("FOG_LINEAR");
+                        break;
+                    case FogMode.Exponential:
+                        material.EnableKeyword("FOG_EXP");
+                        break;
+                    case FogMode.ExponentialSquared:
+                        material.EnableKeyword("FOG_EXP2");
+                        break;
+                }
+            }
+            else
+            {
+                material.EnableKeyword("FOG_OFF");
+            }
 
             int tw = context.width;
             int th = context.height;
