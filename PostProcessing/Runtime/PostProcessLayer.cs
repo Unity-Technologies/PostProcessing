@@ -464,7 +464,7 @@ namespace UnityEngine.Experimental.PostProcessing
             RenderEffect<Grain>(context);
             dithering.Render(context);
 
-            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, context.flip ? 1 : 0);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !m_IsRenderingInSceneView) ? 1 : 0);
             cmd.EndSample("FinalPass");
         }
 
