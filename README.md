@@ -1,5 +1,6 @@
 # Post-processing Stack
 
-Need help ? Check out the [quick start guide](https://github.com/Unity-Technologies/PostProcessing/wiki) and [the official forums](https://forum.unity3d.com/forums/image-effects.96/) !
+Two versions of the post-processing stack are available:
 
-Found a bug ? Let us know and [post an issue](https://github.com/Unity-Technologies/PostProcessing/issues) !
+- [Version 1.x](https://github.com/Unity-Technologies/PostProcessing/tree/v1): Stable, production-ready post-processing stack **(recommended)**.
+- [Version 2.x](https://github.com/Unity-Technologies/PostProcessing/tree/v2): Under active development, considered highly unstable and shouldn't be used in production at this time. Use at your own risk.
