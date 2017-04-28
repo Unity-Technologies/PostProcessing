@@ -10,6 +10,7 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedParameterOverride m_Threshold;
         SerializedParameterOverride m_SoftKnee;
         SerializedParameterOverride m_Color;
+        SerializedParameterOverride m_MobileOptimized;
         
         SerializedParameterOverride m_LensTexture;
         SerializedParameterOverride m_LensIntensity;
@@ -20,6 +21,7 @@ namespace UnityEditor.Experimental.PostProcessing
             m_Threshold = FindParameterOverride(x => x.threshold);
             m_SoftKnee = FindParameterOverride(x => x.softKnee);
             m_Color = FindParameterOverride(x => x.color);
+            m_MobileOptimized = FindParameterOverride(x => x.mobileOptimized);
             
             m_LensTexture = FindParameterOverride(x => x.lensTexture);
             m_LensIntensity = FindParameterOverride(x => x.lensIntensity);
@@ -33,6 +35,7 @@ namespace UnityEditor.Experimental.PostProcessing
             PropertyField(m_Threshold);
             PropertyField(m_SoftKnee);
             PropertyField(m_Color);
+            PropertyField(m_MobileOptimized);
 
             EditorGUILayout.LabelField("Lens Dirtiness", EditorStyles.miniLabel);
                 

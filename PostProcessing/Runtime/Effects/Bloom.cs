@@ -18,6 +18,9 @@ namespace UnityEngine.Experimental.PostProcessing
         [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
         public ColorParameter color = new ColorParameter { value = Color.white };
 
+        [Tooltip("Boost performances by lowering the bloom quality. This settings is meant to be used on mobile and other low-end platforms.")]
+        public BoolParameter mobileOptimized = new BoolParameter { value = false };
+
         [Tooltip("Dirtiness texture to add smudges or dust to the lens."), DisplayName("Texture")]
         public TextureParameter lensTexture = new TextureParameter { value = null };
 
@@ -35,9 +38,12 @@ namespace UnityEngine.Experimental.PostProcessing
     {
         enum Pass
         {
-            Prefilter,
-            Downsample,
-            Upsample
+            Prefilter13,
+            Prefilter4,
+            Downsample13,
+            Downsample4,
+            UpsampleTent,
+            UpsampleBox
         }
 
         // [down,up]
@@ -93,6 +99,8 @@ namespace UnityEngine.Experimental.PostProcessing
             float knee = lthresh * settings.softKnee.value + 1e-5f;
             var curve = new Vector3(lthresh - knee, knee * 2f, 0.25f / knee);
             sheet.properties.SetVector(Uniforms._Curve, curve);
+            
+            int qualityOffset = settings.mobileOptimized ? 1 : 0;
 
             // Downsample
             var last = context.source;
@@ -100,7 +108,9 @@ namespace UnityEngine.Experimental.PostProcessing
             {
                 int mipDown = m_Pyramid[i].down;
                 int mipUp = m_Pyramid[i].up;
-                int pass = i == 0 ? (int)Pass.Prefilter : (int)Pass.Downsample;
+                int pass = i == 0
+                    ? (int)Pass.Prefilter13 + qualityOffset
+                    : (int)Pass.Downsample13 + qualityOffset;
 
                 cmd.GetTemporaryRT(mipDown, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
                 cmd.GetTemporaryRT(mipUp, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
@@ -117,7 +127,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 int mipDown = m_Pyramid[i].down;
                 int mipUp = m_Pyramid[i].up;
                 cmd.SetGlobalTexture(Uniforms._BloomTex, mipDown);
-                cmd.BlitFullscreenTriangle(last, mipUp, sheet, (int)Pass.Upsample);
+                cmd.BlitFullscreenTriangle(last, mipUp, sheet, (int)Pass.UpsampleTent + qualityOffset);
                 last = mipUp;
             }
 

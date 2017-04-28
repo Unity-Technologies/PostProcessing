@@ -3,6 +3,8 @@
 
 #include "StdLib.hlsl"
 
+// Better, temporally stable box filtering
+// [Jimenez14] http://goo.gl/eomGso
 // . . . . . . .
 // . A . B . C .
 // . . D . E . .
@@ -10,7 +12,7 @@
 // . . I . J . .
 // . K . L . M .
 // . . . . . . .
-half3 Downsample13Tap(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize)
+half3 DownsampleBox13Tap(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize)
 {
     half3 A = SAMPLE_TEXTURE2D(tex, samplerTex, uv + texelSize * float2(-1.0, -1.0)).rgb;
     half3 B = SAMPLE_TEXTURE2D(tex, samplerTex, uv + texelSize * float2( 0.0, -1.0)).rgb;
@@ -35,17 +37,20 @@ half3 Downsample13Tap(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSi
     o += (G + H + M + L) * div.y;
 
     return o;
+}
 
-    // TODO: Cheaper version, use that for mobile?
-    //float4 d = texelSize.xyxy * float4(-1.0, -1.0, 1.0, 1.0);
+// Standard box filtering
+half3 DownsampleBox4Tap(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize)
+{
+    float4 d = texelSize.xyxy * float4(-1.0, -1.0, 1.0, 1.0);
 
-    //half3 s;
-    //s = (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xy));
-    //s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zy));
-    //s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xw));
-    //s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zw));
+    half3 s;
+    s = (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xy)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zy)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xw)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zw)).rgb;
 
-    //return s * (1.0 / 4.0);
+    return s * (1.0 / 4.0);
 }
 
 // 9-tap bilinear upsampler (tent filter)
@@ -67,6 +72,20 @@ half3 UpsampleTent(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize,
     s += SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xy).rgb;
 
     return s * (1.0 / 16.0);
+}
+
+// Standard box filtering
+half3 UpsampleBox(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize, float sampleScale)
+{
+    float4 d = texelSize.xyxy * float4(-1.0, -1.0, 1.0, 1.0) * (sampleScale * 0.5);
+
+    half3 s;
+    s = (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xy)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zy)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.xw)).rgb;
+    s += (SAMPLE_TEXTURE2D(tex, samplerTex, uv + d.zw)).rgb;
+
+    return s * (1.0 / 4.0);
 }
 
 #endif // UNITY_POSTFX_SAMPLING
