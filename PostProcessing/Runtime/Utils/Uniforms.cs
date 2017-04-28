@@ -63,7 +63,6 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
         internal static readonly int _Threshold                       = Shader.PropertyToID("_Threshold");
         internal static readonly int _Curve                           = Shader.PropertyToID("_Curve");
-        internal static readonly int _Response                        = Shader.PropertyToID("_Response");
 
         internal static readonly int _ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
         internal static readonly int _ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
