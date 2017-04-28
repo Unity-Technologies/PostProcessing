@@ -63,6 +63,8 @@ namespace UnityEngine.PostProcessing
                 {
                     Matrix4x4 originalProj = context.camera.GetStereoNonJitteredProjectionMatrix(eye);
 
+                    // Currently no support for custom jitter func, as VR devices would need to provide
+                    // original projection matrix as input along with jitter  
                     var jitteredMatrix = GenerateJitteredMatrixFromOriginal(originalProj, jitter);
                     context.camera.SetStereoProjectionMatrix(eye, jitteredMatrix);
                 }
@@ -246,18 +248,6 @@ namespace UnityEngine.PostProcessing
         // We can repeat these calculations for the top and bottom tangents as well.
         public Matrix4x4 GenerateJitteredMatrixFromOriginal(Matrix4x4 origProj, Vector2 jitter)
         {
-            //var rMinusL = 2.0f / origProj[0, 0];
-            //var rPlusL = rMinusL * origProj[0, 2];
-            //var cVal = rMinusL + rPlusL;
-            //var rTanVal = cVal / 2.0f;
-            //var lTanVal = rPlusL - rTanVal;
-
-            //var tMinusB = 2.0f / origProj[1, 1];
-            //var tPlusB = tMinusB * origProj[1, 2];
-            //var dVal = tMinusB + tPlusB;
-            //var tTanVal = dVal / 2.0f;
-            //var bTanVal = tPlusB - tTanVal;
-
             var rTan = (1.0f + origProj[0, 2]) / origProj[0, 0];
             var lTan = rTan - (2.0f / origProj[0, 0]);
 
