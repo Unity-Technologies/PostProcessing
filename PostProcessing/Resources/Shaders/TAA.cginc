@@ -54,6 +54,7 @@ VaryingsSolver VertSolver(AttributesDefault input)
 
     output.vertex = vertex;
     output.uv = input.texcoord.xyxy;
+	output.uv = UnityStereoTransformScreenSpaceTex(output.uv);
 
 #if UNITY_UV_STARTS_AT_TOP
     if (_MainTex_TexelSize.y < 0)
