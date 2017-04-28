@@ -22,6 +22,7 @@ namespace UnityEngine.Experimental.PostProcessing
             parameters = GetType()
                 .GetFields(BindingFlags.Public | BindingFlags.Instance)
                 .Where(t => t.FieldType.IsSubclassOf(typeof(ParameterOverride)))
+                .OrderBy(t => t.MetadataToken) // Guaranteed order
                 .Select(t => (ParameterOverride)t.GetValue(this))
                 .ToList()
                 .AsReadOnly();

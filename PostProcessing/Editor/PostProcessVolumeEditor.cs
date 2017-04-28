@@ -156,6 +156,7 @@ namespace UnityEditor.Experimental.PostProcessing
                     title,
                     editor.baseProperty,
                     editor.activeProperty,
+                    editor.target,
                     () => ResetEffectOverride(editor.target.GetType(), id),
                     () => RemoveEffectOverride(id)
                 );

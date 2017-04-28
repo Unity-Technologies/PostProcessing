@@ -12,6 +12,8 @@ namespace UnityEditor.Experimental.PostProcessing
         static Dictionary<string, GUIContent> s_GUIContentCache;
         static Dictionary<Type, AttributeDecorator> s_AttributeDecorators;
 
+        static PostProcessEffectSettings s_ClipboardContent;
+
         static EditorUtilities()
         {
             s_GUIContentCache = new Dictionary<string, GUIContent>();
@@ -112,10 +114,11 @@ namespace UnityEditor.Experimental.PostProcessing
                 : new Color(0.12f, 0.12f, 0.12f, 1.333f));
         }
 
-        public static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, Action resetAction, Action removeAction)
+        public static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, PostProcessEffectSettings target, Action resetAction, Action removeAction)
         {
             Assert.IsNotNull(group);
             Assert.IsNotNull(activeField);
+            Assert.IsNotNull(target);
 
             var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
 
@@ -161,7 +164,7 @@ namespace UnityEditor.Experimental.PostProcessing
             {   
                 if (menuRect.Contains(e.mousePosition))
                 {
-                    ShowHeaderContextMenu(new Vector2(menuRect.x, menuRect.yMax), resetAction, removeAction);
+                    ShowHeaderContextMenu(new Vector2(menuRect.x, menuRect.yMax), target, resetAction, removeAction);
                     e.Use();
                 }
                 else if (labelRect.Contains(e.mousePosition))
@@ -169,7 +172,7 @@ namespace UnityEditor.Experimental.PostProcessing
                     if (e.button == 0)
                         group.isExpanded = !group.isExpanded;
                     else
-                        ShowHeaderContextMenu(e.mousePosition, resetAction, removeAction);
+                        ShowHeaderContextMenu(e.mousePosition, target, resetAction, removeAction);
 
                     e.Use();
                 }
@@ -178,28 +181,53 @@ namespace UnityEditor.Experimental.PostProcessing
             return group.isExpanded;
         }
 
-        static void ShowHeaderContextMenu(Vector2 position, Action resetAction, Action removeAction)
+        static void ShowHeaderContextMenu(Vector2 position, PostProcessEffectSettings target, Action resetAction, Action removeAction)
         {
+            Assert.IsNotNull(resetAction);
+            Assert.IsNotNull(removeAction);
+
             var menu = new GenericMenu();
             menu.AddItem(GetContent("Reset"), false, () => resetAction());
             menu.AddItem(GetContent("Remove"), false, () => removeAction()); // TODO: Undo support for remove... PITA
             menu.AddSeparator(string.Empty);
-            menu.AddDisabledItem(GetContent("Copy Settings")); // TODO: Copy settings
-            menu.AddDisabledItem(GetContent("Paste Settings")); // TODO: Paste settings
+            menu.AddItem(GetContent("Copy Settings"), false, () => CopySettings(target));
+
+            if (CanPaste(target))
+                menu.AddItem(GetContent("Paste Settings"), false, () => PasteSettings(target));
+            else
+                menu.AddDisabledItem(GetContent("Paste Settings"));
+
             menu.DropDown(new Rect(position, Vector2.zero));
         }
 
-        static void CopySettings(SerializedProperty settings)
+        static void CopySettings(PostProcessEffectSettings target)
         {
+            Assert.IsNotNull(target);
+
+            if (s_ClipboardContent != null)
+            {
+                RuntimeUtilities.Destroy(s_ClipboardContent);
+                s_ClipboardContent = null;
+            }
+
+            s_ClipboardContent = (PostProcessEffectSettings)ScriptableObject.CreateInstance(target.GetType());
+            EditorUtility.CopySerializedIfDifferent(target, s_ClipboardContent);
         }
 
-        static void PasteSettings(SerializedProperty settings)
+        static void PasteSettings(PostProcessEffectSettings target)
         {
+            Assert.IsNotNull(target);
+            Assert.IsNotNull(s_ClipboardContent);
+            Assert.AreEqual(s_ClipboardContent.GetType(), target.GetType());
+
+            Undo.RecordObject(target, "Paste Settings");
+            EditorUtility.CopySerializedIfDifferent(s_ClipboardContent, target);
         }
 
-        static bool CanPaste(SerializedProperty settings)
+        static bool CanPaste(PostProcessEffectSettings target)
         {
-            return false;
+            return s_ClipboardContent != null
+                && s_ClipboardContent.GetType() == target.GetType();
         }
     }
 }

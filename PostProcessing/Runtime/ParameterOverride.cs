@@ -194,7 +194,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 value.AddKey(x, a + (b - a) * t);
             }
 
-            // Is this really needed or does Unity does it for us automatically?
+            // Is this really needed or does Unity do it for us automatically?
             for (int i = 0; i < kSteps; i++)
                 value.SmoothTangents(i, 0f);
         }
@@ -215,6 +215,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var rt = RuntimeUtilities.GetLerpTarget(to.width, to.height, format);
             var material = RuntimeUtilities.lerpMaterial;
 
+            // TODO: Run tests in gamma/linear
             material.SetTexture("_From", from);
             material.SetTexture("_To", to);
             material.SetFloat("_Interp", t);
