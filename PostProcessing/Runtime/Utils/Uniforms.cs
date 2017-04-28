@@ -60,6 +60,7 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int _SampleScale                     = Shader.PropertyToID("_SampleScale");
         internal static readonly int _Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
+        internal static readonly int _Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
         internal static readonly int _Threshold                       = Shader.PropertyToID("_Threshold");
         internal static readonly int _Curve                           = Shader.PropertyToID("_Curve");
         internal static readonly int _Response                        = Shader.PropertyToID("_Response");

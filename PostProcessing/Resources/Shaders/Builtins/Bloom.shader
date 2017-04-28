@@ -13,7 +13,6 @@ Shader "Hidden/PostProcessing/Bloom"
         float _SampleScale;
         float _Threshold;
         float3 _Curve;
-        float _Response;
 
         half4 FragPrefilter(VaryingsDefault i) : SV_Target
         {
@@ -44,7 +43,7 @@ Shader "Hidden/PostProcessing/Bloom"
         {
             half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
             half3 color = SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, i.texcoord).rgb;
-            return half4(bloom * _Response + color, 1.0);
+            return half4(bloom + color, 1.0);
         }
 
     ENDHLSL

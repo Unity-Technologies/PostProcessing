@@ -7,22 +7,16 @@ namespace UnityEngine.Experimental.PostProcessing
     public sealed class Bloom : PostProcessEffectSettings
     {
         [Min(0f), Tooltip("Strength of the bloom filter.")]
-        public FloatParameter intensity = new FloatParameter { value = 0.25f };
+        public FloatParameter intensity = new FloatParameter { value = 1f };
 
         [Min(0f), Tooltip("Filters out pixels under this level of brightness. Value is in gamma-space.")]
         public FloatParameter threshold = new FloatParameter { value = 0f };
 
         [Range(0f, 1f), Tooltip("Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold).")]
-        public FloatParameter softKnee = new FloatParameter { value = 0.5f };
+        public FloatParameter softKnee = new FloatParameter { value = 0.75f };
 
-        [Tooltip("Weighting curve applied to the upsampling pyramid. It can be used to fine-tune the bloom radius and look.")]
-        public CurveParameter responseCurve = new CurveParameter
-        {
-            value = new AnimationCurve(
-                new Keyframe(0f, 0f, 0f, 1f),
-                new Keyframe(1f, 1f, 1f, 0f)
-            )
-        };
+        [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
+        public ColorParameter color = new ColorParameter { value = Color.white };
 
         [Tooltip("Dirtiness texture to add smudges or dust to the lens."), DisplayName("Texture")]
         public TextureParameter lensTexture = new TextureParameter { value = null };
@@ -117,20 +111,17 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             // Upsample
-            float responseStep = 1f / (iterations - 2);
             last = m_Pyramid[iterations - 1].down;
             for (int i = iterations - 2; i >= 0; i--)
             {
                 int mipDown = m_Pyramid[i].down;
                 int mipUp = m_Pyramid[i].up;
-                float response = Mathf.Max(0f, settings.responseCurve.value.Evaluate((iterations - 2 - i) * responseStep));
-                sheet.properties.SetFloat(Uniforms._Response, response);
                 cmd.SetGlobalTexture(Uniforms._BloomTex, mipDown);
                 cmd.BlitFullscreenTriangle(last, mipUp, sheet, (int)Pass.Upsample);
                 last = mipUp;
             }
 
-            var shaderSettings = new Vector3(sampleScale, settings.intensity.value, settings.lensIntensity.value);
+            var shaderSettings = new Vector3(sampleScale, settings.intensity.value * 0.1f, settings.lensIntensity.value);
             var dirtTexture = settings.lensTexture.value == null
                 ? RuntimeUtilities.blackTexture
                 : settings.lensTexture.value;
@@ -138,6 +129,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("BLOOM");
             uberSheet.properties.SetVector(Uniforms._Bloom_Settings, shaderSettings);
+            uberSheet.properties.SetColor(Uniforms._Bloom_Color, settings.color.value.linear);
             uberSheet.properties.SetTexture(Uniforms._Bloom_DirtTex, dirtTexture);
             cmd.SetGlobalTexture(Uniforms._BloomTex, m_Pyramid[0].up);
 

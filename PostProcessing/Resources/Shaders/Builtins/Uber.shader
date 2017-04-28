@@ -30,6 +30,7 @@ Shader "Hidden/PostProcessing/Uber"
         TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
         half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens intensity
+        half3 _Bloom_Color;
 
         // Chromatic aberration
         TEXTURE2D_SAMPLER2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut);
@@ -148,7 +149,7 @@ Shader "Hidden/PostProcessing/Uber"
             #if BLOOM
             {
                 half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x).rgb * _Bloom_Settings.y;
-                color += bloom;
+                color += bloom * _Bloom_Color;
 
                 // Lens dirtiness
                 half3 dirt = SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord).rgb * _Bloom_Settings.z;

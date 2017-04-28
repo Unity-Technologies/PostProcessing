@@ -109,4 +109,31 @@ namespace UnityEditor.Experimental.PostProcessing
             return false;
         }
     }
+
+    [Decorator(typeof(ColorUsageAttribute))]
+    public sealed class ColorUsageDecorator : AttributeDecorator
+    {
+        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        {
+            var attr = (ColorUsageAttribute)attribute;
+
+            if (property.propertyType != SerializedPropertyType.Color)
+                return false;
+
+            ColorPickerHDRConfig hdrConfig = null;
+
+            if (attr.hdr)
+            {
+                hdrConfig = new ColorPickerHDRConfig(
+                    attr.minBrightness,
+                    attr.maxBrightness,
+                    attr.minExposureValue,
+                    attr.maxExposureValue
+                );
+            }
+
+            property.colorValue = EditorGUILayout.ColorField(title, property.colorValue, true, attr.showAlpha, attr.hdr, hdrConfig);
+            return true;
+        }
+    }
 }
