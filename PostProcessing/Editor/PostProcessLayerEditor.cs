@@ -17,6 +17,7 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedProperty m_TaaSharpen;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
+        SerializedProperty m_FxaaMobileOptimized;
 
         SerializedProperty m_DebugMonitor;
 
@@ -38,6 +39,7 @@ namespace UnityEditor.Experimental.PostProcessing
             m_TaaSharpen = FindProperty(x => x.temporalAntialiasing.sharpen);
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
+            m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
 
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
         }
@@ -88,7 +90,10 @@ namespace UnityEditor.Experimental.PostProcessing
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
                     EditorGUILayout.PropertyField(m_TaaMotionBlending);
                     EditorGUILayout.PropertyField(m_TaaSharpen);
-
+                }
+                else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
+                {
+                    EditorGUILayout.PropertyField(m_FxaaMobileOptimized);
                 }
             }
             EditorGUI.indentLevel--;

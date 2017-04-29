@@ -28,6 +28,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // Builtins / hardcoded effects that don't benefit from volume blending
         public Antialiasing antialiasingMode = Antialiasing.None;
         public TemporalAntialiasing temporalAntialiasing;
+        public FastApproximateAntialiasing fastApproximateAntialiasing;
         public Dithering dithering;
 
         // Debug utilities
@@ -473,7 +474,12 @@ namespace UnityEngine.Experimental.PostProcessing
             context.uberSheet = uberSheet;
 
             if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
-                uberSheet.EnableKeyword("FXAA");
+            {
+                uberSheet.EnableKeyword(fastApproximateAntialiasing.mobileOptimized
+                    ? "FXAA_LOW"
+                    : "FXAA"
+                );
+            }
 
             RenderEffect<Grain>(context);
             dithering.Render(context);

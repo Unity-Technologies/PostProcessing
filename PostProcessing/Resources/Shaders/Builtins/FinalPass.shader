@@ -3,7 +3,7 @@ Shader "Hidden/PostProcessing/FinalPass"
     HLSLINCLUDE
 
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-        #pragma multi_compile __ FXAA
+        #pragma multi_compile __ FXAA FXAA_LOW
         #pragma multi_compile __ GRAIN
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
@@ -17,7 +17,12 @@ Shader "Hidden/PostProcessing/FinalPass"
         #define FXAA_HLSL_5 1 // Use Gather() on platforms that support it
     #endif
 
+    #if FXAA_LOW
+        #define FXAA_QUALITY__PRESET 28
+    #else
         #define FXAA_QUALITY__PRESET 39
+    #endif
+
         #define FXAA_GREEN_AS_LUMA 0 // Luma is encoded in alpha after the first Uber pass
 
         #include "FastApproximateAntialiasing.hlsl"
@@ -44,7 +49,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             half4 color = 0.0;
 
-            #if FXAA
+            #if FXAA || FXAA_LOW
             {
             #if FXAA_HLSL_5
                 FxaaTex mainTex;
@@ -64,9 +69,17 @@ Shader "Hidden/PostProcessing/FinalPass"
                     0.0,                        // fxaaConsoleRcpFrameOpt (unused)
                     0.0,                        // fxaaConsoleRcpFrameOpt2 (unused)
                     0.0,                        // fxaaConsole360RcpFrameOpt2 (unused)
+
+                #if FXAA_LOW
+                    0.75,                       // fxaaQualitySubpix
+                    0.166,                      // fxaaQualityEdgeThreshold
+                    0.0833,                     // fxaaQualityEdgeThresholdMin
+                #else
                     1.0,                        // fxaaQualitySubpix
                     0.063,                      // fxaaQualityEdgeThreshold
                     0.0312,                     // fxaaQualityEdgeThresholdMin
+                #endif
+
                     0.0,                        // fxaaConsoleEdgeSharpness (unused)
                     0.0,                        // fxaaConsoleEdgeThreshold (unused)
                     0.0,                        // fxaaConsoleEdgeThresholdMin (unused)
