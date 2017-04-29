@@ -18,7 +18,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
         public ColorParameter color = new ColorParameter { value = Color.white };
 
-        [Tooltip("Boost performances by lowering the bloom quality. This settings is meant to be used on mobile and other low-end platforms.")]
+        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
         public BoolParameter mobileOptimized = new BoolParameter { value = false };
 
         [Tooltip("Dirtiness texture to add smudges or dust to the lens."), DisplayName("Texture")]

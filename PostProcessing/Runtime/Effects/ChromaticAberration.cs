@@ -12,6 +12,9 @@ namespace UnityEngine.Experimental.PostProcessing
         [Range(0f, 1f), Tooltip("Amount of tangential distortion.")]
         public FloatParameter intensity = new FloatParameter { value = 0.1f };
 
+        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
+        public BoolParameter mobileOptimized = new BoolParameter { value = false };
+
         public override bool IsEnabledAndSupported()
         {
             return enabled.value
@@ -54,7 +57,10 @@ namespace UnityEngine.Experimental.PostProcessing
             }
             
             var sheet = context.uberSheet;
-            sheet.EnableKeyword("CHROMATIC_ABERRATION");
+            sheet.EnableKeyword(settings.mobileOptimized
+                ? "CHROMATIC_ABERRATION_LOW"
+                : "CHROMATIC_ABERRATION"
+            );
             sheet.properties.SetFloat(Uniforms._ChromaticAberration_Amount, settings.intensity * 0.05f);
             sheet.properties.SetTexture(Uniforms._ChromaticAberration_SpectralLut, spectralLut);
         }

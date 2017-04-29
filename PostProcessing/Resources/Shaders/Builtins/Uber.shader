@@ -3,7 +3,7 @@ Shader "Hidden/PostProcessing/Uber"
     HLSLINCLUDE
 
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-        #pragma multi_compile __ CHROMATIC_ABERRATION
+        #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
         #pragma multi_compile __ BLOOM
         #pragma multi_compile __ COLOR_GRADING
         #pragma multi_compile __ VIGNETTE
@@ -69,6 +69,30 @@ Shader "Hidden/PostProcessing/Uber"
                     half t = (i + 0.5) / samples;
                     half3 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, pos, 0).rgb;
                     half3 filter = SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0), 0).rgb;
+
+                    sum += s * filter;
+                    filterSum += filter;
+                    pos += delta;
+                }
+
+                color = sum / filterSum;
+            }
+            #elif CHROMATIC_ABERRATION_LOW
+            {
+                float2 coords = 2.0 * uv - 1.0;
+                float2 end = uv - coords * dot(coords, coords) * _ChromaticAberration_Amount;
+
+                float2 diff = end - uv;
+                float2 delta = diff / 3;
+                float2 pos = uv;
+                half3 sum = (0.0).xxx, filterSum = (0.0).xxx;
+
+                UNITY_UNROLL
+                for (int i = 0; i < 3; i++)
+                {
+                    half t = (i + 0.5) / 3;
+                    half3 s = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, pos).rgb;
+                    half3 filter = SAMPLE_TEXTURE2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0)).rgb;
 
                     sum += s * filter;
                     filterSum += filter;
