@@ -240,19 +240,23 @@ namespace UnityEngine.PostProcessing
         // We can also get the value for (rTan + lTan), as it is the numerator for term (0,2).
         // We have the denominator, so (rTan + lTan) = (rTan - lTan) * proj(0,2) = 2 * proj(0,2) / proj (0,0)
         // We can add (rTan + lTan) and (rTan - lTan) to get 2 * rTan, which can gives us rTan.
-        // rTan = ((2 / proj(0,0)) + (2 * proj(0,2) / proj(0,0))) / 2 =
-        //        (1 + proj(0,2)) / proj(0,0) 
+        // rTan = ((2 / proj(0,0)) + (2 * proj(0,2) / proj(0,0))) / 2 =>
+        // rTan = (1 + proj(0,2)) / proj(0,0) 
+        // 
         // We can derive lTan via proj(0,0) = 2 / (rTan - lTan), which gives us
         // lTan = rTan - 2/proj(0,0)
-        //
+        // If we substitute our derivation for rTan in here, we get the conveniently symmetric:
+        // lTan = ((1 + proj(0,2)) / proj(0,0)) - 2 / proj(0,0) => 
+        // lTan = (-1 + proj(0,2)) / proj(0,0)
+        // 
         // We can repeat these calculations for the top and bottom tangents as well.
         public Matrix4x4 GenerateJitteredMatrixFromOriginal(Matrix4x4 origProj, Vector2 jitter)
         {
-            var rTan = (1.0f + origProj[0, 2]) / origProj[0, 0];
-            var lTan = rTan - (2.0f / origProj[0, 0]);
+            var rTan = ( 1.0f + origProj[0, 2]) / origProj[0, 0];
+            var lTan = (-1.0f + origProj[0, 2]) / origProj[0, 0];
 
-            var tTan = (1.0f + origProj[1, 2]) / origProj[1, 1];
-            var bTan = tTan - (2.0f / origProj[1, 1]);
+            var tTan = ( 1.0f + origProj[1, 2]) / origProj[1, 1];
+            var bTan = (-1.0f + origProj[1, 2]) / origProj[1, 1];
 
             float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
             float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
