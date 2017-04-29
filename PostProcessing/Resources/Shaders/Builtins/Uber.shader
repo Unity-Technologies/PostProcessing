@@ -107,14 +107,14 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            color *= autoExposure;
-
             // Gamma space... Gah.
             #if UNITY_COLORSPACE_GAMMA
             {
                 color = SRGBToLinear(color);
             }
             #endif
+
+            color *= autoExposure;
 
             #if BLOOM
             {
