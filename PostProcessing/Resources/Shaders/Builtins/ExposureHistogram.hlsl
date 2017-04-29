@@ -4,7 +4,7 @@
 // Optimal values for PS4/GCN
 // Using a group size of 32x32 seems to be a bit faster on Kepler/Maxwell
 // Don't forget to update 'AutoExposureRenderer.cs' if you change these values !
-#define HISTOGRAM_BINS          64
+#define HISTOGRAM_BINS          128
 #define HISTOGRAM_TEXELS        HISTOGRAM_BINS / 4
 #define HISTOGRAM_THREAD_X      16
 #define HISTOGRAM_THREAD_Y      16

@@ -62,7 +62,7 @@ namespace UnityEngine.Experimental.PostProcessing
         bool m_FirstFrame = true;
 
         // Don't forget to update 'ExposureHistogram.hlsl' if you change these values !
-        const int k_HistogramBins = 64;
+        const int k_HistogramBins = 128;
         const int k_HistogramThreadX = 16;
         const int k_HistogramThreadY = 16;
 
