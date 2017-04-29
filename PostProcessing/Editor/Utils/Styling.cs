@@ -5,11 +5,11 @@ namespace UnityEditor.Experimental.PostProcessing
 {
     public static class Styling
     {
-        public static GUIStyle smallTickbox;
-        public static GUIStyle miniLabelButton;
+        public static readonly GUIStyle smallTickbox;
+        public static readonly GUIStyle miniLabelButton;
 
-        public static Texture2D paneOptionsIconDark;
-        public static Texture2D paneOptionsIconLight;
+        public static readonly Texture2D paneOptionsIconDark;
+        public static readonly Texture2D paneOptionsIconLight;
 
         static Styling()
         {

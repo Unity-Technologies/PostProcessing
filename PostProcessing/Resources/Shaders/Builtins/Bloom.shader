@@ -14,7 +14,10 @@ Shader "Hidden/PostProcessing/Bloom"
         float _Threshold;
         float3 _Curve;
 
-        half3 Prefilter(half3 color, float2 uv)
+        // ----------------------------------------------------------------------------------------
+        // Prefilter
+
+        half4 Prefilter(half3 color, float2 uv)
         {
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             color *= autoExposure;
@@ -29,22 +32,23 @@ Shader "Hidden/PostProcessing/Bloom"
             // Combine and apply the brightness response curve.
             color *= max(rq, br - _Threshold) / max(br, 1e-5);
 
-            return color;
+            return half4(color, 1.0);
         }
 
         half4 FragPrefilter13(VaryingsDefault i) : SV_Target
         {
             half3 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
-            color = Prefilter(color, i.texcoord);
-            return half4(color, 1.0);
+            return Prefilter(color, i.texcoord);
         }
 
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
         {
             half3 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
-            color = Prefilter(color, i.texcoord);
-            return half4(color, 1.0);
+            return Prefilter(color, i.texcoord);
         }
+
+        // ----------------------------------------------------------------------------------------
+        // Downsample
 
         half4 FragDownsample13(VaryingsDefault i) : SV_Target
         {
@@ -58,18 +62,25 @@ Shader "Hidden/PostProcessing/Bloom"
             return half4(color, 1.0);
         }
 
+        // ----------------------------------------------------------------------------------------
+        // Upsample & combine
+
+        half4 Combine(half3 bloom, float2 uv)
+        {
+            half3 color = SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, uv).rgb;
+            return half4(bloom + color, 1.0);
+        }
+
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
             half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
-            half3 color = SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, i.texcoord).rgb;
-            return half4(bloom + color, 1.0);
+            return Combine(bloom, i.texcoord);
         }
 
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
             half3 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
-            half3 color = SAMPLE_TEXTURE2D(_BloomTex, sampler_BloomTex, i.texcoord).rgb;
-            return half4(bloom + color, 1.0);
+            return Combine(bloom, i.texcoord);
         }
 
     ENDHLSL
