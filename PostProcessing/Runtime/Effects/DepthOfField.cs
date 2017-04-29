@@ -171,7 +171,11 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Combine pass
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Combine);
-            
+            cmd.ReleaseTemporaryRT(Uniforms._DepthOfFieldTex);
+
+            if (!context.IsTemporalAntialiasingActive())
+                cmd.ReleaseTemporaryRT(Uniforms._CoCTex);
+
             cmd.EndSample("DepthOfField");
 
             m_ResetHistory = false;
