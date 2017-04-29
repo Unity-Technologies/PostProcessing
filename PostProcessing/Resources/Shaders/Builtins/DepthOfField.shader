@@ -112,6 +112,18 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #include "DepthOfField.hlsl"
             ENDHLSL
         }
+
+        Pass // 8
+        {
+            Name "Combine"
+
+            HLSLPROGRAM
+                #pragma target 3.0
+                #pragma vertex VertDefault
+                #pragma fragment FragCombine
+                #include "DepthOfField.hlsl"
+            ENDHLSL
+        }
     }
 
     // Fallback SubShader with SM 3.0
@@ -216,6 +228,18 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.0
                 #pragma vertex VertDefault
                 #pragma fragment FragPostBlur
+                #include "DepthOfField.hlsl"
+            ENDHLSL
+        }
+
+        Pass // 8
+        {
+            Name "Combine"
+
+            HLSLPROGRAM
+                #pragma target 3.0
+                #pragma vertex VertDefault
+                #pragma fragment FragCombine
                 #include "DepthOfField.hlsl"
             ENDHLSL
         }

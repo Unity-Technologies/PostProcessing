@@ -14,6 +14,9 @@ TEXTURE2D_SAMPLER2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsText
 
 TEXTURE2D_SAMPLER2D(_CoCTex, sampler_CoCTex);
 
+TEXTURE2D_SAMPLER2D(_DepthOfFieldTex, sampler_DepthOfFieldTex);
+float4 _DepthOfFieldTex_TexelSize;
+
 // Camera parameters
 float _Distance;
 float _LensCoeff;  // f^2 / (N * (S1 - f) * film_width * 2)
@@ -202,6 +205,23 @@ half4 FragPostBlur(VaryingsDefault i) : SV_Target
     acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.zy);
     acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.xy);
     return acc / 4.0;
+}
+
+// Combine with source
+half4 FragCombine(VaryingsDefault i) : SV_Target
+{
+    half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
+    half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord).r;
+    coc = (coc - 0.5) * 2.0 * _MaxCoC;
+
+    // Convert CoC to far field alpha value.
+    float ffa = smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, coc);
+
+    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
+
+    // lerp(lerp(color, dof, ffa), dof, dof.a)
+    color = lerp(color, dof.rgb, ffa + dof.a - ffa * dof.a);
+    return half4(color, 1.0);
 }
 
 #endif // UNITY_POSTFX_DEPTH_OF_FIELD

@@ -5,7 +5,6 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ CHROMATIC_ABERRATION
         #pragma multi_compile __ BLOOM
-        #pragma multi_compile __ DEPTH_OF_FIELD
         #pragma multi_compile __ COLOR_GRADING
         #pragma multi_compile __ VIGNETTE
         
@@ -18,12 +17,6 @@ Shader "Hidden/PostProcessing/Uber"
 
         // Auto exposure / eye adaptation
         TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
-
-        // Depth of field
-        TEXTURE2D_SAMPLER2D(_DepthOfFieldTex, sampler_DepthOfFieldTex);
-        TEXTURE2D_SAMPLER2D(_CoCTex, sampler_CoCTex);
-        float4 _DepthOfFieldTex_TexelSize;
-        float3 _DepthOfFieldParams; // x: distance, y: f^2 / (N * (S1 - f) * film_width * 2), z: max coc
 
         // Bloom
         TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
@@ -56,13 +49,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             float2 uv = i.texcoord;
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
-
             half3 color = (0.0).xxx;
-            
-            #if DEPTH_OF_FIELD && CHROMATIC_ABERRATION
-            half4 dof = (0.0).xxxx;
-            half ffa = 0.0; // far field alpha
-            #endif
 
             // Inspired by the method described in "Rendering Inside" [Playdead 2016]
             // https://twitter.com/pixelmager/status/717019757766123520
@@ -77,18 +64,6 @@ Shader "Hidden/PostProcessing/Uber"
                 float2 pos = uv;
                 half3 sum = (0.0).xxx, filterSum = (0.0).xxx;
 
-                #if DEPTH_OF_FIELD
-                float2 dofDelta = delta;
-                float2 dofPos = pos;
-                if (_MainTex_TexelSize.y < 0.0)
-                {
-                    dofDelta.y = -dofDelta.y;
-                    dofPos.y = 1.0 - dofPos.y;
-                }
-                half4 dofSum = (0.0).xxxx;
-                half ffaSum = 0.0;
-                #endif
-
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
@@ -98,23 +73,9 @@ Shader "Hidden/PostProcessing/Uber"
                     sum += s * filter;
                     filterSum += filter;
                     pos += delta;
-
-                    #if DEPTH_OF_FIELD
-                    half4 sdof = SAMPLE_TEXTURE2D_LOD(_DepthOfFieldTex, sampler_DepthOfFieldTex, dofPos, 0);
-                    half scoc = SAMPLE_TEXTURE2D_LOD(_CoCTex, sampler_CoCTex, dofPos, 0).r;
-                    scoc = (scoc - 0.5) * 2.0 * _DepthOfFieldParams.z;
-                    dofSum += sdof * half4(filter, 1.0);
-                    ffaSum += smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, scoc);
-                    dofPos += dofDelta;
-                    #endif
                 }
 
                 color = sum / filterSum;
-
-                #if DEPTH_OF_FIELD
-                dof = dofSum / half4(filterSum, samples);
-                ffa = ffaSum / samples;
-                #endif
             }
             #else
             {
@@ -128,21 +89,6 @@ Shader "Hidden/PostProcessing/Uber"
             #if UNITY_COLORSPACE_GAMMA
             {
                 color = SRGBToLinear(color);
-            }
-            #endif
-
-            #if DEPTH_OF_FIELD
-            {
-                #if !CHROMATIC_ABERRATION
-                half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, uv);
-                half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv).r;
-                coc = (coc - 0.5) * 2.0 * _DepthOfFieldParams.z;
-                // Convert CoC to far field alpha value.
-                float ffa = smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, coc);
-                #endif
-
-                // lerp(lerp(color, dof, ffa), dof, dof.a)
-                color = lerp(color, dof.rgb * autoExposure, ffa + dof.a - ffa * dof.a);
             }
             #endif
 

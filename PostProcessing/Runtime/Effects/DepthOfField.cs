@@ -26,7 +26,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Range(1f, 300f), Tooltip("Distance between the lens and the film. The larger the value is, the shallower the depth of field is.")]
         public FloatParameter focalLength = new FloatParameter { value = 50f };
 
-        [Tooltip("Convolution kernel size of the bokeh filter, which determines the maximum radius of bokeh. It also affects performances (the larger the kernel is, the longer the GPU time is required).")]
+        [DisplayName("Max Blur Size"), Tooltip("Convolution kernel size of the bokeh filter, which determines the maximum radius of bokeh. It also affects performances (the larger the kernel is, the longer the GPU time is required).")]
         public KernelSizeParameter kernelSize = new KernelSizeParameter { value = KernelSize.Medium };
 
         public override bool IsEnabledAndSupported()
@@ -47,7 +47,8 @@ namespace UnityEngine.Experimental.PostProcessing
             BokehMediumKernel,
             BokehLargeKernel,
             BokehVeryLargeKernel,
-            PostFilter
+            PostFilter,
+            Combine
         }
 
         // Ping-pong between two history textures as we can't read & write the same target in the
@@ -129,7 +130,7 @@ namespace UnityEngine.Experimental.PostProcessing
             sheet.properties.SetFloat(Uniforms._MaxCoC, maxCoC);
             sheet.properties.SetFloat(Uniforms._RcpMaxCoC, 1f / maxCoC);
             sheet.properties.SetFloat(Uniforms._RcpAspect, 1f / aspect);
-            
+
             var cmd = context.command;
             cmd.BeginSample("DepthOfField");
 
@@ -168,9 +169,8 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.BlitFullscreenTriangle(Uniforms._DepthOfFieldTemp, Uniforms._DepthOfFieldTex, sheet, (int)Pass.PostFilter);
             cmd.ReleaseTemporaryRT(Uniforms._DepthOfFieldTemp);
 
-            var uberSheet = context.uberSheet;
-            uberSheet.EnableKeyword("DEPTH_OF_FIELD");
-            uberSheet.properties.SetVector(Uniforms._DepthOfFieldParams, new Vector3(s1, coeff, maxCoC));
+            // Combine pass
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Combine);
             
             cmd.EndSample("DepthOfField");
 

@@ -300,10 +300,10 @@ namespace UnityEngine.Experimental.PostProcessing
             {
                 temporalAntialiasing.SetProjectionMatrix(context.camera);
 
-                cmd.GetTemporaryRT(Uniforms._AATemp, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-                context.destination = Uniforms._AATemp;
+                cmd.GetTemporaryRT(Uniforms._TAAOutput, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = Uniforms._TAAOutput;
                 temporalAntialiasing.Render(context);
-                context.source = Uniforms._AATemp;
+                context.source = Uniforms._TAAOutput;
                 context.destination = Uniforms._TempTargetPool[4];
             }
 
@@ -425,15 +425,29 @@ namespace UnityEngine.Experimental.PostProcessing
             if (motionBlur.settings.IsEnabledAndSupported())
             {
                 var finalDestination = context.destination;
-                cmd.GetTemporaryRT(Uniforms._MotionBlurTemp, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-                context.destination = Uniforms._MotionBlurTemp;
+                cmd.GetTemporaryRT(Uniforms._MotionBlurOutput, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = Uniforms._MotionBlurOutput;
                 motionBlur.renderer.Render(context);
-                context.source = Uniforms._MotionBlurTemp;
+                context.source = Uniforms._MotionBlurOutput;
+                context.destination = finalDestination;
+            }
+
+            // Depth of field final combination pass used to be done in Uber which led to artifacts
+            // when used at the same time as Bloom (because both effects used the same source, so
+            // the stronger bloom was, the more DoF was eaten away in out of focus areas)
+            var depthOfField = GetBundle<DepthOfField>();
+
+            if (depthOfField.settings.IsEnabledAndSupported())
+            {
+                var finalDestination = context.destination;
+                cmd.GetTemporaryRT(Uniforms._DepthOfFieldOutput, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = Uniforms._DepthOfFieldOutput;
+                depthOfField.renderer.Render(context);
+                context.source = Uniforms._DepthOfFieldOutput;
                 context.destination = finalDestination;
             }
 
             // Uber effects
-            RenderEffect<DepthOfField>(context);
             RenderEffect<ChromaticAberration>(context);
             RenderEffect<AutoExposure>(context);
 

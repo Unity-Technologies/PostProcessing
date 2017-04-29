@@ -17,13 +17,13 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _LegacyTemp                      = Shader.PropertyToID("_LegacyTemp");
         internal static readonly int _MainTex                         = Shader.PropertyToID("_MainTex");
 
-        internal static readonly int _AATemp                          = Shader.PropertyToID("_AATemp");
+        internal static readonly int _TAAOutput                       = Shader.PropertyToID("_TAAOutput");
         internal static readonly int _Jitter                          = Shader.PropertyToID("_Jitter");
         internal static readonly int _SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
         internal static readonly int _FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");
         internal static readonly int _HistoryTex                      = Shader.PropertyToID("_HistoryTex");
 
-        internal static readonly int _MotionBlurTemp                  = Shader.PropertyToID("_MotionBlurTemp");
+        internal static readonly int _MotionBlurOutput                = Shader.PropertyToID("_MotionBlurOutput");
         internal static readonly int _VelocityScale                   = Shader.PropertyToID("_VelocityScale");
         internal static readonly int _MaxBlurRadius                   = Shader.PropertyToID("_MaxBlurRadius");
         internal static readonly int _RcpMaxBlurRadius                = Shader.PropertyToID("_RcpMaxBlurRadius");
@@ -36,7 +36,8 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _TileVRT                         = Shader.PropertyToID("_TileVRT");
         internal static readonly int _NeighborMaxTex                  = Shader.PropertyToID("_NeighborMaxTex");
         internal static readonly int _LoopCount                       = Shader.PropertyToID("_LoopCount");
-
+        
+        internal static readonly int _DepthOfFieldOutput              = Shader.PropertyToID("_DepthOfFieldOutput");
         internal static readonly int _DepthOfFieldTemp                = Shader.PropertyToID("_DepthOfFieldTemp");
         internal static readonly int _DepthOfFieldTex                 = Shader.PropertyToID("_DepthOfFieldTex");
         internal static readonly int _Distance                        = Shader.PropertyToID("_Distance");
@@ -46,7 +47,6 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _RcpAspect                       = Shader.PropertyToID("_RcpAspect");
         internal static readonly int _CoCTex                          = Shader.PropertyToID("_CoCTex");
         internal static readonly int _TaaParams                       = Shader.PropertyToID("_TaaParams");
-        internal static readonly int _DepthOfFieldParams              = Shader.PropertyToID("_DepthOfFieldParams");
 
         internal static readonly int _AutoExposureCopyTex             = Shader.PropertyToID("_AutoExposureCopyTex");
         internal static readonly int _AutoExposureTex                 = Shader.PropertyToID("_AutoExposureTex");
