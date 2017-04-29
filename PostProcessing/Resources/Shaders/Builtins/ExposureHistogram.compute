@@ -2,6 +2,7 @@
 #define USE_VIGNETTE_WEIGHTING 1
 
 #include "../StdLib.hlsl"
+#include "../Colors.hlsl"
 #include "ExposureHistogram.hlsl"
 
 RWStructuredBuffer<uint> _HistogramBuffer;
@@ -47,7 +48,7 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
         #endif
 
         float3 color = _Source[dispatchThreadId].xyz;
-        float luminance = max(color.r, max(color.g, color.b));
+        float luminance = Luminance(color);
         float logLuminance = GetHistogramBinFromLuminance(luminance, _ScaleOffsetRes.xy);
         uint idx = (uint)(logLuminance * (HISTOGRAM_BINS - 1u));
         InterlockedAdd(gs_histogram[idx], weight);
