@@ -59,8 +59,6 @@ namespace UnityEngine.Experimental.PostProcessing
         int m_AutoExposurePingPong;
         RenderTexture m_CurrentAutoExposure;
 
-        static readonly uint[] s_EmptyHistogramBuffer = new uint[k_HistogramBins];
-
         bool m_FirstFrame = true;
 
         // Don't forget to update 'ExposureHistogram.hlsl' if you change these values !
@@ -117,10 +115,12 @@ namespace UnityEngine.Experimental.PostProcessing
             CheckTexture(1);
 
             // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
-            m_HistogramBuffer.SetData(s_EmptyHistogramBuffer);
+            int kernel = m_EyeCompute.FindKernel("KEyeHistogramClear");
+            cmd.SetComputeBufferParam(m_EyeCompute, kernel, "_HistogramBuffer", m_HistogramBuffer);
+            cmd.DispatchCompute(m_EyeCompute, kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
 
             // Get a log histogram
-            int kernel = m_EyeCompute.FindKernel("KEyeHistogram");
+            kernel = m_EyeCompute.FindKernel("KEyeHistogram");
             cmd.SetComputeBufferParam(m_EyeCompute, kernel, "_HistogramBuffer", m_HistogramBuffer);
             cmd.SetComputeTextureParam(m_EyeCompute, kernel, "_Source", Uniforms._AutoExposureCopyTex);
             cmd.SetComputeVectorParam(m_EyeCompute, "_ScaleOffsetRes", scaleOffsetRes);

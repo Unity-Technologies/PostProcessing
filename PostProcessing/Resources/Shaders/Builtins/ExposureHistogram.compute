@@ -1,4 +1,4 @@
-﻿// Put the following line to 0 or comment it to disable vignette weighting
+// Put the following line to 0 or comment it to disable vignette weighting
 #define USE_VIGNETTE_WEIGHTING 1
 
 #include "../StdLib.hlsl"
@@ -58,4 +58,12 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
     // Merge everything
     if (localThreadId < HISTOGRAM_BINS)
         InterlockedAdd(_HistogramBuffer[localThreadId], gs_histogram[localThreadId]);
+}
+
+#pragma kernel KEyeHistogramClear
+[numthreads(HISTOGRAM_THREAD_X, 1, 1)]
+void KEyeHistogramClear(uint dispatchThreadId : SV_DispatchThreadID)
+{
+    if (dispatchThreadId < HISTOGRAM_BINS)
+        _HistogramBuffer[dispatchThreadId] = 0u;
 }
