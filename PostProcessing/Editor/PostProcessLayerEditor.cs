@@ -70,7 +70,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
                 int mask = m_VolumeLayer.intValue;
                 if (mask == 0)
-                    EditorGUILayout.HelpBox("No layer has been set, the trigger will never be affected by volumes.", MessageType.Info);
+                    EditorGUILayout.HelpBox("No layer has been set, the trigger will never be affected by volumes.", MessageType.Warning);
                 else if (mask == -1 || ((mask & 1) != 0))
                     EditorGUILayout.HelpBox("Do not use \"Everything\" or \"Default\" as a layer mask as it will slow down the volume blending process! Put post-processing volumes in their own dedicated layer for best performances.", MessageType.Warning);
             }

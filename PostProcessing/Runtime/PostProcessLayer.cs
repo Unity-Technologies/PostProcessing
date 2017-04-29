@@ -117,6 +117,14 @@ namespace UnityEngine.Experimental.PostProcessing
             m_PropertySheetFactory.Release();
         }
 
+        // Called everytime the user resets the component from the inspector and more importantly
+        // the first time it's added to a GameObject. As we don't have added/removed event for
+        // components, this will do fine
+        void Reset()
+        {
+            volumeTrigger = transform;
+        }
+
         void OnPreCull()
         {
             // Unused in scriptable render pipelines
