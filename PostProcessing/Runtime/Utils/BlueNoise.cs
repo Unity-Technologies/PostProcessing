@@ -12,21 +12,23 @@ namespace UnityEngine.Experimental.PostProcessing
         [IndexerName("texture")]
         public Texture2D this[int index]
         {
-            get
-            {
-                if (index >= k_NoiseTextureCount)
-                    throw new ArgumentOutOfRangeException();
-
-                if (m_NoiseTextures == null || m_NoiseTextures.Length == 0)
-                    LoadNoiseTextures();
-
-                return m_NoiseTextures[index];
-            }
+            get { return Get(index); }
         }
 
         public int count
         {
             get { return k_NoiseTextureCount; }
+        }
+
+        public Texture2D Get(int index)
+        {
+            if (index >= k_NoiseTextureCount)
+                throw new ArgumentOutOfRangeException();
+
+            if (m_NoiseTextures == null || m_NoiseTextures.Length == 0)
+                LoadNoiseTextures();
+
+            return m_NoiseTextures[index];
         }
 
         void LoadNoiseTextures()

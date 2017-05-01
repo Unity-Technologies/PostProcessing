@@ -36,10 +36,12 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         const string k_ShaderString = "Hidden/PostProcessing/TemporalAntialiasing";
-        const int k_SampleCount = 8;
-        int m_SampleIndex;
         readonly RenderTargetIdentifier[] m_Mrt = new RenderTargetIdentifier[2];
         bool m_ResetHistory = true;
+
+        readonly HaltonSeq haltonSeq = new HaltonSeq();
+        const int k_SampleCount = 8;
+        int m_SampleIndex;
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
@@ -62,27 +64,11 @@ namespace UnityEngine.Experimental.PostProcessing
             m_ResetHistory = true;
         }
 
-        float GetHaltonValue(int index, int radix)
-        {
-            float result = 0f;
-            float fraction = 1f / (float)radix;
-
-            while (index > 0)
-            {
-                result += (float)(index % radix) * fraction;
-
-                index /= radix;
-                fraction /= (float)radix;
-            }
-
-            return result;
-        }
-
         Vector2 GenerateRandomOffset()
         {
             var offset = new Vector2(
-                    GetHaltonValue(m_SampleIndex & 1023, 2),
-                    GetHaltonValue(m_SampleIndex & 1023, 3)
+                    haltonSeq.Get(m_SampleIndex & 1023, 2),
+                    haltonSeq.Get(m_SampleIndex & 1023, 3)
                 );
 
             if (++m_SampleIndex >= k_SampleCount)
