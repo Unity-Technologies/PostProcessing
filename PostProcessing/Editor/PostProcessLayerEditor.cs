@@ -21,11 +21,11 @@ namespace UnityEditor.Experimental.PostProcessing
 
         SerializedProperty m_DebugMonitor;
 
-        static string[] s_AntialiasingMethodNames =
+        static GUIContent[] s_AntialiasingMethodNames =
         {
-            "No Anti-aliasing",
-            "Fast Approximate Anti-aliasing",
-            "Temporal Anti-aliasing"
+            new GUIContent("No Anti-aliasing"),
+            new GUIContent("Fast Approximate Anti-aliasing"),
+            new GUIContent("Temporal Anti-aliasing")
         };
 
         void OnEnable()
@@ -53,7 +53,7 @@ namespace UnityEditor.Experimental.PostProcessing
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.PrefixLabel("Trigger");
+                    EditorGUILayout.PrefixLabel(EditorUtilities.GetContent("Trigger|A transform that will act as a trigger for volume blending."));
                     EditorGUI.indentLevel--; // The editor adds an indentation after the prefix label, this removes it
 
                     using (new EditorGUILayout.HorizontalScope())
@@ -62,14 +62,14 @@ namespace UnityEditor.Experimental.PostProcessing
                         if (GUILayout.Button(EditorUtilities.GetContent("This|Assigns the current GameObject as a trigger."), EditorStyles.miniButton))
                             m_VolumeTrigger.objectReferenceValue = m_Target.transform;
                     }
-                    
+
                     EditorGUI.indentLevel++;
                 }
 
                 if (m_VolumeTrigger.objectReferenceValue == null)
                     EditorGUILayout.HelpBox("No trigger has been set, the camera will only be affected by global volumes.", MessageType.Info);
 
-                EditorGUILayout.PropertyField(m_VolumeLayer, EditorUtilities.GetContent("Layer"));
+                EditorGUILayout.PropertyField(m_VolumeLayer, EditorUtilities.GetContent("Layer|This camera will only be affected by volumes in the selected scene-layers."));
 
                 int mask = m_VolumeLayer.intValue;
                 if (mask == 0)
@@ -85,7 +85,7 @@ namespace UnityEditor.Experimental.PostProcessing
             {
                 EditorGUI.indentLevel++;
 
-                m_AntialiasingMode.intValue = EditorGUILayout.Popup("Mode", m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
+                m_AntialiasingMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The anti-aliasing method to use. FXAA is fast but low quality. TAA is a bit slower but higher quality."), m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
 
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
                 {
