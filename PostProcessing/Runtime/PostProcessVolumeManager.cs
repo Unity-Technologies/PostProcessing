@@ -179,18 +179,16 @@ namespace UnityEngine.Experimental.PostProcessing
 
         internal void UpdateSettings(PostProcessLayer postProcessLayer)
         {
-            var volumeTrigger = postProcessLayer.volumeTrigger;
-
-            if (volumeTrigger == null)
-                return;
-
             // Reset to base state
             postProcessLayer.OverrideSettings(m_BaseSettings, 1f);
 
             var volumeLayer = postProcessLayer.volumeLayer;
             int mask = volumeLayer.value;
 
-            // Optimize me
+            // If no trigger is set, only global volumes will have influence
+            var volumeTrigger = postProcessLayer.volumeTrigger;
+            bool onlyGlobal = volumeTrigger == null;
+
             for (int i = 0; i < k_MaxLayerCount; i++)
             {
                 // Skip layers not in the mask
@@ -211,7 +209,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 }
 
                 // Traverse all volumes
-                var triggerPos = volumeTrigger.position;
+                var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
 
                 foreach (var volume in volumes)
                 {
@@ -225,8 +223,10 @@ namespace UnityEngine.Experimental.PostProcessing
                         continue;
                     }
 
+                    if (onlyGlobal)
+                        continue;
+
                     // If volume isn't global and has no collider, skip it as it's useless
-                    //var colliders = volume.colliders;
                     var colliders = m_TempColliders;
                     volume.GetComponents(colliders);
                     if (colliders.Count == 0)
