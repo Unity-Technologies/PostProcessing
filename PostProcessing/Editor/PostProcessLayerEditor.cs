@@ -66,6 +66,9 @@ namespace UnityEditor.Experimental.PostProcessing
                     EditorGUI.indentLevel++;
                 }
 
+                if (m_VolumeTrigger.objectReferenceValue == null)
+                    EditorGUILayout.HelpBox("No trigger has been set, the camera will only be affected by global volumes.", MessageType.Info);
+
                 EditorGUILayout.PropertyField(m_VolumeLayer, EditorUtilities.GetContent("Layer"));
 
                 int mask = m_VolumeLayer.intValue;
