@@ -38,7 +38,6 @@ namespace UnityEngine.Experimental.PostProcessing
         readonly RenderTargetIdentifier[] m_Mrt = new RenderTargetIdentifier[2];
         bool m_ResetHistory = true;
 
-        readonly HaltonSeq haltonSeq = new HaltonSeq();
         const int k_SampleCount = 8;
         int m_SampleIndex;
 
@@ -66,8 +65,8 @@ namespace UnityEngine.Experimental.PostProcessing
         Vector2 GenerateRandomOffset()
         {
             var offset = new Vector2(
-                    haltonSeq.Get(m_SampleIndex & 1023, 2),
-                    haltonSeq.Get(m_SampleIndex & 1023, 3)
+                    HaltonSeq.Get(m_SampleIndex & 1023, 2),
+                    HaltonSeq.Get(m_SampleIndex & 1023, 3)
                 );
 
             if (++m_SampleIndex >= k_SampleCount)

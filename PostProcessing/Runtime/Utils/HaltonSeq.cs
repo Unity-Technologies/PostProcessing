@@ -1,8 +1,8 @@
 namespace UnityEngine.Experimental.PostProcessing
 {
-    public sealed class HaltonSeq
+    public static class HaltonSeq
     {
-        public float Get(int index, int radix)
+        public static float Get(int index, int radix)
         {
             float result = 0f;
             float fraction = 1f / (float)radix;
