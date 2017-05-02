@@ -127,7 +127,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 {
                     var menu = new GenericMenu();
 
-                    var typeMap = PostProcessVolumeManager.instance.settingsTypes;
+                    var typeMap = PostProcessManager.instance.settingsTypes;
                     foreach (var kvp in typeMap)
                     {
                         var type = kvp.Key;

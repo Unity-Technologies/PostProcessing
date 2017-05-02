@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    using VolumeManager = PostProcessVolumeManager;
-    
     // TODO: Deal with unsupported collider types for editor/sceneview previz
     // TODO: Do outer skin previz for colliders (need mesh manipulation stuff)
     [ExecuteInEditMode]
@@ -31,14 +29,14 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void OnEnable()
         {
-            VolumeManager.instance.Register(this);
+            PostProcessManager.instance.Register(this);
             m_PreviousLayer = gameObject.layer;
             m_TempColliders = new List<Collider>();
         }
 
         void OnDisable()
         {
-            VolumeManager.instance.Unregister(this);
+            PostProcessManager.instance.Unregister(this);
         }
 
         void Reset()
@@ -56,7 +54,7 @@ namespace UnityEngine.Experimental.PostProcessing
             int layer = gameObject.layer;
             if (layer != m_PreviousLayer)
             {
-                VolumeManager.instance.UpdateVolumeLayer(this, m_PreviousLayer, layer);
+                PostProcessManager.instance.UpdateVolumeLayer(this, m_PreviousLayer, layer);
                 m_PreviousLayer = layer;
             }
 
@@ -65,7 +63,7 @@ namespace UnityEngine.Experimental.PostProcessing
             // possible but it doesn't work with Undo/Redo in the editor, which makes it useless.
             if (priority != m_PreviousPriority)
             {
-                VolumeManager.instance.SetLayerDirty(layer);
+                PostProcessManager.instance.SetLayerDirty(layer);
                 m_PreviousPriority = priority;
             }
         }

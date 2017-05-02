@@ -5,8 +5,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    using VolumeManager = PostProcessVolumeManager;
-
     // TODO: Image effects in the sceneview (make sure they work, MB & TAA should be always off in scene view)
     // TODO: User effect sorting for this layer (ReorderableList)
     // TODO: XMLDoc everything (?)
@@ -66,7 +64,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 { PostProcessEvent.AfterStack,        new List<PostProcessBundle>() }
             };
 
-            foreach (var type in VolumeManager.instance.settingsTypes.Keys)
+            foreach (var type in PostProcessManager.instance.settingsTypes.Keys)
             {
                 var settings = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
                 var bundle = new PostProcessBundle(settings);
@@ -273,7 +271,7 @@ namespace UnityEngine.Experimental.PostProcessing
             RuntimeUtilities.ReleaseLerpTargets();
 
             if (m_SettingsUpdateNeeded)
-                VolumeManager.instance.UpdateSettings(this);
+                PostProcessManager.instance.UpdateSettings(this);
 
             m_SettingsUpdateNeeded = false;
         }

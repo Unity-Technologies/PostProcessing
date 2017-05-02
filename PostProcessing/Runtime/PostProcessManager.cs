@@ -8,16 +8,16 @@ namespace UnityEngine.Experimental.PostProcessing
     // Singleton used to tracks all existing volumes in the scene
     // TODO: Add a quick method to create a new volume or new effect override on the fly
     // TODO: Deal with 2D volumes !
-    public sealed class PostProcessVolumeManager
+    public sealed class PostProcessManager
     {
-        static PostProcessVolumeManager s_Instance;
+        static PostProcessManager s_Instance;
 
-        public static PostProcessVolumeManager instance
+        public static PostProcessManager instance
         {
             get
             {
                 if (s_Instance == null)
-                    s_Instance = new PostProcessVolumeManager();
+                    s_Instance = new PostProcessManager();
 
                 return s_Instance;
             }
@@ -31,7 +31,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public readonly Dictionary<Type, PostProcessAttribute> settingsTypes;
 
-        PostProcessVolumeManager()
+        PostProcessManager()
         {
             m_Volumes = new List<PostProcessVolume>[k_MaxLayerCount];
             m_SortNeeded = new bool[k_MaxLayerCount];
