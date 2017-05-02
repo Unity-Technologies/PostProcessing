@@ -188,7 +188,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
             var menu = new GenericMenu();
             menu.AddItem(GetContent("Reset"), false, () => resetAction());
-            menu.AddItem(GetContent("Remove"), false, () => removeAction()); // TODO: Undo support for remove... PITA
+            menu.AddItem(GetContent("Remove"), false, () => removeAction());
             menu.AddSeparator(string.Empty);
             menu.AddItem(GetContent("Copy Settings"), false, () => CopySettings(target));
 

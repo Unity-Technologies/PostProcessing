@@ -62,6 +62,8 @@ namespace UnityEditor.Experimental.PostProcessing
 
         void OnUndoRedoPerformed()
         {
+            m_Target.isDirty = true;
+
             // Seems like there's an issue with the inspector not repainting after some undo events
             // This will take care of that
             Repaint();
@@ -177,7 +179,6 @@ namespace UnityEditor.Experimental.PostProcessing
             serializedObject.ApplyModifiedProperties();
         }
 
-        // TODO: Undo support
         void AddEffectOverride(Type type)
         {
             serializedObject.Update();
@@ -185,11 +186,13 @@ namespace UnityEditor.Experimental.PostProcessing
             var effect = (PostProcessEffectSettings)CreateInstance(type);
             effect.enabled.overrideState = true;
             effect.enabled.value = true;
+            Undo.RegisterCreatedObjectUndo(effect, "Add Effect Override");
 
             // Grow the list first, then add - that's how serialized lists work in Unity
             m_Settings.arraySize++;
             var effectProp = m_Settings.GetArrayElementAtIndex(m_Settings.arraySize - 1);
             effectProp.objectReferenceValue = effect;
+            Undo.RecordObject(effect, "Add Effect Override");
 
             // Create & store the internal editor object for this effect
             CreateEditor(effect, effectProp);
@@ -197,6 +200,7 @@ namespace UnityEditor.Experimental.PostProcessing
             serializedObject.ApplyModifiedProperties();
         }
 
+        // TODO: Undo support on RemoveEffectOverride
         void RemoveEffectOverride(int id)
         {
             // Huh. Hack to keep foldout state on the next element...
