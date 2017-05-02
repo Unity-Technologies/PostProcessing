@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -59,7 +59,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 m_GrainLookupRT.Create();
             }
             
-            var sheet = context.propertySheets.Get("Hidden/PostProcessing/GrainBaker");
+            var sheet = context.propertySheets.Get(context.resources.shaders.grainBaker);
             sheet.properties.Clear();
             sheet.properties.SetFloat(Uniforms._Phase, time / 20f);
 

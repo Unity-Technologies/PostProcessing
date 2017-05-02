@@ -32,11 +32,11 @@ namespace UnityEngine.Experimental.PostProcessing
         // -----------------------------------------------------------------------------------------
         // The following is auto-populated by the post-processing stack
 
+        // Contains references to external resources (shaders, builtin textures...)
+        public PostProcessResources resources { get; internal set; }
+
         // Property sheet factory handled by the currently active PostProcessLayer
         public PropertySheetFactory propertySheets { get; internal set; }
-
-        // Pre-computed bluenoise textures
-        public BlueNoise blueNoise { get; internal set; }
 
         // Custom user data object (unused by builtin effects, feel free to store whatever you want
         // in this object)
@@ -69,12 +69,12 @@ namespace UnityEngine.Experimental.PostProcessing
             destination = 0;
             sourceFormat = RenderTextureFormat.ARGB32;
             flip = false;
-
+            
+            resources = null;
             propertySheets = null;
             userData = null;
             antialiasing = PostProcessLayer.Antialiasing.None;
             temporalAntialiasing = null;
-            blueNoise = null;
 
             uberSheet = null;
             autoExposureTexture = null;

@@ -75,7 +75,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("BloomPyramid");
 
-            var sheet = context.propertySheets.Get("Hidden/PostProcessing/Bloom");
+            var sheet = context.propertySheets.Get(context.resources.shaders.bloom);
 
             // Apply auto exposure adjustment in the prefiltering pass
             sheet.properties.SetTexture(Uniforms._AutoExposureTex, context.autoExposureTexture);

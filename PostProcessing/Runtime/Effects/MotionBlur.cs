@@ -60,7 +60,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 ? RenderTextureFormat.ARGB2101010
                 : RenderTextureFormat.ARGB32;
 
-            var sheet = context.propertySheets.Get("Hidden/PostProcessing/MotionBlur");
+            var sheet = context.propertySheets.Get(context.resources.shaders.motionBlur);
             cmd.BeginSample("MotionBlur");
 
             // Calculate the maximum blur radius in pixels.

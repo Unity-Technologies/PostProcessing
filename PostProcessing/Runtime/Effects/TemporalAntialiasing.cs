@@ -35,7 +35,6 @@ namespace UnityEngine.Experimental.PostProcessing
             AlphaClear
         }
 
-        const string k_ShaderString = "Hidden/PostProcessing/TemporalAntialiasing";
         readonly RenderTargetIdentifier[] m_Mrt = new RenderTargetIdentifier[2];
         bool m_ResetHistory = true;
 
@@ -182,7 +181,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         internal void Render(PostProcessRenderContext context)
         {
-            var sheet = context.propertySheets.Get(k_ShaderString);
+            var sheet = context.propertySheets.Get(context.resources.shaders.temporalAntialiasing);
 
             var cmd = context.command;
             cmd.BeginSample("TemporalAntialiasing");

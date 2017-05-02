@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Assertions;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -9,14 +10,15 @@ namespace UnityEngine.Experimental.PostProcessing
 
         internal void Render(PostProcessRenderContext context)
         {
-            var blueNoise = context.blueNoise;
+            var blueNoise = context.resources.blueNoise;
+            Assert.IsTrue(blueNoise != null && blueNoise.Length > 0);
 
         #if POSTFX_DEBUG_STATIC_DITHERING // Used by QA for automated testing
             textureIndex = 0;
             float rndOffsetX = 0f;
             float rndOffsetY = 0f;
         #else
-            if (++m_NoiseTextureIndex >= blueNoise.count)
+            if (++m_NoiseTextureIndex >= blueNoise.Length)
                 m_NoiseTextureIndex = 0;
 
             float rndOffsetX = Random.value;

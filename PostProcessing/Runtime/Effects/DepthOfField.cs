@@ -123,7 +123,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var coeff = f * f / (settings.aperture.value * (s1 - f) * k_FilmHeight * 2);
             var maxCoC = CalculateMaxCoCRadius(context.height);
 
-            var sheet = context.propertySheets.Get("Hidden/PostProcessing/DepthOfField");
+            var sheet = context.propertySheets.Get(context.resources.shaders.depthOfField);
             sheet.properties.Clear();
             sheet.properties.SetFloat(Uniforms._Distance, s1);
             sheet.properties.SetFloat(Uniforms._LensCoeff, coeff);

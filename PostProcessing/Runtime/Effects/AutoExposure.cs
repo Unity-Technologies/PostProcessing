@@ -87,12 +87,12 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             // Setup compute
             if (m_EyeCompute == null)
-                m_EyeCompute = Resources.Load<ComputeShader>("Shaders/Builtins/ExposureHistogram");
+                m_EyeCompute = context.resources.computeShaders.exposureHistogram;
 
             var cmd = context.command;
             cmd.BeginSample("AutoExposureLookup");
 
-            var sheet = context.propertySheets.Get("Hidden/PostProcessing/AutoExposure");
+            var sheet = context.propertySheets.Get(context.resources.shaders.autoExposure);
             sheet.ClearKeywords();
 
             if (m_HistogramBuffer == null)

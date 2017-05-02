@@ -100,7 +100,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 if (s_CopyMaterial != null)
                     return s_CopyMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/Copy");
+                var shader = PostProcessResources.instance.shaders.copy;
                 s_CopyMaterial = new Material(shader)
                 {
                     name = "PostProcess - Copy",
@@ -165,7 +165,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 if (s_LerpMaterial != null)
                     return s_LerpMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/TextureLerp");
+                var shader = PostProcessResources.instance.shaders.textureLerp;
                 s_LerpMaterial = new Material(shader)
                 {
                     name = "PostProcess - Lerp",

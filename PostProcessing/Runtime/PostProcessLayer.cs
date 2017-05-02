@@ -33,6 +33,9 @@ namespace UnityEngine.Experimental.PostProcessing
         public bool showDebugUI;
         public PostProcessDebugView debugView;
 
+        [SerializeField]
+        PostProcessResources m_Resources;
+
         // Pre-ordered custom user effects
         Dictionary<PostProcessEvent, List<PostProcessBundle>> m_SortedBundles;
 
@@ -44,7 +47,6 @@ namespace UnityEngine.Experimental.PostProcessing
         CommandBuffer m_LegacyCmdBuffer;
         Camera m_Camera;
         PostProcessRenderContext m_CurrentContext;
-        BlueNoise m_BlueNoise;
 
         bool m_SettingsUpdateNeeded = true;
         bool m_IsRenderingInSceneView = false;
@@ -56,6 +58,13 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void OnEnable()
         {
+            // Load resource asset if needed
+            if (m_Resources == null)
+            {
+                Assert.IsNotNull(PostProcessResources.instance, "Could not find the PostProcessResources asset. Please re-import the package.");
+                m_Resources = PostProcessResources.instance;
+            }
+
             m_Bundles = new Dictionary<Type, PostProcessBundle>();
             m_SortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
             {
@@ -75,8 +84,6 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             m_PropertySheetFactory = new PropertySheetFactory();
-
-            m_BlueNoise = new BlueNoise();
 
             // Scriptable render pipeline handles their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
@@ -101,7 +108,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
             }
 
-            m_BlueNoise.Release();
             temporalAntialiasing.Release();
 
             foreach (var bundles in m_SortedBundles.Values)
@@ -253,10 +259,10 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void SetupContext(PostProcessRenderContext context)
         {
+            context.resources = m_Resources;
             context.propertySheets = m_PropertySheetFactory;
             context.antialiasing = antialiasingMode;
             context.temporalAntialiasing = temporalAntialiasing;
-            context.blueNoise = m_BlueNoise;
             SetLegacyCameraFlags(context);
         }
 
@@ -417,7 +423,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void RenderBuiltins(PostProcessRenderContext context)
         {
-            var uberSheet = context.propertySheets.Get("Hidden/PostProcessing/Uber");
+            var uberSheet = context.propertySheets.Get(context.resources.shaders.uber);
             uberSheet.ClearKeywords();
             uberSheet.properties.Clear();
             context.uberSheet = uberSheet;
@@ -474,7 +480,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("FinalPass");
 
-            var uberSheet = context.propertySheets.Get("Hidden/PostProcessing/FinalPass");
+            var uberSheet = context.propertySheets.Get(context.resources.shaders.finalPass);
             uberSheet.ClearKeywords();
             uberSheet.properties.Clear();
             context.uberSheet = uberSheet;

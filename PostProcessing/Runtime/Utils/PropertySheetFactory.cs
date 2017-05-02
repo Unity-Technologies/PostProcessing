@@ -5,25 +5,24 @@ namespace UnityEngine.Experimental.PostProcessing
 {
     public sealed class PropertySheetFactory
     {
-        readonly Dictionary<string, PropertySheet> m_Sheets;
+        readonly Dictionary<Shader, PropertySheet> m_Sheets;
 
         public PropertySheetFactory()
         {
-            m_Sheets = new Dictionary<string, PropertySheet>();
+            m_Sheets = new Dictionary<Shader, PropertySheet>();
         }
 
-        public PropertySheet Get(string shaderName)
+        public PropertySheet Get(Shader shader)
         {
             PropertySheet sheet;
 
-            if (m_Sheets.TryGetValue(shaderName, out sheet))
+            if (m_Sheets.TryGetValue(shader, out sheet))
                 return sheet;
 
-            var shader = Shader.Find(shaderName);
-
             if (shader == null)
-                throw new ArgumentException(string.Format("Invalid shader ({0})", shaderName));
+                throw new ArgumentException(string.Format("Invalid shader ({0})", shader));
 
+            var shaderName = shader.name;
             var material = new Material(shader)
             {
                 name = string.Format("PostProcess - {0}", shaderName.Substring(shaderName.LastIndexOf('/') + 1)),
@@ -31,7 +30,7 @@ namespace UnityEngine.Experimental.PostProcessing
             };
 
             sheet = new PropertySheet(material);
-            m_Sheets.Add(shaderName, sheet);
+            m_Sheets.Add(shader, sheet);
             return sheet;
         }
 
