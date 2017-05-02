@@ -150,7 +150,6 @@ namespace UnityEngine.Experimental.PostProcessing
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
 
-            // TODO: Factorize this
             if (HasOpaqueOnlyEffects())
             {
                 m_LegacyCmdBufferOpaque.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
@@ -432,33 +431,18 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("BuiltinStack");
 
-            // Motion blur is a separate pass
+            // Motion blur is a separate pass - could potentially be done after DoF depending on the
+            // kind of results you're looking for...
             var motionBlur = GetBundle<MotionBlur>();
-
             if (motionBlur.settings.IsEnabledAndSupported())
-            {
-                var finalDestination = context.destination;
-                cmd.GetTemporaryRT(Uniforms._MotionBlurOutput, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-                context.destination = Uniforms._MotionBlurOutput;
-                motionBlur.renderer.Render(context);
-                context.source = Uniforms._MotionBlurOutput;
-                context.destination = finalDestination;
-            }
+                RenderEffect(context, Uniforms._MotionBlurOutput, motionBlur.renderer.Render);
 
             // Depth of field final combination pass used to be done in Uber which led to artifacts
             // when used at the same time as Bloom (because both effects used the same source, so
             // the stronger bloom was, the more DoF was eaten away in out of focus areas)
             var depthOfField = GetBundle<DepthOfField>();
-
             if (depthOfField.settings.IsEnabledAndSupported())
-            {
-                var finalDestination = context.destination;
-                cmd.GetTemporaryRT(Uniforms._DepthOfFieldOutput, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-                context.destination = Uniforms._DepthOfFieldOutput;
-                depthOfField.renderer.Render(context);
-                context.source = Uniforms._DepthOfFieldOutput;
-                context.destination = finalDestination;
-            }
+                RenderEffect(context, Uniforms._DepthOfFieldOutput, depthOfField.renderer.Render);
 
             // Uber effects
             RenderEffect<ChromaticAberration>(context);
@@ -498,6 +482,16 @@ namespace UnityEngine.Experimental.PostProcessing
 
             cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !m_IsRenderingInSceneView) ? 1 : 0);
             cmd.EndSample("FinalPass");
+        }
+
+        void RenderEffect(PostProcessRenderContext context, int middlePass, Action<PostProcessRenderContext> renderFunc)
+        {
+            var finalDestination = context.destination;
+            context.command.GetTemporaryRT(middlePass, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+            context.destination = middlePass;
+            renderFunc(context);
+            context.source = middlePass;
+            context.destination = finalDestination;
         }
 
         void RenderEffect<T>(PostProcessRenderContext context)
