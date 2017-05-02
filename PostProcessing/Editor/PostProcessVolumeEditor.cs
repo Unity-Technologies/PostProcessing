@@ -200,7 +200,6 @@ namespace UnityEditor.Experimental.PostProcessing
             serializedObject.ApplyModifiedProperties();
         }
 
-        // TODO: Undo support on RemoveEffectOverride
         void RemoveEffectOverride(int id)
         {
             // Huh. Hack to keep foldout state on the next element...
@@ -217,7 +216,6 @@ namespace UnityEditor.Experimental.PostProcessing
             // Destroy the object itself first so it doesn't leak
             var property = m_Settings.GetArrayElementAtIndex(id);
             var settings = property.objectReferenceValue;
-            RuntimeUtilities.Destroy(settings);
 
             // Unassign it (should be null already but serialization does funky things
             property.objectReferenceValue = null;
@@ -233,6 +231,11 @@ namespace UnityEditor.Experimental.PostProcessing
                 m_Editors[id].baseProperty.isExpanded = nextFoldoutState;
             
             serializedObject.ApplyModifiedProperties();
+
+            // Destroy the setting object after ApplyModifiedProperties(). If we do it before, redo
+            // actions will be in the wrong order and the reference to the setting object in the
+            // list will be lost.
+            Undo.DestroyObjectImmediate(settings);
         }
 
         // Reset is done by deleting and removing the object from the list and adding a new one in
