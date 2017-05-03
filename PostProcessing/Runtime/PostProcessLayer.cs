@@ -267,10 +267,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void UpdateSettingsIfNeeded(PostProcessRenderContext context)
         {
-#if UNITY_EDITOR
-            m_IsRenderingInSceneView = UnityEditor.SceneView.currentDrawingSceneView != null
-                && context.camera == UnityEditor.SceneView.currentDrawingSceneView.camera;
-#endif
+            m_IsRenderingInSceneView = context.camera.cameraType == CameraType.SceneView;
 
             // Release temporary targets used for texture lerping from last frame
             RuntimeUtilities.ReleaseLerpTargets();
