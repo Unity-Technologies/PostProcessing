@@ -4,6 +4,7 @@
 #define USE_GATHER (SHADER_TARGET >= 50)
 
 #include "../StdLib.hlsl"
+#include "../Colors.hlsl"
 #include "DiskKernels.hlsl"
 
 TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
