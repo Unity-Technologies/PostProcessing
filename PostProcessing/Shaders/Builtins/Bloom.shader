@@ -1,8 +1,9 @@
 Shader "Hidden/PostProcessing/Bloom"
 {
     HLSLINCLUDE
-
+        
         #include "../StdLib.hlsl"
+        #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
@@ -11,8 +12,7 @@ Shader "Hidden/PostProcessing/Bloom"
 
         float4 _MainTex_TexelSize;
         float _SampleScale;
-        float _Threshold;
-        float3 _Curve;
+        float4 _Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
 
         // ----------------------------------------------------------------------------------------
         // Prefilter
@@ -21,17 +21,7 @@ Shader "Hidden/PostProcessing/Bloom"
         {
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             color *= autoExposure;
-
-            // Pixel brightness
-            half br = Max3(color.r, color.g, color.b);
-
-            // Under-threshold part: quadratic curve
-            half rq = clamp(br - _Curve.x, 0.0, _Curve.y);
-            rq = _Curve.z * rq * rq;
-
-            // Combine and apply the brightness response curve.
-            color *= max(rq, br - _Threshold) / max(br, 1e-5);
-
+            color = QuadraticThreshold(color, _Threshold.x, _Threshold.yzw);
             return half4(color, 1.0);
         }
 

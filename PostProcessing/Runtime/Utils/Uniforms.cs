@@ -57,12 +57,12 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _ExposureCompensation            = Shader.PropertyToID("_ExposureCompensation");
 
         internal static readonly int _BloomTex                        = Shader.PropertyToID("_BloomTex");
-        internal static readonly int _Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int _SampleScale                     = Shader.PropertyToID("_SampleScale");
+        internal static readonly int _Threshold                       = Shader.PropertyToID("_Threshold");
+        internal static readonly int _Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int _Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int _Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
-        internal static readonly int _Threshold                       = Shader.PropertyToID("_Threshold");
-        internal static readonly int _Curve                           = Shader.PropertyToID("_Curve");
+        internal static readonly int _Bloom_Threshold                 = Shader.PropertyToID("_Bloom_Threshold");
 
         internal static readonly int _ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
         internal static readonly int _ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");

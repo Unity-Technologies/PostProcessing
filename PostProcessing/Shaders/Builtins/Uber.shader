@@ -22,8 +22,9 @@ Shader "Hidden/PostProcessing/Uber"
         TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
         TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
-        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens intensity
+        half4 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens intensity, w: iteration count
         half3 _Bloom_Color;
+        float4 _Bloom_Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
 
         // Chromatic aberration
         TEXTURE2D_SAMPLER2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut);
@@ -118,12 +119,28 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if BLOOM
             {
-                half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x).rgb * _Bloom_Settings.y;
-                color += bloom * _Bloom_Color;
+                half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x).rgb;
+                half3 dirt = SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord).rgb;
 
-                // Lens dirtiness
-                half3 dirt = SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord).rgb * _Bloom_Settings.z;
-                color += bloom * dirt;
+                // Compute dirt amount
+                dirt *= bloom * _Bloom_Settings.z;
+
+                // Keep energy stable
+                bloom /= _Bloom_Settings.w;
+                
+                // Intensities higher than 1 boost bloom (no more energy conservative as a result)
+                bloom *= max(1.0, _Bloom_Settings.y);
+
+                // Retrieve lost threshold'd data
+                half3 thresholdColor = QuadraticThreshold(color, _Bloom_Threshold.x, _Bloom_Threshold.yzw);
+                bloom += color - thresholdColor;
+
+                // Apply bloom
+                color = lerp(color, bloom * _Bloom_Color, saturate(_Bloom_Settings.y));
+
+                // Apply lens dirtiness
+                dirt *= bloom * _Bloom_Settings.y * _Bloom_Settings.z;
+                color += dirt;
             }
             #endif
 

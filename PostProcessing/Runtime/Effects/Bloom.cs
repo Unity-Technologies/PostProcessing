@@ -6,11 +6,11 @@ namespace UnityEngine.Experimental.PostProcessing
     [PostProcess(typeof(BloomRenderer), "Unity/Bloom")]
     public sealed class Bloom : PostProcessEffectSettings
     {
-        [Min(0f), Tooltip("Strength of the bloom filter.")]
+        [Min(0f), Tooltip("Strength of the bloom filter. Values higher than 1 will make bloom contribute more energy to the final render. Keep this under or equal to 1 if you want energy conservation.")]
         public FloatParameter intensity = new FloatParameter { value = 1f };
 
         [Min(0f), Tooltip("Filters out pixels under this level of brightness. Value is in gamma-space.")]
-        public FloatParameter threshold = new FloatParameter { value = 0f };
+        public FloatParameter threshold = new FloatParameter { value = 1f };
 
         [Range(0f, 1f), Tooltip("Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold).")]
         public FloatParameter softKnee = new FloatParameter { value = 0.75f };
@@ -25,7 +25,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public TextureParameter lensTexture = new TextureParameter { value = null };
 
         [Min(0f), Tooltip("Amount of lens dirtiness."), DisplayName("Intensity")]
-        public FloatParameter lensIntensity = new FloatParameter { value = 3f };
+        public FloatParameter lensIntensity = new FloatParameter { value = 1f };
 
         public override bool IsEnabledAndSupported()
         {
@@ -94,11 +94,9 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Prefiltering parameters
             float lthresh = Mathf.GammaToLinearSpace(settings.threshold.value);
-            sheet.properties.SetFloat(Uniforms._Threshold, lthresh);
-
             float knee = lthresh * settings.softKnee.value + 1e-5f;
-            var curve = new Vector3(lthresh - knee, knee * 2f, 0.25f / knee);
-            sheet.properties.SetVector(Uniforms._Curve, curve);
+            var threshold = new Vector4(lthresh, lthresh - knee, knee * 2f, 0.25f / knee);
+            sheet.properties.SetVector(Uniforms._Threshold, threshold);
             
             int qualityOffset = settings.mobileOptimized ? 1 : 0;
 
@@ -131,7 +129,13 @@ namespace UnityEngine.Experimental.PostProcessing
                 last = mipUp;
             }
 
-            var shaderSettings = new Vector3(sampleScale, settings.intensity.value * 0.1f, settings.lensIntensity.value);
+            var shaderSettings = new Vector4(
+                sampleScale,
+                RuntimeUtilities.Exp2(settings.intensity.value) - 1f,
+                settings.lensIntensity.value,
+                iterations
+            );
+
             var dirtTexture = settings.lensTexture.value == null
                 ? RuntimeUtilities.blackTexture
                 : settings.lensTexture.value;
@@ -141,6 +145,7 @@ namespace UnityEngine.Experimental.PostProcessing
             uberSheet.properties.SetVector(Uniforms._Bloom_Settings, shaderSettings);
             uberSheet.properties.SetColor(Uniforms._Bloom_Color, settings.color.value.linear);
             uberSheet.properties.SetTexture(Uniforms._Bloom_DirtTex, dirtTexture);
+            uberSheet.properties.SetVector(Uniforms._Bloom_Threshold, threshold);
             cmd.SetGlobalTexture(Uniforms._BloomTex, m_Pyramid[0].up);
 
             // Cleanup

@@ -151,6 +151,25 @@ float4 FastTonemapInvert(float4 c)
 }
 
 //
+// Quadratic color thresholding
+// curve = (threshold - knee, knee * 2, 0.25 / knee)
+//
+half3 QuadraticThreshold(half3 color, half threshold, half3 curve)
+{
+    // Pixel brightness
+    half br = Max3(color.r, color.g, color.b);
+
+    // Under-threshold part: quadratic curve
+    half rq = clamp(br - curve.x, 0.0, curve.y);
+    rq = curve.z * rq * rq;
+
+    // Combine and apply the brightness response curve.
+    color *= max(rq, br - threshold) / max(br, 1e-5);
+
+    return color;
+}
+
+//
 // LUT grading
 // scaleOffset = (1 / lut_width, 1 / lut_height, lut_height - 1)
 //
