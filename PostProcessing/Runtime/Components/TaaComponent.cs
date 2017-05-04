@@ -283,8 +283,8 @@ namespace UnityEngine.PostProcessing
 
             jitteredMatrix[2, 0] = 0f;
             jitteredMatrix[2, 1] = 0f;
-            jitteredMatrix[2, 2] = -(context.camera.farClipPlane + context.camera.nearClipPlane) / (context.camera.farClipPlane - context.camera.nearClipPlane);
-            jitteredMatrix[2, 3] = -(2f * context.camera.farClipPlane * context.camera.nearClipPlane) / (context.camera.farClipPlane - context.camera.nearClipPlane);
+            jitteredMatrix[2, 2] = origProj[2, 2];
+            jitteredMatrix[2, 3] = origProj[2, 3];
 
             jitteredMatrix[3, 0] = 0f;
             jitteredMatrix[3, 1] = 0f;
