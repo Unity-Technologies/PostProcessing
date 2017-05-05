@@ -125,6 +125,17 @@ float LinearEyeDepth(float z)
     return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
 }
 
+// Clamp HDR value within a safe range
+half3 SafeHDR(half3 c)
+{
+    return min(c, 65004);
+}
+
+half4 SafeHDR(half4 c)
+{
+    return min(c, 65004);
+}
+
 // Vertex manipulation
 float2 TransformTriangleVertexToUV(float2 vertex)
 {

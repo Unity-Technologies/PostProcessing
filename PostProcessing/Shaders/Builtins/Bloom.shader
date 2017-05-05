@@ -28,13 +28,13 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragPrefilter13(VaryingsDefault i) : SV_Target
         {
             half3 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
-            return Prefilter(color, i.texcoord);
+            return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
         {
             half3 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
-            return Prefilter(color, i.texcoord);
+            return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         // ----------------------------------------------------------------------------------------
