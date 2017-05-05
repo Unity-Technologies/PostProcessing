@@ -11,6 +11,14 @@ namespace UnityEditor.Experimental.PostProcessing
         public static readonly Texture2D paneOptionsIconDark;
         public static readonly Texture2D paneOptionsIconLight;
 
+        public static readonly GUIStyle labelHeader;
+
+        public static readonly GUIStyle wheelLabel;
+        public static readonly GUIStyle wheelThumb;
+        public static readonly Vector2 wheelThumbSize;
+
+        public static readonly GUIStyle preLabel;
+
         static Styling()
         {
             smallTickbox = new GUIStyle("ShurikenCheckMark");
@@ -34,6 +42,19 @@ namespace UnityEditor.Experimental.PostProcessing
 
             paneOptionsIconDark = (Texture2D)EditorGUIUtility.Load("Builtin Skins/DarkSkin/Images/pane options.png");
             paneOptionsIconLight = (Texture2D)EditorGUIUtility.Load("Builtin Skins/LightSkin/Images/pane options.png");
+
+            labelHeader = new GUIStyle(EditorStyles.miniLabel);
+
+            wheelThumb = new GUIStyle("ColorPicker2DThumb");
+
+            wheelThumbSize = new Vector2(
+                !Mathf.Approximately(wheelThumb.fixedWidth, 0f) ? wheelThumb.fixedWidth : wheelThumb.padding.horizontal,
+                !Mathf.Approximately(wheelThumb.fixedHeight, 0f) ? wheelThumb.fixedHeight : wheelThumb.padding.vertical
+            );
+
+            wheelLabel = new GUIStyle(EditorStyles.miniLabel);
+
+            preLabel = new GUIStyle("ShurikenLabel");
         }
     }
 }

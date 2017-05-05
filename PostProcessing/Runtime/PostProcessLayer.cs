@@ -53,8 +53,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
         // Recycled list - used to reduce GC stress when gathering active effects in a bundle list
         // on each frame
-        List<PostProcessEffectRenderer> m_ActivePool = new List<PostProcessEffectRenderer>();
-        List<RenderTargetIdentifier> m_TargetPool = new List<RenderTargetIdentifier>();
+        readonly List<PostProcessEffectRenderer> m_ActivePool = new List<PostProcessEffectRenderer>();
+        readonly List<RenderTargetIdentifier> m_TargetPool = new List<RenderTargetIdentifier>();
 
         void OnEnable()
         {

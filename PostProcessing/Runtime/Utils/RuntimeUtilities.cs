@@ -153,7 +153,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         #endregion
 
-        #region Texture lerping & resource management
+        #region Parameter lerping & resource management
 
         static List<RenderTexture> m_LerpTargetPool = new List<RenderTexture>();
 
@@ -189,6 +189,52 @@ namespace UnityEngine.Experimental.PostProcessing
                 RenderTexture.ReleaseTemporary(rt);
 
             m_LerpTargetPool.Clear();
+        }
+
+        internal static void Lerp(AnimationCurve from, AnimationCurve to, float t, AnimationCurve destination)
+        {
+            // Try and minimize computations & garbage as much as we can
+            // Avoid using `AnimationCurve.keys` as it stresses GC way too much
+            if (from == to || t >= 1f)
+            {
+                if (destination == to)
+                    return;
+
+                int len = to.length;
+                if (len == destination.length)
+                {
+                    for (int i = 0; i < len; i++)
+                        destination.MoveKey(i, to[i]);
+                }
+                else
+                {
+                    for (int i = 0; i < destination.length; i++)
+                        destination.RemoveKey(i);
+
+                    for (int i = 0; i < len; i++)
+                        destination.AddKey(to[i]);
+                }
+
+                return;
+            }
+
+            const int kSteps = 32;
+            float inc = 1f / (float)kSteps;
+
+            for (int i = 0; i < destination.length; i++)
+                destination.RemoveKey(i);
+
+            for (int i = 0; i < kSteps; i++)
+            {
+                float x = i * inc;
+                float a = from.Evaluate(x);
+                float b = to.Evaluate(x);
+                destination.AddKey(x, a + (b - a) * t);
+            }
+
+            // Is this really needed or does Unity do it for us automatically?
+            for (int i = 0; i < kSteps; i++)
+                destination.SmoothTangents(i, 0f);
         }
 
         #endregion
@@ -236,6 +282,7 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         // Returns all attributes set on a specific member
+        // Note: doesn't include inherited attributes, only explicit ones
         public static Attribute[] GetMemberAttributes<TType, TValue>(Expression<Func<TType, TValue>> expr)
         {
             Expression body = expr;

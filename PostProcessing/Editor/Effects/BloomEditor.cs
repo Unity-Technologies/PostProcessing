@@ -29,15 +29,16 @@ namespace UnityEditor.Experimental.PostProcessing
 
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField("Bloom", EditorStyles.miniLabel);
+            EditorUtilities.DrawHeaderLabel("Bloom");
             
             PropertyField(m_Intensity);
             PropertyField(m_Threshold);
             PropertyField(m_SoftKnee);
             PropertyField(m_Color);
             PropertyField(m_MobileOptimized);
-
-            EditorGUILayout.LabelField("Lens Dirtiness", EditorStyles.miniLabel);
+            
+            EditorGUILayout.Space();
+            EditorUtilities.DrawHeaderLabel("Lens Dirtiness");
                 
             PropertyField(m_LensTexture);
             PropertyField(m_LensIntensity);

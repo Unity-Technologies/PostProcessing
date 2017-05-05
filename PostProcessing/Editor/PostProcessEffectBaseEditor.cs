@@ -13,14 +13,21 @@ namespace UnityEditor.Experimental.PostProcessing
         internal SerializedProperty activeProperty;
 
         SerializedProperty m_Enabled;
+        Editor m_Inspector;
 
         internal PostProcessEffectBaseEditor()
         {
         }
 
-        internal void Init(PostProcessEffectSettings target)
+        public void Repaint()
+        {
+            m_Inspector.Repaint();
+        }
+
+        internal void Init(PostProcessEffectSettings target, Editor inspector)
         {
             this.target = target;
+            m_Inspector = inspector;
             serializedObject = new SerializedObject(target);
             m_Enabled = serializedObject.FindProperty("enabled");
             activeProperty = serializedObject.FindProperty("active");
@@ -57,10 +64,10 @@ namespace UnityEditor.Experimental.PostProcessing
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button(EditorUtilities.GetContent("All|Toggle all overrides on"), Styling.miniLabelButton, GUILayout.Width(17f), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(EditorUtilities.GetContent("All|Toggle all overrides on. To maximize performances you should only toggle overrides that you actually need."), Styling.miniLabelButton, GUILayout.Width(17f), GUILayout.ExpandWidth(false)))
                     SetAllOverridesTo(true);
 
-                if (GUILayout.Button(EditorUtilities.GetContent("None|Toggle all overrides off"), Styling.miniLabelButton, GUILayout.Width(32f), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button(EditorUtilities.GetContent("None|Toggle all overrides off."), Styling.miniLabelButton, GUILayout.Width(32f), GUILayout.ExpandWidth(false)))
                     SetAllOverridesTo(false);
 
                 GUILayout.FlexibleSpace();
@@ -68,8 +75,8 @@ namespace UnityEditor.Experimental.PostProcessing
                 var property = m_Enabled.Copy();
                 property.Next(true);
                 bool enabled = property.boolValue;
-                enabled = GUILayout.Toggle(enabled, EditorUtilities.GetContent("On|Enable this effect"), EditorStyles.miniButtonLeft, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
-                enabled = !GUILayout.Toggle(!enabled, EditorUtilities.GetContent("Off|Disable this effect"), EditorStyles.miniButtonRight, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
+                enabled = GUILayout.Toggle(enabled, EditorUtilities.GetContent("On|Enable this effect."), EditorStyles.miniButtonLeft, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
+                enabled = !GUILayout.Toggle(!enabled, EditorUtilities.GetContent("Off|Disable this effect."), EditorStyles.miniButtonRight, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
                 property.boolValue = enabled;
             }
         }
@@ -89,26 +96,6 @@ namespace UnityEditor.Experimental.PostProcessing
 
         protected void PropertyField(SerializedParameterOverride property, GUIContent title)
         {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                bool overrideState = property.overrideState.boolValue;
-
-                // Override checkbox
-                var overrideRect = GUILayoutUtility.GetRect(17f, 17f, GUILayout.ExpandWidth(false));
-                overrideRect.yMin += 4f;
-
-                var oldColor = GUI.color;
-                GUI.color = new Color(0.8f, 0.8f, 0.8f, 0.8f);
-                overrideState = GUI.Toggle(overrideRect, overrideState, EditorUtilities.GetContent("|Override this setting"), Styling.smallTickbox);
-                GUI.color = oldColor;
-
-                property.overrideState.boolValue = overrideState;
-                DoProperty(property, overrideState, title);
-            }
-        }
-
-        void DoProperty(SerializedParameterOverride property, bool overrideState, GUIContent title)
-        {
             // Check for DisplayNameAttribute first
             var displayNameAttr = property.GetAttribute<DisplayNameAttribute>();
             if (displayNameAttr != null)
@@ -122,28 +109,49 @@ namespace UnityEditor.Experimental.PostProcessing
                     title.tooltip = tooltipAttr.tooltip;
             }
 
-            using (new EditorGUI.DisabledScope(!overrideState))
+            // Look for a compatible attribute decorator and break as soon as we find one
+            AttributeDecorator decorator = null;
+            Attribute attribute = null;
+
+            foreach (var attr in property.attributes)
             {
-                // Look for a compatible attribute decorator and break as soon as we find one
-                AttributeDecorator decorator = null;
-                Attribute attribute = null;
-
-                foreach (var attr in property.attributes)
-                {
-                    decorator = EditorUtilities.GetDecorator(attr.GetType());
-                    attribute = attr;
-
-                    if (decorator != null)
-                        break;
-                }
+                decorator = EditorUtilities.GetDecorator(attr.GetType());
+                attribute = attr;
 
                 if (decorator != null)
-                {
-                    if (decorator.OnGUI(property.value, overrideState, title, attribute))
-                        return;
-                }
+                    break;
+            }
 
-                EditorGUILayout.PropertyField(property.value, title);
+            bool invalidProp = false;
+
+            if (decorator != null && !decorator.IsAutoProperty())
+            {
+                if (decorator.OnGUI(property.value, property.overrideState, title, attribute))
+                    return;
+                
+                // Attribute is invalid for the specified property; use default unity field instead
+                invalidProp = true;
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                // Override checkbox
+                var overrideRect = GUILayoutUtility.GetRect(17f, 17f, GUILayout.ExpandWidth(false));
+                overrideRect.yMin += 4f;
+                EditorUtilities.DrawOverrideCheckbox(overrideRect, property.overrideState);
+
+                // Property
+                using (new EditorGUI.DisabledScope(!property.overrideState.boolValue))
+                {
+                    if (decorator != null && !invalidProp)
+                    {
+                        if (decorator.OnGUI(property.value, property.overrideState, title, attribute))
+                            return;
+                    }
+
+                    // Default unity field
+                    EditorGUILayout.PropertyField(property.value, title);
+                }
             }
         }
     }

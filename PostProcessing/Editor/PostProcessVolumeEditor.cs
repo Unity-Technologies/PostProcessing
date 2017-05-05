@@ -78,7 +78,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 editorType = typeof(DefaultPostProcessEffectEditor);
 
             var editor = (PostProcessEffectBaseEditor)Activator.CreateInstance(editorType);
-            editor.Init(settings);
+            editor.Init(settings, this);
             editor.baseProperty = property.Copy();
 
             if (index < 0)

@@ -155,48 +155,16 @@ namespace UnityEngine.Experimental.PostProcessing
     {
         public override void Interp(AnimationCurve from, AnimationCurve to, float t)
         {
-            // Try and minimize computations & garbage as much as we can
-            // Avoid using `AnimationCurve.keys` as it stresses GC way too much
-            if (from == to || t >= 1f)
-            {
-                if (value == to)
-                    return;
+            RuntimeUtilities.Lerp(from, to, t, value);
+        }
+    }
 
-                int len = to.length;
-                if (len == value.length)
-                {
-                    for (int i = 0; i < len; i++)
-                        value.MoveKey(i, to[i]);
-                }
-                else
-                {
-                    for (int i = 0; i < value.length; i++)
-                        value.RemoveKey(i);
-
-                    for (int i = 0; i < len; i++)
-                        value.AddKey(to[i]);
-                }
-
-                return;
-            }
-            
-            const int kSteps = 32;
-            float inc = 1f / (float)kSteps;
-
-            for (int i = 0; i < value.length; i++)
-                value.RemoveKey(i);
-
-            for (int i = 0; i < kSteps; i++)
-            {
-                float x = i * inc;
-                float a = from.Evaluate(x);
-                float b = to.Evaluate(x);
-                value.AddKey(x, a + (b - a) * t);
-            }
-
-            // Is this really needed or does Unity do it for us automatically?
-            for (int i = 0; i < kSteps; i++)
-                value.SmoothTangents(i, 0f);
+    [Serializable]
+    public sealed class GradingCurveParameter : ParameterOverride<ColorGradingCurve>
+    {
+        public override void Interp(ColorGradingCurve from, ColorGradingCurve to, float t)
+        {
+            RuntimeUtilities.Lerp(from.curve, to.curve, t, value.curve);
         }
     }
 

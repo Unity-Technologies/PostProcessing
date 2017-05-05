@@ -7,7 +7,7 @@ namespace UnityEditor.Experimental.PostProcessing
     [Decorator(typeof(RangeAttribute))]
     public sealed class RangeDecorator : AttributeDecorator
     {
-        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
             var attr = (RangeAttribute)attribute;
 
@@ -30,7 +30,7 @@ namespace UnityEditor.Experimental.PostProcessing
     [Decorator(typeof(MinAttribute))]
     public sealed class MinDecorator : AttributeDecorator
     {
-        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
             var attr = (MinAttribute)attribute;
 
@@ -55,7 +55,7 @@ namespace UnityEditor.Experimental.PostProcessing
     [Decorator(typeof(MaxAttribute))]
     public sealed class MaxDecorator : AttributeDecorator
     {
-        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
             var attr = (MaxAttribute)attribute;
 
@@ -80,7 +80,7 @@ namespace UnityEditor.Experimental.PostProcessing
     [Decorator(typeof(MinMaxAttribute))]
     public sealed class MinMaxDecorator : AttributeDecorator
     {
-        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
             var attr = (MinMaxAttribute)attribute;
 
@@ -113,7 +113,7 @@ namespace UnityEditor.Experimental.PostProcessing
     [Decorator(typeof(ColorUsageAttribute))]
     public sealed class ColorUsageDecorator : AttributeDecorator
     {
-        public override bool OnGUI(SerializedProperty property, bool overrideState, GUIContent title, Attribute attribute)
+        public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
             var attr = (ColorUsageAttribute)attribute;
 

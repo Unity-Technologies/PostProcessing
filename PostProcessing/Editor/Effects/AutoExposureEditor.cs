@@ -35,7 +35,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField("Exposure", EditorStyles.miniLabel);
+            EditorUtilities.DrawHeaderLabel("Exposure");
 
             PropertyField(m_Filtering);
 
@@ -47,8 +47,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 PropertyField(m_KeyValue);
             
             EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField("Adaptation", EditorStyles.miniLabel);
+            EditorUtilities.DrawHeaderLabel("Adaptation");
 
             PropertyField(m_EyeAdaptation);
 

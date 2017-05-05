@@ -114,6 +114,19 @@ namespace UnityEditor.Experimental.PostProcessing
                 : new Color(0.12f, 0.12f, 0.12f, 1.333f));
         }
 
+        public static void DrawOverrideCheckbox(Rect rect, SerializedProperty property)
+        {
+            var oldColor = GUI.color;
+            GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.75f);
+            property.boolValue = GUI.Toggle(rect, property.boolValue, GetContent("|Override this setting for this volume."), Styling.smallTickbox);
+            GUI.color = oldColor;
+        }
+
+        public static void DrawHeaderLabel(string title)
+        {
+            EditorGUILayout.LabelField(title, Styling.labelHeader);
+        }
+
         public static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, PostProcessEffectSettings target, Action resetAction, Action removeAction)
         {
             Assert.IsNotNull(group);
