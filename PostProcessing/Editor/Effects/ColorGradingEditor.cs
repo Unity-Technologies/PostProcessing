@@ -21,178 +21,133 @@ namespace UnityEditor.Experimental.PostProcessing
             new GUIContent("Lum VS Sat")
         };
 
-        sealed class CurveData
-        {
-            public SerializedParameterOverride master;
-            public SerializedParameterOverride red;
-            public SerializedParameterOverride green;
-            public SerializedParameterOverride blue;
+        SerializedParameterOverride m_LdrLut;
 
-            public SerializedParameterOverride hueVsHue;
-            public SerializedParameterOverride hueVsSat;
-            public SerializedParameterOverride satVsSat;
-            public SerializedParameterOverride lumVsSat;
+        SerializedParameterOverride m_Temperature;
+        SerializedParameterOverride m_Tint;
 
-            // Internal references to the actual animation curves
-            // Needed for the curve editor
-            public SerializedProperty rawMaster;
-            public SerializedProperty rawRed;
-            public SerializedProperty rawGreen;
-            public SerializedProperty rawBlue;
+        SerializedParameterOverride m_ColorFilter;
+        SerializedParameterOverride m_HueShift;
+        SerializedParameterOverride m_Saturation;
+        SerializedParameterOverride m_Brightness;
+        SerializedParameterOverride m_PostExposure;
+        SerializedParameterOverride m_Contrast;
 
-            public SerializedProperty rawHueVsHue;
-            public SerializedProperty rawHueVsSat;
-            public SerializedProperty rawSatVsSat;
-            public SerializedProperty rawLumVsSat;
+        SerializedParameterOverride m_MixerRedOutRedIn;
+        SerializedParameterOverride m_MixerRedOutGreenIn;
+        SerializedParameterOverride m_MixerRedOutBlueIn;
 
-            public SerializedProperty currentEditingCurve;
+        SerializedParameterOverride m_MixerGreenOutRedIn;
+        SerializedParameterOverride m_MixerGreenOutGreenIn;
+        SerializedParameterOverride m_MixerGreenOutBlueIn;
 
-            public CurveEditor curveEditor;
-            public Dictionary<SerializedProperty, Color> curveDict;
+        SerializedParameterOverride m_MixerBlueOutRedIn;
+        SerializedParameterOverride m_MixerBlueOutGreenIn;
+        SerializedParameterOverride m_MixerBlueOutBlueIn;
 
-            public void SetupCurve(SerializedProperty prop, Color color, uint minPointCount, bool loop)
-            {
-                var state = CurveEditor.CurveState.defaultState;
-                state.color = color;
-                state.visible = false;
-                state.minPointCount = minPointCount;
-                state.onlyShowHandlesOnSelection = true;
-                state.zeroKeyConstantValue = 0.5f;
-                state.loopInBounds = loop;
-                curveEditor.Add(prop, state);
-                curveDict.Add(prop, color);
-            }
-        }
+        SerializedParameterOverride m_Lift;
+        SerializedParameterOverride m_Gamma;
+        SerializedParameterOverride m_Gain;
 
-        // -----------------------------------------------------------------------------------------
-        // LDR settings
+        SerializedParameterOverride m_MasterCurve;
+        SerializedParameterOverride m_RedCurve;
+        SerializedParameterOverride m_GreenCurve;
+        SerializedParameterOverride m_BlueCurve;
 
-        sealed class LdrSettings
-        {
-            public SerializedParameterOverride lut;
+        SerializedParameterOverride m_HueVsHueCurve;
+        SerializedParameterOverride m_HueVsSatCurve;
+        SerializedParameterOverride m_SatVsSatCurve;
+        SerializedParameterOverride m_LumVsSatCurve;
 
-            public SerializedParameterOverride temperature;
-            public SerializedParameterOverride tint;
+        // Internal references to the actual animation curves
+        // Needed for the curve editor
+        SerializedProperty m_RawMasterCurve;
+        SerializedProperty m_RawRedCurve;
+        SerializedProperty m_RawGreenCurve;
+        SerializedProperty m_RawBlueCurve;
 
-            public SerializedParameterOverride colorFilter;
-            public SerializedParameterOverride hueShift;
-            public SerializedParameterOverride saturation;
-            public SerializedParameterOverride brightness;
-            public SerializedParameterOverride contrast;
+        SerializedProperty m_RawHueVsHueCurve;
+        SerializedProperty m_RawHueVsSatCurve;
+        SerializedProperty m_RawSatVsSatCurve;
+        SerializedProperty m_RawLumVsSatCurve;
 
-            public SerializedParameterOverride mixerRedOutRedIn;
-            public SerializedParameterOverride mixerRedOutGreenIn;
-            public SerializedParameterOverride mixerRedOutBlueIn;
+        SerializedProperty m_CurrentMixerChannel;
+        SerializedProperty m_CurrentEditingCurve;
 
-            public SerializedParameterOverride mixerGreenOutRedIn;
-            public SerializedParameterOverride mixerGreenOutGreenIn;
-            public SerializedParameterOverride mixerGreenOutBlueIn;
-
-            public SerializedParameterOverride mixerBlueOutRedIn;
-            public SerializedParameterOverride mixerBlueOutGreenIn;
-            public SerializedParameterOverride mixerBlueOutBlueIn;
-
-            public SerializedParameterOverride lift;
-            public SerializedParameterOverride gamma;
-            public SerializedParameterOverride gain;
-
-            public SerializedProperty mixerChannel;
-
-            public CurveData curveData;
-        }
-
-        LdrSettings ldr;
-
-        // -----------------------------------------------------------------------------------------
-        // HDR settings
-
-        // -----------------------------------------------------------------------------------------
-        // Custom HDR settings
-
-        sealed class CustomSettings
-        {
-            public SerializedParameterOverride m_LogLut;
-        }
-
-        CustomSettings custom;
+        CurveEditor m_CurveEditor;
+        Dictionary<SerializedProperty, Color> m_CurveDict;
+        
+        SerializedParameterOverride m_LogLut;
 
         public override void OnEnable()
         {
             m_GradingMode = FindParameterOverride(x => x.gradingMode);
 
-            ldr = new LdrSettings
-            {
-                lut = FindParameterOverride(x => x.ldrLut),
+            m_LdrLut = FindParameterOverride(x => x.ldrLut);
 
-                temperature = FindParameterOverride(x => x.ldrTemperature),
-                tint = FindParameterOverride(x => x.ldrTint),
+            m_Temperature = FindParameterOverride(x => x.temperature);
+            m_Tint = FindParameterOverride(x => x.tint);
 
-                colorFilter = FindParameterOverride(x => x.ldrColorFilter),
-                hueShift = FindParameterOverride(x => x.ldrHueShift),
-                saturation = FindParameterOverride(x => x.ldrSaturation),
-                brightness = FindParameterOverride(x => x.ldrBrightness),
-                contrast = FindParameterOverride(x => x.ldrContrast),
+            m_ColorFilter = FindParameterOverride(x => x.colorFilter);
+            m_HueShift = FindParameterOverride(x => x.hueShift);
+            m_Saturation = FindParameterOverride(x => x.saturation);
+            m_Brightness = FindParameterOverride(x => x.brightness);
+            m_PostExposure = FindParameterOverride(x => x.postExposure);
+            m_Contrast = FindParameterOverride(x => x.contrast);
 
-                mixerRedOutRedIn = FindParameterOverride(x => x.ldrMixerRedOutRedIn),
-                mixerRedOutGreenIn = FindParameterOverride(x => x.ldrMixerRedOutGreenIn),
-                mixerRedOutBlueIn = FindParameterOverride(x => x.ldrMixerRedOutBlueIn),
+            m_MixerRedOutRedIn = FindParameterOverride(x => x.mixerRedOutRedIn);
+            m_MixerRedOutGreenIn = FindParameterOverride(x => x.mixerRedOutGreenIn);
+            m_MixerRedOutBlueIn = FindParameterOverride(x => x.mixerRedOutBlueIn);
 
-                mixerGreenOutRedIn = FindParameterOverride(x => x.ldrMixerGreenOutRedIn),
-                mixerGreenOutGreenIn = FindParameterOverride(x => x.ldrMixerGreenOutGreenIn),
-                mixerGreenOutBlueIn = FindParameterOverride(x => x.ldrMixerGreenOutBlueIn),
+            m_MixerGreenOutRedIn = FindParameterOverride(x => x.mixerGreenOutRedIn);
+            m_MixerGreenOutGreenIn = FindParameterOverride(x => x.mixerGreenOutGreenIn);
+            m_MixerGreenOutBlueIn = FindParameterOverride(x => x.mixerGreenOutBlueIn);
 
-                mixerBlueOutRedIn = FindParameterOverride(x => x.ldrMixerBlueOutRedIn),
-                mixerBlueOutGreenIn = FindParameterOverride(x => x.ldrMixerBlueOutGreenIn),
-                mixerBlueOutBlueIn = FindParameterOverride(x => x.ldrMixerBlueOutBlueIn),
-                mixerChannel = serializedObject.FindProperty("m_LdrMixerChannel"),
+            m_MixerBlueOutRedIn = FindParameterOverride(x => x.mixerBlueOutRedIn);
+            m_MixerBlueOutGreenIn = FindParameterOverride(x => x.mixerBlueOutGreenIn);
+            m_MixerBlueOutBlueIn = FindParameterOverride(x => x.mixerBlueOutBlueIn);
 
-                lift = FindParameterOverride(x => x.ldrLift),
-                gamma = FindParameterOverride(x => x.ldrGamma),
-                gain = FindParameterOverride(x => x.ldrGain)
-            };
+            m_Lift = FindParameterOverride(x => x.lift);
+            m_Gamma = FindParameterOverride(x => x.gamma);
+            m_Gain = FindParameterOverride(x => x.gain);
 
-            ldr.curveData = new CurveData
-            {
-                master = FindParameterOverride(x => x.ldrMaster),
-                red = FindParameterOverride(x => x.ldrRed),
-                green = FindParameterOverride(x => x.ldrGreen),
-                blue = FindParameterOverride(x => x.ldrBlue),
+            m_MasterCurve = FindParameterOverride(x => x.masterCurve);
+            m_RedCurve = FindParameterOverride(x => x.redCurve);
+            m_GreenCurve = FindParameterOverride(x => x.greenCurve);
+            m_BlueCurve = FindParameterOverride(x => x.blueCurve);
 
-                hueVsHue = FindParameterOverride(x => x.ldrHueVsHue),
-                hueVsSat = FindParameterOverride(x => x.ldrHueVsSat),
-                satVsSat = FindParameterOverride(x => x.ldrSatVsSat),
-                lumVsSat = FindParameterOverride(x => x.ldrLumVsSat),
+            m_HueVsHueCurve = FindParameterOverride(x => x.hueVsHueCurve);
+            m_HueVsSatCurve = FindParameterOverride(x => x.hueVsSatCurve);
+            m_SatVsSatCurve = FindParameterOverride(x => x.satVsSatCurve);
+            m_LumVsSatCurve = FindParameterOverride(x => x.lumVsSatCurve);
 
-                rawMaster = FindProperty(x => x.ldrMaster.value.curve),
-                rawRed = FindProperty(x => x.ldrRed.value.curve),
-                rawGreen = FindProperty(x => x.ldrGreen.value.curve),
-                rawBlue = FindProperty(x => x.ldrBlue.value.curve),
+            m_RawMasterCurve = FindProperty(x => x.masterCurve.value.curve);
+            m_RawRedCurve = FindProperty(x => x.redCurve.value.curve);
+            m_RawGreenCurve = FindProperty(x => x.greenCurve.value.curve);
+            m_RawBlueCurve = FindProperty(x => x.blueCurve.value.curve);
 
-                rawHueVsHue = FindProperty(x => x.ldrHueVsHue.value.curve),
-                rawHueVsSat = FindProperty(x => x.ldrHueVsSat.value.curve),
-                rawSatVsSat = FindProperty(x => x.ldrSatVsSat.value.curve),
-                rawLumVsSat = FindProperty(x => x.ldrLumVsSat.value.curve),
+            m_RawHueVsHueCurve = FindProperty(x => x.hueVsHueCurve.value.curve);
+            m_RawHueVsSatCurve = FindProperty(x => x.hueVsSatCurve.value.curve);
+            m_RawSatVsSatCurve = FindProperty(x => x.satVsSatCurve.value.curve);
+            m_RawLumVsSatCurve = FindProperty(x => x.lumVsSatCurve.value.curve);
+            
+            m_CurrentMixerChannel = serializedObject.FindProperty("m_CurrentMixerChannel");
+            m_CurrentEditingCurve = serializedObject.FindProperty("m_CurrentEditingCurve");
 
-                currentEditingCurve = serializedObject.FindProperty("m_LdrCurrentEditingCurve"),
-
-                curveEditor = new CurveEditor(),
-                curveDict = new Dictionary<SerializedProperty, Color>()
-            };
+            m_CurveEditor = new CurveEditor();
+            m_CurveDict = new Dictionary<SerializedProperty, Color>();
 
             // Prepare the curve editor
-            ldr.curveData.SetupCurve(ldr.curveData.rawMaster, new Color(1f, 1f, 1f), 2, false);
-            ldr.curveData.SetupCurve(ldr.curveData.rawRed, new Color(1f, 0f, 0f), 2, false);
-            ldr.curveData.SetupCurve(ldr.curveData.rawGreen, new Color(0f, 1f, 0f), 2, false);
-            ldr.curveData.SetupCurve(ldr.curveData.rawBlue, new Color(0f, 0.5f, 1f), 2, false);
-            ldr.curveData.SetupCurve(ldr.curveData.rawHueVsHue, new Color(1f, 1f, 1f), 0, true);
-            ldr.curveData.SetupCurve(ldr.curveData.rawHueVsSat, new Color(1f, 1f, 1f), 0, true);
-            ldr.curveData.SetupCurve(ldr.curveData.rawSatVsSat, new Color(1f, 1f, 1f), 0, false);
-            ldr.curveData.SetupCurve(ldr.curveData.rawLumVsSat, new Color(1f, 1f, 1f), 0, false);
+            SetupCurve(m_RawMasterCurve, new Color(1f, 1f, 1f), 2, false);
+            SetupCurve(m_RawRedCurve, new Color(1f, 0f, 0f), 2, false);
+            SetupCurve(m_RawGreenCurve, new Color(0f, 1f, 0f), 2, false);
+            SetupCurve(m_RawBlueCurve, new Color(0f, 0.5f, 1f), 2, false);
+            SetupCurve(m_RawHueVsHueCurve, new Color(1f, 1f, 1f), 0, true);
+            SetupCurve(m_RawHueVsSatCurve, new Color(1f, 1f, 1f), 0, true);
+            SetupCurve(m_RawSatVsSatCurve, new Color(1f, 1f, 1f), 0, false);
+            SetupCurve(m_RawLumVsSatCurve, new Color(1f, 1f, 1f), 0, false);
 
-            custom = new CustomSettings
-            {
-                m_LogLut = FindParameterOverride(x => x.logLut),
-            };
+            m_LogLut = FindParameterOverride(x => x.logLut);
         }
 
         public override void OnInspectorGUI()
@@ -201,37 +156,63 @@ namespace UnityEditor.Experimental.PostProcessing
 
             var gradingMode = (GradingMode)m_GradingMode.value.intValue;
             if (gradingMode == GradingMode.LowDefinitionRange)
-                DoLdrGUI();
+                DoStandardModeGUI(false);
             else if (gradingMode == GradingMode.HighDefinitionRange)
-                DoHdrGUI();
+                DoStandardModeGUI(true);
             else
                 DoCustomHdrGUI();
             
             EditorGUILayout.Space();
         }
 
-        void DoLdrGUI()
+        void SetupCurve(SerializedProperty prop, Color color, uint minPointCount, bool loop)
+        {
+            var state = CurveEditor.CurveState.defaultState;
+            state.color = color;
+            state.visible = false;
+            state.minPointCount = minPointCount;
+            state.onlyShowHandlesOnSelection = true;
+            state.zeroKeyConstantValue = 0.5f;
+            state.loopInBounds = loop;
+            m_CurveEditor.Add(prop, state);
+            m_CurveDict.Add(prop, color);
+        }
+
+        void DoStandardModeGUI(bool hdr)
         {
             EditorGUILayout.HelpBox("Only GradingMode.CustomLogLUT works right now.", MessageType.Error);
-            PropertyField(ldr.lut);
-            
+
+            if (!hdr)
+            {
+                PropertyField(m_LdrLut);
+
+                var lut = (target as ColorGrading).ldrLut.value;
+                CheckLutImportSettings(lut);
+            }
+
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("White Balance");
             
-            PropertyField(ldr.temperature);
-            PropertyField(ldr.tint);
+            PropertyField(m_Temperature);
+            PropertyField(m_Tint);
 
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Tone");
-            
-            PropertyField(ldr.colorFilter);
-            PropertyField(ldr.hueShift);
-            PropertyField(ldr.saturation);
-            PropertyField(ldr.brightness);
-            PropertyField(ldr.contrast);
+
+            if (hdr)
+                PropertyField(m_PostExposure);
+
+            PropertyField(m_ColorFilter);
+            PropertyField(m_HueShift);
+            PropertyField(m_Saturation);
+
+            if (!hdr)
+                PropertyField(m_Brightness);
+
+            PropertyField(m_Contrast);
 
             EditorGUILayout.Space();
-            int currentChannel = ldr.mixerChannel.intValue;
+            int currentChannel = m_CurrentMixerChannel.intValue;
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -251,25 +232,25 @@ namespace UnityEditor.Experimental.PostProcessing
                     GUI.FocusControl(null);
             }
 
-            ldr.mixerChannel.intValue = currentChannel;
+            m_CurrentMixerChannel.intValue = currentChannel;
 
             if (currentChannel == 0)
             {
-                PropertyField(ldr.mixerRedOutRedIn);
-                PropertyField(ldr.mixerRedOutGreenIn);
-                PropertyField(ldr.mixerRedOutBlueIn);
+                PropertyField(m_MixerRedOutRedIn);
+                PropertyField(m_MixerRedOutGreenIn);
+                PropertyField(m_MixerRedOutBlueIn);
             }
             else if (currentChannel == 1)
             {
-                PropertyField(ldr.mixerGreenOutRedIn);
-                PropertyField(ldr.mixerGreenOutGreenIn);
-                PropertyField(ldr.mixerGreenOutBlueIn);
+                PropertyField(m_MixerGreenOutRedIn);
+                PropertyField(m_MixerGreenOutGreenIn);
+                PropertyField(m_MixerGreenOutBlueIn);
             }
             else
             {
-                PropertyField(ldr.mixerBlueOutRedIn);
-                PropertyField(ldr.mixerBlueOutGreenIn);
-                PropertyField(ldr.mixerBlueOutBlueIn);
+                PropertyField(m_MixerBlueOutRedIn);
+                PropertyField(m_MixerBlueOutGreenIn);
+                PropertyField(m_MixerBlueOutBlueIn);
             }
 
             EditorGUILayout.Space();
@@ -277,31 +258,29 @@ namespace UnityEditor.Experimental.PostProcessing
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                PropertyField(ldr.lift);
+                PropertyField(m_Lift);
                 GUILayout.Space(4f);
-                PropertyField(ldr.gamma);
+                PropertyField(m_Gamma);
                 GUILayout.Space(4f);
-                PropertyField(ldr.gain);
+                PropertyField(m_Gain);
             }
 
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Grading Curves");
 
-            DoCurvesGUI(ldr.curveData);
-        }
-
-        void DoHdrGUI()
-        {
-            EditorGUILayout.HelpBox("Only GradingMode.CustomLogLUT works right now.", MessageType.Error);
+            DoCurvesGUI();
         }
 
         void DoCustomHdrGUI()
         {
-            PropertyField(custom.m_LogLut);
+            PropertyField(m_LogLut);
 
             var lut = (target as ColorGrading).logLut.value;
+            CheckLutImportSettings(lut);
+        }
 
-            // Checks import settings on the LUT
+        void CheckLutImportSettings(Texture lut)
+        {
             if (lut != null)
             {
                 var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(lut)) as TextureImporter;
@@ -317,12 +296,12 @@ namespace UnityEditor.Experimental.PostProcessing
                         && importer.filterMode == FilterMode.Bilinear;
 
                     if (!valid)
-                        EditorUtilities.DrawFixMeBox("Invalid LUT import settings.", () => SetLogLutImportSettings(importer));
+                        EditorUtilities.DrawFixMeBox("Invalid LUT import settings.", () => SetLutImportSettings(importer));
                 }
             }
         }
 
-        void SetLogLutImportSettings(TextureImporter importer)
+        void SetLutImportSettings(TextureImporter importer)
         {
             importer.textureType = TextureImporterType.Default;
             importer.filterMode = FilterMode.Bilinear;
@@ -336,22 +315,22 @@ namespace UnityEditor.Experimental.PostProcessing
             AssetDatabase.Refresh();
         }
 
-        void ResetVisibleCurves(CurveData curveData)
+        void ResetVisibleCurves()
         {
-            foreach (var curve in curveData.curveDict)
+            foreach (var curve in m_CurveDict)
             {
-                var state = curveData.curveEditor.GetCurveState(curve.Key);
+                var state = m_CurveEditor.GetCurveState(curve.Key);
                 state.visible = false;
-                curveData.curveEditor.SetCurveState(curve.Key, state);
+                m_CurveEditor.SetCurveState(curve.Key, state);
             }
         }
 
-        void SetCurveVisible(SerializedProperty rawProp, SerializedProperty overrideProp, CurveData curveData)
+        void SetCurveVisible(SerializedProperty rawProp, SerializedProperty overrideProp)
         {
-            var state = curveData.curveEditor.GetCurveState(rawProp);
+            var state = m_CurveEditor.GetCurveState(rawProp);
             state.visible = true;
             state.editable = overrideProp.boolValue;
-            curveData.curveEditor.SetCurveState(rawProp, state);
+            m_CurveEditor.SetCurveState(rawProp, state);
         }
 
         void CurveOverrideToggle(SerializedProperty overrideProp)
@@ -361,10 +340,10 @@ namespace UnityEditor.Experimental.PostProcessing
 
         static Material s_MaterialGrid;
 
-        void DoCurvesGUI(CurveData curveData)
+        void DoCurvesGUI()
         {
             EditorGUILayout.Space();
-            ResetVisibleCurves(curveData);
+            ResetVisibleCurves();
 
             using (new EditorGUI.DisabledGroupScope(serializedObject.isEditingMultipleObjects))
             {
@@ -374,51 +353,51 @@ namespace UnityEditor.Experimental.PostProcessing
                 // Top toolbar
                 using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
                 {
-                    curveEditingId = EditorGUILayout.Popup(curveData.currentEditingCurve.intValue, s_Curves, EditorStyles.toolbarPopup, GUILayout.MaxWidth(150f));
+                    curveEditingId = EditorGUILayout.Popup(m_CurrentEditingCurve.intValue, s_Curves, EditorStyles.toolbarPopup, GUILayout.MaxWidth(150f));
                     curveEditingId = Mathf.Clamp(curveEditingId, 0, 7);
                     EditorGUILayout.Space();
 
                     switch (curveEditingId)
                     {
                         case 0:
-                            CurveOverrideToggle(curveData.master.overrideState);
-                            SetCurveVisible(curveData.rawMaster, curveData.master.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawMaster;
+                            CurveOverrideToggle(m_MasterCurve.overrideState);
+                            SetCurveVisible(m_RawMasterCurve, m_MasterCurve.overrideState);
+                            currentCurveRawProp = m_RawMasterCurve;
                             break;
                         case 1:
-                            CurveOverrideToggle(curveData.red.overrideState);
-                            SetCurveVisible(curveData.rawRed, curveData.red.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawRed;
+                            CurveOverrideToggle(m_RedCurve.overrideState);
+                            SetCurveVisible(m_RawRedCurve, m_RedCurve.overrideState);
+                            currentCurveRawProp = m_RawRedCurve;
                             break;
                         case 2:
-                            CurveOverrideToggle(curveData.green.overrideState);
-                            SetCurveVisible(curveData.rawGreen, curveData.green.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawGreen;
+                            CurveOverrideToggle(m_GreenCurve.overrideState);
+                            SetCurveVisible(m_RawGreenCurve, m_GreenCurve.overrideState);
+                            currentCurveRawProp = m_RawGreenCurve;
                             break;
                         case 3:
-                            CurveOverrideToggle(curveData.blue.overrideState);
-                            SetCurveVisible(curveData.rawBlue, curveData.blue.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawBlue;
+                            CurveOverrideToggle(m_BlueCurve.overrideState);
+                            SetCurveVisible(m_RawBlueCurve, m_BlueCurve.overrideState);
+                            currentCurveRawProp = m_RawBlueCurve;
                             break;
                         case 4:
-                            CurveOverrideToggle(curveData.hueVsHue.overrideState);
-                            SetCurveVisible(curveData.rawHueVsHue, curveData.hueVsHue.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawHueVsHue;
+                            CurveOverrideToggle(m_HueVsHueCurve.overrideState);
+                            SetCurveVisible(m_RawHueVsHueCurve, m_HueVsHueCurve.overrideState);
+                            currentCurveRawProp = m_RawHueVsHueCurve;
                             break;
                         case 5:
-                            CurveOverrideToggle(curveData.hueVsSat.overrideState);
-                            SetCurveVisible(curveData.rawHueVsSat, curveData.hueVsSat.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawHueVsSat;
+                            CurveOverrideToggle(m_HueVsSatCurve.overrideState);
+                            SetCurveVisible(m_RawHueVsSatCurve, m_HueVsSatCurve.overrideState);
+                            currentCurveRawProp = m_RawHueVsSatCurve;
                             break;
                         case 6:
-                            CurveOverrideToggle(curveData.satVsSat.overrideState);
-                            SetCurveVisible(curveData.rawSatVsSat, curveData.satVsSat.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawSatVsSat;
+                            CurveOverrideToggle(m_SatVsSatCurve.overrideState);
+                            SetCurveVisible(m_RawSatVsSatCurve, m_SatVsSatCurve.overrideState);
+                            currentCurveRawProp = m_RawSatVsSatCurve;
                             break;
                         case 7:
-                            CurveOverrideToggle(curveData.lumVsSat.overrideState);
-                            SetCurveVisible(curveData.rawLumVsSat, curveData.lumVsSat.overrideState, curveData);
-                            currentCurveRawProp = curveData.rawLumVsSat;
+                            CurveOverrideToggle(m_LumVsSatCurve.overrideState);
+                            SetCurveVisible(m_RawLumVsSatCurve, m_LumVsSatCurve.overrideState);
+                            currentCurveRawProp = m_RawLumVsSatCurve;
                             break;
                     }
 
@@ -428,30 +407,30 @@ namespace UnityEditor.Experimental.PostProcessing
                     {
                         switch (curveEditingId)
                         {
-                            case 0: curveData.rawMaster.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+                            case 0: m_RawMasterCurve.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
                                 break;
-                            case 1: curveData.rawRed.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+                            case 1: m_RawRedCurve.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
                                 break;
-                            case 2: curveData.rawGreen.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+                            case 2: m_RawGreenCurve.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
                                 break;
-                            case 3: curveData.rawBlue.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+                            case 3: m_RawBlueCurve.animationCurveValue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
                                 break;
-                            case 4: curveData.rawHueVsHue.animationCurveValue = new AnimationCurve();
+                            case 4: m_RawHueVsHueCurve.animationCurveValue = new AnimationCurve();
                                 break;
-                            case 5: curveData.rawHueVsSat.animationCurveValue = new AnimationCurve();
+                            case 5: m_RawHueVsSatCurve.animationCurveValue = new AnimationCurve();
                                 break;
-                            case 6: curveData.rawSatVsSat.animationCurveValue = new AnimationCurve();
+                            case 6: m_RawSatVsSatCurve.animationCurveValue = new AnimationCurve();
                                 break;
-                            case 7: curveData.rawLumVsSat.animationCurveValue = new AnimationCurve();
+                            case 7: m_RawLumVsSatCurve.animationCurveValue = new AnimationCurve();
                                 break;
                         }
                     }
 
-                    curveData.currentEditingCurve.intValue = curveEditingId;
+                    m_CurrentEditingCurve.intValue = curveEditingId;
                 }
 
                 // Curve area
-                var settings = curveData.curveEditor.settings;
+                var settings = m_CurveEditor.settings;
                 var rect = GUILayoutUtility.GetAspectRect(2f);
                 var innerRect = settings.padding.Remove(rect);
 
@@ -498,7 +477,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 }
 
                 // Curve editor
-                if (curveData.curveEditor.OnGUI(rect))
+                if (m_CurveEditor.OnGUI(rect))
                 {
                     Repaint();
                     GUI.changed = true;
@@ -513,11 +492,11 @@ namespace UnityEditor.Experimental.PostProcessing
                     Handles.DrawLine(new Vector2(rect.x, rect.yMax), new Vector2(rect.xMax, rect.yMax));
                     Handles.DrawLine(new Vector2(rect.xMax, rect.yMax), new Vector2(rect.xMax, rect.y - 18f));
 
-                    bool editable = curveData.curveEditor.GetCurveState(currentCurveRawProp).editable;
+                    bool editable = m_CurveEditor.GetCurveState(currentCurveRawProp).editable;
                     string editableString = editable ? string.Empty : "(Not Overriding)\n";
 
                     // Selection info
-                    var selection = curveData.curveEditor.GetSelection();
+                    var selection = m_CurveEditor.GetSelection();
                     var infoRect = innerRect;
                     infoRect.x += 5f;
                     infoRect.width = 100f;
