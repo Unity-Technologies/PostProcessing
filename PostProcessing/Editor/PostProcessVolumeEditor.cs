@@ -51,7 +51,6 @@ namespace UnityEditor.Experimental.PostProcessing
                 EditorGUILayout.PropertyField(m_BlendRadius);
 
             EditorGUILayout.PropertyField(m_Priority);
-            EditorGUILayout.Space();
             
             bool assetHasChanged = false;
 
@@ -103,9 +102,9 @@ namespace UnityEditor.Experimental.PostProcessing
                         assetHasChanged = true;
                     }
                 }
-
-                EditorGUI.indentLevel++;
             }
+
+            EditorGUILayout.Space();
 
             if (m_Profile.objectReferenceValue == null)
             {
