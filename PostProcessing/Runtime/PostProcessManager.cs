@@ -27,7 +27,7 @@ namespace UnityEngine.Experimental.PostProcessing
         readonly List<PostProcessVolume>[] m_Volumes;
         readonly bool[] m_SortNeeded;
         readonly List<PostProcessEffectSettings> m_BaseSettings;
-        readonly List<Collider> m_TempColliders; 
+        readonly List<Collider> m_TempColliders;
 
         public readonly Dictionary<Type, PostProcessAttribute> settingsTypes;
 
@@ -43,6 +43,8 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
 #if UNITY_EDITOR
+        // Called every time Unity recompile scripts in the editor. We need this to keep track of
+        // any new custom effect the user might add to the project
         [UnityEditor.Callbacks.DidReloadScripts]
         static void OnEditorReload()
         {
@@ -213,13 +215,16 @@ namespace UnityEngine.Experimental.PostProcessing
 
                 foreach (var volume in volumes)
                 {
-                    if (!volume.enabled)
+                    // Skip disabled volumes and volumes without any data
+                    if (!volume.enabled || volume.profileRef == null)
                         continue;
+
+                    var settings = volume.profileRef.settings;
 
                     // Global volume always have influence
                     if (volume.isGlobal)
                     {
-                        postProcessLayer.OverrideSettings(volume.settings, 1f);
+                        postProcessLayer.OverrideSettings(settings, 1f);
                         continue;
                     }
 
@@ -264,7 +269,7 @@ namespace UnityEngine.Experimental.PostProcessing
                         interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
 
                     // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
-                    postProcessLayer.OverrideSettings(volume.settings, interpFactor);
+                    postProcessLayer.OverrideSettings(settings, interpFactor);
                 }
             }
         }

@@ -2,8 +2,12 @@ using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    // This asset is used to store references to shaders and other resources we might need at
+    // runtime without having to use a `Resources` folder. This allows for better memory management,
+    // better dependency tracking and better interoperability with asset bundles.
     public sealed class PostProcessResources : ScriptableObject
     {
+        // TODO: Remove this ugly hack
         internal static PostProcessResources instance;
 
         [Serializable]

@@ -1,13 +1,65 @@
-using System;
 using System.Collections.Generic;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    //
+    // Here's a quick look at the architecture of this framework and how it's integrated into Unity
+    // (written between versions 5.6 and 2017.1):
+    //
+    // Users have to be able to plug in their own effects without having to modify the codebase and
+    // these custom effects should work out-of-the-box with all the other features we provide
+    // (volume blending etc). This relies on heavy use of polymorphism, but the only way to get
+    // the serialization system to work well with polymorphism in Unity is to use ScriptableObjects.
+    //
+    // Users can push their custom effects at different (hardcoded) injection points.
+    //
+    // Each effect consists of at least two classes (+ shaders): a POD "Settings" class which only
+    // stores parameters, and a "Renderer" class that holds the rendering logic. Settings are linked
+    // to renderers using a PostProcessAttribute. These are automatically collected at init time
+    // using reflection. Settings in this case are ScriptableObjects, we only need to serialize
+    // these.
+    //
+    // We could store these settings object straight into each volume and call it a day, but
+    // unfortunately there's one feature of Unity that doesn't work well with scene-stored assets:
+    // prefabs. So we need to store all of these settings in a disk-asset and treat them as
+    // sub-assets.
+    //
+    // Note: We have to use ScriptableObject for everything but these don't work with the Animator
+    //       tool. It's unfortunate but it's the only way to make it easily extensible. On the other
+    //       hand, users can animate post-processing effects using Volumes or straight up scripting.
+    //
+    // Volume blending leverages the physics system for distance checks to the nearest point on
+    // volume colliders. Each volume can have several colliders or any type (cube, mesh...), making
+    // it quite a powerful feature to use.
+    //
+    // Volumes & blending are handled by a singleton manager (see PostProcessManager).
+    //
+    // Rendering is handled by a PostProcessLayer component living on the camera, which mean you
+    // can easily toggle post-processing on & off or change the anti-aliasing type per-camera,
+    // which is very useful when doing multi-layered camera rendering or any other technique that
+    // involves multiple-camera setups. This PostProcessLayer component can also filters volumes
+    // by layers (as in Unity layers) so you can easily choose which volumes should affect the
+    // camera.
+    //
+    // All post-processing shaders MUST use the custom Standard Shader Library bundled with the
+    // framework. The reason for that is because the codebase is meant to work without any
+    // modification on the Classic Render Pipelines (Forward, Deferred...) and the upcoming
+    // Scriptable Render Pipelines (HDPipe, LDPipe...). But these don't have compatible shader
+    // libraries so instead of writing two code paths we chose to provide a minimalist, generic
+    // Standard Library geared toward post-processing use. An added bonus to that if users create
+    // their own post-processing effects using this framework, then they'll work without any
+    // modification on both Classic and Scriptable Render Pipelines.
+    //
+
     // TODO: Deal with unsupported collider types for editor/sceneview previz
     // TODO: Do outer skin previz for colliders (need mesh manipulation stuff)
     [ExecuteInEditMode]
     public sealed class PostProcessVolume : MonoBehaviour
     {
+        // Modifying sharedProfile will change the behavior of all volumes using this profile, and
+        // change profile settings that are stored in the project too
+        public PostProcessProfile sharedProfile;
+
         [Tooltip("A global volume is applied to the whole scene.")]
         public bool isGlobal = false;
         
@@ -17,15 +69,55 @@ namespace UnityEngine.Experimental.PostProcessing
         [Tooltip("Volume priority in the stack. Higher number means higher priority. Negative values are supported.")]
         public float priority = 0f;
 
-        public List<PostProcessEffectSettings> settings = new List<PostProcessEffectSettings>();
+        // This property automatically instantiates the profile and make it unique to this volume
+        // so you can safely edit it via scripting at runtime without changing the original asset
+        // in the project.
+        // Note that if you pass in your own profile, it is your responsability to destroy it once
+        // it's not in use anymore.
+        public PostProcessProfile profile
+        {
+            get
+            {
+                if (m_InternalProfile == null)
+                {
+                    m_InternalProfile = ScriptableObject.CreateInstance<PostProcessProfile>();
 
-        // Editor only, doesn't have any use outside of it
-        [NonSerialized]
-        public bool isDirty;
+                    foreach (var item in sharedProfile.settings)
+                    {
+                        var itemCopy = Instantiate(item);
+                        m_InternalProfile.settings.Add(itemCopy);
+                    }
+
+                    m_IsInternalProfileRef = true;
+                }
+
+                return m_InternalProfile;
+            }
+            set
+            {
+                if (m_InternalProfile != null)
+                    TryReleaseInternalProfileRef();
+
+                m_InternalProfile = value;
+            }
+        }
+
+        internal PostProcessProfile profileRef
+        {
+            get
+            {
+                return m_InternalProfile == null
+                    ? sharedProfile
+                    : m_InternalProfile;
+            }
+        }
+
+        bool m_IsInternalProfileRef = false;
 
         int m_PreviousLayer;
         float m_PreviousPriority;
         List<Collider> m_TempColliders;
+        PostProcessProfile m_InternalProfile;
 
         void OnEnable()
         {
@@ -37,11 +129,7 @@ namespace UnityEngine.Experimental.PostProcessing
         void OnDisable()
         {
             PostProcessManager.instance.Unregister(this);
-        }
-
-        void Reset()
-        {
-            isDirty = true;
+            TryReleaseInternalProfileRef();
         }
 
         void Update()
@@ -50,7 +138,6 @@ namespace UnityEngine.Experimental.PostProcessing
             // real-time as the user could change it at any time in the editor or at runtime.
             // Because no event is raised when the layer changes, we have to track it on every
             // frame :/
-            // TODO: Talk to the scripting team about dispatching an event if layer is changed
             int layer = gameObject.layer;
             if (layer != m_PreviousLayer)
             {
@@ -66,86 +153,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 PostProcessManager.instance.SetLayerDirty(layer);
                 m_PreviousPriority = priority;
             }
-        }
-
-        public T AddSettings<T>()
-            where T : PostProcessEffectSettings
-        {
-            return (T)AddSettings(typeof(T));
-        }
-
-        public PostProcessEffectSettings AddSettings(Type type)
-        {
-            if (HasSettings(type))
-                throw new InvalidOperationException("Effect already exists in the stack");
-
-            var effect = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
-            effect.enabled.overrideState = true;
-            effect.enabled.value = true;
-            settings.Add(effect);
-            isDirty = true;
-            return effect;
-        }
-
-        public void RemoveSettings<T>()
-            where T : PostProcessEffectSettings
-        {
-            RemoveSettings(typeof(T));
-        }
-
-        public void RemoveSettings(Type type)
-        {
-            int toRemove = -1;
-
-            for (int i = 0; i < settings.Count; i++)
-            {
-                if (settings.GetType() == type)
-                {
-                    toRemove = i;
-                    break;
-                }
-            }
-
-            if (toRemove < 0)
-                throw new InvalidOperationException("Effect doesn't exist in the stack");
-
-            settings.RemoveAt(toRemove);
-            isDirty = true;
-        }
-
-        public bool HasSettings<T>()
-            where T : PostProcessEffectSettings
-        {
-            return HasSettings(typeof(T));
-        }
-
-        public bool HasSettings(Type type)
-        {
-            foreach (var setting in settings)
-            {
-                if (setting.GetType() == type)
-                    return true;
-            }
-
-            return false;
-        }
-
-        public bool HasSettings<T>(out T outSetting)
-            where T : PostProcessEffectSettings
-        {
-            var type = typeof(T);
-            outSetting = null;
-
-            foreach (var setting in settings)
-            {
-                if (setting.GetType() == type)
-                {
-                    outSetting = (T)setting;
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         void OnDrawGizmos()
@@ -175,6 +182,14 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             colliders.Clear();
+        }
+
+        void TryReleaseInternalProfileRef()
+        {
+            if (m_IsInternalProfileRef)
+                RuntimeUtilities.Destroy(m_InternalProfile);
+
+            m_IsInternalProfileRef = false;
         }
     }
 }

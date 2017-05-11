@@ -1,4 +1,3 @@
-﻿using UnityEngine;
 using UnityEngine.Experimental.PostProcessing;
 
 namespace UnityEditor.Experimental.PostProcessing
