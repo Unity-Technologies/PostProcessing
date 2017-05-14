@@ -112,11 +112,11 @@ namespace UnityEditor.Experimental.PostProcessing
 
             switch (attr.mode)
             {
-                case TrackballAttribute.Mode.Lift: displayValue = ColorGradingRenderer.GetLift(value);
+                case TrackballAttribute.Mode.Lift: displayValue = ColorUtilities.ColorToLift(value);
                     break;
-                case TrackballAttribute.Mode.Gamma: displayValue = ColorGradingRenderer.GetInvGamma(value);
+                case TrackballAttribute.Mode.Gamma: displayValue = ColorUtilities.ColorToInverseGamma(value);
                     break;
-                case TrackballAttribute.Mode.Gain: displayValue = ColorGradingRenderer.GetGain(value);
+                case TrackballAttribute.Mode.Gain: displayValue = ColorUtilities.ColorToGain(value);
                     break;
             }
 

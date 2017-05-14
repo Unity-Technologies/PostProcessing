@@ -197,7 +197,7 @@ namespace UnityEngine.Experimental.PostProcessing
                     k_LutSize / (k_LutSize - 1f))
                 );
 
-                var colorBalance = CalculateColorBalance(settings.temperature.value, settings.tint.value);
+                var colorBalance = ColorUtilities.ComputeColorBalance(settings.temperature.value, settings.tint.value);
                 lutSheet.properties.SetVector(Uniforms._ColorBalance, colorBalance);
 
                 lutSheet.properties.SetVector(Uniforms._ColorFilter, settings.colorFilter.value);
@@ -212,9 +212,9 @@ namespace UnityEngine.Experimental.PostProcessing
                 lutSheet.properties.SetVector(Uniforms._ChannelMixerGreen, channelMixerG / 100f);
                 lutSheet.properties.SetVector(Uniforms._ChannelMixerBlue, channelMixerB / 100f);
 
-                lutSheet.properties.SetVector(Uniforms._Lift, GetLift(settings.lift.value * 0.2f));
-                lutSheet.properties.SetVector(Uniforms._InvGamma, GetInvGamma(settings.gamma.value * 0.5f));
-                lutSheet.properties.SetVector(Uniforms._Gain, GetGain(settings.gain.value * 0.7f));
+                lutSheet.properties.SetVector(Uniforms._Lift, ColorUtilities.ColorToLift(settings.lift.value * 0.2f));
+                lutSheet.properties.SetVector(Uniforms._InvGamma, ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.5f));
+                lutSheet.properties.SetVector(Uniforms._Gain, ColorUtilities.ColorToGain(settings.gain.value * 0.7f));
 
                 lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(true));
 
@@ -306,80 +306,6 @@ namespace UnityEngine.Experimental.PostProcessing
             m_GradingCurves.Apply(false, false);
 
             return m_GradingCurves;
-        }
-
-        // An analytical model of chromaticity of the standard illuminant, by Judd et al.
-        // http://en.wikipedia.org/wiki/Standard_illuminant#Illuminant_series_D
-        // Slightly modifed to adjust it with the D65 white point (x=0.31271, y=0.32902).
-        public static float StandardIlluminantY(float x)
-        {
-            return 2.87f * x - 3f * x * x - 0.27509507f;
-        }
-
-        // CIE xy chromaticity to CAT02 LMS.
-        // http://en.wikipedia.org/wiki/LMS_color_space#CAT02
-        public static Vector3 CIExyToLMS(float x, float y)
-        {
-            float Y = 1f;
-            float X = Y * x / y;
-            float Z = Y * (1f - x - y) / y;
-
-            float L =  0.7328f * X + 0.4296f * Y - 0.1624f * Z;
-            float M = -0.7036f * X + 1.6975f * Y + 0.0061f * Z;
-            float S =  0.0030f * X + 0.0136f * Y + 0.9834f * Z;
-
-            return new Vector3(L, M, S);
-        }
-
-        public static Vector3 CalculateColorBalance(float temperature, float tint)
-        {
-            // Range ~[-1.67;1.67] work best
-            float t1 = temperature / 60f;
-            float t2 = tint / 60f;
-
-            // Get the CIE xy chromaticity of the reference white point.
-            // Note: 0.31271 = x value on the D65 white point
-            float x = 0.31271f - t1 * (t1 < 0f ? 0.1f : 0.05f);
-            float y = StandardIlluminantY(x) + t2 * 0.05f;
-
-            // Calculate the coefficients in the LMS space.
-            var w1 = new Vector3(0.949237f, 1.03542f, 1.08728f); // D65 white point
-            var w2 = CIExyToLMS(x, y);
-            return new Vector3(w1.x / w2.x, w1.y / w2.y, w1.z / w2.z);
-        }
-
-        public static Vector3 GetLift(Vector4 lift)
-        {
-            // Shadows
-            var S = new Vector3(lift.x, lift.y, lift.z);
-            float lumLift = S.x * 0.2126f + S.y * 0.7152f + S.z * 0.0722f;
-            S = new Vector3(S.x - lumLift, S.y - lumLift, S.z - lumLift);
-            float liftOffset = lift.w;
-            return new Vector3(S.x + liftOffset, S.y + liftOffset, S.z + liftOffset);
-        }
-
-        public static Vector3 GetInvGamma(Vector4 gamma)
-        {
-            // Midtones
-            var M = new Vector3(gamma.x, gamma.y, gamma.z);
-            float lumGamma = M.x * 0.2126f + M.y * 0.7152f + M.z * 0.0722f;
-            M = new Vector3(M.x - lumGamma, M.y - lumGamma, M.z - lumGamma);
-            float gammaOffset = gamma.w + 1f;
-            return new Vector3(
-                1f / Mathf.Max(M.x + gammaOffset, 1e-03f),
-                1f / Mathf.Max(M.y + gammaOffset, 1e-03f),
-                1f / Mathf.Max(M.z + gammaOffset, 1e-03f)
-            );
-        }
-
-        public static Vector3 GetGain(Vector4 gain)
-        {
-            // Highlights
-            var H = new Vector3(gain.x, gain.y, gain.z);
-            float lumGain = H.x * 0.2126f + H.y * 0.7152f + H.z * 0.0722f;
-            H = new Vector3(H.x - lumGain, H.y - lumGain, H.z - lumGain);
-            float gainOffset = gain.w + 1f;
-            return new Vector3(H.x + gainOffset, H.y + gainOffset, H.z + gainOffset);
         }
 
         static RenderTextureFormat GetLogLutFormat()
