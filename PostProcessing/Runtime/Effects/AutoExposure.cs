@@ -27,9 +27,6 @@ namespace UnityEngine.Experimental.PostProcessing
         [DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
         public FloatParameter maxLuminance = new FloatParameter { value = 1f };
 
-        [Tooltip("Set this to true to let Unity handle the key value automatically based on average luminance.")]
-        public BoolParameter dynamicKeyValue = new BoolParameter { value = true };
-
         [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
         public FloatParameter keyValue = new FloatParameter { value = 0.25f };
 
@@ -46,7 +43,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             return enabled.value
                 && SystemInfo.supportsComputeShaders
-                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf);
+                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat);
         }
     }
 
@@ -145,9 +142,6 @@ namespace UnityEngine.Experimental.PostProcessing
             sheet.properties.SetVector(Uniforms._Speed, new Vector2(settings.speedDown.value, settings.speedUp.value));
             sheet.properties.SetVector(Uniforms._ScaleOffsetRes, scaleOffsetRes);
             sheet.properties.SetFloat(Uniforms._ExposureCompensation, settings.keyValue.value);
-
-            if (settings.dynamicKeyValue)
-                sheet.EnableKeyword("AUTO_KEY_VALUE");
 
             if (m_FirstFrame || !Application.isPlaying)
             {

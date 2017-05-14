@@ -9,8 +9,6 @@ namespace UnityEditor.Experimental.PostProcessing
         
         SerializedParameterOverride m_MinLuminance;
         SerializedParameterOverride m_MaxLuminance;
-
-        SerializedParameterOverride m_DynamicKeyValue;
         SerializedParameterOverride m_KeyValue;
 
         SerializedParameterOverride m_EyeAdaptation;
@@ -23,8 +21,6 @@ namespace UnityEditor.Experimental.PostProcessing
             
             m_MinLuminance = FindParameterOverride(x => x.minLuminance);
             m_MaxLuminance = FindParameterOverride(x => x.maxLuminance);
-            
-            m_DynamicKeyValue = FindParameterOverride(x => x.dynamicKeyValue);
             m_KeyValue = FindParameterOverride(x => x.keyValue);
             
             m_EyeAdaptation = FindParameterOverride(x => x.eyeAdaptation);
@@ -40,10 +36,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
             PropertyField(m_MinLuminance);
             PropertyField(m_MaxLuminance);
-            PropertyField(m_DynamicKeyValue);
-
-            if (!m_DynamicKeyValue.value.boolValue)
-                PropertyField(m_KeyValue);
+            PropertyField(m_KeyValue);
             
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Adaptation");

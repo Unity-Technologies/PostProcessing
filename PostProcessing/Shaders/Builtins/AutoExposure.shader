@@ -3,7 +3,6 @@ Shader "Hidden/PostProcessing/AutoExposure"
     HLSLINCLUDE
 
         #pragma target 4.5
-        #pragma multi_compile __ AUTO_KEY_VALUE
         #include "../StdLib.hlsl"
         #include "ExposureHistogram.hlsl"
 
@@ -80,14 +79,9 @@ Shader "Hidden/PostProcessing/AutoExposure"
         float GetExposureMultiplier(float avgLuminance)
         {
             avgLuminance = max(EPSILON, avgLuminance);
-
-        #if AUTO_KEY_VALUE
-            half keyValue = 1.03 - (2.0 / (2.0 + log2(avgLuminance + 1.0)));
-        #else
-            half keyValue = _ExposureCompensation;
-        #endif
-
-            half exposure = keyValue / avgLuminance;
+            //float keyValue = 1.03 - (2.0 / (2.0 + log2(avgLuminance + 1.0)));
+            float keyValue = _ExposureCompensation;
+            float exposure = keyValue / avgLuminance;
             return exposure;
         }
 
