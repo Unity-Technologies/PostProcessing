@@ -2,6 +2,10 @@ using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    // For now and by popular request, this bloom effect is geared toward artists so they have full
+    // control over how it looks at the expense of physical correctness.
+    // Eventually we will need a "true" natural bloom effect with proper energy conservation.
+
     [Serializable]
     [PostProcess(typeof(BloomRenderer), "Unity/Bloom")]
     public sealed class Bloom : PostProcessEffectSettings
@@ -13,7 +17,10 @@ namespace UnityEngine.Experimental.PostProcessing
         public FloatParameter threshold = new FloatParameter { value = 1f };
 
         [Range(0f, 1f), Tooltip("Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold).")]
-        public FloatParameter softKnee = new FloatParameter { value = 0.75f };
+        public FloatParameter softKnee = new FloatParameter { value = 0.5f };
+
+        [Range(1f, 10f), Tooltip("Changes the extent of veiling effects. For maximum quality stick to integer values. Because this value changes the internal iteration count, animating it isn't recommended as it may introduce small hiccups in the perceived radius.")]
+        public FloatParameter diffusion = new FloatParameter { value = 6f };
 
         [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
         public ColorParameter color = new ColorParameter { value = Color.white };
@@ -81,7 +88,7 @@ namespace UnityEngine.Experimental.PostProcessing
             sheet.properties.SetTexture(Uniforms._AutoExposureTex, context.autoExposureTexture);
 
             // Determine the iteration count
-            float logh = Mathf.Log(context.height, 2f);
+            float logh = Mathf.Log(context.height, 2f) + settings.diffusion.value - 10f;
             int logh_i = Mathf.FloorToInt(logh);
             int iterations = Mathf.Clamp(logh_i, 1, k_MaxPyramidSize);
             float sampleScale = 0.5f + logh - logh_i;
@@ -131,7 +138,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             var shaderSettings = new Vector4(
                 sampleScale,
-                RuntimeUtilities.Exp2(settings.intensity.value) - 1f,
+                RuntimeUtilities.Exp2(settings.intensity.value / 10f) - 1f,
                 settings.lensIntensity.value,
                 iterations
             );
@@ -145,7 +152,6 @@ namespace UnityEngine.Experimental.PostProcessing
             uberSheet.properties.SetVector(Uniforms._Bloom_Settings, shaderSettings);
             uberSheet.properties.SetColor(Uniforms._Bloom_Color, settings.color.value.linear);
             uberSheet.properties.SetTexture(Uniforms._Bloom_DirtTex, dirtTexture);
-            uberSheet.properties.SetVector(Uniforms._Bloom_Threshold, threshold);
             cmd.SetGlobalTexture(Uniforms._BloomTex, m_Pyramid[0].up);
 
             // Cleanup

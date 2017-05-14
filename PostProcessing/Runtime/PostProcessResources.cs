@@ -23,6 +23,7 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader temporalAntialiasing;
             public Shader textureLerp;
             public Shader uber;
+            public Shader lutBaker;
         }
 
         [Serializable]

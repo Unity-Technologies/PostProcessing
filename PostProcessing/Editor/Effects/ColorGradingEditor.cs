@@ -15,11 +15,13 @@ namespace UnityEditor.Experimental.PostProcessing
             new GUIContent("Red"),
             new GUIContent("Green"),
             new GUIContent("Blue"),
-            new GUIContent("Hue VS Hue"),
-            new GUIContent("Hue VS Sat"),
-            new GUIContent("Sat VS Sat"),
-            new GUIContent("Lum VS Sat")
+            new GUIContent("Hue Vs Hue"),
+            new GUIContent("Hue Vs Sat"),
+            new GUIContent("Sat Vs Sat"),
+            new GUIContent("Lum Vs Sat")
         };
+
+        SerializedParameterOverride m_Tonemapper;
 
         SerializedParameterOverride m_LdrLut;
 
@@ -71,9 +73,6 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedProperty m_RawSatVsSatCurve;
         SerializedProperty m_RawLumVsSatCurve;
 
-        SerializedProperty m_CurrentMixerChannel;
-        SerializedProperty m_CurrentEditingCurve;
-
         CurveEditor m_CurveEditor;
         Dictionary<SerializedProperty, Color> m_CurveDict;
         
@@ -82,6 +81,8 @@ namespace UnityEditor.Experimental.PostProcessing
         public override void OnEnable()
         {
             m_GradingMode = FindParameterOverride(x => x.gradingMode);
+
+            m_Tonemapper = FindParameterOverride(x => x.tonemapper);
 
             m_LdrLut = FindParameterOverride(x => x.ldrLut);
 
@@ -130,9 +131,6 @@ namespace UnityEditor.Experimental.PostProcessing
             m_RawHueVsSatCurve = FindProperty(x => x.hueVsSatCurve.value.curve);
             m_RawSatVsSatCurve = FindProperty(x => x.satVsSatCurve.value.curve);
             m_RawLumVsSatCurve = FindProperty(x => x.lumVsSatCurve.value.curve);
-            
-            m_CurrentMixerChannel = serializedObject.FindProperty("m_CurrentMixerChannel");
-            m_CurrentEditingCurve = serializedObject.FindProperty("m_CurrentEditingCurve");
 
             m_CurveEditor = new CurveEditor();
             m_CurveDict = new Dictionary<SerializedProperty, Color>();
@@ -155,6 +153,15 @@ namespace UnityEditor.Experimental.PostProcessing
             PropertyField(m_GradingMode);
 
             var gradingMode = (GradingMode)m_GradingMode.value.intValue;
+
+            // Check if we're in gamma or linear and display a warning if we're trying to do hdr
+            // color grading while being in gamma mode
+            if (gradingMode != GradingMode.LowDefinitionRange)
+            {
+                if (QualitySettings.activeColorSpace == ColorSpace.Gamma)
+                    EditorGUILayout.HelpBox("ColorSpace in project settings is set to Gamma, HDR color grading won't look correct. Switch to Linear or use LDR color grading mode instead.", MessageType.Warning);
+            }
+
             if (gradingMode == GradingMode.LowDefinitionRange)
                 DoStandardModeGUI(false);
             else if (gradingMode == GradingMode.HighDefinitionRange)
@@ -180,15 +187,19 @@ namespace UnityEditor.Experimental.PostProcessing
 
         void DoStandardModeGUI(bool hdr)
         {
-            EditorGUILayout.HelpBox("Only GradingMode.CustomLogLUT works right now.", MessageType.Error);
-
             if (!hdr)
             {
+                EditorGUILayout.HelpBox("Not implemented yet.", MessageType.Error);
+
                 PropertyField(m_LdrLut);
 
                 var lut = (target as ColorGrading).ldrLut.value;
                 CheckLutImportSettings(lut);
             }
+
+            EditorGUILayout.Space();
+            EditorUtilities.DrawHeaderLabel("Tonemapping");
+            PropertyField(m_Tonemapper);
 
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("White Balance");
@@ -212,7 +223,7 @@ namespace UnityEditor.Experimental.PostProcessing
             PropertyField(m_Contrast);
 
             EditorGUILayout.Space();
-            int currentChannel = m_CurrentMixerChannel.intValue;
+            int currentChannel = GlobalSettings.currentChannelMixer;
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -222,7 +233,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        GUILayoutUtility.GetRect(14f, 18f, GUILayout.ExpandWidth(false)); // Dirty hack to do proper right column alignement
+                        GUILayoutUtility.GetRect(9f, 18f, GUILayout.ExpandWidth(false)); // Dirty hack to do proper right column alignement
                         if (GUILayout.Toggle(currentChannel == 0, EditorUtilities.GetContent("Red|Red output channel."), EditorStyles.miniButtonLeft)) currentChannel = 0;
                         if (GUILayout.Toggle(currentChannel == 1, EditorUtilities.GetContent("Green|Green output channel."), EditorStyles.miniButtonMid)) currentChannel = 1;
                         if (GUILayout.Toggle(currentChannel == 2, EditorUtilities.GetContent("Blue|Blue output channel."), EditorStyles.miniButtonRight)) currentChannel = 2;
@@ -232,7 +243,7 @@ namespace UnityEditor.Experimental.PostProcessing
                     GUI.FocusControl(null);
             }
 
-            m_CurrentMixerChannel.intValue = currentChannel;
+            GlobalSettings.currentChannelMixer = currentChannel;
 
             if (currentChannel == 0)
             {
@@ -268,11 +279,12 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Grading Curves");
 
-            DoCurvesGUI();
+            DoCurvesGUI(hdr);
         }
 
         void DoCustomHdrGUI()
         {
+            PropertyField(m_PostExposure);
             PropertyField(m_LogLut);
 
             var lut = (target as ColorGrading).logLut.value;
@@ -292,8 +304,9 @@ namespace UnityEditor.Experimental.PostProcessing
                     bool valid = importer.anisoLevel == 0
                         && importer.mipmapEnabled == false
                         && importer.sRGBTexture == false
-                        && (importer.textureCompression == TextureImporterCompression.Uncompressed)
-                        && importer.filterMode == FilterMode.Bilinear;
+                        && importer.textureCompression == TextureImporterCompression.Uncompressed
+                        && importer.filterMode == FilterMode.Bilinear
+                        && importer.wrapMode == TextureWrapMode.Clamp;
 
                     if (!valid)
                         EditorUtilities.DrawFixMeBox("Invalid LUT import settings.", () => SetLutImportSettings(importer));
@@ -311,6 +324,7 @@ namespace UnityEditor.Experimental.PostProcessing
             importer.npotScale = TextureImporterNPOTScale.None;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.alphaSource = TextureImporterAlphaSource.None;
+            importer.wrapMode = TextureWrapMode.Clamp;
             importer.SaveAndReimport();
             AssetDatabase.Refresh();
         }
@@ -340,7 +354,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
         static Material s_MaterialGrid;
 
-        void DoCurvesGUI()
+        void DoCurvesGUI(bool hdr)
         {
             EditorGUILayout.Space();
             ResetVisibleCurves();
@@ -353,8 +367,9 @@ namespace UnityEditor.Experimental.PostProcessing
                 // Top toolbar
                 using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
                 {
-                    curveEditingId = EditorGUILayout.Popup(m_CurrentEditingCurve.intValue, s_Curves, EditorStyles.toolbarPopup, GUILayout.MaxWidth(150f));
-                    curveEditingId = Mathf.Clamp(curveEditingId, 0, 7);
+                    curveEditingId = DoCurveSelectionPopup(GlobalSettings.currentCurve, hdr);
+                    curveEditingId = Mathf.Clamp(curveEditingId, hdr ? 4 : 0, 7);
+
                     EditorGUILayout.Space();
 
                     switch (curveEditingId)
@@ -426,7 +441,7 @@ namespace UnityEditor.Experimental.PostProcessing
                         }
                     }
 
-                    m_CurrentEditingCurve.intValue = curveEditingId;
+                    GlobalSettings.currentCurve = curveEditingId;
                 }
 
                 // Curve area
@@ -534,6 +549,37 @@ namespace UnityEditor.Experimental.PostProcessing
 
             GUI.DrawTexture(rect, rt);
             RenderTexture.ReleaseTemporary(rt);
+        }
+
+        int DoCurveSelectionPopup(int id, bool hdr)
+        {
+            GUILayout.Label(s_Curves[id], EditorStyles.toolbarPopup, GUILayout.MaxWidth(150f));
+
+            var lastRect = GUILayoutUtility.GetLastRect();
+            var e = Event.current;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && lastRect.Contains(e.mousePosition))
+            {
+                var menu = new GenericMenu();
+
+                for (int i = 0; i < s_Curves.Length; i++)
+                {
+                    if (i == 4)
+                        menu.AddSeparator("");
+
+                    if (hdr && i < 4)
+                        menu.AddDisabledItem(s_Curves[i]);
+                    else
+                    {
+                        int current = i; // Capture local for closure
+                        menu.AddItem(s_Curves[i], current == id, () => GlobalSettings.currentCurve = current);
+                    }
+                }
+
+                menu.DropDown(new Rect(lastRect.xMin, lastRect.yMax, 1f, 1f));
+            }
+
+            return id;
         }
     }
 }

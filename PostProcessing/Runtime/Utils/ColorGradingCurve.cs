@@ -59,5 +59,15 @@ namespace UnityEngine.Experimental.PostProcessing
 
             return m_InternalLoopingCurve.Evaluate(t);
         }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + curve.GetHashCode(); // Not implemented in Unity, so it'll always return the same value :(
+                return hash;
+            }
+        }
     }
 }

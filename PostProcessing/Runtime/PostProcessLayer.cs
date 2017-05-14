@@ -61,10 +61,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             // Load resource asset if needed
             if (m_Resources == null)
-            {
-                Assert.IsNotNull(PostProcessResources.instance, "Could not find the PostProcessResources asset. Please re-import the package.");
                 m_Resources = PostProcessResources.instance;
-            }
 
             m_Bundles = new Dictionary<Type, PostProcessBundle>();
             m_SortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
@@ -457,6 +454,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.EndSample("BuiltinStack");
         }
 
+        // This pass will have to be disabled for HDR screen output as it's an LDR pass
         void RenderFinalPass(PostProcessRenderContext context)
         {
             var cmd = context.command;

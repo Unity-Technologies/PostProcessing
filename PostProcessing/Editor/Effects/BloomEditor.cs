@@ -8,6 +8,7 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedParameterOverride m_Intensity;
         SerializedParameterOverride m_Threshold;
         SerializedParameterOverride m_SoftKnee;
+        SerializedParameterOverride m_Diffusion;
         SerializedParameterOverride m_Color;
         SerializedParameterOverride m_MobileOptimized;
         
@@ -19,6 +20,7 @@ namespace UnityEditor.Experimental.PostProcessing
             m_Intensity = FindParameterOverride(x => x.intensity);
             m_Threshold = FindParameterOverride(x => x.threshold);
             m_SoftKnee = FindParameterOverride(x => x.softKnee);
+            m_Diffusion = FindParameterOverride(x => x.diffusion);
             m_Color = FindParameterOverride(x => x.color);
             m_MobileOptimized = FindParameterOverride(x => x.mobileOptimized);
             
@@ -33,6 +35,7 @@ namespace UnityEditor.Experimental.PostProcessing
             PropertyField(m_Intensity);
             PropertyField(m_Threshold);
             PropertyField(m_SoftKnee);
+            PropertyField(m_Diffusion);
             PropertyField(m_Color);
             PropertyField(m_MobileOptimized);
             

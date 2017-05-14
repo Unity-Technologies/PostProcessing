@@ -41,6 +41,10 @@
 #define HALF_PI         1.57079632679
 #define INV_HALF_PI     0.636619772367
 
+#define FLT_EPSILON     1.192092896e-07 // Smallest positive number, such that 1.0 + FLT_EPSILON != 1.0
+#define FLT_MIN         1.175494351e-38 // Minimum representable positive floating-point number
+#define FLT_MAX         3.402823466e+38 // Maximum representable floating-point number
+
 // -----------------------------------------------------------------------------
 // Compatibility functions
 
@@ -93,6 +97,29 @@ float4 Max3(float4 a, float4 b, float4 c)
 }
 #endif // INTRINSIC_MINMAX3
 
+// Using pow often result to a warning like this
+// "pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them"
+// PositivePow remove this warning when you know the value is positive and avoid inf/NAN.
+float PositivePow(float base, float power)
+{
+    return pow(max(abs(base), float(FLT_EPSILON)), power);
+}
+
+float2 PositivePow(float2 base, float2 power)
+{
+    return pow(max(abs(base), float2(FLT_EPSILON, FLT_EPSILON)), power);
+}
+
+float3 PositivePow(float3 base, float3 power)
+{
+    return pow(max(abs(base), float3(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
+}
+
+float4 PositivePow(float4 base, float4 power)
+{
+    return pow(max(abs(base), float4(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
+}
+
 // -----------------------------------------------------------------------------
 // Std unity data
 
@@ -122,18 +149,18 @@ float Linear01Depth(float z)
 
 float LinearEyeDepth(float z)
 {
-    return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
+    return rcp(_ZBufferParams.z * z + _ZBufferParams.w);
 }
 
 // Clamp HDR value within a safe range
 half3 SafeHDR(half3 c)
 {
-    return min(c, 65004);
+    return min(c, HALF_MAX);
 }
 
 half4 SafeHDR(half4 c)
 {
-    return min(c, 65004);
+    return min(c, HALF_MAX);
 }
 
 // Vertex manipulation

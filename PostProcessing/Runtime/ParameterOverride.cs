@@ -54,7 +54,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             unchecked
             {
-                int hash = 13;
+                int hash = 17;
                 hash = hash * 23 + overrideState.GetHashCode();
                 hash = hash * 23 + value.GetHashCode();
                 return hash;
@@ -184,9 +184,9 @@ namespace UnityEngine.Experimental.PostProcessing
             var material = RuntimeUtilities.lerpMaterial;
 
             // TODO: Run tests in gamma/linear
-            material.SetTexture("_From", from);
-            material.SetTexture("_To", to);
-            material.SetFloat("_Interp", t);
+            material.SetTexture(Uniforms._From, from);
+            material.SetTexture(Uniforms._To, to);
+            material.SetFloat(Uniforms._Interp, t);
             Graphics.SetRenderTarget(rt);
             material.SetPass(0);
             Graphics.DrawMeshNow(RuntimeUtilities.fullscreenTriangle, Matrix4x4.identity);

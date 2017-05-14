@@ -11,6 +11,7 @@ namespace UnityEditor.Experimental.PostProcessing
         static Material s_Material;
 
         bool m_ResetState;
+        Vector2 m_CursorPos;
 
         public override bool IsAutoProperty()
         {
@@ -27,7 +28,7 @@ namespace UnityEditor.Experimental.PostProcessing
             using (new EditorGUILayout.VerticalScope())
             {
                 using (new EditorGUI.DisabledScope(!overrideState.boolValue))
-                    DrawWheel(ref value, overrideState.boolValue, title);
+                    DrawWheel(ref value, overrideState.boolValue, (TrackballAttribute)attribute);
 
                 DrawLabelAndOverride(title, overrideState);
             }
@@ -43,7 +44,7 @@ namespace UnityEditor.Experimental.PostProcessing
             return true;
         }
 
-        void DrawWheel(ref Vector4 value, bool overrideState, GUIContent title)
+        void DrawWheel(ref Vector4 value, bool overrideState, TrackballAttribute attr)
         {
             var wheelRect = GUILayoutUtility.GetAspectRect(1f);
             float size = wheelRect.width;
@@ -53,6 +54,13 @@ namespace UnityEditor.Experimental.PostProcessing
             Vector3 hsv;
             Color.RGBToHSV(value, out hsv.x, out hsv.y, out hsv.z);
             float offset = value.w;
+
+            // Thumb
+            var thumbPos = Vector2.zero;
+            float theta = hsv.x * (Mathf.PI * 2f);
+            thumbPos.x = Mathf.Cos(theta + (Mathf.PI / 2f));
+            thumbPos.y = Mathf.Sin(theta - (Mathf.PI / 2f));
+            thumbPos *= hsv.y * radius;
 
             // Draw the wheel
             if (Event.current.type == EventType.Repaint)
@@ -66,7 +74,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 // Wheel texture
                 var oldRT = RenderTexture.active;
                 var rt = RenderTexture.GetTemporary((int)(size * scale), (int)(size * scale), 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-                s_Material.SetFloat("_Offset",offset);
+                s_Material.SetFloat("_Offset", offset);
                 s_Material.SetFloat("_DisabledState", overrideState ? 1f : 0.5f);
                 s_Material.SetVector("_Resolution", new Vector2(size * scale, size * scale / 2f));
                 Graphics.Blit(null, rt, s_Material, EditorGUIUtility.isProSkin ? 0 : 1);
@@ -75,13 +83,6 @@ namespace UnityEditor.Experimental.PostProcessing
                 GUI.DrawTexture(wheelRect, rt);
                 RenderTexture.ReleaseTemporary(rt);
 
-                // Thumb
-                var thumbPos = Vector2.zero;
-                float theta = hsv.x * (Mathf.PI * 2f);
-                float len = hsv.y * radius;
-                thumbPos.x = Mathf.Cos(theta + (Mathf.PI / 2f));
-                thumbPos.y = Mathf.Sin(theta - (Mathf.PI / 2f));
-                thumbPos *= len;
                 var thumbSize = Styling.wheelThumbSize;
                 var thumbSizeH = thumbSize / 2f;
                 Styling.wheelThumb.Draw(new Rect(wheelRect.x + hsize + thumbPos.x - thumbSizeH.x, wheelRect.y + hsize + thumbPos.y - thumbSizeH.y, thumbSize.x, thumbSize.y), false, false, false, false);
@@ -92,7 +93,7 @@ namespace UnityEditor.Experimental.PostProcessing
             bounds.x += hsize - radius;
             bounds.y += hsize - radius;
             bounds.width = bounds.height = radius * 2f;
-            hsv = GetInput(bounds, hsv, radius);
+            hsv = GetInput(bounds, hsv, thumbPos, radius);
             value = Color.HSVToRGB(hsv.x, hsv.y, 1f);
             value.w = offset;
 
@@ -103,17 +104,31 @@ namespace UnityEditor.Experimental.PostProcessing
             sliderRect.xMax -= padding;
             value.w = GUI.HorizontalSlider(sliderRect, value.w, -1f, 1f);
 
+            if (attr.mode == TrackballAttribute.Mode.None)
+                return;
+            
             // Values
-            // TODO: Values fetching
+            var displayValue = Vector3.zero;
+
+            switch (attr.mode)
+            {
+                case TrackballAttribute.Mode.Lift: displayValue = ColorGradingRenderer.GetLift(value);
+                    break;
+                case TrackballAttribute.Mode.Gamma: displayValue = ColorGradingRenderer.GetInvGamma(value);
+                    break;
+                case TrackballAttribute.Mode.Gain: displayValue = ColorGradingRenderer.GetGain(value);
+                    break;
+            }
+
             using (new EditorGUI.DisabledGroupScope(true))
             {
                 var valuesRect = GUILayoutUtility.GetRect(1f, 17f);
                 valuesRect.width /= 3f;
-                GUI.Label(valuesRect, 0.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
+                GUI.Label(valuesRect, displayValue.x.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
                 valuesRect.x += valuesRect.width;
-                GUI.Label(valuesRect, 0.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
+                GUI.Label(valuesRect, displayValue.y.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
                 valuesRect.x += valuesRect.width;
-                GUI.Label(valuesRect, 0.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
+                GUI.Label(valuesRect, displayValue.z.ToString("F2"), EditorStyles.centeredGreyMiniLabel);
                 valuesRect.x += valuesRect.width;
             }
         }
@@ -123,30 +138,19 @@ namespace UnityEditor.Experimental.PostProcessing
             // Title
             var areaRect = GUILayoutUtility.GetRect(1f, 17f);
             var labelSize = Styling.wheelLabel.CalcSize(title);
-            var labelRect = new Rect(
-                areaRect.x + areaRect.width / 2 - labelSize.x / 2,
-                areaRect.y,
-                labelSize.x,
-                labelSize.y
-            );
+            var labelRect = new Rect(areaRect.x + areaRect.width / 2 - labelSize.x / 2, areaRect.y, labelSize.x, labelSize.y);
             GUI.Label(labelRect, title, Styling.wheelLabel);
 
             // Override checkbox
-            var overrideRect = new Rect(
-                labelRect.x - 17,
-                labelRect.y + 3,
-                17f, 17f
-            );
+            var overrideRect = new Rect(labelRect.x - 17, labelRect.y + 3, 17f, 17f);
             EditorUtilities.DrawOverrideCheckbox(overrideRect, overrideState);
         }
 
-        Vector3 GetInput(Rect bounds, Vector3 hsv, float radius)
+        Vector3 GetInput(Rect bounds, Vector3 hsv, Vector2 thumbPos, float radius)
         {
             var e = Event.current;
             var id = GUIUtility.GetControlID(k_ThumbHash, FocusType.Passive, bounds);
-
             var mousePos = e.mousePosition;
-            var relativePos = mousePos - new Vector2(bounds.x, bounds.y);
 
             if (e.type == EventType.MouseDown && GUIUtility.hotControl == 0 && bounds.Contains(mousePos))
             {
@@ -158,7 +162,7 @@ namespace UnityEditor.Experimental.PostProcessing
                     if (dist <= radius)
                     {
                         e.Use();
-                        GetWheelHueSaturation(relativePos.x, relativePos.y, radius, out hsv.x, out hsv.y);
+                        m_CursorPos = new Vector2(thumbPos.x + radius, thumbPos.y + radius);
                         GUIUtility.hotControl = id;
                         GUI.changed = true;
                     }
@@ -174,7 +178,8 @@ namespace UnityEditor.Experimental.PostProcessing
             {
                 e.Use();
                 GUI.changed = true;
-                GetWheelHueSaturation(relativePos.x, relativePos.y, radius, out hsv.x, out hsv.y);
+                m_CursorPos += e.delta * GlobalSettings.trackballSensitivity;
+                GetWheelHueSaturation(m_CursorPos.x, m_CursorPos.y, radius, out hsv.x, out hsv.y);
             }
             else if (e.rawType == EventType.MouseUp && e.button == 0 && GUIUtility.hotControl == id)
             {

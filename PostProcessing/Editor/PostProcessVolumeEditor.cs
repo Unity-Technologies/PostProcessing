@@ -74,7 +74,7 @@ namespace UnityEditor.Experimental.PostProcessing
                         var scene = SceneManager.GetActiveScene();
                         var path = string.Empty;
 
-                        if (!scene.IsValid())
+                        if (string.IsNullOrEmpty(scene.path))
                         {
                             path = "Assets/";
                         }

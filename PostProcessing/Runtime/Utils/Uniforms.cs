@@ -69,6 +69,21 @@ namespace UnityEngine.Experimental.PostProcessing
 
         internal static readonly int _LogLut                          = Shader.PropertyToID("_LogLut");
         internal static readonly int _LogLut_Params                   = Shader.PropertyToID("_LogLut_Params");
+        internal static readonly int _LutParams                       = Shader.PropertyToID("_LutParams");
+        internal static readonly int _PostExposure                    = Shader.PropertyToID("_PostExposure");
+        internal static readonly int _ColorBalance                    = Shader.PropertyToID("_ColorBalance");
+        internal static readonly int _ColorFilter                     = Shader.PropertyToID("_ColorFilter");
+        internal static readonly int _HueShift                        = Shader.PropertyToID("_HueShift");
+        internal static readonly int _Saturation                      = Shader.PropertyToID("_Saturation");
+        internal static readonly int _Contrast                        = Shader.PropertyToID("_Contrast");
+        internal static readonly int _Brightness                      = Shader.PropertyToID("_Brightness");
+        internal static readonly int _ChannelMixerRed                 = Shader.PropertyToID("_ChannelMixerRed");
+        internal static readonly int _ChannelMixerGreen               = Shader.PropertyToID("_ChannelMixerGreen");
+        internal static readonly int _ChannelMixerBlue                = Shader.PropertyToID("_ChannelMixerBlue");
+        internal static readonly int _Lift                            = Shader.PropertyToID("_Lift");
+        internal static readonly int _InvGamma                        = Shader.PropertyToID("_InvGamma");
+        internal static readonly int _Gain                            = Shader.PropertyToID("_Gain");
+        internal static readonly int _Curves                          = Shader.PropertyToID("_Curves");
 
         internal static readonly int _Vignette_Color                  = Shader.PropertyToID("_Vignette_Color");
         internal static readonly int _Vignette_Center                 = Shader.PropertyToID("_Vignette_Center");
@@ -84,5 +99,9 @@ namespace UnityEngine.Experimental.PostProcessing
 
         internal static readonly int _DitheringTex                    = Shader.PropertyToID("_DitheringTex");
         internal static readonly int _Dithering_Coords                = Shader.PropertyToID("_Dithering_Coords");
+
+        internal static readonly int _From                            = Shader.PropertyToID("_From");
+        internal static readonly int _To                              = Shader.PropertyToID("_To");
+        internal static readonly int _Interp                          = Shader.PropertyToID("_Interp");
     }
 }
