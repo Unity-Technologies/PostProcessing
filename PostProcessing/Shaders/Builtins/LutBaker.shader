@@ -9,7 +9,7 @@ Shader "Hidden/PostProcessing/LutBaker"
         
         #pragma multi_compile __ TONEMAPPING_ACES TONEMAPPING_NEUTRAL TONEMAPPING_CUSTOM
 
-        TEXTURE2D_SAMPLER2D(_BaseLut, sampler_BaseLut);
+        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _Lut2D_Params;
 
         float3 _CustomToneCurve;
@@ -153,6 +153,16 @@ Shader "Hidden/PostProcessing/LutBaker"
             return float4(graded, 1.0);
         }
 
+        // -----------------------------------------------------------------------------------------
+        // LDR Grading - with starting lut
+
+        float4 FragLDR(VaryingsDefault i) : SV_Target
+        {
+            float3 colorLinear = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+            float3 graded = ColorGradeLDR(colorLinear);
+            return float4(graded, 1.0);
+        }
+
     ENDHLSL
 
     SubShader
@@ -185,6 +195,16 @@ Shader "Hidden/PostProcessing/LutBaker"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragLDRFromScratch
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragLDR
 
             ENDHLSL
         }

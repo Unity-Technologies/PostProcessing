@@ -30,6 +30,7 @@ namespace UnityEngine.Experimental.PostProcessing
     public sealed class TonemapperParameter : ParameterOverride<Tonemapper> {}
 
     // TODO: use 33x33 Texture3D when supported
+    // TODO: Bug with the curve editor when working with any of the YRGB curves, the last key isn't properly deleted somehow (?!)
     [Serializable]
     [PostProcess(typeof(ColorGradingRenderer), "Unity/Color Grading")]
     public sealed class ColorGrading : PostProcessEffectSettings
@@ -262,7 +263,11 @@ namespace UnityEngine.Experimental.PostProcessing
                 lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(false));
                 
                 // Generate the lut
-                context.command.BlitFullscreenTriangle((Texture)null, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
+                var userLut = settings.ldrLut.value;
+                if (userLut == null)
+                    context.command.BlitFullscreenTriangle((Texture)null, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
+                else
+                    context.command.BlitFullscreenTriangle(userLut, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDR);
             }
             
             var lut = m_InternalLdrLut;
