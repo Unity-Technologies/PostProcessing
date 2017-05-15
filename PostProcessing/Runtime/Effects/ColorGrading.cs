@@ -149,8 +149,9 @@ namespace UnityEngine.Experimental.PostProcessing
         const float k_CurveStep = 1f / k_CurvePrecision;
         readonly Color[] m_Pixels = new Color[k_CurvePrecision * 2]; // Avoids GC stress
 
+        RenderTexture m_InternalLdrLut;
         RenderTexture m_InternalLogLut;
-        const int k_LutSize = 32;
+        const int k_Lut2DSize = 32;
 
         readonly HableCurve m_HableCurve = new HableCurve();
 
@@ -175,17 +176,17 @@ namespace UnityEngine.Experimental.PostProcessing
             // volume with & without Luts set.
             if (lut == null)
             {
-                CheckInternalLut();
+                CheckInternalLogLut();
                 lut = m_InternalLogLut;
 
                 var lutSheet = context.propertySheets.Get(context.resources.shaders.lutBaker);
                 lutSheet.ClearKeywords();
 
-                lutSheet.properties.SetVector(Uniforms._LutParams, new Vector4(
-                    k_LutSize,
-                    0.5f / (k_LutSize * k_LutSize),
-                    0.5f / k_LutSize,
-                    k_LutSize / (k_LutSize - 1f))
+                lutSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector4(
+                    k_Lut2DSize,
+                    0.5f / (k_Lut2DSize * k_Lut2DSize),
+                    0.5f / k_Lut2DSize,
+                    k_Lut2DSize / (k_Lut2DSize - 1f))
                 );
 
                 context.command.BlitFullscreenTriangle((Texture)null, lut, lutSheet, (int)Pass.LutGenNoGradingHDR);
@@ -193,9 +194,9 @@ namespace UnityEngine.Experimental.PostProcessing
             
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("COLOR_GRADING_HDR");
-            uberSheet.properties.SetVector(Uniforms._LogLut_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
+            uberSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
             uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
-            uberSheet.properties.SetTexture(Uniforms._LogLut, lut);
+            uberSheet.properties.SetTexture(Uniforms._Lut2D, lut);
         }
 
         void RenderHDRPipeline(PostProcessRenderContext context)
@@ -207,68 +208,24 @@ namespace UnityEngine.Experimental.PostProcessing
             // It's not a very expensive operation anyway (we're talking about filling a 1024x32
             // Lut on the GPU) but every little thing helps, especially on mobile.
             {
-                CheckInternalLut();
+                CheckInternalLogLut();
 
                 // Lut setup
                 var lutSheet = context.propertySheets.Get(context.resources.shaders.lutBaker);
                 lutSheet.ClearKeywords();
 
-                lutSheet.properties.SetVector(Uniforms._LutParams, new Vector4(
-                    k_LutSize,
-                    0.5f / (k_LutSize * k_LutSize),
-                    0.5f / k_LutSize,
-                    k_LutSize / (k_LutSize - 1f))
-                );
-
-                var colorBalance = ColorUtilities.ComputeColorBalance(settings.temperature.value, settings.tint.value);
-                lutSheet.properties.SetVector(Uniforms._ColorBalance, colorBalance);
-
-                lutSheet.properties.SetVector(Uniforms._ColorFilter, settings.colorFilter.value);
-                lutSheet.properties.SetFloat(Uniforms._Contrast, settings.contrast.value / 100f + 1f);     // Remap to [0;2]
-                lutSheet.properties.SetFloat(Uniforms._Saturation, settings.saturation.value / 100f + 1f); // Remap to [0;2]
-                lutSheet.properties.SetFloat(Uniforms._HueShift, settings.hueShift.value / 360f);          // Remap to [-0.5;0.5]
+                SetupCommonSettings(lutSheet);
                 
-                var channelMixerR = new Vector3(settings.mixerRedOutRedIn, settings.mixerRedOutGreenIn, settings.mixerRedOutBlueIn);
-                var channelMixerG = new Vector3(settings.mixerGreenOutRedIn, settings.mixerGreenOutGreenIn, settings.mixerGreenOutBlueIn);
-                var channelMixerB = new Vector3(settings.mixerBlueOutRedIn, settings.mixerBlueOutGreenIn, settings.mixerBlueOutBlueIn);
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerRed, channelMixerR / 100f);            // Remap to [-2;2]
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerGreen, channelMixerG / 100f);
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerBlue, channelMixerB / 100f);
-
-                lutSheet.properties.SetVector(Uniforms._Lift, ColorUtilities.ColorToLift(settings.lift.value * 0.2f));
-                lutSheet.properties.SetVector(Uniforms._InvGamma, ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.5f));
-                lutSheet.properties.SetVector(Uniforms._Gain, ColorUtilities.ColorToGain(settings.gain.value * 0.7f));
+                var lift = ColorUtilities.ColorToLift(settings.lift.value * 0.2f);
+                var gain = ColorUtilities.ColorToGain(settings.gain.value * 0.5f);
+                var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.7f);
+                lutSheet.properties.SetVector(Uniforms._Lift, lift);
+                lutSheet.properties.SetVector(Uniforms._InvGamma, invgamma);
+                lutSheet.properties.SetVector(Uniforms._Gain, gain);
 
                 lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(true));
 
-                var tonemapper = settings.tonemapper.value;
-                if (tonemapper == Tonemapper.ACES)
-                {
-                    lutSheet.EnableKeyword("TONEMAPPING_ACES");
-                }
-                else if (tonemapper == Tonemapper.Neutral)
-                {
-                    lutSheet.EnableKeyword("TONEMAPPING_NEUTRAL");
-                }
-                else if (tonemapper == Tonemapper.Custom)
-                {
-                    lutSheet.EnableKeyword("TONEMAPPING_CUSTOM");
-
-                    m_HableCurve.Init(
-                        settings.toneCurveToeStrength.value,
-                        settings.toneCurveToeLength.value,
-                        settings.toneCurveShoulderStrength.value,
-                        settings.toneCurveShoulderLength.value,
-                        settings.toneCurveShoulderAngle.value,
-                        settings.toneCurveGamma.value
-                    );
-
-                    var curve = new Vector3(m_HableCurve.inverseWhitePoint, m_HableCurve.x0, m_HableCurve.x1);
-                    lutSheet.properties.SetVector(Uniforms._CustomToneCurve, curve);
-                    lutSheet.properties.SetFloatArray(Uniforms._ToeSegment, m_HableCurve.segments[0].data);
-                    lutSheet.properties.SetFloatArray(Uniforms._MidSegment, m_HableCurve.segments[1].data);
-                    lutSheet.properties.SetFloatArray(Uniforms._ShoSegment, m_HableCurve.segments[2].data);
-                }
+                SetupTonemapping(lutSheet);
 
                 // Generate the lut
                 context.command.BlitFullscreenTriangle((Texture)null, m_InternalLogLut, lutSheet, (int)Pass.LutGenHDR);
@@ -277,25 +234,110 @@ namespace UnityEngine.Experimental.PostProcessing
             var lut = m_InternalLogLut;
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("COLOR_GRADING_HDR");
-            uberSheet.properties.SetVector(Uniforms._LogLut_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
-            uberSheet.properties.SetTexture(Uniforms._LogLut, lut);
+            uberSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
+            uberSheet.properties.SetTexture(Uniforms._Lut2D, lut);
             uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
         }
 
         void RenderLDRPipeline(PostProcessRenderContext context)
         {
+            // For the same reasons as in RenderHDRPipeline, regen LUT on evey frame
+            {
+                CheckInternalLdrLut();
+
+                // Lut setup
+                var lutSheet = context.propertySheets.Get(context.resources.shaders.lutBaker);
+                lutSheet.ClearKeywords();
+
+                SetupCommonSettings(lutSheet);
+
+                var lift = ColorUtilities.ColorToLift(settings.lift.value);
+                var gain = ColorUtilities.ColorToGain(settings.gain.value);
+                var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value);
+                lutSheet.properties.SetVector(Uniforms._Lift, lift);
+                lutSheet.properties.SetVector(Uniforms._InvGamma, invgamma);
+                lutSheet.properties.SetVector(Uniforms._Gain, gain);
+
+                lutSheet.properties.SetFloat(Uniforms._Brightness, (settings.brightness.value + 100f) / 100f);
+                lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(false));
+                
+                // Generate the lut
+                context.command.BlitFullscreenTriangle((Texture)null, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
+            }
             
+            var lut = m_InternalLdrLut;
+            var uberSheet = context.uberSheet;
+            uberSheet.EnableKeyword("COLOR_GRADING_LDR");
+            uberSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
+            uberSheet.properties.SetTexture(Uniforms._Lut2D, lut);
         }
 
-        void CheckInternalLut()
+        void SetupCommonSettings(PropertySheet sheet)
+        {
+            sheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector4(
+                k_Lut2DSize,
+                0.5f / (k_Lut2DSize * k_Lut2DSize),
+                0.5f / k_Lut2DSize,
+                k_Lut2DSize / (k_Lut2DSize - 1f))
+            );
+
+            var colorBalance = ColorUtilities.ComputeColorBalance(settings.temperature.value, settings.tint.value);
+            sheet.properties.SetVector(Uniforms._ColorBalance, colorBalance);
+
+            sheet.properties.SetVector(Uniforms._ColorFilter, settings.colorFilter.value);
+            sheet.properties.SetFloat(Uniforms._Contrast, settings.contrast.value / 100f + 1f);     // Remap to [0;2]
+            sheet.properties.SetFloat(Uniforms._Saturation, settings.saturation.value / 100f + 1f); // Remap to [0;2]
+            sheet.properties.SetFloat(Uniforms._HueShift, settings.hueShift.value / 360f);          // Remap to [-0.5;0.5]
+                
+            var channelMixerR = new Vector3(settings.mixerRedOutRedIn, settings.mixerRedOutGreenIn, settings.mixerRedOutBlueIn);
+            var channelMixerG = new Vector3(settings.mixerGreenOutRedIn, settings.mixerGreenOutGreenIn, settings.mixerGreenOutBlueIn);
+            var channelMixerB = new Vector3(settings.mixerBlueOutRedIn, settings.mixerBlueOutGreenIn, settings.mixerBlueOutBlueIn);
+            sheet.properties.SetVector(Uniforms._ChannelMixerRed, channelMixerR / 100f);            // Remap to [-2;2]
+            sheet.properties.SetVector(Uniforms._ChannelMixerGreen, channelMixerG / 100f);
+            sheet.properties.SetVector(Uniforms._ChannelMixerBlue, channelMixerB / 100f);
+        }
+
+        void SetupTonemapping(PropertySheet sheet)
+        {
+            var tonemapper = settings.tonemapper.value;
+            if (tonemapper == Tonemapper.ACES)
+            {
+                sheet.EnableKeyword("TONEMAPPING_ACES");
+            }
+            else if (tonemapper == Tonemapper.Neutral)
+            {
+                sheet.EnableKeyword("TONEMAPPING_NEUTRAL");
+            }
+            else if (tonemapper == Tonemapper.Custom)
+            {
+                sheet.EnableKeyword("TONEMAPPING_CUSTOM");
+
+                m_HableCurve.Init(
+                    settings.toneCurveToeStrength.value,
+                    settings.toneCurveToeLength.value,
+                    settings.toneCurveShoulderStrength.value,
+                    settings.toneCurveShoulderLength.value,
+                    settings.toneCurveShoulderAngle.value,
+                    settings.toneCurveGamma.value
+                );
+
+                var curve = new Vector3(m_HableCurve.inverseWhitePoint, m_HableCurve.x0, m_HableCurve.x1);
+                sheet.properties.SetVector(Uniforms._CustomToneCurve, curve);
+                sheet.properties.SetFloatArray(Uniforms._ToeSegment, m_HableCurve.segments[0].data);
+                sheet.properties.SetFloatArray(Uniforms._MidSegment, m_HableCurve.segments[1].data);
+                sheet.properties.SetFloatArray(Uniforms._ShoSegment, m_HableCurve.segments[2].data);
+            }
+        }
+
+        void CheckInternalLogLut()
         {
             // Check internal lut state, (re)create it if needed
             if (m_InternalLogLut == null || !m_InternalLogLut.IsCreated())
             {
                 RuntimeUtilities.Destroy(m_InternalLogLut);
 
-                var format = GetLogLutFormat();
-                m_InternalLogLut = new RenderTexture(k_LutSize * k_LutSize, k_LutSize, 0, format, RenderTextureReadWrite.Linear)
+                var format = GetLutFormat();
+                m_InternalLogLut = new RenderTexture(k_Lut2DSize * k_Lut2DSize, k_Lut2DSize, 0, format, RenderTextureReadWrite.Linear)
                 {
                     name = "Color Grading Log Lut",
                     hideFlags = HideFlags.DontSave,
@@ -304,6 +346,26 @@ namespace UnityEngine.Experimental.PostProcessing
                     anisoLevel = 0
                 };
                 m_InternalLogLut.Create();
+            }
+        }
+
+        void CheckInternalLdrLut()
+        {
+            // Check internal lut state, (re)create it if needed
+            if (m_InternalLdrLut == null || !m_InternalLdrLut.IsCreated())
+            {
+                RuntimeUtilities.Destroy(m_InternalLdrLut);
+
+                var format = GetLutFormat();
+                m_InternalLdrLut = new RenderTexture(k_Lut2DSize * k_Lut2DSize, k_Lut2DSize, 0, format, RenderTextureReadWrite.Linear)
+                {
+                    name = "Color Grading Ldr Lut",
+                    hideFlags = HideFlags.DontSave,
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                    anisoLevel = 0
+                };
+                m_InternalLdrLut.Create();
             }
         }
 
@@ -354,7 +416,7 @@ namespace UnityEngine.Experimental.PostProcessing
             return m_GradingCurves;
         }
 
-        static RenderTextureFormat GetLogLutFormat()
+        static RenderTextureFormat GetLutFormat()
         {
             // Use ARGBHalf if possible, fallback on ARGB2101010 and ARGB32 otherwise
             var format = RenderTextureFormat.ARGBHalf;
@@ -386,6 +448,9 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public override void Release()
         {
+            RuntimeUtilities.Destroy(m_InternalLdrLut);
+            m_InternalLdrLut = null;
+
             RuntimeUtilities.Destroy(m_InternalLogLut);
             m_InternalLogLut = null;
 

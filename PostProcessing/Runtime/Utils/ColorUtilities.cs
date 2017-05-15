@@ -49,6 +49,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var S = new Vector3(color.x, color.y, color.z);
             float lumLift = S.x * 0.2126f + S.y * 0.7152f + S.z * 0.0722f;
             S = new Vector3(S.x - lumLift, S.y - lumLift, S.z - lumLift);
+
             float liftOffset = color.w;
             return new Vector3(S.x + liftOffset, S.y + liftOffset, S.z + liftOffset);
         }
@@ -60,6 +61,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var M = new Vector3(color.x, color.y, color.z);
             float lumGamma = M.x * 0.2126f + M.y * 0.7152f + M.z * 0.0722f;
             M = new Vector3(M.x - lumGamma, M.y - lumGamma, M.z - lumGamma);
+
             float gammaOffset = color.w + 1f;
             return new Vector3(
                 1f / Mathf.Max(M.x + gammaOffset, 1e-03f),
@@ -75,6 +77,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var H = new Vector3(color.x, color.y, color.z);
             float lumGain = H.x * 0.2126f + H.y * 0.7152f + H.z * 0.0722f;
             H = new Vector3(H.x - lumGain, H.y - lumGain, H.z - lumGain);
+
             float gainOffset = color.w + 1f;
             return new Vector3(H.x + gainOffset, H.y + gainOffset, H.z + gainOffset);
         }

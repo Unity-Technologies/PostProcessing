@@ -210,27 +210,28 @@ namespace UnityEditor.Experimental.PostProcessing
         {
             if (!hdr)
             {
-                EditorGUILayout.HelpBox("Not implemented yet.", MessageType.Error);
-
                 PropertyField(m_LdrLut);
 
                 var lut = (target as ColorGrading).ldrLut.value;
                 CheckLutImportSettings(lut);
             }
 
-            EditorGUILayout.Space();
-            EditorUtilities.DrawHeaderLabel("Tonemapping");
-            PropertyField(m_Tonemapper);
-
-            if (m_Tonemapper.value.intValue == (int)Tonemapper.Custom)
+            if (hdr)
             {
-                DrawCustomToneCurve();
-                PropertyField(m_ToneCurveToeStrength);
-                PropertyField(m_ToneCurveToeLength);
-                PropertyField(m_ToneCurveShoulderStrength);
-                PropertyField(m_ToneCurveShoulderLength);
-                PropertyField(m_ToneCurveShoulderAngle);
-                PropertyField(m_ToneCurveGamma);
+                EditorGUILayout.Space();
+                EditorUtilities.DrawHeaderLabel("Tonemapping");
+                PropertyField(m_Tonemapper);
+
+                if (m_Tonemapper.value.intValue == (int)Tonemapper.Custom)
+                {
+                    DrawCustomToneCurve();
+                    PropertyField(m_ToneCurveToeStrength);
+                    PropertyField(m_ToneCurveToeLength);
+                    PropertyField(m_ToneCurveShoulderStrength);
+                    PropertyField(m_ToneCurveShoulderLength);
+                    PropertyField(m_ToneCurveShoulderAngle);
+                    PropertyField(m_ToneCurveGamma);
+                }
             }
 
             EditorGUILayout.Space();
@@ -657,8 +658,6 @@ namespace UnityEditor.Experimental.PostProcessing
                     }
                 }
             }
-
-            EditorGUILayout.Space();
         }
 
         void DrawBackgroundTexture(Rect rect, int pass)

@@ -67,9 +67,8 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
         internal static readonly int _ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
 
-        internal static readonly int _LogLut                          = Shader.PropertyToID("_LogLut");
-        internal static readonly int _LogLut_Params                   = Shader.PropertyToID("_LogLut_Params");
-        internal static readonly int _LutParams                       = Shader.PropertyToID("_LutParams");
+        internal static readonly int _Lut2D                           = Shader.PropertyToID("_Lut2D");
+        internal static readonly int _Lut2D_Params                    = Shader.PropertyToID("_Lut2D_Params");
         internal static readonly int _CustomToneCurve                 = Shader.PropertyToID("_CustomToneCurve");
         internal static readonly int _ToeSegment                      = Shader.PropertyToID("_ToeSegment");
         internal static readonly int _MidSegment                      = Shader.PropertyToID("_MidSegment");

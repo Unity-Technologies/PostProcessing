@@ -10,7 +10,7 @@ Shader "Hidden/PostProcessing/LutBaker"
         #pragma multi_compile __ TONEMAPPING_ACES TONEMAPPING_NEUTRAL TONEMAPPING_CUSTOM
 
         TEXTURE2D_SAMPLER2D(_BaseLut, sampler_BaseLut);
-        float4 _LutParams;
+        float4 _Lut2D_Params;
 
         float3 _CustomToneCurve;
         float _ToeSegment[6];
@@ -35,12 +35,12 @@ Shader "Hidden/PostProcessing/LutBaker"
         TEXTURE2D_SAMPLER2D(_Curves, sampler_Curves);
 
         // -----------------------------------------------------------------------------------------
-        // HDR Grading
+        // HDR Grading - empty, default lut
 
         float4 FragNoGradingHDR(VaryingsDefault i) : SV_Target
         {
             // 2D strip lut
-            float3 colorLutSpace = GetLutStripValue(i.texcoord, _LutParams);
+            float3 colorLutSpace = GetLutStripValue(i.texcoord, _Lut2D_Params);
 
             // Switch back to unity linear
             float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
@@ -72,17 +72,13 @@ Shader "Hidden/PostProcessing/LutBaker"
             acescg = LiftGammaGainHDR(acescg, _Lift, _InvGamma, _Gain);
 
             float3 hsv = RgbToHsv(acescg);
-
-            // Secondary color correction (VS curves)
             float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
             satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
             satMult *= SecondaryLumSat(Luminance(acescg), TEXTURE2D_PARAM(_Curves, sampler_Curves));
             hsv.x = SecondaryHueHue(hsv.x + _HueShift, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-
-            // Saturation
-            hsv.y *= _Saturation * satMult;
-
             acescg = HsvToRgb(hsv);
+
+            acescg = Saturation(acescg, _Saturation * satMult);
 
             // Tonemap
             #if TONEMAPPING_ACES
@@ -112,12 +108,48 @@ Shader "Hidden/PostProcessing/LutBaker"
         float4 FragHDR(VaryingsDefault i) : SV_Target
         {
             // 2D strip lut
-            float3 colorLutSpace = GetLutStripValue(i.texcoord, _LutParams);
+            float3 colorLutSpace = GetLutStripValue(i.texcoord, _Lut2D_Params);
 
             // Switch back to unity linear and color grade
             float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
             float3 graded = ColorGradeHDR(colorLinear);
 
+            return float4(graded, 1.0);
+        }
+
+        // -----------------------------------------------------------------------------------------
+        // LDR Grading - no starting lut
+
+        float3 ColorGradeLDR(float3 colorLinear)
+        {
+            const float kMidGrey = pow(0.5, 2.2);
+
+            colorLinear *= _Brightness;
+            colorLinear = Contrast(colorLinear, kMidGrey, _Contrast);
+            colorLinear = WhiteBalance(colorLinear, _ColorBalance);
+            colorLinear *= _ColorFilter;
+            colorLinear = ChannelMixer(colorLinear, _ChannelMixerRed, _ChannelMixerGreen, _ChannelMixerBlue);
+            colorLinear = LiftGammaGainLDR(colorLinear, _Lift, _InvGamma, _Gain);
+
+            float3 hsv = RgbToHsv(colorLinear);
+            float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+            satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+            satMult *= SecondaryLumSat(Luminance(colorLinear), TEXTURE2D_PARAM(_Curves, sampler_Curves));
+            hsv.x = SecondaryHueHue(hsv.x + _HueShift, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+            colorLinear = HsvToRgb(hsv);
+
+            colorLinear = Saturation(colorLinear, _Saturation * satMult);
+            colorLinear = saturate(colorLinear);
+            colorLinear = YrgbCurve(colorLinear, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+
+            return saturate(colorLinear);
+        }
+
+        float4 FragLDRFromScratch(VaryingsDefault i) : SV_Target
+        {
+            // 2D strip lut
+            float3 colorLinear = GetLutStripValue(i.texcoord, _Lut2D_Params);
+            float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }
 
@@ -143,6 +175,16 @@ Shader "Hidden/PostProcessing/LutBaker"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragHDR
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragLDRFromScratch
 
             ENDHLSL
         }

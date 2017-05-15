@@ -30,8 +30,8 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
-        TEXTURE2D_SAMPLER2D(_LogLut, sampler_LogLut);
-        float3 _LogLut_Params;
+        TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
+        float3 _Lut2D_Params;
         half _PostExposure; // EV (exp2)
 
         // Vignette
@@ -126,14 +126,6 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            #if COLOR_GRADING_HDR
-            {
-                color *= _PostExposure; // Exposure is in ev units (or 'stops')
-                float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color));
-                color = ApplyLut2D(TEXTURE2D_PARAM(_LogLut, sampler_LogLut), colorLutSpace, _LogLut_Params);
-            }
-            #endif
-
             #if VIGNETTE
             {
                 if (_Vignette_Mode < 0.5)
@@ -150,6 +142,19 @@ Shader "Hidden/PostProcessing/Uber"
                     half3 new_color = color * lerp(_Vignette_Color, (1.0).xxx, vfactor);
                     color = lerp(color, new_color, _Vignette_Opacity);
                 }
+            }
+            #endif
+
+            #if COLOR_GRADING_HDR
+            {
+                color *= _PostExposure; // Exposure is in ev units (or 'stops')
+                float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color));
+                color = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), colorLutSpace, _Lut2D_Params);
+            }
+            #elif COLOR_GRADING_LDR
+            {
+                color = saturate(color);
+                color = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color, _Lut2D_Params);
             }
             #endif
 

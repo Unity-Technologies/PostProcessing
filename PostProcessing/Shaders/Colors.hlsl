@@ -468,7 +468,7 @@ float RotateHue(float value, float low, float hi)
 
 //
 // RGB Saturation (closer to a vibrance effect than actual saturation)
-// Recommended workspace: ACEScc (log)
+// Recommended workspace: ACEScg (linear)
 // Optimal range: [0.0, 2.0]
 //
 float3 Saturation(float3 c, float sat)
@@ -498,6 +498,16 @@ float3 LiftGammaGainHDR(float3 c, float3 lift, float3 invgamma, float3 gain)
     // ACEScg will output negative values, as clamping to 0 will lose precious information we'll
     // mirror the gamma function instead
     return sign(c) * pow(abs(c), invgamma);
+}
+
+//
+// Lift, Gamma (pre-inverted), Gain tuned for LDR use
+// Input is linear RGB
+//
+float3 LiftGammaGainLDR(float3 c, float3 lift, float3 invgamma, float3 gain)
+{
+    c = saturate(PositivePow(c, invgamma));
+    return gain * c + lift * (1.0 - c);
 }
 
 //
