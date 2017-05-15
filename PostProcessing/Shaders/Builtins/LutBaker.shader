@@ -7,10 +7,15 @@ Shader "Hidden/PostProcessing/LutBaker"
         #include "../Colors.hlsl"
         #include "../ACES.hlsl"
         
-        #pragma multi_compile __ TONEMAPPING_ACES TONEMAPPING_NEUTRAL
+        #pragma multi_compile __ TONEMAPPING_ACES TONEMAPPING_NEUTRAL TONEMAPPING_CUSTOM
 
         TEXTURE2D_SAMPLER2D(_BaseLut, sampler_BaseLut);
         float4 _LutParams;
+
+        float3 _CustomToneCurve;
+        float _ToeSegment[6];
+        float _MidSegment[6];
+        float _ShoSegment[6];
 
         float3 _ColorBalance;
         float3 _ColorFilter;
@@ -89,6 +94,11 @@ Shader "Hidden/PostProcessing/LutBaker"
             {
                 colorLinear = ACEScg_to_unity(acescg);
                 colorLinear = NeutralTonemap(colorLinear);
+            }
+            #elif TONEMAPPING_CUSTOM
+            {
+                colorLinear = ACEScg_to_unity(acescg);
+                colorLinear = CustomTonemap(colorLinear, _CustomToneCurve, _ToeSegment, _MidSegment, _ShoSegment);
             }
             #else
             {

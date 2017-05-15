@@ -70,6 +70,10 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _LogLut                          = Shader.PropertyToID("_LogLut");
         internal static readonly int _LogLut_Params                   = Shader.PropertyToID("_LogLut_Params");
         internal static readonly int _LutParams                       = Shader.PropertyToID("_LutParams");
+        internal static readonly int _CustomToneCurve                 = Shader.PropertyToID("_CustomToneCurve");
+        internal static readonly int _ToeSegment                      = Shader.PropertyToID("_ToeSegment");
+        internal static readonly int _MidSegment                      = Shader.PropertyToID("_MidSegment");
+        internal static readonly int _ShoSegment                      = Shader.PropertyToID("_ShoSegment");
         internal static readonly int _PostExposure                    = Shader.PropertyToID("_PostExposure");
         internal static readonly int _ColorBalance                    = Shader.PropertyToID("_ColorBalance");
         internal static readonly int _ColorFilter                     = Shader.PropertyToID("_ColorFilter");

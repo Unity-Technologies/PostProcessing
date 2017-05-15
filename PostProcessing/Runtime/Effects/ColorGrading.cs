@@ -17,7 +17,10 @@ namespace UnityEngine.Experimental.PostProcessing
         Neutral,
 
         // ACES Filmic reference tonemapper (custom approximation)
-        ACES
+        ACES,
+
+        // Custom artist-friendly curve
+        Custom
     }
 
     [Serializable]
@@ -36,6 +39,24 @@ namespace UnityEngine.Experimental.PostProcessing
 
         [DisplayName("Mode"), Tooltip("Select a tonemapping algorithm to use at the end of the color grading process.")]
         public TonemapperParameter tonemapper = new TonemapperParameter { value = Tonemapper.None };
+
+        [DisplayName("Toe Strength"), Range(0f, 1f), Tooltip("Affects the transition between the toe and the mid section of the curve. A value of 0 means no toe, a value of 1 means a very hard transition.")]
+        public FloatParameter toneCurveToeStrength = new FloatParameter { value = 0f };
+
+        [DisplayName("Toe Length"), Range(0f, 1f), Tooltip("Affects how much of the dynamic range is in the toe. With a small value, the toe will be very short and quickly transition into the linear section, and with a longer value having a longer toe.")]
+        public FloatParameter toneCurveToeLength = new FloatParameter { value = 0.5f };
+
+        [DisplayName("Shoulder Strength"), Range(0f, 1f), Tooltip("Affects the transition between the mid section and the shoulder of the curve. A value of 0 means no shoulder, a value of 1 means a very hard transition.")]
+        public FloatParameter toneCurveShoulderStrength = new FloatParameter { value = 0f };
+
+        [DisplayName("Shoulder Length"), Min(0f), Tooltip("Affects how many F-stops (EV) to add to the dynamic range of the curve.")]
+        public FloatParameter toneCurveShoulderLength = new FloatParameter { value = 0.5f };
+
+        [DisplayName("Shoulder Angle"), Range(0f, 1f), Tooltip("Affects how much overshoot to add to the shoulder.")]
+        public FloatParameter toneCurveShoulderAngle = new FloatParameter { value = 0f };
+
+        [DisplayName("Gamma"), Min(0.001f), Tooltip("")]
+        public FloatParameter toneCurveGamma = new FloatParameter { value = 1f };
 
         [DisplayName("Lookup Texture"), Tooltip("Custom log-space lookup texture (strip format, e.g. 1024x32). EXR format is highly recommended or precision will be heavily degraded. Refer to the documentation for more information about how to create such a Lut.")]
         public TextureParameter logLut = new TextureParameter { value = null };
@@ -131,6 +152,8 @@ namespace UnityEngine.Experimental.PostProcessing
         RenderTexture m_InternalLogLut;
         const int k_LutSize = 32;
 
+        readonly HableCurve m_HableCurve = new HableCurve();
+
         public override void Render(PostProcessRenderContext context)
         {
             switch (settings.gradingMode.value)
@@ -220,9 +243,32 @@ namespace UnityEngine.Experimental.PostProcessing
 
                 var tonemapper = settings.tonemapper.value;
                 if (tonemapper == Tonemapper.ACES)
+                {
                     lutSheet.EnableKeyword("TONEMAPPING_ACES");
+                }
                 else if (tonemapper == Tonemapper.Neutral)
+                {
                     lutSheet.EnableKeyword("TONEMAPPING_NEUTRAL");
+                }
+                else if (tonemapper == Tonemapper.Custom)
+                {
+                    lutSheet.EnableKeyword("TONEMAPPING_CUSTOM");
+
+                    m_HableCurve.Init(
+                        settings.toneCurveToeStrength.value,
+                        settings.toneCurveToeLength.value,
+                        settings.toneCurveShoulderStrength.value,
+                        settings.toneCurveShoulderLength.value,
+                        settings.toneCurveShoulderAngle.value,
+                        settings.toneCurveGamma.value
+                    );
+
+                    var curve = new Vector3(m_HableCurve.inverseWhitePoint, m_HableCurve.x0, m_HableCurve.x1);
+                    lutSheet.properties.SetVector(Uniforms._CustomToneCurve, curve);
+                    lutSheet.properties.SetFloatArray(Uniforms._ToeSegment, m_HableCurve.segments[0].data);
+                    lutSheet.properties.SetFloatArray(Uniforms._MidSegment, m_HableCurve.segments[1].data);
+                    lutSheet.properties.SetFloatArray(Uniforms._ShoSegment, m_HableCurve.segments[2].data);
+                }
 
                 // Generate the lut
                 context.command.BlitFullscreenTriangle((Texture)null, m_InternalLogLut, lutSheet, (int)Pass.LutGenHDR);

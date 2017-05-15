@@ -98,8 +98,9 @@ namespace UnityEditor.Experimental.PostProcessing
                 {
                     EditorGUILayout.PropertyField(m_FxaaMobileOptimized);
                 }
+
+                EditorGUI.indentLevel--;
             }
-            EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
 

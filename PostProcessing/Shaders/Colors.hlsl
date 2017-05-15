@@ -264,6 +264,44 @@ float3 NeutralTonemap(float3 x)
 }
 
 //
+// Raw, unoptimized version of John Hable's artist-friendly tone curve
+// Input is linear RGB
+//
+float EvalCustomSegment(float x, float segment[6])
+{
+    const float kOffsetX = segment[0];
+    const float kOffsetY = segment[1];
+    const float kScaleX  = segment[2];
+    const float kScaleY  = segment[3];
+    const float kLnA     = segment[4];
+    const float kB       = segment[5];
+
+    float x0 = (x - kOffsetX) * kScaleX;
+    float y0 = (x0 > 0.0) ? exp(kLnA + kB * log(x0)) : 0.0;
+    return y0 * kScaleY + kOffsetY;
+}
+
+float EvalCustomCurve(float x, float3 curve, float toeSegment[6], float midSegment[6], float shoSegment[6])
+{
+    float segment[6];
+    if (x < curve.y) segment = toeSegment;
+    else if (x < curve.z) segment = midSegment;
+    else segment = shoSegment;
+    return EvalCustomSegment(x, segment);
+}
+
+// curve: x: inverseWhitePoint, y: x0, z: x1
+float3 CustomTonemap(float3 x, float3 curve, float toeSegment[6], float midSegment[6], float shoSegment[6])
+{
+    float3 normX = x * curve.x;
+    float3 ret;
+    ret.x = EvalCustomCurve(normX.x, curve, toeSegment, midSegment, shoSegment);
+    ret.y = EvalCustomCurve(normX.y, curve, toeSegment, midSegment, shoSegment);
+    ret.z = EvalCustomCurve(normX.z, curve, toeSegment, midSegment, shoSegment);
+    return ret;
+}
+
+//
 // Filmic tonemapping (ACES fitting, unless TONEMAPPING_USE_FULL_ACES is set to 1)
 // Input is ACES2065-1 (AP0 w/ linear encoding)
 //
