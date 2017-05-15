@@ -293,7 +293,7 @@ float EvalCustomCurve(float x, float3 curve, float toeSegment[6], float midSegme
 // curve: x: inverseWhitePoint, y: x0, z: x1
 float3 CustomTonemap(float3 x, float3 curve, float toeSegment[6], float midSegment[6], float shoSegment[6])
 {
-    float3 normX = x * curve.x;
+    float3 normX = max((0.0).xxx, x) * curve.x;
     float3 ret;
     ret.x = EvalCustomCurve(normX.x, curve, toeSegment, midSegment, shoSegment);
     ret.y = EvalCustomCurve(normX.y, curve, toeSegment, midSegment, shoSegment);
