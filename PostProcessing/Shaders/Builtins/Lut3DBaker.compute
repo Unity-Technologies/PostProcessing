@@ -1,0 +1,126 @@
+#include "../StdLib.hlsl"
+#include "../Colors.hlsl"
+#include "../ACES.hlsl"
+
+#pragma kernel KGenLut3D_NoTonemap
+#pragma kernel KGenLut3D_AcesTonemap TONEMAPPING_ACES
+#pragma kernel KGenLut3D_NeutralTonemap TONEMAPPING_NEUTRAL
+#pragma kernel KGenLut3D_CustomTonemap TONEMAPPING_CUSTOM
+
+RWTexture3D<float4> _Output;
+
+CBUFFER_START(Params)
+    float4 _Size; // x: lut_size, y: 1 / (lut_size - 1), zw: unused
+
+    float4 _ColorBalance;
+    float4 _ColorFilter;
+    float4 _HueSatCon;
+
+    float4 _ChannelMixerRed;
+    float4 _ChannelMixerGreen;
+    float4 _ChannelMixerBlue;
+
+    float4 _Lift;
+    float4 _InvGamma;
+    float4 _Gain;
+
+    float4 _CustomToneCurve;
+
+    // Packing is currently borked, can't pass float arrays without it creating one vector4 per
+    // float so we'll pack manually...
+    float4 _ToeSegmentA;
+    float4 _ToeSegmentB;
+    float4 _MidSegmentA;
+    float4 _MidSegmentB;
+    float4 _ShoSegmentA;
+    float4 _ShoSegmentB;
+CBUFFER_END
+
+Texture2D _Curves;
+SamplerState sampler_Curves;
+
+float3 ColorGrade(float3 colorLinear)
+{
+    float3 aces = unity_to_ACES(colorLinear);
+
+    // ACEScc (log) space
+    float3 acescc = ACES_to_ACEScc(aces);
+
+    // Contrast feels a lot more natural when done in log rather than doing it in linear
+    acescc = Contrast(acescc, ACEScc_MIDGRAY, _HueSatCon.z);
+
+    aces = ACEScc_to_ACES(acescc);
+
+    // ACEScg (linear) space
+    float3 acescg = ACES_to_ACEScg(aces);
+
+    acescg = WhiteBalance(acescg, _ColorBalance.rgb);
+    acescg *= _ColorFilter.rgb;
+    acescg = ChannelMixer(acescg, _ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb);
+    acescg = LiftGammaGainHDR(acescg, _Lift.rgb, _InvGamma.rgb, _Gain.rgb);
+
+    float3 hsv = RgbToHsv(acescg);
+    float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    satMult *= SecondaryLumSat(Luminance(acescg), TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    hsv.x = SecondaryHueHue(hsv.x + _HueSatCon.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    acescg = HsvToRgb(hsv);
+
+    acescg = Saturation(acescg, _HueSatCon.y * satMult);
+
+    // Tonemap
+    #if TONEMAPPING_ACES
+    {
+        aces = ACEScg_to_ACES(acescg);
+        colorLinear = AcesTonemap(aces);
+    }
+    #elif TONEMAPPING_NEUTRAL
+    {
+        colorLinear = ACEScg_to_unity(acescg);
+        colorLinear = NeutralTonemap(colorLinear);
+    }
+    #elif TONEMAPPING_CUSTOM
+    {
+        colorLinear = ACEScg_to_unity(acescg);
+        colorLinear = CustomTonemap(
+            colorLinear, _CustomToneCurve.xyz,
+            _ToeSegmentA, _ToeSegmentB.xy,
+            _MidSegmentA, _MidSegmentB.xy,
+            _ShoSegmentA, _ShoSegmentB.xy
+        );
+    }
+    #else
+    {
+        colorLinear = ACEScg_to_unity(acescg);
+    }
+    #endif
+
+    return colorLinear;
+}
+
+void Eval(uint3 id)
+{
+    if (float(id.x) < _Size.x && float(id.y) < _Size.x && float(id.z) < _Size.x)
+    {
+        // Lut space (log space)
+        float3 colorLutSpace = float3(id) * _Size.y;
+
+        // Switch back to unity linear and color grade
+        float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
+        float3 graded = ColorGrade(colorLinear);
+
+        _Output[id] = float4(graded, 1.0);
+    }
+}
+
+[numthreads(4,4,4)]
+void KGenLut3D_NoTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
+
+[numthreads(4,4,4)]
+void KGenLut3D_AcesTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
+
+[numthreads(4,4,4)]
+void KGenLut3D_NeutralTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
+
+[numthreads(4,4,4)]
+void KGenLut3D_CustomTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }

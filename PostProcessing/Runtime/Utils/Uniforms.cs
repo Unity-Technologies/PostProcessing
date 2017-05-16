@@ -36,7 +36,7 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _TileVRT                         = Shader.PropertyToID("_TileVRT");
         internal static readonly int _NeighborMaxTex                  = Shader.PropertyToID("_NeighborMaxTex");
         internal static readonly int _LoopCount                       = Shader.PropertyToID("_LoopCount");
-        
+
         internal static readonly int _DepthOfFieldOutput              = Shader.PropertyToID("_DepthOfFieldOutput");
         internal static readonly int _DepthOfFieldTemp                = Shader.PropertyToID("_DepthOfFieldTemp");
         internal static readonly int _DepthOfFieldTex                 = Shader.PropertyToID("_DepthOfFieldTex");
@@ -68,17 +68,13 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
 
         internal static readonly int _Lut2D                           = Shader.PropertyToID("_Lut2D");
+        internal static readonly int _Lut3D                           = Shader.PropertyToID("_Lut3D");
+        internal static readonly int _Lut3D_Params                    = Shader.PropertyToID("_Lut3D_Params");
         internal static readonly int _Lut2D_Params                    = Shader.PropertyToID("_Lut2D_Params");
-        internal static readonly int _CustomToneCurve                 = Shader.PropertyToID("_CustomToneCurve");
-        internal static readonly int _ToeSegment                      = Shader.PropertyToID("_ToeSegment");
-        internal static readonly int _MidSegment                      = Shader.PropertyToID("_MidSegment");
-        internal static readonly int _ShoSegment                      = Shader.PropertyToID("_ShoSegment");
         internal static readonly int _PostExposure                    = Shader.PropertyToID("_PostExposure");
         internal static readonly int _ColorBalance                    = Shader.PropertyToID("_ColorBalance");
         internal static readonly int _ColorFilter                     = Shader.PropertyToID("_ColorFilter");
-        internal static readonly int _HueShift                        = Shader.PropertyToID("_HueShift");
-        internal static readonly int _Saturation                      = Shader.PropertyToID("_Saturation");
-        internal static readonly int _Contrast                        = Shader.PropertyToID("_Contrast");
+        internal static readonly int _HueSatCon                       = Shader.PropertyToID("_HueSatCon");
         internal static readonly int _Brightness                      = Shader.PropertyToID("_Brightness");
         internal static readonly int _ChannelMixerRed                 = Shader.PropertyToID("_ChannelMixerRed");
         internal static readonly int _ChannelMixerGreen               = Shader.PropertyToID("_ChannelMixerGreen");

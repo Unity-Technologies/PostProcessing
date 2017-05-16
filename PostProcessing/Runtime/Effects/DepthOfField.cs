@@ -35,7 +35,8 @@ namespace UnityEngine.Experimental.PostProcessing
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
         }
     }
-
+    
+    // TODO: Look into minimum blur amount in the distance, right now it's lerped until a point
     public sealed class DepthOfFieldRenderer : PostProcessEffectRenderer<DepthOfField>
     {
         enum Pass

@@ -2,6 +2,8 @@ Shader "Hidden/PostProcessing/Uber"
 {
     HLSLINCLUDE
 
+        #pragma target 3.0
+
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
         #pragma multi_compile __ BLOOM
@@ -30,7 +32,9 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
+        TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
         TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
+        float2 _Lut3D_Params;
         float3 _Lut2D_Params;
         half _PostExposure; // EV (exp2)
 
@@ -149,7 +153,7 @@ Shader "Hidden/PostProcessing/Uber"
             {
                 color *= _PostExposure; // Exposure is in ev units (or 'stops')
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color));
-                color = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), colorLutSpace, _Lut2D_Params);
+                color = ApplyLut3D(TEXTURE3D_PARAM(_Lut3D, sampler_Lut3D), colorLutSpace, _Lut3D_Params);
             }
             #elif COLOR_GRADING_LDR
             {

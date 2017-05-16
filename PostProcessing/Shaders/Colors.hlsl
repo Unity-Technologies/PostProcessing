@@ -21,7 +21,7 @@
 #define TONEMAPPING_USE_FULL_ACES 0
 
 // PQ ST.2048 max value (nits) - Bump this up
-#define DEFAULT_MAX_PQ 500.0
+#define DEFAULT_MAX_PQ 1000.0
 
 //
 // Alexa LogC converters (El 1000)
@@ -267,37 +267,52 @@ float3 NeutralTonemap(float3 x)
 // Raw, unoptimized version of John Hable's artist-friendly tone curve
 // Input is linear RGB
 //
-float EvalCustomSegment(float x, float segment[6])
+float EvalCustomSegment(float x, float4 segmentA, float2 segmentB)
 {
-    const float kOffsetX = segment[0];
-    const float kOffsetY = segment[1];
-    const float kScaleX  = segment[2];
-    const float kScaleY  = segment[3];
-    const float kLnA     = segment[4];
-    const float kB       = segment[5];
+    const float kOffsetX = segmentA.x;
+    const float kOffsetY = segmentA.y;
+    const float kScaleX  = segmentA.z;
+    const float kScaleY  = segmentA.w;
+    const float kLnA     = segmentB.x;
+    const float kB       = segmentB.y;
 
     float x0 = (x - kOffsetX) * kScaleX;
     float y0 = (x0 > 0.0) ? exp(kLnA + kB * log(x0)) : 0.0;
     return y0 * kScaleY + kOffsetY;
 }
 
-float EvalCustomCurve(float x, float3 curve, float toeSegment[6], float midSegment[6], float shoSegment[6])
+float EvalCustomCurve(float x, float3 curve, float4 toeSegmentA, float2 toeSegmentB, float4 midSegmentA, float2 midSegmentB, float4 shoSegmentA, float2 shoSegmentB)
 {
-    float segment[6];
-    if (x < curve.y) segment = toeSegment;
-    else if (x < curve.z) segment = midSegment;
-    else segment = shoSegment;
-    return EvalCustomSegment(x, segment);
+    float4 segmentA;
+    float2 segmentB;
+
+    if (x < curve.y)
+    {
+        segmentA = toeSegmentA;
+        segmentB = toeSegmentB;
+    }
+    else if (x < curve.z)
+    {
+        segmentA = midSegmentA;
+        segmentB = midSegmentB;
+    }
+    else
+    {
+        segmentA = shoSegmentA;
+        segmentB = shoSegmentB;
+    }
+
+    return EvalCustomSegment(x, segmentA, segmentB);
 }
 
 // curve: x: inverseWhitePoint, y: x0, z: x1
-float3 CustomTonemap(float3 x, float3 curve, float toeSegment[6], float midSegment[6], float shoSegment[6])
+float3 CustomTonemap(float3 x, float3 curve, float4 toeSegmentA, float2 toeSegmentB, float4 midSegmentA, float2 midSegmentB, float4 shoSegmentA, float2 shoSegmentB)
 {
     float3 normX = max((0.0).xxx, x) * curve.x;
     float3 ret;
-    ret.x = EvalCustomCurve(normX.x, curve, toeSegment, midSegment, shoSegment);
-    ret.y = EvalCustomCurve(normX.y, curve, toeSegment, midSegment, shoSegment);
-    ret.z = EvalCustomCurve(normX.z, curve, toeSegment, midSegment, shoSegment);
+    ret.x = EvalCustomCurve(normX.x, curve, toeSegmentA, toeSegmentB, midSegmentA, midSegmentB, shoSegmentA, shoSegmentB);
+    ret.y = EvalCustomCurve(normX.y, curve, toeSegmentA, toeSegmentB, midSegmentA, midSegmentB, shoSegmentA, shoSegmentB);
+    ret.z = EvalCustomCurve(normX.z, curve, toeSegmentA, toeSegmentB, midSegmentA, midSegmentB, shoSegmentA, shoSegmentB);
     return ret;
 }
 
@@ -378,7 +393,19 @@ float3 AcesTonemap(float3 aces)
 }
 
 //
-// LUT grading
+// 3D LUT grading
+// scaleOffset = (1 / lut_size, lut_size - 1)
+//
+half3 ApplyLut3D(TEXTURE3D_ARGS(tex, samplerTex), float3 uvw, float2 scaleOffset)
+{
+    float shift = floor(uvw.z);
+    uvw.xy = uvw.xy * scaleOffset.y * scaleOffset.xx + scaleOffset.xx * 0.5;
+    uvw.x += shift * scaleOffset.x;
+    return SAMPLE_TEXTURE3D(tex, samplerTex, uvw).rgb;
+}
+
+//
+// 2D LUT grading
 // scaleOffset = (1 / lut_width, 1 / lut_height, lut_height - 1)
 //
 half3 ApplyLut2D(TEXTURE2D_ARGS(tex, samplerTex), float3 uvw, float3 scaleOffset)
@@ -540,7 +567,7 @@ float3 YrgbCurve(float3 c, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 //
 float SecondaryHueHue(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 {
-    float offset = saturate(SAMPLE_TEXTURE2D(curveTex, sampler_curveTex, float2(hue, 0.25)).x) - 0.5;
+    float offset = saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(hue, 0.25), 0).x) - 0.5;
     hue += offset;
     hue = RotateHue(hue, 0.0, 1.0);
     return hue;
@@ -553,7 +580,7 @@ float SecondaryHueHue(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 //
 float SecondaryHueSat(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 {
-    return saturate(SAMPLE_TEXTURE2D(curveTex, sampler_curveTex, float2(hue, 0.25)).y) * 2.0;
+    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(hue, 0.25), 0).y) * 2.0;
 }
 
 //
@@ -563,7 +590,7 @@ float SecondaryHueSat(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 //
 float SecondarySatSat(float sat, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 {
-    return saturate(SAMPLE_TEXTURE2D(curveTex, sampler_curveTex, float2(sat, 0.25)).z) * 2.0;
+    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(sat, 0.25), 0).z) * 2.0;
 }
 
 //
@@ -573,7 +600,7 @@ float SecondarySatSat(float sat, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 //
 float SecondaryLumSat(float lum, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 {
-    return saturate(SAMPLE_TEXTURE2D(curveTex, sampler_curveTex, float2(lum, 0.25)).w) * 2.0;
+    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(lum, 0.25), 0).w) * 2.0;
 }
 
 //

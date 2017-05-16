@@ -20,9 +20,11 @@ namespace UnityEditor.Experimental.PostProcessing
             In,
             Out
         }
+
         #endregion
 
         #region Structs
+
         public struct Settings
         {
             public Rect bounds;
@@ -122,9 +124,11 @@ namespace UnityEditor.Experimental.PostProcessing
                 this.position = position;
             }
         }
+
         #endregion
 
         #region Fields & properties
+
         public Settings settings { get; private set; }
 
         readonly Dictionary<SerializedProperty, CurveState> m_Curves;
@@ -137,9 +141,11 @@ namespace UnityEditor.Experimental.PostProcessing
         Tangent m_TangentEditMode;
 
         bool m_Dirty;
+
         #endregion
 
         #region Constructors & destructors
+
         public CurveEditor()
             : this(Settings.defaultSettings)
         { }
@@ -153,6 +159,7 @@ namespace UnityEditor.Experimental.PostProcessing
         #endregion
 
         #region Public API
+
         public void Add(params SerializedProperty[] curves)
         {
             foreach (var curve in curves)

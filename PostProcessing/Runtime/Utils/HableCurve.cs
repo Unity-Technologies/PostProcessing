@@ -6,15 +6,12 @@ namespace UnityEngine.Experimental.PostProcessing
     {
         public class Segment
         {
-            // Baked by an array so we can send it straight to shaders
-            public float offsetX { get { return data[0]; } set { data[0] = value; } }
-            public float offsetY { get { return data[1]; } set { data[1] = value; } }
-            public float scaleX  { get { return data[2]; } set { data[2] = value; } }
-            public float scaleY  { get { return data[3]; } set { data[3] = value; } }
-            public float lnA     { get { return data[4]; } set { data[4] = value; } }
-            public float B       { get { return data[5]; } set { data[5] = value; } }
-
-            public readonly float[] data = new float[6];
+            public float offsetX;
+            public float offsetY;
+            public float scaleX;
+            public float scaleY;
+            public float lnA;
+            public float B;
 
             public float Eval(float x)
             {

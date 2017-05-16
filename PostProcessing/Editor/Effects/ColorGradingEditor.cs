@@ -315,13 +315,16 @@ namespace UnityEditor.Experimental.PostProcessing
             DoCurvesGUI(hdr);
         }
 
+        // TODO: Support custom 3D luts and add converter tool for external formats
         void DoCustomHdrGUI()
         {
+            EditorGUILayout.HelpBox("WIP, currently disabled, don't use.", MessageType.Error);
+
             PropertyField(m_PostExposure);
             PropertyField(m_LogLut);
 
-            var lut = (target as ColorGrading).logLut.value;
-            CheckLutImportSettings(lut);
+            //var lut = (target as ColorGrading).logLut.value;
+            //CheckLutImportSettings(lut);
         }
 
         void CheckLutImportSettings(Texture lut)

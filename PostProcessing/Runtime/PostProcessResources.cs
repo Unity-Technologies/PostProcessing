@@ -23,13 +23,14 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader temporalAntialiasing;
             public Shader textureLerp;
             public Shader uber;
-            public Shader lutBaker;
+            public Shader lut2DBaker;
         }
 
         [Serializable]
         public sealed class ComputeShaders
         {
             public ComputeShader exposureHistogram;
+            public ComputeShader lut3DBaker;
         }
 
         public Texture2D[] blueNoise;
