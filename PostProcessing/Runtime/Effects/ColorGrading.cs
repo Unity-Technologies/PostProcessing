@@ -142,7 +142,7 @@ namespace UnityEngine.Experimental.PostProcessing
                     return false;
             }
 
-            return true;
+            return enabled.value;
         }
     }
 
