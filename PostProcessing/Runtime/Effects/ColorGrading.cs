@@ -263,8 +263,8 @@ namespace UnityEngine.Experimental.PostProcessing
                 cmd.SetComputeVectorParam(compute, "_ChannelMixerBlue", channelMixerB / 100f);
 
                 var lift = ColorUtilities.ColorToLift(settings.lift.value * 0.2f);
-                var gain = ColorUtilities.ColorToGain(settings.gain.value * 0.5f);
-                var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.7f);
+                var gain = ColorUtilities.ColorToGain(settings.gain.value * 0.8f);
+                var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.8f);
                 cmd.SetComputeVectorParam(compute, "_Lift", new Vector4(lift.x, lift.y, lift.z, 0f));
                 cmd.SetComputeVectorParam(compute, "_InvGamma", new Vector4(invgamma.x, invgamma.y, invgamma.z, 0f));
                 cmd.SetComputeVectorParam(compute, "_Gain", new Vector4(gain.x, gain.y, gain.z, 0f));

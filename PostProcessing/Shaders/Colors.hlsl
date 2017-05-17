@@ -4,13 +4,8 @@
 #include "StdLib.hlsl"
 #include "ACES.hlsl"
 
-#if 1
-    #define LUT_SPACE_ENCODE(x) LinearToLogC(x)
-    #define LUT_SPACE_DECODE(x) LogCToLinear(x)
-#else
-    #define LUT_SPACE_ENCODE(x) LinearToPQ(x)
-    #define LUT_SPACE_DECODE(x) PQToLinear(x)
-#endif
+#define LUT_SPACE_ENCODE(x) LinearToLogC(x)
+#define LUT_SPACE_DECODE(x) LogCToLinear(x)
 
 // Set to 1 to use more precise but more expensive log/linear conversions. I haven't found a proper
 // use case for the high precision version yet so I'm leaving this to 0.
@@ -20,8 +15,9 @@
 // purposes as it's quite heavy and generally overkill.
 #define TONEMAPPING_USE_FULL_ACES 0
 
-// PQ ST.2048 max value (nits) - Bump this up
-#define DEFAULT_MAX_PQ 1000.0
+// PQ ST.2048 max value
+// 1.0 = 100nits, 100.0 = 10knits
+#define DEFAULT_MAX_PQ 100.0
 
 //
 // Alexa LogC converters (El 1000)
@@ -238,11 +234,6 @@ float3 NeutralCurve(float3 x, float a, float b, float c, float d, float e, float
 
 float3 NeutralTonemap(float3 x)
 {
-    // ACES supports negative color values and WILL output negative values
-    // Make sure negative channels are clamped to 0.0 as this neutral tonemapper can't deal with
-    // them properly
-    x = max((0.0).xxx, x);
-
     // Tonemap
     float a = 0.2;
     float b = 0.29;
@@ -308,7 +299,7 @@ float EvalCustomCurve(float x, float3 curve, float4 toeSegmentA, float2 toeSegme
 // curve: x: inverseWhitePoint, y: x0, z: x1
 float3 CustomTonemap(float3 x, float3 curve, float4 toeSegmentA, float2 toeSegmentB, float4 midSegmentA, float2 midSegmentB, float4 shoSegmentA, float2 shoSegmentB)
 {
-    float3 normX = max((0.0).xxx, x) * curve.x;
+    float3 normX = x * curve.x;
     float3 ret;
     ret.x = EvalCustomCurve(normX.x, curve, toeSegmentA, toeSegmentB, midSegmentA, midSegmentB, shoSegmentA, shoSegmentB);
     ret.y = EvalCustomCurve(normX.y, curve, toeSegmentA, toeSegmentB, midSegmentA, midSegmentB, shoSegmentA, shoSegmentB);

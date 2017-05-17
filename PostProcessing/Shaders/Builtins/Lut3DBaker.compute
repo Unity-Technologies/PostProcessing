@@ -2,10 +2,10 @@
 #include "../Colors.hlsl"
 #include "../ACES.hlsl"
 
-#pragma kernel KGenLut3D_NoTonemap
-#pragma kernel KGenLut3D_AcesTonemap TONEMAPPING_ACES
+#pragma kernel KGenLut3D_NoTonemap      TONEMAPPING_NONE
+#pragma kernel KGenLut3D_AcesTonemap    TONEMAPPING_ACES
 #pragma kernel KGenLut3D_NeutralTonemap TONEMAPPING_NEUTRAL
-#pragma kernel KGenLut3D_CustomTonemap TONEMAPPING_CUSTOM
+#pragma kernel KGenLut3D_CustomTonemap  TONEMAPPING_CUSTOM
 
 RWTexture3D<float4> _Output;
 
@@ -39,49 +39,78 @@ CBUFFER_END
 Texture2D _Curves;
 SamplerState sampler_Curves;
 
-float3 ColorGrade(float3 colorLinear)
+float3 LogGrade(float3 colorLog)
 {
+    // Contrast feels a lot more natural when done in log rather than doing it in linear
+    colorLog = Contrast(colorLog, ACEScc_MIDGRAY, _HueSatCon.z);
+
+    return colorLog;
+}
+
+float3 LinearGrade(float3 colorLinear)
+{
+    colorLinear = WhiteBalance(colorLinear, _ColorBalance.rgb);
+    colorLinear *= _ColorFilter.rgb;
+    colorLinear = ChannelMixer(colorLinear, _ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb);
+    colorLinear = LiftGammaGainHDR(colorLinear, _Lift.rgb, _InvGamma.rgb, _Gain.rgb);
+
+    // Do NOT feed negative values to RgbToHsv or they'll wrap around
+    colorLinear = max(0.0, colorLinear);
+
+    float3 hsv = RgbToHsv(colorLinear);
+    float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    satMult *= SecondaryLumSat(Luminance(colorLinear), TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    hsv.x = SecondaryHueHue(hsv.x + _HueSatCon.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+    colorLinear = HsvToRgb(hsv);
+
+    colorLinear = Saturation(colorLinear, _HueSatCon.y * satMult);
+
+    return colorLinear;
+}
+
+#if TONEMAPPING_ACES
+
+float3 ColorGrade(float3 colorLutSpace)
+{
+    float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
     float3 aces = unity_to_ACES(colorLinear);
 
     // ACEScc (log) space
     float3 acescc = ACES_to_ACEScc(aces);
-
-    // Contrast feels a lot more natural when done in log rather than doing it in linear
-    acescc = Contrast(acescc, ACEScc_MIDGRAY, _HueSatCon.z);
-
+    acescc = LogGrade(acescc);
     aces = ACEScc_to_ACES(acescc);
 
     // ACEScg (linear) space
     float3 acescg = ACES_to_ACEScg(aces);
+    acescg = LinearGrade(acescg);
 
-    acescg = WhiteBalance(acescg, _ColorBalance.rgb);
-    acescg *= _ColorFilter.rgb;
-    acescg = ChannelMixer(acescg, _ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb);
-    acescg = LiftGammaGainHDR(acescg, _Lift.rgb, _InvGamma.rgb, _Gain.rgb);
+    // Tonemap ODT(RRT(aces))
+    aces = ACEScg_to_ACES(acescg);
+    colorLinear = AcesTonemap(aces);
 
-    float3 hsv = RgbToHsv(acescg);
-    float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-    satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-    satMult *= SecondaryLumSat(Luminance(acescg), TEXTURE2D_PARAM(_Curves, sampler_Curves));
-    hsv.x = SecondaryHueHue(hsv.x + _HueSatCon.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-    acescg = HsvToRgb(hsv);
+    return colorLinear;
+}
 
-    acescg = Saturation(acescg, _HueSatCon.y * satMult);
+#else
+
+float3 ColorGrade(float3 colorLutSpace)
+{
+    // colorLutSpace is already in log space
+    colorLutSpace = LogGrade(colorLutSpace);
+
+    // Switch back to linear
+    float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
+    colorLinear = LinearGrade(colorLinear);
+    colorLinear = max(0.0, colorLinear);
 
     // Tonemap
-    #if TONEMAPPING_ACES
+    #if TONEMAPPING_NEUTRAL
     {
-        aces = ACEScg_to_ACES(acescg);
-        colorLinear = AcesTonemap(aces);
-    }
-    #elif TONEMAPPING_NEUTRAL
-    {
-        colorLinear = ACEScg_to_unity(acescg);
         colorLinear = NeutralTonemap(colorLinear);
     }
     #elif TONEMAPPING_CUSTOM
     {
-        colorLinear = ACEScg_to_unity(acescg);
         colorLinear = CustomTonemap(
             colorLinear, _CustomToneCurve.xyz,
             _ToeSegmentA, _ToeSegmentB.xy,
@@ -89,14 +118,12 @@ float3 ColorGrade(float3 colorLinear)
             _ShoSegmentA, _ShoSegmentB.xy
         );
     }
-    #else
-    {
-        colorLinear = ACEScg_to_unity(acescg);
-    }
     #endif
 
     return colorLinear;
 }
+
+#endif
 
 void Eval(uint3 id)
 {
@@ -105,9 +132,8 @@ void Eval(uint3 id)
         // Lut space (log space)
         float3 colorLutSpace = float3(id) * _Size.y;
 
-        // Switch back to unity linear and color grade
-        float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
-        float3 graded = ColorGrade(colorLinear);
+        // Color grade & tonemap
+        float3 graded = ColorGrade(colorLutSpace);
 
         _Output[id] = float4(graded, 1.0);
     }
