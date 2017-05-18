@@ -267,7 +267,9 @@ namespace UnityEngine.Experimental.PostProcessing
                 }
 
                 // Generate the lut
+                context.command.BeginSample("HdrColorGradingLut");
                 cmd.DispatchCompute(compute, kernel, groupSize, groupSize, groupSize);
+                context.command.EndSample("HdrColorGradingLut");
             }
 
             var lut = m_InternalLogLut;
@@ -318,11 +320,13 @@ namespace UnityEngine.Experimental.PostProcessing
                 lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(false));
 
                 // Generate the lut
+                context.command.BeginSample("LdrColorGradingLut");
                 var userLut = settings.ldrLut.value;
                 if (userLut == null)
                     context.command.BlitFullscreenTriangle((Texture)null, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
                 else
                     context.command.BlitFullscreenTriangle(userLut, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDR);
+                context.command.EndSample("LdrColorGradingLut");
             }
 
             var lut = m_InternalLdrLut;
