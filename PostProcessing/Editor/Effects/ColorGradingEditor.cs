@@ -81,8 +81,6 @@ namespace UnityEditor.Experimental.PostProcessing
 
         CurveEditor m_CurveEditor;
         Dictionary<SerializedProperty, Color> m_CurveDict;
-        
-        SerializedParameterOverride m_LogLut;
 
         // Custom tone curve drawing
         const int k_CustomToneCurveResolution = 48;
@@ -165,8 +163,6 @@ namespace UnityEditor.Experimental.PostProcessing
             SetupCurve(m_RawHueVsSatCurve, new Color(1f, 1f, 1f), 0, true);
             SetupCurve(m_RawSatVsSatCurve, new Color(1f, 1f, 1f), 0, false);
             SetupCurve(m_RawLumVsSatCurve, new Color(1f, 1f, 1f), 0, false);
-
-            m_LogLut = FindParameterOverride(x => x.logLut);
         }
 
         public override void OnInspectorGUI()
@@ -187,8 +183,6 @@ namespace UnityEditor.Experimental.PostProcessing
                 DoStandardModeGUI(false);
             else if (gradingMode == GradingMode.HighDefinitionRange)
                 DoStandardModeGUI(true);
-            else
-                DoCustomHdrGUI();
             
             EditorGUILayout.Space();
         }
@@ -313,18 +307,6 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorUtilities.DrawHeaderLabel("Grading Curves");
 
             DoCurvesGUI(hdr);
-        }
-
-        // TODO: Support custom 3D luts and add converter tool for external formats
-        void DoCustomHdrGUI()
-        {
-            EditorGUILayout.HelpBox("WIP, currently disabled, don't use.", MessageType.Error);
-
-            PropertyField(m_PostExposure);
-            PropertyField(m_LogLut);
-
-            //var lut = (target as ColorGrading).logLut.value;
-            //CheckLutImportSettings(lut);
         }
 
         void CheckLutImportSettings(Texture lut)

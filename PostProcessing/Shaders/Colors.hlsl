@@ -89,7 +89,7 @@ float3 LogCToLinear(float3 x)
 
 //
 // SMPTE ST.2084 (PQ) transfer functions
-// Used for HDR Lut storage, max range depends on the maxValue parameter
+// Used for HDR Lut storage, max range depends on the maxPQValue parameter
 //
 struct ParamsPQ
 {
@@ -130,7 +130,9 @@ float3 PQToLinear(float3 x)
     return PQToLinear(x, DEFAULT_MAX_PQ);
 }
 
-// sRGB / linear
+//
+// sRGB transfer functions
+//
 half3 SRGBToLinear(half3 c)
 {
     half3 linearRGBLo = c / 12.92;

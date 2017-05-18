@@ -6,8 +6,7 @@ namespace UnityEngine.Experimental.PostProcessing
     public enum GradingMode
     {
         LowDefinitionRange,
-        HighDefinitionRange,
-        CustomLogLUT
+        HighDefinitionRange
     }
 
     public enum Tonemapper
@@ -136,7 +135,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public override bool IsEnabledAndSupported()
         {
-            if (gradingMode.value == GradingMode.HighDefinitionRange || gradingMode.value == GradingMode.CustomLogLUT)
+            if (gradingMode.value == GradingMode.HighDefinitionRange)
             {
                 if (!SystemInfo.supports3DRenderTextures || !SystemInfo.supportsComputeShaders)
                     return false;
@@ -174,42 +173,7 @@ namespace UnityEngine.Experimental.PostProcessing
                     break;
                 case GradingMode.HighDefinitionRange: RenderHDRPipeline(context);
                     break;
-                case GradingMode.CustomLogLUT: RenderCustomLogLUT(context);
-                    break;
             }
-        }
-
-        void RenderCustomLogLUT(PostProcessRenderContext context)
-        {
-            /*
-            var lut = settings.logLut.value;
-
-            // Generate a default, non-graded Lut if none is set so we can lerp properly between
-            // volume with & without Luts set.
-            if (lut == null)
-            {
-                CheckInternalLogLut();
-                lut = m_InternalLogLut;
-
-                var lutSheet = context.propertySheets.Get(context.resources.shaders.lutBaker);
-                lutSheet.ClearKeywords();
-
-                lutSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector4(
-                    k_Lut2DSize,
-                    0.5f / (k_Lut2DSize * k_Lut2DSize),
-                    0.5f / k_Lut2DSize,
-                    k_Lut2DSize / (k_Lut2DSize - 1f))
-                );
-
-                context.command.BlitFullscreenTriangle((Texture)null, lut, lutSheet, (int)Pass.LutGenNoGradingHDR);
-            }
-            
-            var uberSheet = context.uberSheet;
-            uberSheet.EnableKeyword("COLOR_GRADING_HDR");
-            uberSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
-            uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
-            uberSheet.properties.SetTexture(Uniforms._Lut2D, lut);
-            */
         }
 
         // HDR color pipeline is rendered to a 3D lut; it requires Texture3D & compute shaders
