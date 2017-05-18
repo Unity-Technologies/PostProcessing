@@ -5,7 +5,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    // TODO: Image effects in the sceneview (make sure they work, MB & TAA should be always off in scene view)
     // TODO: User effect sorting for this layer (ReorderableList)
     // TODO: XMLDoc everything (?)
     // TODO: Final pass should be done on an ARGB32 buffer instead of source format.

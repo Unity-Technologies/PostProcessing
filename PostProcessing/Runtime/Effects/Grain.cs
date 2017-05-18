@@ -2,6 +2,7 @@ using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    // TODO: Rework grain, it's not very good in its current state. Also make it work in HDR.
     [Serializable]
     [PostProcess(typeof(GrainRenderer), "Unity/Grain")]
     public sealed class Grain : PostProcessEffectSettings
