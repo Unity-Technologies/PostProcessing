@@ -160,7 +160,7 @@ Shader "Hidden/PostProcessing/Uber"
                 float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoord * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
-                float lum = 1.0 - sqrt(Luminance(color));
+                float lum = 1.0 - sqrt(Luminance(saturate(color)));
                 lum = lerp(1.0, lum, _Grain_Params1.x);
 
                 color += color * grain * _Grain_Params1.y * lum;
