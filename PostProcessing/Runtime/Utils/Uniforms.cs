@@ -4,26 +4,14 @@ namespace UnityEngine.Experimental.PostProcessing
     // fields names as in the shaders for ease of use
     static class Uniforms
     {
-        // Used by `PostProcessLayer` to ping-pong targets in render lists
-        internal static readonly int[] _TempTargetPool =
-        {
-            Shader.PropertyToID("_TempTargetPool1"),
-            Shader.PropertyToID("_TempTargetPool2"),
-            Shader.PropertyToID("_TempTargetPool3"),
-            Shader.PropertyToID("_TempTargetPool4"),
-            Shader.PropertyToID("_TempTargetPool5")
-        };
-
-        internal static readonly int _LegacyTemp                      = Shader.PropertyToID("_LegacyTemp");
         internal static readonly int _MainTex                         = Shader.PropertyToID("_MainTex");
 
-        internal static readonly int _TAAOutput                       = Shader.PropertyToID("_TAAOutput");
+        internal static readonly int _TaaOutput                       = Shader.PropertyToID("_TaaOutput");
         internal static readonly int _Jitter                          = Shader.PropertyToID("_Jitter");
         internal static readonly int _SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
         internal static readonly int _FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");
         internal static readonly int _HistoryTex                      = Shader.PropertyToID("_HistoryTex");
 
-        internal static readonly int _MotionBlurOutput                = Shader.PropertyToID("_MotionBlurOutput");
         internal static readonly int _VelocityScale                   = Shader.PropertyToID("_VelocityScale");
         internal static readonly int _MaxBlurRadius                   = Shader.PropertyToID("_MaxBlurRadius");
         internal static readonly int _RcpMaxBlurRadius                = Shader.PropertyToID("_RcpMaxBlurRadius");
@@ -37,7 +25,6 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _NeighborMaxTex                  = Shader.PropertyToID("_NeighborMaxTex");
         internal static readonly int _LoopCount                       = Shader.PropertyToID("_LoopCount");
 
-        internal static readonly int _DepthOfFieldOutput              = Shader.PropertyToID("_DepthOfFieldOutput");
         internal static readonly int _DepthOfFieldTemp                = Shader.PropertyToID("_DepthOfFieldTemp");
         internal static readonly int _DepthOfFieldTex                 = Shader.PropertyToID("_DepthOfFieldTex");
         internal static readonly int _Distance                        = Shader.PropertyToID("_Distance");

@@ -53,6 +53,9 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             get { return camera.pixelHeight; }
         }
+
+        // Are we currently rendering in the scene view?
+        public bool isSceneView { get; internal set; }
         
         // Current antialiasing method set
         public PostProcessLayer.Antialiasing antialiasing { get; internal set; }
@@ -73,6 +76,7 @@ namespace UnityEngine.Experimental.PostProcessing
             resources = null;
             propertySheets = null;
             userData = null;
+            isSceneView = false;
             antialiasing = PostProcessLayer.Antialiasing.None;
             temporalAntialiasing = null;
 
