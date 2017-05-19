@@ -4,7 +4,6 @@ Shader "Hidden/PostProcessing/FinalPass"
 
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ FXAA FXAA_LOW
-        #pragma multi_compile __ GRAIN
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
 
@@ -39,11 +38,6 @@ Shader "Hidden/PostProcessing/FinalPass"
         // Dithering
         TEXTURE2D_SAMPLER2D(_DitheringTex, sampler_DitheringTex);
         float4 _Dithering_Coords;
-
-        // Grain
-        TEXTURE2D_SAMPLER2D(_GrainTex, sampler_GrainTex);
-        half2 _Grain_Params1; // x: lum_contrib, y: intensity
-        half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
@@ -93,18 +87,6 @@ Shader "Hidden/PostProcessing/FinalPass"
             #else
                 color = tex2D(_MainTex, i.texcoord);
             #endif
-            }
-            #endif
-
-            #if GRAIN
-            {
-                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoord * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
-
-                // Noisiness response curve based on scene luminance
-                float lum = 1.0 - sqrt(color.a); // Luma is stored in alpha (see Uber/FXAA)
-                lum = lerp(1.0, lum, _Grain_Params1.x);
-
-                color.rgb += color.rgb * grain * _Grain_Params1.y * lum;
             }
             #endif
 

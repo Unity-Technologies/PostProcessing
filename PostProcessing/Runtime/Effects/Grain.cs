@@ -2,7 +2,6 @@ using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    // TODO: Rework grain, it's not very good in its current state. Also make it work in HDR.
     [Serializable]
     [PostProcess(typeof(GrainRenderer), "Unity/Grain")]
     public sealed class Grain : PostProcessEffectSettings
@@ -30,6 +29,9 @@ namespace UnityEngine.Experimental.PostProcessing
     public sealed class GrainRenderer : PostProcessEffectRenderer<Grain>
     {
         RenderTexture m_GrainLookupRT;
+        
+        const int k_SampleCount = 1024;
+        int m_SampleIndex;
 
         public override void Render(PostProcessRenderContext context)
         {
@@ -40,8 +42,11 @@ namespace UnityEngine.Experimental.PostProcessing
             float rndOffsetY = 0f;
 #else
             float time = Time.realtimeSinceStartup;
-            float rndOffsetX = Random.value;
-            float rndOffsetY = Random.value;
+            float rndOffsetX = HaltonSeq.Get(m_SampleIndex & 1023, 2);
+            float rndOffsetY = HaltonSeq.Get(m_SampleIndex & 1023, 3);
+
+            if (++m_SampleIndex >= k_SampleCount)
+                m_SampleIndex = 0;
 #endif
 
             // Generate the grain lut for the current frame first
@@ -80,6 +85,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             RuntimeUtilities.Destroy(m_GrainLookupRT);
             m_GrainLookupRT = null;
+            m_SampleIndex = 0;
         }
     }
 }

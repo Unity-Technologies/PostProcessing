@@ -9,6 +9,7 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ BLOOM
         #pragma multi_compile __ COLOR_GRADING_LDR COLOR_GRADING_HDR
         #pragma multi_compile __ VIGNETTE
+        #pragma multi_compile __ GRAIN
         
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
@@ -45,6 +46,11 @@ Shader "Hidden/PostProcessing/Uber"
         half _Vignette_Opacity;
         half _Vignette_Mode; // <0.5: procedural, >=0.5: masked
         TEXTURE2D_SAMPLER2D(_Vignette_Mask, sampler_Vignette_Mask);
+
+        // Grain
+        TEXTURE2D_SAMPLER2D(_GrainTex, sampler_GrainTex);
+        half2 _Grain_Params1; // x: lum_contrib, y: intensity
+        half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
 
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
@@ -149,6 +155,18 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
+            #if GRAIN
+            {
+                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoord * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+
+                // Noisiness response curve based on scene luminance
+                float lum = 1.0 - sqrt(Luminance(color));
+                lum = lerp(1.0, lum, _Grain_Params1.x);
+
+                color += color * grain * _Grain_Params1.y * lum;
+            }
+            #endif
+
             #if COLOR_GRADING_HDR
             {
                 color *= _PostExposure; // Exposure is in ev units (or 'stops')
@@ -164,7 +182,6 @@ Shader "Hidden/PostProcessing/Uber"
 
             // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
             // necessary as RGB values will potentially still be HDR for the FXAA pass
-            // Also used for Grain's response curve in final pass
             half luma = Luminance(saturate(color));
             half4 output = half4(color, luma);
 
@@ -174,7 +191,8 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            // Output RGB is still HDR at that point, alpha is luminance of saturate(rgb)
+            // Output RGB is still HDR at that point (unless range was crunched by a tonemapper)
+            // Alpha is luminance of saturate(rgb)
             return output;
         }
 

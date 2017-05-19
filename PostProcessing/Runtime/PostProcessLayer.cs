@@ -460,6 +460,7 @@ namespace UnityEngine.Experimental.PostProcessing
             RenderEffect<Bloom>(context);
             RenderEffect<ColorGrading>(context);
             RenderEffect<Vignette>(context);
+            RenderEffect<Grain>(context);
             
             cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
@@ -494,7 +495,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 );
             }
 
-            RenderEffect<Grain>(context);
             dithering.Render(context);
 
             cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !context.isSceneView) ? 1 : 0);
