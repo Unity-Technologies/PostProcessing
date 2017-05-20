@@ -144,7 +144,7 @@ namespace UnityEngine.Experimental.PostProcessing
             m_CurrentContext.destination = BuiltinRenderTextureType.CameraTarget;
 
             // Update & override layer settings first (volume blending)
-            UpdateSettingsIfNeeded(m_CurrentContext);
+            UpdateSettingsIfNeeded();
 
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
@@ -268,7 +268,7 @@ namespace UnityEngine.Experimental.PostProcessing
             SetLegacyCameraFlags(context);
         }
 
-        void UpdateSettingsIfNeeded(PostProcessRenderContext context)
+        void UpdateSettingsIfNeeded()
         {
             m_TargetPool.Reset();
 
@@ -288,7 +288,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             // Update & override layer settings first (volume blending), will only be done once per
             // frame, either here or in Render() if there isn't any opaque-only effect to render.
-            UpdateSettingsIfNeeded(context);
+            UpdateSettingsIfNeeded();
 
             SetupContext(context);
 
@@ -308,7 +308,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
-            UpdateSettingsIfNeeded(context);
+            UpdateSettingsIfNeeded();
 
             SetupContext(context);
 
