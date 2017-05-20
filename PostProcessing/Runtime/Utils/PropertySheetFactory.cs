@@ -12,6 +12,11 @@ namespace UnityEngine.Experimental.PostProcessing
             m_Sheets = new Dictionary<Shader, PropertySheet>();
         }
 
+        public PropertySheet Get(string shaderName)
+        {
+            return Get(Shader.Find(shaderName));
+        }
+
         public PropertySheet Get(Shader shader)
         {
             PropertySheet sheet;

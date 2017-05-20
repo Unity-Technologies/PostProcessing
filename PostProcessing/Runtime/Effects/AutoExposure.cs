@@ -30,7 +30,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
         public FloatParameter keyValue = new FloatParameter { value = 0.25f };
 
-        [DisplayName("Type")]
+        [DisplayName("Type"), Tooltip("Use \"Progressive\" if you want auto exposure to be animated. Use \"Fixed\" otherwise.")]
         public EyeAdaptationParameter eyeAdaptation = new EyeAdaptationParameter { value = EyeAdaptation.Progressive };
 
         [Min(0f), Tooltip("Adaptation speed from a dark to a light environment.")]
