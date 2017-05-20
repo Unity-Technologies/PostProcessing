@@ -82,9 +82,8 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Anti-aliasing"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
             {
-                EditorGUI.indentLevel++;
-
                 m_AntialiasingMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The anti-aliasing method to use. FXAA is fast but low quality. TAA is a bit slower but higher quality."), m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
 
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
@@ -98,24 +97,24 @@ namespace UnityEditor.Experimental.PostProcessing
                 {
                     EditorGUILayout.PropertyField(m_FxaaMobileOptimized);
                 }
-
-                EditorGUI.indentLevel--;
             }
+            EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.PropertyField(m_ShowDebugUI);
-
-            if (m_ShowDebugUI.boolValue)
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Debug Layer"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
             {
-                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(m_ShowDebugUI, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
+
+                if (m_ShowDebugUI.boolValue)
                 {
-                    EditorGUILayout.PropertyField(m_DebugMonitor);
-                    EditorGUILayout.HelpBox("The debug UI only works on compute-shader enabled platforms.", MessageType.Info);
-                    EditorGUILayout.HelpBox("Currently non-implemented.", MessageType.Warning);
+                    EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
+                    EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Info);
+                    EditorGUILayout.HelpBox("Not implemented.", MessageType.Error);
                 }
-                EditorGUI.indentLevel--;
             }
+            EditorGUI.indentLevel--;
 
             serializedObject.ApplyModifiedProperties();
         }
