@@ -6,7 +6,6 @@ namespace UnityEngine.Experimental.PostProcessing
     {
         internal static readonly int _MainTex                         = Shader.PropertyToID("_MainTex");
 
-        internal static readonly int _TaaOutput                       = Shader.PropertyToID("_TaaOutput");
         internal static readonly int _Jitter                          = Shader.PropertyToID("_Jitter");
         internal static readonly int _SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
         internal static readonly int _FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");

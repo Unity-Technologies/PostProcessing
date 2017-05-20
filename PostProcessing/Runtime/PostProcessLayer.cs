@@ -51,7 +51,7 @@ namespace UnityEngine.Experimental.PostProcessing
         bool m_SettingsUpdateNeeded = true;
         bool m_IsRenderingInSceneView = false;
 
-        readonly TargetPool m_TargetPool = new TargetPool(); 
+        TargetPool m_TargetPool;
 
         // Recycled list - used to reduce GC stress when gathering active effects in a bundle list
         // on each frame
@@ -83,6 +83,7 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             m_PropertySheetFactory = new PropertySheetFactory();
+            m_TargetPool = new TargetPool();
 
             // Scriptable render pipeline handles their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
@@ -270,13 +271,14 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void UpdateSettingsIfNeeded()
         {
-            m_TargetPool.Reset();
-
             // Release temporary targets used for texture lerping from last frame
             RuntimeUtilities.ReleaseLerpTargets();
 
             if (m_SettingsUpdateNeeded)
+            {
                 PostProcessManager.instance.UpdateSettings(this);
+                m_TargetPool.Reset();
+            }
 
             m_SettingsUpdateNeeded = false;
         }
@@ -317,7 +319,7 @@ namespace UnityEngine.Experimental.PostProcessing
             if (context.IsTemporalAntialiasingActive() && !context.isSceneView)
             {
                 temporalAntialiasing.SetProjectionMatrix(context.camera);
-                lastTarget = Uniforms._TaaOutput;
+                lastTarget = m_TargetPool.Get();
                 RenderEffect(context, lastTarget, temporalAntialiasing.Render);
             }
 

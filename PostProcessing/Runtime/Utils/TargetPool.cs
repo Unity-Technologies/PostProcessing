@@ -10,6 +10,7 @@ namespace UnityEngine.Experimental.PostProcessing
         internal TargetPool()
         {
             m_Pool = new List<int>();
+            Get(); // Pre-warm with a default target to avoid black frame on first frame
         }
 
         internal int Get()
