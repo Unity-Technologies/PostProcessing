@@ -165,7 +165,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 if (s_LerpMaterial != null)
                     return s_LerpMaterial;
 
-                var shader = PostProcessResources.instance.shaders.textureLerp;
+                var shader = PostProcessResources.instance.shaders.texture2dLerp;
                 s_LerpMaterial = new Material(shader)
                 {
                     name = "PostProcess - Lerp",

@@ -21,7 +21,7 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader grainBaker;
             public Shader motionBlur;
             public Shader temporalAntialiasing;
-            public Shader textureLerp;
+            public Shader texture2dLerp;
             public Shader uber;
             public Shader lut2DBaker;
         }
