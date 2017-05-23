@@ -436,22 +436,15 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
             var finalDestination = context.destination;
             context.destination = tempTarget;
-            
-            int motionBlurTarget = -1;
-            int depthOfFieldTarget = -1;
 
             // Motion blur is a separate pass - could potentially be done after DoF depending on the
             // kind of results you're looking for...
-            var motionBlur = GetBundle<MotionBlur>();
-            if (motionBlur.settings.IsEnabledAndSupported())
-                motionBlurTarget = RenderEffect(context, m_TargetPool.Get(), motionBlur.renderer.Render);
+            int motionBlurTarget = RenderEffect<MotionBlur>(context, true);
 
             // Depth of field final combination pass used to be done in Uber which led to artifacts
             // when used at the same time as Bloom (because both effects used the same source, so
             // the stronger bloom was, the more DoF was eaten away in out of focus areas)
-            var depthOfField = GetBundle<DepthOfField>();
-            if (depthOfField.settings.IsEnabledAndSupported())
-                depthOfFieldTarget = RenderEffect(context, m_TargetPool.Get(), depthOfField.renderer.Render);
+            int depthOfFieldTarget = RenderEffect<DepthOfField>(context, true);
 
             // Uber effects
             RenderEffect<ChromaticAberration>(context);
@@ -507,6 +500,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.EndSample("FinalPass");
         }
 
+        // TODO: Only used by TAA, which needs to become a PostProcessEffectRenderer and use the other RenderEffect() instead.
         int RenderEffect(PostProcessRenderContext context, int tempTarget, Action<PostProcessRenderContext> renderFunc)
         {
             var finalDestination = context.destination;
@@ -520,18 +514,31 @@ namespace UnityEngine.Experimental.PostProcessing
             return tempTarget;
         }
 
-        void RenderEffect<T>(PostProcessRenderContext context)
+        int RenderEffect<T>(PostProcessRenderContext context, bool useTempTarget = false)
             where T : PostProcessEffectSettings
         {
             var effect = GetBundle<T>();
 
             if (!effect.settings.IsEnabledAndSupported())
-                return;
+                return -1;
 
             if (m_IsRenderingInSceneView && !effect.attribute.allowInSceneView)
-                return;
+                return -1;
 
+            if (!useTempTarget)
+            {
+                effect.renderer.Render(context);
+                return -1;
+            }
+
+            var finalDestination = context.destination;
+            var tempTarget = m_TargetPool.Get();
+            context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+            context.destination = tempTarget;
             effect.renderer.Render(context);
+            context.source = tempTarget;
+            context.destination = finalDestination;
+            return tempTarget;
         }
 
         // Debug view display
