@@ -29,8 +29,6 @@ namespace UnityEngine.Experimental.PostProcessing
         public FastApproximateAntialiasing fastApproximateAntialiasing;
         public Dithering dithering;
 
-        // Debug utilities
-        public bool showDebugUI;
         public PostProcessDebugView debugView;
 
         [SerializeField]
@@ -267,6 +265,9 @@ namespace UnityEngine.Experimental.PostProcessing
             context.antialiasing = antialiasingMode;
             context.temporalAntialiasing = temporalAntialiasing;
             SetLegacyCameraFlags(context);
+
+            // Unsafe to keep this around but we need it for OnGUI events for debug views
+            m_CurrentContext = context;
         }
 
         void UpdateSettingsIfNeeded()
@@ -544,10 +545,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // Debug view display
         void OnGUI()
         {
-            if (!showDebugUI || !SystemInfo.supportsComputeShaders || m_CurrentContext == null)
-                return;
-
-            //debugView.OnGUI(m_CurrentContext, GetBundle<AutoExposure>());
+            debugView.OnGUI(m_CurrentContext);
         }
     }
 }

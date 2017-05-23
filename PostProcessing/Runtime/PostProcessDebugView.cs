@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -13,6 +13,13 @@ namespace UnityEngine.Experimental.PostProcessing
             Vectorscope
         }
 
+        public bool display = false;
         public Monitor monitor = Monitor.Waveform;
+
+        public void OnGUI(PostProcessRenderContext context)
+        {
+            if (!display || !SystemInfo.supportsComputeShaders || context == null)
+                return;
+        }
     }
 }

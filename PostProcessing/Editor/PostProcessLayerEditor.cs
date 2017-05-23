@@ -10,7 +10,6 @@ namespace UnityEditor.Experimental.PostProcessing
     {
         SerializedProperty m_VolumeTrigger;
         SerializedProperty m_VolumeLayer;
-        SerializedProperty m_ShowDebugUI;
 
         SerializedProperty m_AntialiasingMode;
         SerializedProperty m_TaaJitterSpread;
@@ -19,6 +18,7 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_FxaaMobileOptimized;
 
+        SerializedProperty m_DebugDisplay;
         SerializedProperty m_DebugMonitor;
 
         static GUIContent[] s_AntialiasingMethodNames =
@@ -32,7 +32,6 @@ namespace UnityEditor.Experimental.PostProcessing
         {
             m_VolumeTrigger = FindProperty(x => x.volumeTrigger);
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
-            m_ShowDebugUI = FindProperty(x => x.showDebugUI);
 
             m_AntialiasingMode = FindProperty(x => x.antialiasingMode);
             m_TaaJitterSpread = FindProperty(x => x.temporalAntialiasing.jitterSpread);
@@ -41,6 +40,7 @@ namespace UnityEditor.Experimental.PostProcessing
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
 
+            m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
         }
 
@@ -105,9 +105,9 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Debug Layer"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
-                EditorGUILayout.PropertyField(m_ShowDebugUI, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
+                EditorGUILayout.PropertyField(m_DebugDisplay, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
 
-                if (m_ShowDebugUI.boolValue)
+                if (m_DebugDisplay.boolValue)
                 {
                     EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
                     EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Info);
