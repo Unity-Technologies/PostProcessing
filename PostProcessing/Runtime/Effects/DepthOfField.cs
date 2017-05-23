@@ -14,7 +14,7 @@ namespace UnityEngine.Experimental.PostProcessing
     public sealed class KernelSizeParameter : ParameterOverride<KernelSize> {}
 
     [Serializable]
-    [PostProcess(typeof(DepthOfFieldRenderer), "Unity/Depth of Field")]
+    [PostProcess(typeof(DepthOfFieldRenderer), "Unity/Depth of Field", false)]
     public sealed class DepthOfField : PostProcessEffectSettings
     {
         [Min(0.1f), Tooltip("Distance to the point of focus.")]
