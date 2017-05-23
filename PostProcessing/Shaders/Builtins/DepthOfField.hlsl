@@ -1,8 +1,6 @@
 #ifndef UNITY_POSTFX_DEPTH_OF_FIELD
 #define UNITY_POSTFX_DEPTH_OF_FIELD
 
-#define USE_GATHER (SHADER_TARGET >= 50)
-
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
 #include "DiskKernels.hlsl"
@@ -39,18 +37,22 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 {
     float3 uvOffs = _MainTex_TexelSize.xyy * float3(1.0, 1.0, 0.0);
 
-#if USE_GATHER
+#if UNITY_GATHER_SUPPORTED
+
     half4 cocTL = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.xy * 0.5); // top-left
     half4 cocBR = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.xy * 0.5); // bottom-right
     half coc1 = cocTL.x; // top
     half coc2 = cocTL.z; // left
     half coc3 = cocBR.x; // bottom
     half coc4 = cocBR.z; // right
+
 #else
+
     half coc1 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.xz).r; // top
     half coc2 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.zy).r; // left
     half coc3 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.zy).r; // bottom
     half coc4 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.xz).r; // right
+
 #endif
 
     // Dejittered center sample.
@@ -79,7 +81,7 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 // Prefilter: downsampling and premultiplying
 half4 FragPrefilter(VaryingsDefault i) : SV_Target
 {
-#if USE_GATHER
+#if UNITY_GATHER_SUPPORTED
 
     // Sample source colors
     half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);

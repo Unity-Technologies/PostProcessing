@@ -1,5 +1,6 @@
 #define UNITY_UV_STARTS_AT_TOP 1
 #define UNITY_REVERSED_Z 1
+#define UNITY_GATHER_SUPPORTED (SHADER_TARGET >= 50)
 #define INTRINSIC_MINMAX3
 #define Min3 min3
 #define Max3 max3

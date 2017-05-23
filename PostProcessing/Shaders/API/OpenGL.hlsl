@@ -1,6 +1,7 @@
 // For now OpenGL is considered at GLES2 level
 #define UNITY_UV_STARTS_AT_TOP 0
 #define UNITY_REVERSED_Z 0
+#define UNITY_GATHER_SUPPORTED 0
 
 #define TEXTURE2D_SAMPLER2D(textureName, samplerName) sampler2D textureName
 #define TEXTURE3D_SAMPLER3D(textureName, samplerName) sampler3D textureName
