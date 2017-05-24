@@ -223,7 +223,8 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             // Special case for TAA
-            flags |= temporalAntialiasing.GetLegacyCameraFlags();
+            if (context.IsTemporalAntialiasingActive())
+                flags |= temporalAntialiasing.GetLegacyCameraFlags();
 
             context.camera.depthTextureMode = flags;
         }
