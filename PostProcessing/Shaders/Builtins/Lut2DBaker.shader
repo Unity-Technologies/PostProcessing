@@ -40,10 +40,23 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
             colorLinear = LiftGammaGainLDR(colorLinear, _Lift, _InvGamma, _Gain);
 
             float3 hsv = RgbToHsv(colorLinear);
-            float satMult = SecondaryHueSat(hsv.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-            satMult *= SecondarySatSat(hsv.y, TEXTURE2D_PARAM(_Curves, sampler_Curves));
-            satMult *= SecondaryLumSat(Luminance(colorLinear), TEXTURE2D_PARAM(_Curves, sampler_Curves));
-            hsv.x = SecondaryHueHue(hsv.x + _HueSatCon.x, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+
+            // Hue Vs Sat
+            float satMult;
+            satMult = saturate(SAMPLE_TEXTURE2D_LOD(_Curves, sampler_Curves, float2(hsv.x, 0.25), 0).y) * 2.0;
+
+            // Sat Vs Sat
+            satMult *= saturate(SAMPLE_TEXTURE2D_LOD(_Curves, sampler_Curves, float2(hsv.y, 0.25), 0).z) * 2.0;
+
+            // Lum Vs Sat
+            satMult *= saturate(SAMPLE_TEXTURE2D_LOD(_Curves, sampler_Curves, float2(Luminance(colorLinear), 0.25), 0).w) * 2.0;
+
+            // Hue Vs Hue
+            float hue = hsv.x + _HueSatCon.x;
+            float offset = saturate(SAMPLE_TEXTURE2D_LOD(_Curves, sampler_Curves, float2(hue, 0.25), 0).x) - 0.5;
+            hue += offset;
+            hsv.x = RotateHue(hue, 0.0, 1.0);
+
             colorLinear = HsvToRgb(hsv);
 
             colorLinear = Saturation(colorLinear, _HueSatCon.y * satMult);

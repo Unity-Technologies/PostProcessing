@@ -554,49 +554,6 @@ float3 YrgbCurve(float3 c, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
 }
 
 //
-// (X) Hue VS Hue - Remaps hue on a curve according to the current hue
-//      Input is Hue [0.0, 1.0]
-//      Output is Hue [0.0, 1.0]
-//
-float SecondaryHueHue(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
-{
-    float offset = saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(hue, 0.25), 0).x) - 0.5;
-    hue += offset;
-    hue = RotateHue(hue, 0.0, 1.0);
-    return hue;
-}
-
-//
-// (Y) Hue VS Saturation - Remaps saturation on a curve according to the current hue
-//      Input is Hue [0.0, 1.0]
-//      Output is Saturation multiplier [0.0, 2.0]
-//
-float SecondaryHueSat(float hue, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
-{
-    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(hue, 0.25), 0).y) * 2.0;
-}
-
-//
-// (Z) Saturation VS Saturation - Remaps saturation on a curve according to the current saturation
-//      Input is Saturation [0.0, 1.0]
-//      Output is Saturation multiplier [0.0, 2.0]
-//
-float SecondarySatSat(float sat, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
-{
-    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(sat, 0.25), 0).z) * 2.0;
-}
-
-//
-// (W) Luminance VS Saturation - Remaps saturation on a curve according to the current luminance
-//      Input is Luminance [0.0, 1.0]
-//      Output is Saturation multiplier [0.0, 2.0]
-//
-float SecondaryLumSat(float lum, TEXTURE2D_ARGS(curveTex, sampler_curveTex))
-{
-    return saturate(SAMPLE_TEXTURE2D_LOD(curveTex, sampler_curveTex, float2(lum, 0.25), 0).w) * 2.0;
-}
-
-//
 // Channel mixing (same as Photoshop's and DaVinci's Resolve)
 // Recommended workspace: ACEScg (linear)
 //      Input mixers should be in range [-2.0; 2.0]

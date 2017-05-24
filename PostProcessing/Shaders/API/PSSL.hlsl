@@ -33,13 +33,6 @@
 #define SAMPLE_DEPTH_TEXTURE(textureName, samplerName, coord2) SAMPLE_TEXTURE2D(textureName, samplerName, coord2).r
 #define SAMPLE_DEPTH_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod).r
 
-#define TEXTURE2D_HALF TEXTURE2D
-#define TEXTURE2D_FLOAT TEXTURE2D
-#define TEXTURE3D_HALF TEXTURE3D
-#define TEXTURE3D_FLOAT TEXTURE3D
-#define TEXTURE2D_SAMPLER2D_HALF TEXTURE2D_SAMPLER2D
-#define TEXTURE2D_SAMPLER2D_FLOAT TEXTURE2D_SAMPLER2D
-
 #define UNITY_BRANCH    [branch]
 #define UNITY_FLATTEN   [flatten]
 #define UNITY_UNROLL    [unroll]

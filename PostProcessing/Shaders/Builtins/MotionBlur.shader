@@ -9,18 +9,18 @@ Shader "Hidden/PostProcessing/MotionBlur"
         float4 _MainTex_TexelSize;
 
         // Camera depth texture
-        TEXTURE2D_SAMPLER2D_FLOAT(_CameraDepthTexture, sampler_CameraDepthTexture);
+        TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
 
         // Camera motion vectors texture
-        TEXTURE2D_SAMPLER2D_HALF(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture);
+        TEXTURE2D_SAMPLER2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture);
         float4 _CameraMotionVectorsTexture_TexelSize;
 
         // Packed velocity texture (2/10/10/10)
-        TEXTURE2D_SAMPLER2D_HALF(_VelocityTex, sampler_VelocityTex);
+        TEXTURE2D_SAMPLER2D(_VelocityTex, sampler_VelocityTex);
         float2 _VelocityTex_TexelSize;
 
         // NeighborMax texture
-        TEXTURE2D_SAMPLER2D_HALF(_NeighborMaxTex, sampler_NeighborMaxTex);
+        TEXTURE2D_SAMPLER2D(_NeighborMaxTex, sampler_NeighborMaxTex);
         float2 _NeighborMaxTex_TexelSize;
 
         // Velocity scale factor

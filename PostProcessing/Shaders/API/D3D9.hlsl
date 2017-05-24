@@ -1,6 +1,7 @@
 // ALso used for Direct3D 11 "feature level 9.x" target for Windows Store and Windows Phone
 #define UNITY_UV_STARTS_AT_TOP 1
 #define UNITY_REVERSED_Z 0
+#define UNITY_GATHER_SUPPORTED 0
 
 #define TEXTURE2D_SAMPLER2D(textureName, samplerName) sampler2D textureName
 #define TEXTURE3D_SAMPLER3D(textureName, samplerName) sampler3D textureName
@@ -24,13 +25,6 @@
 
 #define SAMPLE_DEPTH_TEXTURE(textureName, samplerName, coord2) SAMPLE_TEXTURE2D(textureName, samplerName, coord2).r
 #define SAMPLE_DEPTH_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod).r
-
-#define TEXTURE2D_HALF(textureName) sampler2D_half textureName
-#define TEXTURE2D_FLOAT(textureName) sampler2D_float textureName
-#define TEXTURE3D_HALF(textureName) sampler3D_half textureName
-#define TEXTURE3D_FLOAT(textureName) sampler3D_float textureName
-#define TEXTURE2D_SAMPLER2D_HALF(textureName, samplerName) sampler2D_half textureName
-#define TEXTURE2D_SAMPLER2D_FLOAT(textureName, samplerName) sampler2D_float textureName
 
 #define UNITY_BRANCH
 #define UNITY_FLATTEN

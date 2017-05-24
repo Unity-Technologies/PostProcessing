@@ -205,7 +205,7 @@ namespace UnityEngine.Experimental.PostProcessing
                         break;
                 }
 
-                int groupSize = Mathf.CeilToInt(k_Lut3DSize / 4f);
+                int groupSize = Mathf.CeilToInt(k_Lut3DSize / 8f);
                 var cmd = context.command;
                 cmd.SetComputeTextureParam(compute, kernel, "_Output", m_InternalLogLut);
                 cmd.SetComputeVectorParam(compute, "_Size", new Vector4(k_Lut3DSize, 1f / (k_Lut3DSize - 1f), 0f, 0f));

@@ -49,7 +49,6 @@ namespace UnityEngine.Experimental.PostProcessing
 
     public sealed class AutoExposureRenderer : PostProcessEffectRenderer<AutoExposure>
     {
-        ComputeShader m_EyeCompute;
         ComputeBuffer m_HistogramBuffer;
 
         readonly RenderTexture[] m_AutoExposurePool = new RenderTexture[2];
@@ -82,9 +81,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public override void Render(PostProcessRenderContext context)
         {
-            // Setup compute
-            if (m_EyeCompute == null)
-                m_EyeCompute = context.resources.computeShaders.exposureHistogram;
+            var compute = context.resources.computeShaders.exposureHistogram;
 
             var cmd = context.command;
             cmd.BeginSample("AutoExposureLookup");
@@ -112,16 +109,16 @@ namespace UnityEngine.Experimental.PostProcessing
             CheckTexture(1);
 
             // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
-            int kernel = m_EyeCompute.FindKernel("KEyeHistogramClear");
-            cmd.SetComputeBufferParam(m_EyeCompute, kernel, "_HistogramBuffer", m_HistogramBuffer);
-            cmd.DispatchCompute(m_EyeCompute, kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
+            int kernel = compute.FindKernel("KEyeHistogramClear");
+            cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_HistogramBuffer);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
 
             // Get a log histogram
-            kernel = m_EyeCompute.FindKernel("KEyeHistogram");
-            cmd.SetComputeBufferParam(m_EyeCompute, kernel, "_HistogramBuffer", m_HistogramBuffer);
-            cmd.SetComputeTextureParam(m_EyeCompute, kernel, "_Source", Uniforms._AutoExposureCopyTex);
-            cmd.SetComputeVectorParam(m_EyeCompute, "_ScaleOffsetRes", scaleOffsetRes);
-            cmd.DispatchCompute(m_EyeCompute, kernel,
+            kernel = compute.FindKernel("KEyeHistogram");
+            cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_HistogramBuffer);
+            cmd.SetComputeTextureParam(compute, kernel, "_Source", Uniforms._AutoExposureCopyTex);
+            cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
+            cmd.DispatchCompute(compute, kernel,
                 Mathf.CeilToInt(scaleOffsetRes.z / (float)k_HistogramThreadX),
                 Mathf.CeilToInt(scaleOffsetRes.w / (float)k_HistogramThreadY),
                 1);
