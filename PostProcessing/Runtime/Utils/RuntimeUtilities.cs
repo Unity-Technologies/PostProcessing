@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    using SceneManagement;
     using UnityObject = UnityEngine.Object;
 
     public static class RuntimeUtilities
@@ -258,6 +259,36 @@ namespace UnityEngine.Experimental.PostProcessing
 #else
                 UnityObject.Destroy(obj);
 #endif
+            }
+        }
+
+        // Returns ALL scene objects in the hierarchy, included inactive objects
+        // Beware, this method will be slow for big scenes
+        public static IEnumerable<T> GetAllSceneObjects<T>()
+            where T : Component
+        {
+            var queue = new Queue<Transform>();
+            var roots = SceneManager.GetActiveScene().GetRootGameObjects();
+
+            foreach (var root in roots)
+            {
+                queue.Enqueue(root.transform);
+                var comp = root.GetComponent<T>();
+
+                if (comp != null)
+                    yield return comp;
+            }
+
+            while (queue.Count > 0)
+            {
+                foreach (Transform child in queue.Dequeue())
+                {
+                    queue.Enqueue(child);
+                    var comp = child.GetComponent<T>();
+
+                    if (comp != null)
+                        yield return comp;
+                }
             }
         }
 

@@ -7,6 +7,7 @@ namespace UnityEditor.Experimental.PostProcessing
             internal const string trackballSensitivity = "PostProcessing.Trackball.Sensitivity";
             internal const string currentChannelMixer  = "PostProcessing.ChannelMixer.CurrentChannel";
             internal const string currentCurve         = "PostProcessing.Curve.Current";
+            internal const string showLayerToolkit     = "PostProcessing.Layer.showLayerToolkit";
             internal const string showCustomSorter     = "PostProcessing.Layer.ShowCustomSorter";
         }
 
@@ -40,6 +41,13 @@ namespace UnityEditor.Experimental.PostProcessing
             set { TrySave(ref m_ShowCustomSorter, value, Keys.showCustomSorter); }
         }
 
+        static bool m_ShowLayerToolkit = false;
+        internal static bool showLayerToolkit
+        {
+            get { return m_ShowLayerToolkit; }
+            set { TrySave(ref m_ShowLayerToolkit, value, Keys.showLayerToolkit); }
+        }
+
         static GlobalSettings()
         {
             Load();
@@ -61,6 +69,7 @@ namespace UnityEditor.Experimental.PostProcessing
             m_TrackballSensitivity = EditorPrefs.GetFloat(Keys.trackballSensitivity, 0.2f);
             m_CurrentChannelMixer  = EditorPrefs.GetInt(Keys.currentChannelMixer, 0);
             m_CurrentCurve         = EditorPrefs.GetInt(Keys.currentCurve, 0);
+            m_ShowLayerToolkit     = EditorPrefs.GetBool(Keys.showLayerToolkit, false);
             m_ShowCustomSorter     = EditorPrefs.GetBool(Keys.showCustomSorter, false);
 
             m_Loaded = true;

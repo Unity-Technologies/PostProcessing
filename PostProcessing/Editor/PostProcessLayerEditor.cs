@@ -7,8 +7,6 @@ using UnityEditorInternal;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
-    // TODO: Add button to select all volumes on the same layer
-    // TODO: Add button to open the volume manager
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
@@ -139,9 +137,44 @@ namespace UnityEditor.Experimental.PostProcessing
 
             EditorGUILayout.Space();
 
+            // Toolkit
+            EditorUtilities.DrawSplitter();
+            GlobalSettings.showLayerToolkit = EditorUtilities.DrawHeader("Toolkit", GlobalSettings.showLayerToolkit);
+
+            if (GlobalSettings.showLayerToolkit)
+            {
+                EditorGUILayout.Space();
+
+                using (new EditorGUI.DisabledScope(true))
+                if (GUILayout.Button(EditorUtilities.GetContent("Export frame to EXR..."), EditorStyles.miniButton))
+                {
+                    // TODO: Export frame to EXR with options to disable postfx, stop postfx just before colorgrading, or output with postfx applied
+                }
+
+                if (GUILayout.Button(EditorUtilities.GetContent("Select all layer volumes|Selects all the volumes that will influence this layer."), EditorStyles.miniButton))
+                {
+                    var volumes = RuntimeUtilities.GetAllSceneObjects<PostProcessVolume>()
+                        .Where(x => (m_VolumeLayer.intValue & (1 << x.gameObject.layer)) != 0)
+                        .Select(x => x.gameObject)
+                        .Cast<UnityEngine.Object>()
+                        .ToArray();
+
+                    if (volumes.Count() > 0)
+                        Selection.objects = volumes;
+                }
+
+                using (new EditorGUI.DisabledScope(true))
+                if (GUILayout.Button(EditorUtilities.GetContent("Open Volume Explorer"), EditorStyles.miniButton))
+                {
+                    // TODO: Volume explorer
+                }
+
+                EditorGUILayout.Space();
+            }
+
+            // Custom user effects sorter
             EditorUtilities.DrawSplitter();
             GlobalSettings.showCustomSorter = EditorUtilities.DrawHeader("Custom Effect Sorting", GlobalSettings.showCustomSorter);
-            EditorUtilities.DrawSplitter();
 
             if (GlobalSettings.showCustomSorter)
             {
@@ -166,7 +199,9 @@ namespace UnityEditor.Experimental.PostProcessing
                     EditorGUILayout.Space();
                 }
             }
-            else EditorGUILayout.Space();
+
+            EditorUtilities.DrawSplitter();
+            EditorGUILayout.Space();
 
             serializedObject.ApplyModifiedProperties();
         }
