@@ -172,12 +172,6 @@ namespace UnityEditor.Experimental.PostProcessing
                         Selection.objects = volumes;
                 }
 
-                using (new EditorGUI.DisabledScope(true))
-                if (GUILayout.Button(EditorUtilities.GetContent("Open Volume Explorer"), EditorStyles.miniButton))
-                {
-                    // TODO: Volume explorer
-                }
-
                 EditorGUILayout.Space();
             }
 
