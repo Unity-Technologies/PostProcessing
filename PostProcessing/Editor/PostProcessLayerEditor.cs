@@ -78,20 +78,18 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Volume blending"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.PrefixLabel(EditorUtilities.GetContent("Trigger|A transform that will act as a trigger for volume blending."));
-                    EditorGUI.indentLevel--; // The editor adds an indentation after the prefix label, this removes it
+                // The layout system sort of break alignement when mixing inspector fields with
+                // custom layouted fields, do the layout manually instead
+                var indentOffset = EditorGUI.indentLevel * 15f;
+                var lineRect = GUILayoutUtility.GetRect(1, EditorGUIUtility.singleLineHeight);
+                var labelRect = new Rect(lineRect.x, lineRect.y, EditorGUIUtility.labelWidth - indentOffset, lineRect.height);
+                var fieldRect = new Rect(labelRect.xMax, lineRect.y, lineRect.width - labelRect.width - 60f, lineRect.height);
+                var buttonRect = new Rect(fieldRect.xMax, lineRect.y, 60f, lineRect.height);
 
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        m_VolumeTrigger.objectReferenceValue = (Transform)EditorGUILayout.ObjectField(m_VolumeTrigger.objectReferenceValue, typeof(Transform), false);
-                        if (GUILayout.Button(EditorUtilities.GetContent("This|Assigns the current GameObject as a trigger."), EditorStyles.miniButton))
-                            m_VolumeTrigger.objectReferenceValue = m_Target.transform;
-                    }
-
-                    EditorGUI.indentLevel++;
-                }
+                EditorGUI.PrefixLabel(labelRect, EditorUtilities.GetContent("Trigger|A transform that will act as a trigger for volume blending."));
+                m_VolumeTrigger.objectReferenceValue = (Transform)EditorGUI.ObjectField(fieldRect, m_VolumeTrigger.objectReferenceValue, typeof(Transform), false);
+                if (GUI.Button(buttonRect, EditorUtilities.GetContent("This|Assigns the current GameObject as a trigger."), EditorStyles.miniButton))
+                    m_VolumeTrigger.objectReferenceValue = m_Target.transform;
 
                 if (m_VolumeTrigger.objectReferenceValue == null)
                     EditorGUILayout.HelpBox("No trigger has been set, the camera will only be affected by global volumes.", MessageType.Info);

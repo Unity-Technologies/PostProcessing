@@ -54,54 +54,56 @@ namespace UnityEditor.Experimental.PostProcessing
             
             bool assetHasChanged = false;
 
-            using (new EditorGUILayout.HorizontalScope())
+            // The layout system sort of break alignement when mixing inspector fields with custom
+            // layouted fields, do the layout manually instead
+            var indentOffset = EditorGUI.indentLevel * 15f;
+            var lineRect = GUILayoutUtility.GetRect(1, EditorGUIUtility.singleLineHeight);
+            var labelRect = new Rect(lineRect.x, lineRect.y, EditorGUIUtility.labelWidth - indentOffset, lineRect.height);
+            var fieldRect = new Rect(labelRect.xMax, lineRect.y, lineRect.width - labelRect.width - 60f, lineRect.height);
+            var buttonRect = new Rect(fieldRect.xMax, lineRect.y, 60f, lineRect.height);
+
+            EditorGUI.PrefixLabel(labelRect, EditorUtilities.GetContent("Profile|A reference to a profile asset."));
+
+            using (var scope = new EditorGUI.ChangeCheckScope())
             {
-                EditorGUILayout.PrefixLabel(EditorUtilities.GetContent("Profile|A reference to a profile asset."));
+                m_Profile.objectReferenceValue = (PostProcessProfile)EditorGUI.ObjectField(fieldRect, m_Profile.objectReferenceValue, typeof(PostProcessProfile), false);
+                assetHasChanged = scope.changed;
+            }
 
-                using (new EditorGUILayout.HorizontalScope())
+            if (GUI.Button(buttonRect, EditorUtilities.GetContent("New|Create a new profile."), EditorStyles.miniButton))
+            {
+                // By default, try to put assets in a folder next to the currently active
+                // scene file. If the user isn't a scene, put them in root instead.
+                var targetName = m_Target.name;
+                var scene = SceneManager.GetActiveScene();
+                var path = string.Empty;
+
+                if (string.IsNullOrEmpty(scene.path))
                 {
-                    using (var scope = new EditorGUI.ChangeCheckScope())
-                    {
-                        m_Profile.objectReferenceValue = (PostProcessProfile)EditorGUILayout.ObjectField(m_Profile.objectReferenceValue, typeof(PostProcessProfile), false);
-                        assetHasChanged = scope.changed;
-                    }
-
-                    if (GUILayout.Button(EditorUtilities.GetContent("New|Create a new profile."), EditorStyles.miniButton))
-                    {
-                        // By default, try to put assets in a folder next to the currently active
-                        // scene file. If the user isn't a scene, put them in root instead.
-                        var targetName = m_Target.name;
-                        var scene = SceneManager.GetActiveScene();
-                        var path = string.Empty;
-
-                        if (string.IsNullOrEmpty(scene.path))
-                        {
-                            path = "Assets/";
-                        }
-                        else
-                        {
-                            var scenePath = Path.GetDirectoryName(scene.path);
-                            var extPath = scene.name + "_Profiles";
-                            var profilePath = scenePath + "/" + extPath;
-
-                            if (!AssetDatabase.IsValidFolder(profilePath))
-                                AssetDatabase.CreateFolder(scenePath, extPath);
-
-                            path = profilePath + "/";
-                        }
-
-                        path += targetName + " Profile.asset";
-                        path = AssetDatabase.GenerateUniqueAssetPath(path);
-                        
-                        var asset = CreateInstance<PostProcessProfile>();
-                        AssetDatabase.CreateAsset(asset, path);
-                        AssetDatabase.SaveAssets();
-                        AssetDatabase.Refresh();
-
-                        m_Profile.objectReferenceValue = asset;
-                        assetHasChanged = true;
-                    }
+                    path = "Assets/";
                 }
+                else
+                {
+                    var scenePath = Path.GetDirectoryName(scene.path);
+                    var extPath = scene.name + "_Profiles";
+                    var profilePath = scenePath + "/" + extPath;
+
+                    if (!AssetDatabase.IsValidFolder(profilePath))
+                        AssetDatabase.CreateFolder(scenePath, extPath);
+
+                    path = profilePath + "/";
+                }
+
+                path += targetName + " Profile.asset";
+                path = AssetDatabase.GenerateUniqueAssetPath(path);
+                        
+                var asset = CreateInstance<PostProcessProfile>();
+                AssetDatabase.CreateAsset(asset, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                m_Profile.objectReferenceValue = asset;
+                assetHasChanged = true;
             }
 
             EditorGUILayout.Space();
