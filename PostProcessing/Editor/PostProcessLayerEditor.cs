@@ -196,16 +196,19 @@ namespace UnityEditor.Experimental.PostProcessing
                 EditorGUILayout.Space();
 
                 bool anyList = false;
-                foreach (var kvp in m_CustomLists)
+                if (m_CustomLists != null)
                 {
-                    var list = kvp.Value;
+                    foreach (var kvp in m_CustomLists)
+                    {
+                        var list = kvp.Value;
 
-                    // Skip empty lists to avoid polluting the inspector
-                    if (list.count == 0)
-                        continue;
+                        // Skip empty lists to avoid polluting the inspector
+                        if (list.count == 0)
+                            continue;
 
-                    list.DoLayoutList();
-                    anyList = true;
+                        list.DoLayoutList();
+                        anyList = true;
+                    }
                 }
 
                 if (!anyList)
