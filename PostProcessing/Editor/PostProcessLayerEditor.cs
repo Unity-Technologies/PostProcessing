@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.PostProcessing;
 using UnityEditorInternal;
+using System.IO;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
@@ -31,6 +32,13 @@ namespace UnityEditor.Experimental.PostProcessing
             new GUIContent("Fast Approximate Anti-aliasing"),
             new GUIContent("Temporal Anti-aliasing")
         };
+
+        enum ExportMode
+        {
+            FullFrame,
+            DisablePost,
+            BreakBeforeColorGrading
+        }
 
         void OnEnable()
         {
@@ -145,10 +153,13 @@ namespace UnityEditor.Experimental.PostProcessing
             {
                 EditorGUILayout.Space();
 
-                using (new EditorGUI.DisabledScope(true))
                 if (GUILayout.Button(EditorUtilities.GetContent("Export frame to EXR..."), EditorStyles.miniButton))
                 {
-                    // TODO: Export frame to EXR with options to disable postfx, stop postfx just before colorgrading, or output with postfx applied
+                    var menu = new GenericMenu();
+                    menu.AddItem(EditorUtilities.GetContent("Full Frame (as displayed)"), false, () => ExportFrameToExr(ExportMode.FullFrame));
+                    menu.AddItem(EditorUtilities.GetContent("Disable post-processing"), false, () => ExportFrameToExr(ExportMode.DisablePost));
+                    menu.AddItem(EditorUtilities.GetContent("Break before Color Grading"), false, () => ExportFrameToExr(ExportMode.BreakBeforeColorGrading));
+                    menu.ShowAsContext();
                 }
 
                 if (GUILayout.Button(EditorUtilities.GetContent("Select all layer volumes|Selects all the volumes that will influence this layer."), EditorStyles.miniButton))
@@ -204,6 +215,50 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.Space();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        void ExportFrameToExr(ExportMode mode)
+        {
+            string path = EditorUtility.SaveFilePanel("Export EXR...", "", "Frame", "exr");
+
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            var camera = m_Target.GetComponent<Camera>();
+            var w = camera.pixelWidth;
+            var h = camera.pixelHeight;
+
+            var texOut = new Texture2D(w, h, TextureFormat.RGBAFloat, false);
+            var target = new RenderTexture(w, h, 24, RenderTextureFormat.ARGBFloat);
+
+            var lastActive = RenderTexture.active;
+            var lastTargetSet = camera.targetTexture;
+            var lastPostFXState = m_Target.enabled;
+            var lastBreakColorGradingState = m_Target.breakBeforeColorGrading;
+
+            if (mode == ExportMode.DisablePost)
+                m_Target.enabled = false;
+            else if (mode == ExportMode.BreakBeforeColorGrading)
+                m_Target.breakBeforeColorGrading = true;
+
+            camera.targetTexture = target;
+            camera.Render();
+            camera.targetTexture = lastTargetSet;
+
+            m_Target.enabled = lastPostFXState;
+            m_Target.breakBeforeColorGrading = lastBreakColorGradingState;
+
+            RenderTexture.active = target;
+            texOut.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+            texOut.Apply();
+            RenderTexture.active = lastActive;
+
+            var bytes = texOut.EncodeToEXR(Texture2D.EXRFlags.OutputAsFloat);
+            File.WriteAllBytes(path, bytes);
+            AssetDatabase.Refresh();
+
+            DestroyImmediate(target);
+            DestroyImmediate(texOut);
         }
     }
 }

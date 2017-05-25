@@ -33,6 +33,10 @@ namespace UnityEngine.Experimental.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
+        // Will stop applying post-processing effects just before color grading is applied
+        // Currently used to export to exr without color grading
+        public bool breakBeforeColorGrading = false;
+
         // Pre-ordered custom user effects
         // Do not touch this dictionary or the underlying lists, this is populated automatically
         // It has to be public so it can be accessible in the editor (separate assemblies)
@@ -456,9 +460,11 @@ namespace UnityEngine.Experimental.PostProcessing
             uberSheet.properties.SetTexture(Uniforms._AutoExposureTex, context.autoExposureTexture);
 
             RenderEffect<Bloom>(context);
-            RenderEffect<ColorGrading>(context);
             RenderEffect<Vignette>(context);
             RenderEffect<Grain>(context);
+
+            if (!breakBeforeColorGrading)
+                RenderEffect<ColorGrading>(context);
             
             cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
@@ -480,22 +486,29 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("FinalPass");
 
-            var uberSheet = context.propertySheets.Get(context.resources.shaders.finalPass);
-            uberSheet.ClearKeywords();
-            uberSheet.properties.Clear();
-            context.uberSheet = uberSheet;
-
-            if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
+            if (breakBeforeColorGrading)
             {
-                uberSheet.EnableKeyword(fastApproximateAntialiasing.mobileOptimized
-                    ? "FXAA_LOW"
-                    : "FXAA"
-                );
+                cmd.BlitFullscreenTriangle(context.source, context.destination);
             }
+            else
+            {
+                var uberSheet = context.propertySheets.Get(context.resources.shaders.finalPass);
+                uberSheet.ClearKeywords();
+                uberSheet.properties.Clear();
+                context.uberSheet = uberSheet;
 
-            dithering.Render(context);
+                if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
+                {
+                    uberSheet.EnableKeyword(fastApproximateAntialiasing.mobileOptimized
+                        ? "FXAA_LOW"
+                        : "FXAA"
+                    );
+                }
 
-            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !context.isSceneView) ? 1 : 0);
+                dithering.Render(context);
+
+                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !context.isSceneView) ? 1 : 0);
+            }
 
             if (releaseTargetAfterUse > -1)
                 cmd.ReleaseTemporaryRT(releaseTargetAfterUse);
