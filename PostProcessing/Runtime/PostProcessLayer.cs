@@ -35,7 +35,9 @@ namespace UnityEngine.Experimental.PostProcessing
         PostProcessResources m_Resources;
 
         // Pre-ordered custom user effects
-        Dictionary<PostProcessEvent, List<PostProcessBundle>> m_SortedBundles;
+        // Do not touch this dictionary or the underlying lists, this is populated automatically
+        // It has to be public so it can be accessible in the editor (separate assemblies)
+        public Dictionary<PostProcessEvent, List<PostProcessBundle>> sortedBundles { get; private set; }
 
         // Settings/Renderer bundles mapped to settings types
         Dictionary<Type, PostProcessBundle> m_Bundles;
@@ -63,7 +65,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 m_Resources = PostProcessResources.instance;
 
             m_Bundles = new Dictionary<Type, PostProcessBundle>();
-            m_SortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
+            sortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
             {
                 { PostProcessEvent.BeforeTransparent, new List<PostProcessBundle>() },
                 { PostProcessEvent.BeforeStack,       new List<PostProcessBundle>() },
@@ -77,7 +79,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 m_Bundles.Add(type, bundle);
 
                 if (!bundle.attribute.builtinEffect)
-                    m_SortedBundles[bundle.attribute.eventType].Add(bundle);
+                    sortedBundles[bundle.attribute.eventType].Add(bundle);
             }
 
             m_PropertySheetFactory = new PropertySheetFactory();
@@ -108,14 +110,14 @@ namespace UnityEngine.Experimental.PostProcessing
 
             temporalAntialiasing.Release();
 
-            foreach (var bundles in m_SortedBundles.Values)
+            foreach (var bundles in sortedBundles.Values)
                 bundles.Clear();
 
             foreach (var bundle in m_Bundles.Values)
                 bundle.Release();
 
             m_Bundles.Clear();
-            m_SortedBundles.Clear();
+            sortedBundles.Clear();
             m_PropertySheetFactory.Release();
         }
 
@@ -246,7 +248,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public bool HasActiveEffects(PostProcessEvent evt)
         {
-            var list = m_SortedBundles[evt];
+            var list = sortedBundles[evt];
 
             foreach (var bundle in list)
             {
@@ -296,7 +298,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             SetupContext(context);
 
-            RenderList(m_SortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
+            RenderList(sortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
         }
 
         // Renders everything not opaque-only
@@ -354,7 +356,7 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
             context.destination = tempTarget;
-            RenderList(m_SortedBundles[evt], context, marker);
+            RenderList(sortedBundles[evt], context, marker);
             context.source = tempTarget;
             context.destination = finalDestination;
 

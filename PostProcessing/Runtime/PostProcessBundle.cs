@@ -3,10 +3,10 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    sealed class PostProcessBundle
+    public sealed class PostProcessBundle
     {
-        internal PostProcessAttribute attribute { get; private set; }
-        internal PostProcessEffectSettings settings { get; private set; }
+        public PostProcessAttribute attribute { get; private set; }
+        public PostProcessEffectSettings settings { get; private set; }
 
         internal PostProcessEffectRenderer renderer
         {

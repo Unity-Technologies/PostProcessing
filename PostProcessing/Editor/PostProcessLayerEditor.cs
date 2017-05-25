@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Experimental.PostProcessing;
+using UnityEditorInternal;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
@@ -20,6 +24,8 @@ namespace UnityEditor.Experimental.PostProcessing
 
         SerializedProperty m_DebugDisplay;
         SerializedProperty m_DebugMonitor;
+
+        Dictionary<PostProcessEvent, ReorderableList> m_CustomLists;
 
         static GUIContent[] s_AntialiasingMethodNames =
         {
@@ -42,6 +48,21 @@ namespace UnityEditor.Experimental.PostProcessing
 
             m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
+
+            // Create a reorderable list for each injection event
+            m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
+            foreach (var evt in Enum.GetValues(typeof(PostProcessEvent)).Cast<PostProcessEvent>())
+            {
+                var bundles = m_Target.sortedBundles[evt];
+                var listName = ObjectNames.NicifyVariableName(evt.ToString());
+
+                var list = new ReorderableList(bundles, typeof(PostProcessBundle), true, true, false, false);
+                list.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, listName);
+                list.drawElementCallback = (rect, index, isActive, isFocused) => EditorGUI.LabelField(rect, ((PostProcessBundle)list.list[index]).attribute.menuItem);
+                list.onReorderCallback = (l) => InternalEditorUtility.RepaintAllViews();
+
+                m_CustomLists.Add(evt, list);
+            }
         }
 
         public override void OnInspectorGUI()
@@ -115,6 +136,37 @@ namespace UnityEditor.Experimental.PostProcessing
                 }
             }
             EditorGUI.indentLevel--;
+
+            EditorGUILayout.Space();
+
+            EditorUtilities.DrawSplitter();
+            GlobalSettings.showCustomSorter = EditorUtilities.DrawHeader("Custom Effect Sorting", GlobalSettings.showCustomSorter);
+            EditorUtilities.DrawSplitter();
+
+            if (GlobalSettings.showCustomSorter)
+            {
+                EditorGUILayout.Space();
+
+                bool anyList = false;
+                foreach (var kvp in m_CustomLists)
+                {
+                    var list = kvp.Value;
+
+                    // Skip empty lists to avoid polluting the inspector
+                    if (list.count == 0)
+                        continue;
+
+                    list.DoLayoutList();
+                    anyList = true;
+                }
+
+                if (!anyList)
+                {
+                    EditorGUILayout.HelpBox("No custom effect loaded.", MessageType.Info);
+                    EditorGUILayout.Space();
+                }
+            }
+            else EditorGUILayout.Space();
 
             serializedObject.ApplyModifiedProperties();
         }

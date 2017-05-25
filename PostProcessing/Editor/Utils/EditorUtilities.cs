@@ -127,6 +127,43 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.LabelField(title, Styling.labelHeader);
         }
 
+        public static bool DrawHeader(string title, bool state)
+        {
+            var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
+
+            var labelRect = backgroundRect;
+            labelRect.xMin += 16f;
+            labelRect.xMax -= 20f;
+
+            var foldoutRect = backgroundRect;
+            foldoutRect.y += 1f;
+            foldoutRect.width = 13f;
+            foldoutRect.height = 13f;
+
+            // Background rect should be full-width
+            backgroundRect.xMin = 0f;
+            backgroundRect.width += 4f;
+
+            // Background
+            float backgroundTint = EditorGUIUtility.isProSkin ? 0.1f : 1f;
+            EditorGUI.DrawRect(backgroundRect, new Color(backgroundTint, backgroundTint, backgroundTint, 0.2f));
+
+            // Title
+            EditorGUI.LabelField(labelRect, GetContent(title), EditorStyles.boldLabel);
+
+            // Active checkbox
+            state = GUI.Toggle(foldoutRect, state, GUIContent.none, EditorStyles.foldout);
+
+            var e = Event.current;
+            if (e.type == EventType.MouseDown && backgroundRect.Contains(e.mousePosition) && e.button == 0)
+            {
+                state = !state;
+                e.Use();
+            }
+
+            return state;
+        }
+
         public static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, PostProcessEffectSettings target, Action resetAction, Action removeAction)
         {
             Assert.IsNotNull(group);
