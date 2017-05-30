@@ -7,9 +7,6 @@ namespace UnityEngine.Experimental.PostProcessing
     // better dependency tracking and better interoperability with asset bundles.
     public sealed class PostProcessResources : ScriptableObject
     {
-        // TODO: Remove this ugly hack
-        internal static PostProcessResources instance;
-
         [Serializable]
         public sealed class Shaders
         {
@@ -36,16 +33,6 @@ namespace UnityEngine.Experimental.PostProcessing
         public Texture2D[] blueNoise;
         public Shaders shaders;
         public ComputeShaders computeShaders;
-
-        void OnEnable()
-        {
-            instance = this;
-        }
-
-        void OnDisable()
-        {
-            instance = null;
-        }
 
         /*
 #if UNITY_EDITOR

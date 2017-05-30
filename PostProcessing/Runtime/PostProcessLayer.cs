@@ -63,10 +63,6 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void OnEnable()
         {
-            // Load resource asset if needed
-            if (m_Resources == null)
-                m_Resources = PostProcessResources.instance;
-
             m_Bundles = new Dictionary<Type, PostProcessBundle>();
             sortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
             {
