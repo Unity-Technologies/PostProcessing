@@ -222,8 +222,17 @@ half4 FragCombine(VaryingsDefault i) : SV_Target
 
     half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
 
+#if defined(UNITY_COLORSPACE_GAMMA)
+    color = SRGBToLinear(color);
+#endif
+
     // lerp(lerp(color, dof, ffa), dof, dof.a)
     color = lerp(color, dof.rgb, ffa + dof.a - ffa * dof.a);
+
+#if defined(UNITY_COLORSPACE_GAMMA)
+    color = LinearToSRGB(color);
+#endif
+
     return half4(color, 1.0);
 }
 
