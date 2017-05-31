@@ -131,31 +131,8 @@ namespace UnityEditor.Experimental.PostProcessing
                 RefreshEditors();
                 m_Asset.isDirty = false;
             }
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(EditorUtilities.GetContent("Overrides"), EditorStyles.boldLabel);
-
-                if (GUILayout.Button("Add effect...", EditorStyles.miniButton))
-                {
-                    var menu = new GenericMenu();
-
-                    var typeMap = PostProcessManager.instance.settingsTypes;
-                    foreach (var kvp in typeMap)
-                    {
-                        var type = kvp.Key;
-                        var title = EditorUtilities.GetContent(kvp.Value.menuItem);
-                        bool exists = m_Asset.HasSettings(type);
-
-                        if (!exists)
-                            menu.AddItem(title, false, () => AddEffectOverride(type));
-                        else
-                            menu.AddDisabledItem(title);
-                    }
-
-                    menu.ShowAsContext();
-                }
-            }
+            
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Overrides"), EditorStyles.boldLabel);
 
             // Override list
             for (int i = 0; i < m_Editors.Count; i++)
@@ -186,6 +163,32 @@ namespace UnityEditor.Experimental.PostProcessing
                 EditorUtilities.DrawSplitter();
                 EditorGUILayout.Space();
             }
+            else
+            {
+                EditorGUILayout.HelpBox("No override set on this volume.", MessageType.Info);
+            }
+            
+            if (GUILayout.Button("Add effect...", EditorStyles.miniButton))
+            {
+                var menu = new GenericMenu();
+
+                var typeMap = PostProcessManager.instance.settingsTypes;
+                foreach (var kvp in typeMap)
+                {
+                    var type = kvp.Key;
+                    var title = EditorUtilities.GetContent(kvp.Value.menuItem);
+                    bool exists = m_Asset.HasSettings(type);
+
+                    if (!exists)
+                        menu.AddItem(title, false, () => AddEffectOverride(type));
+                    else
+                        menu.AddDisabledItem(title);
+                }
+
+                menu.ShowAsContext();
+            }
+
+            EditorGUILayout.Space();
         }
 
         void AddEffectOverride(Type type)

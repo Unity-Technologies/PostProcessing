@@ -39,6 +39,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // Pre-ordered custom user effects
         // Do not touch this dictionary or the underlying lists, this is populated automatically
         // It has to be public so it can be accessible in the editor (separate assemblies)
+        // TODO: Sorting doesn't work, it's reset on enabled
         public Dictionary<PostProcessEvent, List<PostProcessBundle>> sortedBundles { get; private set; }
 
         // Settings/Renderer bundles mapped to settings types
