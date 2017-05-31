@@ -6,7 +6,6 @@ using UnityEngine.Rendering;
 namespace UnityEngine.Experimental.PostProcessing
 {
     // TODO: XMLDoc everything (?)
-    // TODO: Final pass should be done on an ARGB32 buffer instead of source format.
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [RequireComponent(typeof(Camera))]
     public sealed class PostProcessLayer : MonoBehaviour

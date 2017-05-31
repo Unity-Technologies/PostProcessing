@@ -526,7 +526,7 @@ float3 LiftGammaGainHDR(float3 c, float3 lift, float3 invgamma, float3 gain)
 //
 float3 LiftGammaGainLDR(float3 c, float3 lift, float3 invgamma, float3 gain)
 {
-    c = saturate(PositivePow(c, invgamma));
+    c = saturate(PositivePow(saturate(c), invgamma));
     return gain * c + lift * (1.0 - c);
 }
 
