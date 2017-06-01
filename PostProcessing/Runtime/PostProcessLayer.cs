@@ -522,14 +522,14 @@ namespace UnityEngine.Experimental.PostProcessing
             var finalDestination = context.destination;
             context.destination = tempTarget;
 
-            // Motion blur is a separate pass - could potentially be done after DoF depending on the
-            // kind of results you're looking for...
-            int motionBlurTarget = RenderEffect<MotionBlur>(context, true);
-
             // Depth of field final combination pass used to be done in Uber which led to artifacts
             // when used at the same time as Bloom (because both effects used the same source, so
             // the stronger bloom was, the more DoF was eaten away in out of focus areas)
             int depthOfFieldTarget = RenderEffect<DepthOfField>(context, true);
+
+            // Motion blur is a separate pass - could potentially be done after DoF depending on the
+            // kind of results you're looking for...
+            int motionBlurTarget = RenderEffect<MotionBlur>(context, true);
 
             // Uber effects
             RenderEffect<ChromaticAberration>(context);
