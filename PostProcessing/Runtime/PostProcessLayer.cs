@@ -405,8 +405,7 @@ namespace UnityEngine.Experimental.PostProcessing
             if (context.IsTemporalAntialiasingActive() && !context.isSceneView)
             {
                 temporalAntialiasing.SetProjectionMatrix(context.camera);
-                lastTarget = m_TargetPool.Get();
-                RenderEffect(context, lastTarget, temporalAntialiasing.Render);
+                lastTarget = RenderEffect(context, m_TargetPool.Get(), temporalAntialiasing.Render);
             }
 
             // Right before the builtin stack
@@ -595,7 +594,6 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.EndSample("FinalPass");
         }
 
-        // TODO: Only used by TAA, which needs to become a PostProcessEffectRenderer and use the other RenderEffect() instead.
         int RenderEffect(PostProcessRenderContext context, int tempTarget, Action<PostProcessRenderContext> renderFunc)
         {
             var finalDestination = context.destination;

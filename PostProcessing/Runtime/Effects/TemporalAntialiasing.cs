@@ -24,9 +24,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
         // For custom jittered matrices - use at your own risks
         public Func<Camera, Vector2, Matrix4x4> jitteredMatrixFunc;
-        
-        Vector2 m_Jitter;
-        public Vector2 jitter { get { return m_Jitter; } }
+
+        public Vector2 jitter { get; private set; }
 
         enum Pass
         {
@@ -135,28 +134,24 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public void SetProjectionMatrix(Camera camera)
         {
-            m_Jitter = GenerateRandomOffset();
-            m_Jitter *= jitterSpread;
+            jitter = GenerateRandomOffset();
+            jitter *= jitterSpread;
 
             camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
 
             if (jitteredMatrixFunc != null)
             {
-                camera.projectionMatrix = jitteredMatrixFunc(camera, m_Jitter);
+                camera.projectionMatrix = jitteredMatrixFunc(camera, jitter);
             }
             else
             {
                 camera.projectionMatrix = camera.orthographic
-                    ? GetOrthographicProjectionMatrix(camera, m_Jitter)
-                    : GetPerspectiveProjectionMatrix(camera, m_Jitter);
+                    ? GetOrthographicProjectionMatrix(camera, jitter)
+                    : GetPerspectiveProjectionMatrix(camera, jitter);
             }
 
-        #if UNITY_5_5_OR_NEWER
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
-        #endif
-
-            m_Jitter.x /= camera.pixelWidth;
-            m_Jitter.y /= camera.pixelHeight;
+            jitter = new Vector2(jitter.x / camera.pixelWidth, jitter.y / camera.pixelHeight);
         }
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context, PropertySheet sheet)
@@ -191,7 +186,7 @@ namespace UnityEngine.Experimental.PostProcessing
             m_HistoryPingPong = ++pp % 2;
 
             const float kMotionAmplification = 100f * 60f;
-            sheet.properties.SetVector(Uniforms._Jitter, m_Jitter);
+            sheet.properties.SetVector(Uniforms._Jitter, jitter);
             sheet.properties.SetFloat(Uniforms._SharpenParameters, sharpen);
             sheet.properties.SetVector(Uniforms._FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(Uniforms._HistoryTex, historyRead);
