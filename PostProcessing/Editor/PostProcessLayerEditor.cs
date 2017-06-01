@@ -8,6 +8,8 @@ using System.IO;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
+    using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
+
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
@@ -54,6 +56,39 @@ namespace UnityEditor.Experimental.PostProcessing
 
             m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
+
+            // See the comment on haveBundlesBeenInited in PostProcessLayer for more info as to why
+            // we need to do this
+            if (!m_Target.haveBundlesBeenInited)
+                m_Target.InitBundles();
+
+            // Create a reorderable list for each injection event
+            m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
+            foreach (var evt in Enum.GetValues(typeof(PostProcessEvent)).Cast<PostProcessEvent>())
+            {
+                var bundles = m_Target.sortedBundles[evt];
+                var listName = ObjectNames.NicifyVariableName(evt.ToString());
+                    
+                var list = new ReorderableList(bundles, typeof(SerializedBundleRef), true, true, false, false);
+
+                list.drawHeaderCallback = (rect) =>
+                {
+                    EditorGUI.LabelField(rect, listName);
+                };
+
+                list.drawElementCallback = (rect, index, isActive, isFocused) =>
+                {
+                    var sbr = (SerializedBundleRef)list.list[index];
+                    EditorGUI.LabelField(rect, sbr.bundle.attribute.menuItem);
+                };
+
+                list.onReorderCallback = (l) =>
+                {
+                    EditorUtility.SetDirty(m_Target);
+                };
+
+                m_CustomLists.Add(evt, list);
+            }
         }
 
         void OnDisable()
@@ -63,28 +98,6 @@ namespace UnityEditor.Experimental.PostProcessing
 
         public override void OnInspectorGUI()
         {
-            // For some obscure reason, on assembly reload a MonoBehavior's Editor OnEnable will be
-            // called BEFORE the MonoBehavior's own OnEnable... So we need to do this here instead
-            // of OnEnable :|
-
-            if (m_Target.sortedBundles != null && m_CustomLists == null)
-            {
-                // Create a reorderable list for each injection event
-                m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
-                foreach (var evt in Enum.GetValues(typeof(PostProcessEvent)).Cast<PostProcessEvent>())
-                {
-                    var bundles = m_Target.sortedBundles[evt];
-                    var listName = ObjectNames.NicifyVariableName(evt.ToString());
-
-                    var list = new ReorderableList(bundles, typeof(PostProcessBundle), true, true, false, false);
-                    list.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, listName);
-                    list.drawElementCallback = (rect, index, isActive, isFocused) => EditorGUI.LabelField(rect, ((PostProcessBundle)list.list[index]).attribute.menuItem);
-                    list.onReorderCallback = (l) => InternalEditorUtility.RepaintAllViews();
-
-                    m_CustomLists.Add(evt, list);
-                }
-            }
-
             serializedObject.Update();
 
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Volume blending"), EditorStyles.boldLabel);
@@ -180,7 +193,7 @@ namespace UnityEditor.Experimental.PostProcessing
                         .Cast<UnityEngine.Object>()
                         .ToArray();
 
-                    if (volumes.Count() > 0)
+                    if (volumes.Length > 0)
                         Selection.objects = volumes;
                 }
 

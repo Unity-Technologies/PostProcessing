@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
@@ -37,10 +38,35 @@ namespace UnityEngine.Experimental.PostProcessing
         public bool breakBeforeColorGrading = false;
 
         // Pre-ordered custom user effects
-        // Do not touch this dictionary or the underlying lists, this is populated automatically
-        // It has to be public so it can be accessible in the editor (separate assemblies)
-        // TODO: Sorting doesn't work, it's reset on enabled
-        public Dictionary<PostProcessEvent, List<PostProcessBundle>> sortedBundles { get; private set; }
+        // These are automatically populated and made to work properly with the serialization
+        // system AND the editor. Modify at your own risk.
+        [Serializable]
+        public sealed class SerializedBundleRef
+        {
+            // We can't serialize Type so use assemblyQualifiedName instead, we only need this at
+            // init time anyway so it's fine
+            public string assemblyQualifiedName;
+
+            // Not serialized, is set/reset when deserialization kicks in
+            public PostProcessBundle bundle;
+        }
+
+        [SerializeField]
+        List<SerializedBundleRef> m_BeforeTransparentBundles;
+
+        [SerializeField]
+        List<SerializedBundleRef> m_BeforeStackBundles;
+
+        [SerializeField]
+        List<SerializedBundleRef> m_AfterStackBundles;
+
+        public Dictionary<PostProcessEvent, List<SerializedBundleRef>> sortedBundles { get; private set; }
+
+        // We need to keep track of bundle initialization because for some obscure reason, on
+        // assembly reload a MonoBehavior's Editor OnEnable will be called BEFORE the MonoBehavior's
+        // own OnEnable... So we'll use it to pre-init bundles if the layer inspector is opened and
+        // the component hasn't been enabled yet.
+        public bool haveBundlesBeenInited { get; private set; }
 
         // Settings/Renderer bundles mapped to settings types
         Dictionary<Type, PostProcessBundle> m_Bundles;
@@ -63,23 +89,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void OnEnable()
         {
-            m_Bundles = new Dictionary<Type, PostProcessBundle>();
-            sortedBundles = new Dictionary<PostProcessEvent, List<PostProcessBundle>>(new PostProcessEventComparer())
-            {
-                { PostProcessEvent.BeforeTransparent, new List<PostProcessBundle>() },
-                { PostProcessEvent.BeforeStack,       new List<PostProcessBundle>() },
-                { PostProcessEvent.AfterStack,        new List<PostProcessBundle>() }
-            };
-
-            foreach (var type in PostProcessManager.instance.settingsTypes.Keys)
-            {
-                var settings = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
-                var bundle = new PostProcessBundle(settings);
-                m_Bundles.Add(type, bundle);
-
-                if (!bundle.attribute.builtinEffect)
-                    sortedBundles[bundle.attribute.eventType].Add(bundle);
-            }
+            if (!haveBundlesBeenInited)
+                InitBundles();
 
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
@@ -99,6 +110,80 @@ namespace UnityEngine.Experimental.PostProcessing
             m_CurrentContext = new PostProcessRenderContext();
         }
 
+        public void InitBundles()
+        {
+            // Create these lists only once, the serialization system will take over after that
+            if (m_BeforeTransparentBundles == null)
+                m_BeforeTransparentBundles = new List<SerializedBundleRef>();
+
+            if (m_BeforeStackBundles == null)
+                m_BeforeStackBundles = new List<SerializedBundleRef>();
+
+            if (m_AfterStackBundles == null)
+                m_AfterStackBundles = new List<SerializedBundleRef>();
+
+            // Create a bundle for each effect type
+            m_Bundles = new Dictionary<Type, PostProcessBundle>();
+
+            foreach (var type in PostProcessManager.instance.settingsTypes.Keys)
+            {
+                var settings = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
+                var bundle = new PostProcessBundle(settings);
+                m_Bundles.Add(type, bundle);
+            }
+
+            // Update sorted lists with newly added or removed effects in the assemblies
+            UpdateBundleSortList(m_BeforeTransparentBundles, PostProcessEvent.BeforeTransparent);
+            UpdateBundleSortList(m_BeforeStackBundles, PostProcessEvent.BeforeStack);
+            UpdateBundleSortList(m_AfterStackBundles, PostProcessEvent.AfterStack);
+
+            // Push all sorted lists in a dictionary for easier access 
+            sortedBundles = new Dictionary<PostProcessEvent, List<SerializedBundleRef>>(new PostProcessEventComparer())
+            {
+                { PostProcessEvent.BeforeTransparent, m_BeforeTransparentBundles },
+                { PostProcessEvent.BeforeStack,       m_BeforeStackBundles },
+                { PostProcessEvent.AfterStack,        m_AfterStackBundles }
+            };
+
+            // Done
+            haveBundlesBeenInited = true;
+        }
+
+        void UpdateBundleSortList(List<SerializedBundleRef> sortedList, PostProcessEvent evt)
+        {
+            // First get all effects associated with the injection point
+            var effects = m_Bundles.Where(kvp => kvp.Value.attribute.eventType == evt && !kvp.Value.attribute.builtinEffect)
+                                   .Select(kvp => kvp.Value)
+                                   .ToList();
+
+            // Remove types that don't exist anymore
+            sortedList.RemoveAll(x =>
+            {
+                string searchStr = x.assemblyQualifiedName;
+                return !effects.Exists(b => b.settings.GetType().AssemblyQualifiedName == searchStr);
+            });
+
+            // Add new ones
+            foreach (var effect in effects)
+            {
+                string typeName = effect.settings.GetType().AssemblyQualifiedName;
+
+                if (!sortedList.Exists(b => b.assemblyQualifiedName == typeName))
+                {
+                    var sbr = new SerializedBundleRef { assemblyQualifiedName = typeName };
+                    sortedList.Add(sbr);
+                }
+            }
+
+            // Link internal references
+            foreach (var effect in sortedList)
+            {
+                string typeName = effect.assemblyQualifiedName;
+                var bundle = effects.Find(b => b.settings.GetType().AssemblyQualifiedName == typeName);
+                effect.bundle = bundle;
+            }
+        }
+
         void OnDisable()
         {
             if (!RuntimeUtilities.scriptableRenderPipelineActive)
@@ -109,15 +194,13 @@ namespace UnityEngine.Experimental.PostProcessing
 
             temporalAntialiasing.Release();
 
-            foreach (var bundles in sortedBundles.Values)
-                bundles.Clear();
-
             foreach (var bundle in m_Bundles.Values)
                 bundle.Release();
 
             m_Bundles.Clear();
-            sortedBundles.Clear();
             m_PropertySheetFactory.Release();
+
+            haveBundlesBeenInited = false;
         }
 
         // Called everytime the user resets the component from the inspector and more importantly
@@ -249,9 +332,9 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             var list = sortedBundles[evt];
 
-            foreach (var bundle in list)
+            foreach (var item in list)
             {
-                if (bundle.settings.IsEnabledAndSupported())
+                if (item.bundle.settings.IsEnabledAndSupported())
                     return true;
             }
 
@@ -365,7 +448,7 @@ namespace UnityEngine.Experimental.PostProcessing
             return tempTarget;
         }
 
-        void RenderList(List<PostProcessBundle> list, PostProcessRenderContext context, string marker)
+        void RenderList(List<SerializedBundleRef> list, PostProcessRenderContext context, string marker)
         {
             var cmd = context.command;
             cmd.BeginSample(marker);
@@ -374,7 +457,7 @@ namespace UnityEngine.Experimental.PostProcessing
             m_ActiveEffects.Clear();
             for (int i = 0; i < list.Count; i++)
             {
-                var effect = list[i];
+                var effect = list[i].bundle;
                 if (effect.settings.IsEnabledAndSupported())
                 {
                     if (!context.isSceneView || (context.isSceneView && effect.attribute.allowInSceneView))
