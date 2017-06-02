@@ -25,6 +25,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
         SerializedProperty m_DebugDisplay;
         SerializedProperty m_DebugMonitor;
+        SerializedProperty m_DebugLightMeter;
 
         Dictionary<PostProcessEvent, ReorderableList> m_CustomLists;
 
@@ -56,6 +57,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
             m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
+            m_DebugLightMeter = FindProperty(x => x.debugView.lightMeter);
 
             // See the comment on haveBundlesBeenInited in PostProcessLayer for more info as to why
             // we need to do this
@@ -159,9 +161,11 @@ namespace UnityEditor.Experimental.PostProcessing
 
                 if (m_DebugDisplay.boolValue)
                 {
+                    if (!SystemInfo.supportsComputeShaders)
+                        EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Info);
+
                     EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
-                    EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Info);
-                    EditorGUILayout.HelpBox("Not implemented.", MessageType.Error);
+                    EditorGUILayout.PropertyField(m_DebugLightMeter, EditorUtilities.GetContent("HDR Light Meter|Light metering utility used to setup auto exposure. Note that it will only display correct values when using a full-HDR workflow (HDR camera, HDR/Custom color grading)."));
                 }
             }
             EditorGUI.indentLevel--;

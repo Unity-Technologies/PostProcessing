@@ -15,9 +15,6 @@ namespace UnityEngine.Experimental.PostProcessing
     [PostProcess(typeof(AutoExposureRenderer), "Unity/Auto Exposure")]
     public sealed class AutoExposure : PostProcessEffectSettings
     {
-        public static readonly int histogramLogMin = -9;
-        public static readonly int histogramLogMax =  9;
-
         [MinMax(1f, 99f), DisplayName("Filtering (%)"), Tooltip("Filters the bright & dark part of the histogram when computing the average luminance to avoid very dark pixels & very bright pixels from contributing to the auto exposure. Unit is in percent.")]
         public Vector2Parameter filtering = new Vector2Parameter { value = new Vector2(50f, 95f) };
 
@@ -49,26 +46,11 @@ namespace UnityEngine.Experimental.PostProcessing
 
     public sealed class AutoExposureRenderer : PostProcessEffectRenderer<AutoExposure>
     {
-        ComputeBuffer m_HistogramBuffer;
-
         readonly RenderTexture[] m_AutoExposurePool = new RenderTexture[2];
         int m_AutoExposurePingPong;
         RenderTexture m_CurrentAutoExposure;
 
         bool m_FirstFrame = true;
-
-        // Don't forget to update 'ExposureHistogram.hlsl' if you change these values !
-        const int k_HistogramBins = 128;
-        const int k_HistogramThreadX = 16;
-        const int k_HistogramThreadY = 16;
-
-        internal Vector4 GetHistogramScaleOffsetRes(PostProcessRenderContext context)
-        {
-            float diff = AutoExposure.histogramLogMax - AutoExposure.histogramLogMin;
-            float scale = 1f / diff;
-            float offset = -AutoExposure.histogramLogMin * scale;
-            return new Vector4(scale, offset, Mathf.Floor(context.width / 2f), Mathf.Floor(context.height / 2f));
-        }
 
         void CheckTexture(int id)
         {
@@ -81,50 +63,15 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public override void Render(PostProcessRenderContext context)
         {
-            var compute = context.resources.computeShaders.exposureHistogram;
-
             var cmd = context.command;
             cmd.BeginSample("AutoExposureLookup");
 
             var sheet = context.propertySheets.Get(context.resources.shaders.autoExposure);
             sheet.ClearKeywords();
 
-            if (m_HistogramBuffer == null)
-                m_HistogramBuffer = new ComputeBuffer(k_HistogramBins, sizeof(uint));
-
-            // Downscale the framebuffer, we don't need an absolute precision for auto exposure and it
-            // helps making it more stable
-            var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
-
-            cmd.GetTemporaryRT(Uniforms._AutoExposureCopyTex,
-                (int)scaleOffsetRes.z,
-                (int)scaleOffsetRes.w,
-                0,
-                FilterMode.Bilinear,
-                context.sourceFormat);
-            cmd.BlitFullscreenTriangle(context.source, Uniforms._AutoExposureCopyTex);
-
             // Prepare autoExpo texture pool
             CheckTexture(0);
             CheckTexture(1);
-
-            // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
-            int kernel = compute.FindKernel("KEyeHistogramClear");
-            cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_HistogramBuffer);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
-
-            // Get a log histogram
-            kernel = compute.FindKernel("KEyeHistogram");
-            cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_HistogramBuffer);
-            cmd.SetComputeTextureParam(compute, kernel, "_Source", Uniforms._AutoExposureCopyTex);
-            cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
-            cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(scaleOffsetRes.z / (float)k_HistogramThreadX),
-                Mathf.CeilToInt(scaleOffsetRes.w / (float)k_HistogramThreadY),
-                1);
-
-            // Cleanup
-            cmd.ReleaseTemporaryRT(Uniforms._AutoExposureCopyTex);
 
             // Make sure filtering values are correct to avoid apocalyptic consequences
             float lowPercent = settings.filtering.value.x;
@@ -134,10 +81,10 @@ namespace UnityEngine.Experimental.PostProcessing
             lowPercent = Mathf.Clamp(lowPercent, 1f, highPercent - kMinDelta);
 
             // Compute auto exposure
-            sheet.properties.SetBuffer(Uniforms._HistogramBuffer, m_HistogramBuffer);
+            sheet.properties.SetBuffer(Uniforms._HistogramBuffer, context.logHistogram.data);
             sheet.properties.SetVector(Uniforms._Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
             sheet.properties.SetVector(Uniforms._Speed, new Vector2(settings.speedDown.value, settings.speedUp.value));
-            sheet.properties.SetVector(Uniforms._ScaleOffsetRes, scaleOffsetRes);
+            sheet.properties.SetVector(Uniforms._ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context));
             sheet.properties.SetFloat(Uniforms._ExposureCompensation, settings.keyValue.value);
 
             if (m_FirstFrame || !Application.isPlaying)
@@ -163,6 +110,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.EndSample("AutoExposureLookup");
 
             context.autoExposureTexture = m_CurrentAutoExposure;
+            context.autoExposure = settings;
             m_FirstFrame = false;
         }
 
@@ -170,11 +118,6 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             foreach (var rt in m_AutoExposurePool)
                 RuntimeUtilities.Destroy(rt);
-
-            if (m_HistogramBuffer != null)
-                m_HistogramBuffer.Release();
-
-            m_HistogramBuffer = null;
         }
     }
 }

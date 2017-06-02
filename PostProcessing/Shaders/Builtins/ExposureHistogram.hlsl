@@ -19,4 +19,66 @@ float GetLuminanceFromHistogramBin(float bin, float2 scaleOffset)
     return exp2((bin - scaleOffset.y) / scaleOffset.x);
 }
 
+float GetBinValue(StructuredBuffer<uint> buffer, uint index, float maxHistogramValue)
+{
+    return float(buffer[index]) * maxHistogramValue;
+}
+
+// Done once in the vertex shader
+float FindMaxHistogramValue(StructuredBuffer<uint> buffer)
+{
+    uint maxValue = 0u;
+
+    for (uint i = 0; i < HISTOGRAM_BINS; i++)
+    {
+        uint h = buffer[i];
+        maxValue = max(maxValue, h);
+    }
+
+    return float(maxValue);
+}
+
+void FilterLuminance(StructuredBuffer<uint> buffer, uint i, float maxHistogramValue, float2 scaleOffset, inout float4 filter)
+{
+    float binValue = GetBinValue(buffer, i, maxHistogramValue);
+
+    // Filter dark areas
+    float offset = min(filter.z, binValue);
+    binValue -= offset;
+    filter.zw -= offset.xx;
+
+    // Filter highlights
+    binValue = min(filter.w, binValue);
+    filter.w -= binValue;
+
+    // Luminance at the bin
+    float luminance = GetLuminanceFromHistogramBin(float(i) / float(HISTOGRAM_BINS), scaleOffset);
+
+    filter.xy += float2(luminance * binValue, binValue);
+}
+
+float GetAverageLuminance(StructuredBuffer<uint> buffer, float4 params, float maxHistogramValue, float2 scaleOffset)
+{
+    // Sum of all bins
+    uint i;
+    float totalSum = 0.0;
+
+    UNITY_LOOP
+        for (i = 0; i < HISTOGRAM_BINS; i++)
+            totalSum += GetBinValue(buffer, i, maxHistogramValue);
+
+    // Skip darker and lighter parts of the histogram to stabilize the auto exposure
+    // x: filtered sum
+    // y: accumulator
+    // zw: fractions
+    float4 filter = float4(0.0, 0.0, totalSum * params.xy);
+
+    UNITY_LOOP
+        for (i = 0; i < HISTOGRAM_BINS; i++)
+            FilterLuminance(buffer, i, maxHistogramValue, scaleOffset, filter);
+
+    // Clamp to user brightness range
+    return clamp(filter.x / max(filter.y, EPSILON), params.z, params.w);
+}
+
 #endif // UNITY_POSTFX_EXPOSURE_HISTOGRAM

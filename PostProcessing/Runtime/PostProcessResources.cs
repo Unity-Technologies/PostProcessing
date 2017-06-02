@@ -21,6 +21,7 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader texture2dLerp;
             public Shader uber;
             public Shader lut2DBaker;
+            public Shader lightMeter;
         }
 
         [Serializable]

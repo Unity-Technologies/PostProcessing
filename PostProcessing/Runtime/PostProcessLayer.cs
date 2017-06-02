@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 namespace UnityEngine.Experimental.PostProcessing
 {
     // TODO: XMLDoc everything (?)
+    // TODO: Add "keep alpha" checkbox
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [RequireComponent(typeof(Camera))]
     public sealed class PostProcessLayer : MonoBehaviour
@@ -76,6 +77,7 @@ namespace UnityEngine.Experimental.PostProcessing
         CommandBuffer m_LegacyCmdBuffer;
         Camera m_Camera;
         PostProcessRenderContext m_CurrentContext;
+        LogHistogram m_LogHistogram;
 
         bool m_SettingsUpdateNeeded = true;
         bool m_IsRenderingInSceneView = false;
@@ -92,6 +94,7 @@ namespace UnityEngine.Experimental.PostProcessing
             if (!haveBundlesBeenInited)
                 InitBundles();
 
+            m_LogHistogram = new LogHistogram();
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
 
@@ -193,12 +196,14 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             temporalAntialiasing.Release();
+            m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
                 bundle.Release();
 
             m_Bundles.Clear();
             m_PropertySheetFactory.Release();
+            debugView.Release();
 
             haveBundlesBeenInited = false;
         }
@@ -349,6 +354,7 @@ namespace UnityEngine.Experimental.PostProcessing
             context.propertySheets = m_PropertySheetFactory;
             context.antialiasing = antialiasingMode;
             context.temporalAntialiasing = temporalAntialiasing;
+            context.logHistogram = m_LogHistogram;
             SetLegacyCameraFlags(context);
 
             // Unsafe to keep this around but we need it for OnGUI events for debug views
@@ -531,12 +537,15 @@ namespace UnityEngine.Experimental.PostProcessing
             // kind of results you're looking for...
             int motionBlurTarget = RenderEffect<MotionBlur>(context, true);
 
-            // Uber effects
-            RenderEffect<ChromaticAberration>(context);
-            RenderEffect<AutoExposure>(context);
+            // Prepare exposure histogram if needed
+            if (ShouldGenerateLogHistogram())
+                m_LogHistogram.Generate(context);
 
+            // Uber effects
+            RenderEffect<AutoExposure>(context);
             uberSheet.properties.SetTexture(Uniforms._AutoExposureTex, context.autoExposureTexture);
 
+            RenderEffect<ChromaticAberration>(context);
             RenderEffect<Bloom>(context);
             RenderEffect<Vignette>(context);
             RenderEffect<Grain>(context);
@@ -634,10 +643,18 @@ namespace UnityEngine.Experimental.PostProcessing
             return tempTarget;
         }
 
+        bool ShouldGenerateLogHistogram()
+        {
+            bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported();
+            bool debug = debugView.IsEnabledAndSupported() && debugView.lightMeter;
+            return autoExpo || debug;
+        }
+
         // Debug view display
         void OnGUI()
         {
-            debugView.OnGUI(m_CurrentContext);
+            if (debugView.IsEnabledAndSupported())
+                debugView.OnGUI(m_CurrentContext);
         }
     }
 }

@@ -142,6 +142,19 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
+        public static void BlitFullscreenTriangle(Texture source, RenderTexture destination, Material material, int pass)
+        {
+            var oldRt = RenderTexture.active;
+
+            material.SetPass(pass);
+            if (source != null)
+                material.SetTexture(Uniforms._MainTex, source);
+
+            Graphics.SetRenderTarget(destination);
+            Graphics.DrawMeshNow(fullscreenTriangle, Matrix4x4.identity);
+            RenderTexture.active = oldRt;
+        }
+
         // Fast basic copy texture if available, falls back to blit copy if not
         // Assumes that both textures have the exact same type and format
         public static void CopyTexture(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)

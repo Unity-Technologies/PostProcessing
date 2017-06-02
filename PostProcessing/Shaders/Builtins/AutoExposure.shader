@@ -14,68 +14,6 @@ Shader "Hidden/PostProcessing/AutoExposure"
 
         StructuredBuffer<uint> _HistogramBuffer;
 
-        float GetBinValue(uint index, float maxHistogramValue)
-        {
-            return float(_HistogramBuffer[index]) * maxHistogramValue;
-        }
-
-        // Done in the vertex shader
-        float FindMaxHistogramValue()
-        {
-            uint maxValue = 0u;
-
-            for (uint i = 0; i < HISTOGRAM_BINS; i++)
-            {
-                uint h = _HistogramBuffer[i];
-                maxValue = max(maxValue, h);
-            }
-
-            return float(maxValue);
-        }
-
-        void FilterLuminance(uint i, float maxHistogramValue, inout float4 filter)
-        {
-            float binValue = GetBinValue(i, maxHistogramValue);
-
-            // Filter dark areas
-            float offset = min(filter.z, binValue);
-            binValue -= offset;
-            filter.zw -= offset.xx;
-
-            // Filter highlights
-            binValue = min(filter.w, binValue);
-            filter.w -= binValue;
-
-            // Luminance at the bin
-            float luminance = GetLuminanceFromHistogramBin(float(i) / float(HISTOGRAM_BINS), _ScaleOffsetRes.xy);
-
-            filter.xy += float2(luminance * binValue, binValue);
-        }
-
-        float GetAverageLuminance(float maxHistogramValue)
-        {
-            // Sum of all bins
-            uint i;
-            float totalSum = 0.0;
-
-            UNITY_LOOP
-            for (i = 0; i < HISTOGRAM_BINS; i++)
-                totalSum += GetBinValue(i, maxHistogramValue);
-
-            // Skip darker and lighter parts of the histogram to stabilize the auto exposure
-            // x: filtered sum
-            // y: accumulator
-            // zw: fractions
-            float4 filter = float4(0.0, 0.0, totalSum * _Params.xy);
-
-            UNITY_LOOP
-            for (i = 0; i < HISTOGRAM_BINS; i++)
-                FilterLuminance(i, maxHistogramValue, filter);
-
-            // Clamp to user brightness range
-            return clamp(filter.x / max(filter.y, EPSILON), _Params.z, _Params.w);
-        }
-
         float GetExposureMultiplier(float avgLuminance)
         {
             avgLuminance = max(EPSILON, avgLuminance);
@@ -96,8 +34,8 @@ Shader "Hidden/PostProcessing/AutoExposure"
 
         float4 FragAdaptProgressive(VaryingsDefault i) : SV_Target
         {
-            float maxValue = 1.0 / FindMaxHistogramValue();
-            float avgLuminance = GetAverageLuminance(maxValue);
+            float maxValue = 1.0 / FindMaxHistogramValue(_HistogramBuffer);
+            float avgLuminance = GetAverageLuminance(_HistogramBuffer, _Params, maxValue, _ScaleOffsetRes.xy);
             float exposure = GetExposureMultiplier(avgLuminance);
             float prevExposure = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, (0.5).xx).r;
             exposure = InterpolateExposure(exposure, prevExposure);
@@ -106,8 +44,8 @@ Shader "Hidden/PostProcessing/AutoExposure"
 
         float4 FragAdaptFixed(VaryingsDefault i) : SV_Target
         {
-            float maxValue = 1.0 / FindMaxHistogramValue();
-            float avgLuminance = GetAverageLuminance(maxValue);
+            float maxValue = 1.0 / FindMaxHistogramValue(_HistogramBuffer);
+            float avgLuminance = GetAverageLuminance(_HistogramBuffer, _Params, maxValue, _ScaleOffsetRes.xy);
             float exposure = GetExposureMultiplier(avgLuminance);
             return exposure.xxxx;
         }

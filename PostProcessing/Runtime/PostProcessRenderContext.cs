@@ -72,7 +72,7 @@ namespace UnityEngine.Experimental.PostProcessing
             destination = 0;
             sourceFormat = RenderTextureFormat.ARGB32;
             flip = false;
-            
+
             resources = null;
             propertySheets = null;
             userData = null;
@@ -82,6 +82,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
             uberSheet = null;
             autoExposureTexture = null;
+            logLut = null;
+            autoExposure = null;
         }
 
         // Checks if TAA is enabled & supported
@@ -92,7 +94,11 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         // Internal values used for builtin effects
+        // Beware, these may not have been set before a specific builtin effect has been executed
         internal PropertySheet uberSheet;
         internal Texture autoExposureTexture;
+        internal LogHistogram logHistogram;
+        internal Texture logLut;
+        internal AutoExposure autoExposure;
     }
 }

@@ -278,6 +278,8 @@ namespace UnityEngine.Experimental.PostProcessing
             uberSheet.properties.SetTexture(Uniforms._Lut3D, lut);
             uberSheet.properties.SetVector(Uniforms._Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
             uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
+
+            context.logLut = lut;
         }
 
         // LDR color pipeline is rendered to a 2D strip lut (works on every platform)

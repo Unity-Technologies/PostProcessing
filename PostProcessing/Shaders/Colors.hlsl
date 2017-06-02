@@ -460,7 +460,7 @@ float3 WhiteBalance(float3 c, float3 balance)
 //  Sat [0.0, 1.0]
 //  Lum [0.0, HALF_MAX]
 //
-float3 RgbToHsv(half3 c)
+float3 RgbToHsv(float3 c)
 {
     float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
