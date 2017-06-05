@@ -61,7 +61,7 @@ Shader "Hidden/Post FX/Lut Generator"
             acescg = WhiteBalance(acescg, _Balance);
             acescg = LiftGammaGain(acescg, _Lift, _InvGamma, _Gain);
 
-            half3 hsv = RgbToHsv(acescg);
+            half3 hsv = RgbToHsv(max(acescg, 0.0));
             hsv.x = SecondaryHueHue(hsv.x + _HueShift, _Curves);
             acescg = HsvToRgb(hsv);
 
