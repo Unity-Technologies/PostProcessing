@@ -34,18 +34,5 @@ namespace UnityEngine.Experimental.PostProcessing
         public Texture2D[] blueNoise;
         public Shaders shaders;
         public ComputeShaders computeShaders;
-
-        /*
-#if UNITY_EDITOR
-        [UnityEditor.MenuItem("Tools/Create Empty PostProcessResources Asset")]
-        static void CreateAsset()
-        {
-            var asset = CreateInstance<PostProcessResources>();
-            UnityEditor.AssetDatabase.CreateAsset(asset, "Assets/PostProcessResources.asset");
-            UnityEditor.AssetDatabase.SaveAssets();
-            UnityEditor.AssetDatabase.Refresh();
-        }
-#endif
-        */
     }
 }
