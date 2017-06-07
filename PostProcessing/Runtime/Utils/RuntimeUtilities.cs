@@ -169,42 +169,6 @@ namespace UnityEngine.Experimental.PostProcessing
 
         #region Parameter lerping & resource management
 
-        static List<RenderTexture> m_LerpTargetPool = new List<RenderTexture>();
-
-        static Material s_LerpMaterial;
-        public static Material lerpMaterial
-        {
-            get
-            {
-                if (s_LerpMaterial != null)
-                    return s_LerpMaterial;
-
-                var shader = Shader.Find("Hidden/PostProcessing/Texture2DLerp");
-                s_LerpMaterial = new Material(shader)
-                {
-                    name = "PostProcess - Lerp",
-                    hideFlags = HideFlags.HideAndDontSave
-                };
-
-                return s_LerpMaterial;
-            }
-        }
-
-        internal static RenderTexture GetLerpTarget(int width, int height, RenderTextureFormat format)
-        {
-            var rt = RenderTexture.GetTemporary(width, height, 0, format);
-            m_LerpTargetPool.Add(rt);
-            return rt;
-        }
-
-        internal static void ReleaseLerpTargets()
-        {
-            foreach (var rt in m_LerpTargetPool)
-                RenderTexture.ReleaseTemporary(rt);
-
-            m_LerpTargetPool.Clear();
-        }
-
         internal static void Lerp(AnimationCurve from, AnimationCurve to, float t, AnimationCurve destination)
         {
             // Try and minimize computations & garbage as much as we can

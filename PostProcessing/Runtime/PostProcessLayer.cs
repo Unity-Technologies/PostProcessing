@@ -205,6 +205,9 @@ namespace UnityEngine.Experimental.PostProcessing
             m_PropertySheetFactory.Release();
             debugView.Release();
 
+            // Might be an issue if several layers are blending in the same frame...
+            TextureLerper.instance.Clear();
+
             haveBundlesBeenInited = false;
         }
 
@@ -222,17 +225,15 @@ namespace UnityEngine.Experimental.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
+            var context = m_CurrentContext;
             var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
             int tempRt = m_TargetPool.Get();
 
-            m_CurrentContext.Reset();
-            m_CurrentContext.camera = m_Camera;
-            m_CurrentContext.sourceFormat = sourceFormat;
-            m_CurrentContext.source = new RenderTargetIdentifier(tempRt);
-            m_CurrentContext.destination = BuiltinRenderTextureType.CameraTarget;
-
-            // Update & override layer settings first (volume blending)
-            UpdateSettingsIfNeeded();
+            context.Reset();
+            context.camera = m_Camera;
+            context.sourceFormat = sourceFormat;
+            context.source = new RenderTargetIdentifier(tempRt);
+            context.destination = BuiltinRenderTextureType.CameraTarget;
 
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
@@ -241,15 +242,15 @@ namespace UnityEngine.Experimental.PostProcessing
             {
                 m_LegacyCmdBufferOpaque.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
                 m_LegacyCmdBufferOpaque.BlitFullscreenTriangle(BuiltinRenderTextureType.CameraTarget, tempRt);
-                m_CurrentContext.command = m_LegacyCmdBufferOpaque;
-                RenderOpaqueOnly(m_CurrentContext);
+                context.command = m_LegacyCmdBufferOpaque;
+                RenderOpaqueOnly(context);
                 m_LegacyCmdBufferOpaque.ReleaseTemporaryRT(tempRt);
             }
 
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
             m_LegacyCmdBuffer.BlitFullscreenTriangle(BuiltinRenderTextureType.CameraTarget, tempRt);
-            m_CurrentContext.command = m_LegacyCmdBuffer;
-            Render(m_CurrentContext);
+            context.command = m_LegacyCmdBuffer;
+            Render(context);
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
         }
 
@@ -363,9 +364,6 @@ namespace UnityEngine.Experimental.PostProcessing
 
         void UpdateSettingsIfNeeded()
         {
-            // Release temporary targets used for texture lerping from last frame
-            RuntimeUtilities.ReleaseLerpTargets();
-
             if (m_SettingsUpdateNeeded)
             {
                 PostProcessManager.instance.UpdateSettings(this);
@@ -380,11 +378,12 @@ namespace UnityEngine.Experimental.PostProcessing
         // automatically blit source into destination if no opaque effects are active.
         public void RenderOpaqueOnly(PostProcessRenderContext context)
         {
+            SetupContext(context);
+            TextureLerper.instance.BeginFrame(context);
+
             // Update & override layer settings first (volume blending), will only be done once per
             // frame, either here or in Render() if there isn't any opaque-only effect to render.
             UpdateSettingsIfNeeded();
-
-            SetupContext(context);
 
             RenderList(sortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
         }
@@ -400,11 +399,12 @@ namespace UnityEngine.Experimental.PostProcessing
         // Final pass should be skipped when outputting to a HDR display.
         public void Render(PostProcessRenderContext context)
         {
+            SetupContext(context);
+            TextureLerper.instance.BeginFrame(context);
+
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
             UpdateSettingsIfNeeded();
-
-            SetupContext(context);
 
             // Do temporal anti-aliasing first
             int lastTarget = -1;
@@ -427,6 +427,7 @@ namespace UnityEngine.Experimental.PostProcessing
             // And close with the final pass
             RenderFinalPass(context, lastTarget);
 
+            TextureLerper.instance.EndFrame();
             m_SettingsUpdateNeeded = true;
         }
 

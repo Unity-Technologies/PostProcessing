@@ -53,6 +53,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
     // TODO: Deal with unsupported collider types for editor/sceneview previz
     // TODO: Do outer skin previz for colliders (need mesh manipulation stuff)
+    // TODO: There seems to be a bug with layer filtering...
     [ExecuteInEditMode]
     public sealed class PostProcessVolume : MonoBehaviour
     {

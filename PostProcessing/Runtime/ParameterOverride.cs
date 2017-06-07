@@ -168,7 +168,6 @@ namespace UnityEngine.Experimental.PostProcessing
         }
     }
 
-    // TODO: Texture3D lerping
     [Serializable]
     public sealed class TextureParameter : ParameterOverride<Texture>
     {
@@ -180,19 +179,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 return;
             }
 
-            var format = TextureFormatUtilities.GetUncompressedRenderTextureFormat(to);
-            var rt = RuntimeUtilities.GetLerpTarget(to.width, to.height, format);
-            var material = RuntimeUtilities.lerpMaterial;
-
-            // TODO: Run tests in gamma/linear
-            material.SetTexture(Uniforms._From, from);
-            material.SetTexture(Uniforms._To, to);
-            material.SetFloat(Uniforms._Interp, t);
-            Graphics.SetRenderTarget(rt);
-            material.SetPass(0);
-            Graphics.DrawMeshNow(RuntimeUtilities.fullscreenTriangle, Matrix4x4.identity);
-
-            value = rt;
+            value = TextureLerper.instance.Lerp(from, to, t);
         }
     }
 } 
