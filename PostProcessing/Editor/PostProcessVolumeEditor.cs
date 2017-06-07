@@ -109,7 +109,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 assetHasChanged = true;
             }
 
-            if (showCopy && GUI.Button(buttonCopyRect, EditorUtilities.GetContent("Copy|Create a new profile and copy the content of the currently assigned profile."), EditorStyles.miniButtonRight))
+            if (showCopy && GUI.Button(buttonCopyRect, EditorUtilities.GetContent("Clone|Create a new profile and copy the content of the currently assigned profile."), EditorStyles.miniButtonRight))
             {
                 // Duplicate the currently assigned profile and save it as a new profile
                 var origin = (PostProcessProfile)m_Profile.objectReferenceValue;
