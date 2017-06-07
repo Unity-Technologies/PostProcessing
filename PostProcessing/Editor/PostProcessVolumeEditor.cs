@@ -53,14 +53,17 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.PropertyField(m_Priority);
             
             bool assetHasChanged = false;
+            bool showCopy = m_Profile.objectReferenceValue != null;
 
             // The layout system sort of break alignement when mixing inspector fields with custom
             // layouted fields, do the layout manually instead
-            var indentOffset = EditorGUI.indentLevel * 15f;
+            int buttonWidth = showCopy ? 45 : 60;
+            float indentOffset = EditorGUI.indentLevel * 15f;
             var lineRect = GUILayoutUtility.GetRect(1, EditorGUIUtility.singleLineHeight);
             var labelRect = new Rect(lineRect.x, lineRect.y, EditorGUIUtility.labelWidth - indentOffset, lineRect.height);
-            var fieldRect = new Rect(labelRect.xMax, lineRect.y, lineRect.width - labelRect.width - 60f, lineRect.height);
-            var buttonRect = new Rect(fieldRect.xMax, lineRect.y, 60f, lineRect.height);
+            var fieldRect = new Rect(labelRect.xMax, lineRect.y, lineRect.width - labelRect.width - buttonWidth * (showCopy ? 2 : 1), lineRect.height);
+            var buttonNewRect = new Rect(fieldRect.xMax, lineRect.y, buttonWidth, lineRect.height);
+            var buttonCopyRect = new Rect(buttonNewRect.xMax, lineRect.y, buttonWidth, lineRect.height);
 
             EditorGUI.PrefixLabel(labelRect, EditorUtilities.GetContent("Profile|A reference to a profile asset."));
 
@@ -70,7 +73,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 assetHasChanged = scope.changed;
             }
 
-            if (GUI.Button(buttonRect, EditorUtilities.GetContent("New|Create a new profile."), EditorStyles.miniButton))
+            if (GUI.Button(buttonNewRect, EditorUtilities.GetContent("New|Create a new profile."), showCopy ? EditorStyles.miniButtonLeft : EditorStyles.miniButton))
             {
                 // By default, try to put assets in a folder next to the currently active
                 // scene file. If the user isn't a scene, put them in root instead.
@@ -102,6 +105,30 @@ namespace UnityEditor.Experimental.PostProcessing
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
 
+                m_Profile.objectReferenceValue = asset;
+                assetHasChanged = true;
+            }
+
+            if (showCopy && GUI.Button(buttonCopyRect, EditorUtilities.GetContent("Copy|Create a new profile and copy the content of the currently assigned profile."), EditorStyles.miniButtonRight))
+            {
+                // Duplicate the currently assigned profile and save it as a new profile
+                var origin = (PostProcessProfile)m_Profile.objectReferenceValue;
+                var path = AssetDatabase.GetAssetPath(origin);
+                path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+                var asset = Instantiate(origin);
+                asset.settings.Clear();
+
+                foreach (var item in origin.settings)
+                {
+                    var itemCopy = Instantiate(item);
+                    asset.settings.Add(itemCopy);
+                }
+
+                AssetDatabase.CreateAsset(asset, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                
                 m_Profile.objectReferenceValue = asset;
                 assetHasChanged = true;
             }
