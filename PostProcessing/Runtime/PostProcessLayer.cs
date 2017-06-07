@@ -421,7 +421,8 @@ namespace UnityEngine.Experimental.PostProcessing
             lastTarget = RenderBuiltins(context, lastTarget);
 
             // After the builtin stack but before the final pass (before FXAA & Dithering)
-            lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
+            if (!breakBeforeColorGrading)
+                lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
 
             // And close with the final pass
             RenderFinalPass(context, lastTarget);
@@ -575,7 +576,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
             if (breakBeforeColorGrading)
             {
-                cmd.BlitFullscreenTriangle(context.source, context.destination);
+                var sheet = context.propertySheets.Get(context.resources.shaders.discardAlpha);
+                cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
             }
             else
             {

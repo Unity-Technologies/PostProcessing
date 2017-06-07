@@ -168,6 +168,7 @@ namespace UnityEngine.Experimental.PostProcessing
         }
     }
 
+    // TODO: Texture3D lerping
     [Serializable]
     public sealed class TextureParameter : ParameterOverride<Texture>
     {

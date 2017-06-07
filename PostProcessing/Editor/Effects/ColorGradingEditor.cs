@@ -21,6 +21,8 @@ namespace UnityEditor.Experimental.PostProcessing
             new GUIContent("Lum Vs Sat")
         };
 
+        SerializedParameterOverride m_ExternalLut;
+
         SerializedParameterOverride m_Tonemapper;
         SerializedParameterOverride m_ToneCurveToeStrength;
         SerializedParameterOverride m_ToneCurveToeLength;
@@ -94,6 +96,8 @@ namespace UnityEditor.Experimental.PostProcessing
         public override void OnEnable()
         {
             m_GradingMode = FindParameterOverride(x => x.gradingMode);
+
+            m_ExternalLut = FindParameterOverride(x => x.externalLut);
 
             m_Tonemapper = FindParameterOverride(x => x.tonemapper);
             m_ToneCurveToeStrength = FindParameterOverride(x => x.toneCurveToeStrength);
@@ -183,6 +187,8 @@ namespace UnityEditor.Experimental.PostProcessing
                 DoStandardModeGUI(false);
             else if (gradingMode == GradingMode.HighDefinitionRange)
                 DoStandardModeGUI(true);
+            else if (gradingMode == GradingMode.External)
+                DoExternalModeGUI();
             
             EditorGUILayout.Space();
         }
@@ -198,6 +204,11 @@ namespace UnityEditor.Experimental.PostProcessing
             state.loopInBounds = loop;
             m_CurveEditor.Add(prop, state);
             m_CurveDict.Add(prop, color);
+        }
+
+        void DoExternalModeGUI()
+        {
+            PropertyField(m_ExternalLut);
         }
 
         void DoStandardModeGUI(bool hdr)

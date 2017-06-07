@@ -13,6 +13,7 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader autoExposure;
             public Shader bloom;
             public Shader copy;
+            public Shader discardAlpha;
             public Shader depthOfField;
             public Shader finalPass;
             public Shader grainBaker;

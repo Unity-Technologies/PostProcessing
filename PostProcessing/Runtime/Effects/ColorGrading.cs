@@ -6,7 +6,8 @@ namespace UnityEngine.Experimental.PostProcessing
     public enum GradingMode
     {
         LowDefinitionRange,
-        HighDefinitionRange
+        HighDefinitionRange,
+        External
     }
 
     public enum Tonemapper
@@ -36,6 +37,9 @@ namespace UnityEngine.Experimental.PostProcessing
     {
         [DisplayName("Mode"), Tooltip("Select a color grading mode that fits your dynamic range and workflow. Use HDR if your camera is set to render in HDR and your target platform supports it. Use LDR for low-end mobiles or devices that don't support HDR. Use Custom HDR if you prefer authoring a Log LUT in external softwares.")]
         public GradingModeParameter gradingMode = new GradingModeParameter { value = GradingMode.HighDefinitionRange };
+
+        [DisplayName("Lookup Texture"), Tooltip("")]
+        public TextureParameter externalLut = new TextureParameter { value = null };
 
         [DisplayName("Mode"), Tooltip("Select a tonemapping algorithm to use at the end of the color grading process.")]
         public TonemapperParameter tonemapper = new TonemapperParameter { value = Tonemapper.None };
@@ -135,7 +139,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
         public override bool IsEnabledAndSupported()
         {
-            if (gradingMode.value == GradingMode.HighDefinitionRange)
+            if (gradingMode.value == GradingMode.HighDefinitionRange || gradingMode.value == GradingMode.External)
             {
                 if (!SystemInfo.supports3DRenderTextures || !SystemInfo.supportsComputeShaders)
                     return false;
@@ -169,11 +173,30 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             switch (settings.gradingMode.value)
             {
+                case GradingMode.External: RenderExternalPipeline(context);
+                    break;
                 case GradingMode.LowDefinitionRange: RenderLDRPipeline(context);
                     break;
                 case GradingMode.HighDefinitionRange: RenderHDRPipeline(context);
                     break;
             }
+        }
+
+        // Do color grading using an externally authored 3D lut; it requires Texture3D support and
+        // compute shaders in case blending is required - Desktop / Consoles / Some high-end mobiles
+        void RenderExternalPipeline(PostProcessRenderContext context)
+        {
+            var lut = settings.externalLut.value;
+
+            if (lut == null)
+                return;
+
+            var uberSheet = context.uberSheet;
+            uberSheet.EnableKeyword("COLOR_GRADING_HDR");
+            uberSheet.properties.SetTexture(Uniforms._Lut3D, lut);
+            uberSheet.properties.SetVector(Uniforms._Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
+            uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
+            context.logLut = lut;
         }
 
         // HDR color pipeline is rendered to a 3D lut; it requires Texture3D & compute shaders

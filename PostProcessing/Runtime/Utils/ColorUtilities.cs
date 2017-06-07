@@ -81,5 +81,37 @@ namespace UnityEngine.Experimental.PostProcessing
             float gainOffset = color.w + 1f;
             return new Vector3(H.x + gainOffset, H.y + gainOffset, H.z + gainOffset);
         }
+
+        // Alexa LogC converters (El 1000)
+        // See http://www.vocas.nl/webfm_send/964
+        public static float LogCToLinear(float x)
+        {
+            const float cut = 0.011361f;
+            const float a = 5.555556f;
+            const float b = 0.047996f;
+            const float c = 0.244161f;
+            const float d = 0.386036f;
+            const float e = 5.301883f;
+            const float f = 0.092819f;
+
+            return (x > e * cut + f)
+                ? (Mathf.Pow(10f, (x - d) / c) - b) / a
+                : (x - f) / e;
+        }
+
+        public static float LinearToLogC(float x)
+        {
+            const float cut = 0.011361f;
+            const float a = 5.555556f;
+            const float b = 0.047996f;
+            const float c = 0.244161f;
+            const float d = 0.386036f;
+            const float e = 5.301883f;
+            const float f = 0.092819f;
+
+            return (x > cut)
+                ? c * Mathf.Log10(a * x + b) + d
+                : e * x + f;
+        }
     }
 }

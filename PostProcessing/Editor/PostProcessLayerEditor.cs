@@ -40,7 +40,8 @@ namespace UnityEditor.Experimental.PostProcessing
         {
             FullFrame,
             DisablePost,
-            BreakBeforeColorGrading
+            BreakBeforeColorGradingLinear,
+            BreakBeforeColorGradingLog
         }
 
         void OnEnable()
@@ -185,7 +186,8 @@ namespace UnityEditor.Experimental.PostProcessing
                     var menu = new GenericMenu();
                     menu.AddItem(EditorUtilities.GetContent("Full Frame (as displayed)"), false, () => ExportFrameToExr(ExportMode.FullFrame));
                     menu.AddItem(EditorUtilities.GetContent("Disable post-processing"), false, () => ExportFrameToExr(ExportMode.DisablePost));
-                    menu.AddItem(EditorUtilities.GetContent("Break before Color Grading"), false, () => ExportFrameToExr(ExportMode.BreakBeforeColorGrading));
+                    menu.AddItem(EditorUtilities.GetContent("Break before Color Grading (Linear)"), false, () => ExportFrameToExr(ExportMode.BreakBeforeColorGradingLinear));
+                    menu.AddItem(EditorUtilities.GetContent("Break before Color Grading (Log)"), false, () => ExportFrameToExr(ExportMode.BreakBeforeColorGradingLog));
                     menu.ShowAsContext();
                 }
 
@@ -252,8 +254,8 @@ namespace UnityEditor.Experimental.PostProcessing
             var w = camera.pixelWidth;
             var h = camera.pixelHeight;
 
-            var texOut = new Texture2D(w, h, TextureFormat.RGBAFloat, false);
-            var target = new RenderTexture(w, h, 24, RenderTextureFormat.ARGBFloat);
+            var texOut = new Texture2D(w, h, TextureFormat.RGBAFloat, false, true);
+            var target = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear, 1);
 
             var lastActive = RenderTexture.active;
             var lastTargetSet = camera.targetTexture;
@@ -262,7 +264,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
             if (mode == ExportMode.DisablePost)
                 m_Target.enabled = false;
-            else if (mode == ExportMode.BreakBeforeColorGrading)
+            else if (mode == ExportMode.BreakBeforeColorGradingLinear || mode == ExportMode.BreakBeforeColorGradingLog)
                 m_Target.breakBeforeColorGrading = true;
 
             camera.targetTexture = target;
@@ -271,6 +273,17 @@ namespace UnityEditor.Experimental.PostProcessing
 
             m_Target.enabled = lastPostFXState;
             m_Target.breakBeforeColorGrading = lastBreakColorGradingState;
+
+            if (mode == ExportMode.BreakBeforeColorGradingLog)
+            {
+                // Convert to log
+                var material = new Material(Shader.Find("Hidden/PostProcessing/Editor/ConvertToLog"));
+                var newTarget = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+                Graphics.Blit(target, newTarget, material, 0);
+                RenderTexture.ReleaseTemporary(target);
+                DestroyImmediate(material);
+                target = newTarget;
+            }
 
             RenderTexture.active = target;
             texOut.ReadPixels(new Rect(0, 0, w, h), 0, 0);
@@ -281,7 +294,7 @@ namespace UnityEditor.Experimental.PostProcessing
             File.WriteAllBytes(path, bytes);
             AssetDatabase.Refresh();
 
-            DestroyImmediate(target);
+            RenderTexture.ReleaseTemporary(target);
             DestroyImmediate(texOut);
         }
     }
