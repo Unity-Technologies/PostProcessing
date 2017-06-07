@@ -75,7 +75,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 // By default, try to put assets in a folder next to the currently active
                 // scene file. If the user isn't a scene, put them in root instead.
                 var targetName = m_Target.name;
-                var scene = SceneManager.GetActiveScene();
+                var scene = m_Target.gameObject.scene;
                 var path = string.Empty;
 
                 if (string.IsNullOrEmpty(scene.path))
