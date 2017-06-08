@@ -246,7 +246,7 @@ namespace UnityEngine.Experimental.PostProcessing
                             continue;
 
                         var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
-                        var d = ((closestPoint - triggerPos) / 2).sqrMagnitude;
+                        var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
 
                         if (d < closestDistanceSqr)
                             closestDistanceSqr = d;

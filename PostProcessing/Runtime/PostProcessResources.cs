@@ -30,6 +30,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             public ComputeShader exposureHistogram;
             public ComputeShader lut3DBaker;
+            public ComputeShader texture3dLerp;
         }
 
         public Texture2D[] blueNoise;

@@ -60,7 +60,7 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
-        RenderTexture Get(RenderTextureFormat format, int w, int h, int d = 1)
+        RenderTexture Get(RenderTextureFormat format, int w, int h, int d = 1, bool enableRandomWrite = false)
         {
             RenderTexture rt = null;
             int i, len = m_Recycled.Count;
@@ -68,7 +68,7 @@ namespace UnityEngine.Experimental.PostProcessing
             for (i = 0; i < len; i++)
             {
                 var r = m_Recycled[i];
-                if (r.width == w && r.height == h && r.volumeDepth == d && r.format == format)
+                if (r.width == w && r.height == h && r.volumeDepth == d && r.format == format && r.enableRandomWrite == enableRandomWrite)
                 {
                     rt = r;
                     break;
@@ -77,13 +77,20 @@ namespace UnityEngine.Experimental.PostProcessing
 
             if (rt == null)
             {
+                var dimension = d > 1
+                    ? TextureDimension.Tex3D
+                    : TextureDimension.Tex2D;
+
                 rt = new RenderTexture(w, h, d, format)
                 {
                     filterMode = FilterMode.Bilinear,
                     wrapMode = TextureWrapMode.Clamp,
                     anisoLevel = 0,
-                    volumeDepth = d
+                    volumeDepth = d,
+                    enableRandomWrite = enableRandomWrite,
+                    dimension = dimension
                 };
+                rt.Create();
             }
             else m_Recycled.RemoveAt(i);
 
@@ -103,7 +110,18 @@ namespace UnityEngine.Experimental.PostProcessing
 
             if (is3d)
             {
-                // TODO: Texture3D lerping
+                int size = to.width;
+                rt = Get(RenderTextureFormat.ARGBHalf, size, size, size, true);
+
+                var compute = m_Resources.computeShaders.texture3dLerp;
+                int kernel = compute.FindKernel("KTexture3DLerp");
+                m_Command.SetComputeVectorParam(compute, "_Params", new Vector4(t, size, 0f, 0f));
+                m_Command.SetComputeTextureParam(compute, kernel, "_Output", rt);
+                m_Command.SetComputeTextureParam(compute, kernel, "_From", from);
+                m_Command.SetComputeTextureParam(compute, kernel, "_To", to);
+
+                int groupSize = Mathf.CeilToInt(size / 8f);
+                m_Command.DispatchCompute(compute, kernel, groupSize, groupSize, groupSize);
             }
             else
             {

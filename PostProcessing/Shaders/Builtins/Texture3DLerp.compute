@@ -1,0 +1,23 @@
+#include "../StdLib.hlsl"
+
+#pragma kernel KTexture3DLerp
+
+RWTexture3D<float4> _Output;
+
+CBUFFER_START(Params)
+    float4 _Params; // x: lerp factor, y: lut size, zw: unused
+CBUFFER_END
+
+Texture3D _From;
+Texture3D _To;
+
+[numthreads(8, 8, 8)]
+void KTexture3DLerp(uint3 id : SV_DispatchThreadID)
+{
+    if (float(id.x) < _Params.y && float(id.y) < _Params.y && float(id.z) < _Params.y)
+    {
+        float3 from = _From[id].rgb;
+        float3 to = _To[id].rgb;
+        _Output[id] = float4(lerp(from, to, _Params.xxx), 1.0);
+    }
+}

@@ -362,11 +362,13 @@ namespace UnityEngine.Experimental.PostProcessing
             m_CurrentContext = context;
         }
 
-        void UpdateSettingsIfNeeded()
+        void UpdateSettingsIfNeeded(PostProcessRenderContext context)
         {
             if (m_SettingsUpdateNeeded)
             {
+                context.command.BeginSample("VolumeBlending");
                 PostProcessManager.instance.UpdateSettings(this);
+                context.command.EndSample("VolumeBlending");
                 m_TargetPool.Reset();
             }
 
@@ -383,7 +385,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Update & override layer settings first (volume blending), will only be done once per
             // frame, either here or in Render() if there isn't any opaque-only effect to render.
-            UpdateSettingsIfNeeded();
+            UpdateSettingsIfNeeded(context);
 
             RenderList(sortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
         }
@@ -404,7 +406,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
-            UpdateSettingsIfNeeded();
+            UpdateSettingsIfNeeded(context);
 
             // Do temporal anti-aliasing first
             int lastTarget = -1;
