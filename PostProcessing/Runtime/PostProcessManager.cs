@@ -201,7 +201,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 var volumes = m_Volumes[i];
 
                 if (volumes == null)
-                    return;
+                    continue;
 
                 // Sort the volume list if needed
                 if (m_SortNeeded[i])
