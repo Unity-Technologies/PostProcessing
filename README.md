@@ -9,6 +9,7 @@ Instructions
 
 Quickstart guides:
 
+* [Quickstart](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Quickstart)
 * [Writing custom effects](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Writing-custom-effects)
 * [External LUT authoring](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-External-LUT-authoring)
   - [DaVinci Resolve](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-DaVinci-Resolve)
