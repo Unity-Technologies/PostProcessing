@@ -54,7 +54,7 @@ namespace UnityEngine.Experimental.PostProcessing
             {
                 RuntimeUtilities.Destroy(m_GrainLookupRT);
 
-                m_GrainLookupRT = new RenderTexture(192, 192, 0, RenderTextureFormat.ARGBHalf)
+                m_GrainLookupRT = new RenderTexture(128, 128, 0, GetLookupFormat())
                 {
                     filterMode = FilterMode.Bilinear,
                     wrapMode = TextureWrapMode.Repeat,
@@ -67,7 +67,7 @@ namespace UnityEngine.Experimental.PostProcessing
             
             var sheet = context.propertySheets.Get(context.resources.shaders.grainBaker);
             sheet.properties.Clear();
-            sheet.properties.SetFloat(Uniforms._Phase, time / 20f);
+            sheet.properties.SetFloat(Uniforms._Phase, time % 10f);
 
             context.command.BeginSample("GrainLookup");
             context.command.BlitFullscreenTriangle((Texture)null, m_GrainLookupRT, sheet, settings.colored.value ? 1 : 0);
@@ -79,6 +79,14 @@ namespace UnityEngine.Experimental.PostProcessing
             uberSheet.properties.SetTexture(Uniforms._GrainTex, m_GrainLookupRT);
             uberSheet.properties.SetVector(Uniforms._Grain_Params1, new Vector2(settings.lumContrib.value, settings.intensity.value * 20f));
             uberSheet.properties.SetVector(Uniforms._Grain_Params2, new Vector4((float)context.width / (float)m_GrainLookupRT.width / settings.size.value, (float)context.height / (float)m_GrainLookupRT.height / settings.size.value, rndOffsetX, rndOffsetY));
+        }
+
+        RenderTextureFormat GetLookupFormat()
+        {
+            if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
+                return RenderTextureFormat.ARGBHalf;
+
+            return RenderTextureFormat.ARGB32;
         }
 
         public override void Release()

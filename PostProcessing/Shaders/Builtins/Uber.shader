@@ -58,7 +58,7 @@ Shader "Hidden/PostProcessing/Uber"
         // Grain
         TEXTURE2D_SAMPLER2D(_GrainTex, sampler_GrainTex);
         half2 _Grain_Params1; // x: lum_contrib, y: intensity
-        half4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
+        float4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
 
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
