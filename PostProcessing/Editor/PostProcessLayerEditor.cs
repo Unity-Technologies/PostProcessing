@@ -251,6 +251,8 @@ namespace UnityEditor.Experimental.PostProcessing
             if (string.IsNullOrEmpty(path))
                 return;
 
+            EditorUtility.DisplayProgressBar("Export EXR", "Rendering...", 0f);
+
             var camera = m_Target.GetComponent<Camera>();
             var w = camera.pixelWidth;
             var h = camera.pixelHeight;
@@ -272,6 +274,8 @@ namespace UnityEditor.Experimental.PostProcessing
             camera.Render();
             camera.targetTexture = lastTargetSet;
 
+            EditorUtility.DisplayProgressBar("Export EXR", "Reading...", 0.25f);
+
             m_Target.enabled = lastPostFXState;
             m_Target.breakBeforeColorGrading = lastBreakColorGradingState;
 
@@ -291,8 +295,15 @@ namespace UnityEditor.Experimental.PostProcessing
             texOut.Apply();
             RenderTexture.active = lastActive;
 
+            EditorUtility.DisplayProgressBar("Export EXR", "Encoding...", 0.5f);
+
             var bytes = texOut.EncodeToEXR(EXRFlags.OutputAsFloat | EXRFlags.CompressZIP);
+
+            EditorUtility.DisplayProgressBar("Export EXR", "Saving...", 0.75f);
+
             File.WriteAllBytes(path, bytes);
+
+            EditorUtility.ClearProgressBar();
             AssetDatabase.Refresh();
 
             RenderTexture.ReleaseTemporary(target);
