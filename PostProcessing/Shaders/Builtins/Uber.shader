@@ -33,10 +33,18 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
+    #if COLOR_GRADING_HDR
+
         TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
-        TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
         float2 _Lut3D_Params;
+
+    #elif COLOR_GRADING_LDR
+
+        TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
         float3 _Lut2D_Params;
+
+    #endif
+
         half _PostExposure; // EV (exp2)
 
         // Vignette
