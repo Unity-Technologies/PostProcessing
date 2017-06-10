@@ -9,6 +9,7 @@ using System.IO;
 namespace UnityEditor.Experimental.PostProcessing
 {
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
+    using EXRFlags = Texture2D.EXRFlags;
 
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
@@ -290,7 +291,7 @@ namespace UnityEditor.Experimental.PostProcessing
             texOut.Apply();
             RenderTexture.active = lastActive;
 
-            var bytes = texOut.EncodeToEXR(Texture2D.EXRFlags.OutputAsFloat);
+            var bytes = texOut.EncodeToEXR(EXRFlags.OutputAsFloat | EXRFlags.CompressZIP);
             File.WriteAllBytes(path, bytes);
             AssetDatabase.Refresh();
 
