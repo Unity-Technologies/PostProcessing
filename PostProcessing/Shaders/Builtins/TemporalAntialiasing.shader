@@ -107,8 +107,10 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, texcoord - motion);
 
+            float motionLength = length(motion);
             float2 luma = float2(Luminance(average), Luminance(color));
-            float nudge = 4.0 * abs(luma.x - luma.y);
+            //float nudge = 4.0 * abs(luma.x - luma.y);
+            float nudge = lerp(4.0, 0.25, saturate(motionLength * 100.0)) * abs(luma.x - luma.y);
 
             float4 minimum = min(bottomRight, topLeft) - nudge;
             float4 maximum = max(topLeft, bottomRight) + nudge;
@@ -120,7 +122,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             // Blend method
             float weight = clamp(
-                lerp(_FinalBlendParameters.x, _FinalBlendParameters.y, length(motion) * _FinalBlendParameters.z),
+                lerp(_FinalBlendParameters.x, _FinalBlendParameters.y, motionLength * _FinalBlendParameters.z),
                 _FinalBlendParameters.y, _FinalBlendParameters.x
             );
 
