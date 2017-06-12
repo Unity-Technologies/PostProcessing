@@ -6,7 +6,6 @@ using UnityEngine.Assertions;
 namespace UnityEngine.Experimental.PostProcessing
 {
     // Singleton used to tracks all existing volumes in the scene
-    // TODO: Add a quick method to create a new volume or new effect override on the fly
     // TODO: Deal with 2D volumes !
     public sealed class PostProcessManager
     {
@@ -126,6 +125,29 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             return output;
+        }
+
+        public PostProcessVolume QuickVolume(int layer, float priority, params PostProcessEffectSettings[] settings)
+        {
+            var gameObject = new GameObject()
+            {
+                name = "Quick Volume",
+                layer = layer,
+                hideFlags = HideFlags.HideAndDontSave
+            };
+
+            var volume = gameObject.AddComponent<PostProcessVolume>();
+            volume.priority = priority;
+            volume.isGlobal = true;
+            var profile = volume.profile;
+
+            foreach (var s in settings)
+            {
+                Assert.IsNotNull(s, "Trying to create a volume with null effects");
+                profile.AddSettings(s);
+            }
+
+            return volume;
         }
 
         internal void SetLayerDirty(int layer)

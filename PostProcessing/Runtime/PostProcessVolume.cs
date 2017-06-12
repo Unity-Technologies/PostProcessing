@@ -82,10 +82,13 @@ namespace UnityEngine.Experimental.PostProcessing
                 {
                     m_InternalProfile = ScriptableObject.CreateInstance<PostProcessProfile>();
 
-                    foreach (var item in sharedProfile.settings)
+                    if (sharedProfile != null)
                     {
-                        var itemCopy = Instantiate(item);
-                        m_InternalProfile.settings.Add(itemCopy);
+                        foreach (var item in sharedProfile.settings)
+                        {
+                            var itemCopy = Instantiate(item);
+                            m_InternalProfile.settings.Add(itemCopy);
+                        }
                     }
 
                     m_IsInternalProfileRef = true;

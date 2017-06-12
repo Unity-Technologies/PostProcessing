@@ -39,6 +39,16 @@ namespace UnityEngine.Experimental.PostProcessing
             return effect;
         }
 
+        public PostProcessEffectSettings AddSettings(PostProcessEffectSettings effect)
+        {
+            if (HasSettings(settings.GetType()))
+                throw new InvalidOperationException("Effect already exists in the stack");
+
+            settings.Add(effect);
+            isDirty = true;
+            return effect;
+        }
+
         public void RemoveSettings<T>()
             where T : PostProcessEffectSettings
         {

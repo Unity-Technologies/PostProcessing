@@ -50,6 +50,12 @@ namespace UnityEngine.Experimental.PostProcessing
             value = t > 0f ? to : from;
         }
 
+        public void Override(T x)
+        {
+            overrideState = true;
+            value = x;
+        }
+
         public override int GetHash()
         {
             unchecked

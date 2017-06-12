@@ -12,6 +12,8 @@ namespace UnityEngine.Experimental.PostProcessing
         // on & off in the editor
         public bool active = true;
 
+        // This is the true state of the effect override in the stack - so you can disable a lower
+        // priority effect by pushing a higher priority effect with enabled set to false.
         public BoolParameter enabled = new BoolParameter { value = false };
 
         internal ReadOnlyCollection<ParameterOverride> parameters;
