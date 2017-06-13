@@ -39,6 +39,11 @@ namespace UnityEngine.Experimental.PostProcessing
             return enabled.value
                 && intensity.value > 0f;
         }
+
+        public override void SetDisabledState()
+        {
+            intensity.value = 0f;
+        }
     }
 
     public sealed class BloomRenderer : PostProcessEffectRenderer<Bloom>

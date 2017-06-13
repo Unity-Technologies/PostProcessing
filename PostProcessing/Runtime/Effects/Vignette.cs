@@ -48,6 +48,11 @@ namespace UnityEngine.Experimental.PostProcessing
                 && ((mode.value == VignetteMode.Classic && intensity.value > 0f)
                 ||  (mode.value == VignetteMode.Masked && opacity.value > 0f && mask.value != null));
         }
+
+        public override void SetDisabledState()
+        {
+            intensity.value = 0f;
+        }
     }
 
     public sealed class VignetteRenderer : PostProcessEffectRenderer<Vignette>

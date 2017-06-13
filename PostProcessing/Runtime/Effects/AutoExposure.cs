@@ -42,6 +42,14 @@ namespace UnityEngine.Experimental.PostProcessing
                 && SystemInfo.supportsComputeShaders
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat);
         }
+
+        public override void SetDisabledState()
+        {
+            filtering.value = new Vector2(1f, 99f);
+            minLuminance.value = 0f;
+            maxLuminance.value = 0f;
+            keyValue.value = 1f;
+        }
     }
 
     public sealed class AutoExposureRenderer : PostProcessEffectRenderer<AutoExposure>

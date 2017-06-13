@@ -1,7 +1,6 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.Experimental.PostProcessing;
-using UnityEngine.SceneManagement;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
@@ -12,6 +11,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
         SerializedProperty m_IsGlobal;
         SerializedProperty m_BlendRadius;
+        SerializedProperty m_Weight;
         SerializedProperty m_Priority;
 
         EffectListEditor m_EffectList;
@@ -22,6 +22,7 @@ namespace UnityEditor.Experimental.PostProcessing
 
             m_IsGlobal = FindProperty(x => x.isGlobal);
             m_BlendRadius = FindProperty(x => x.blendDistance);
+            m_Weight = FindProperty(x => x.weight);
             m_Priority = FindProperty(x => x.priority);
 
             m_EffectList = new EffectListEditor(this);
@@ -49,7 +50,8 @@ namespace UnityEditor.Experimental.PostProcessing
 
             if (!m_IsGlobal.boolValue) // Blend radius is not needed for global volumes
                 EditorGUILayout.PropertyField(m_BlendRadius);
-
+            
+            EditorGUILayout.PropertyField(m_Weight);
             EditorGUILayout.PropertyField(m_Priority);
             
             bool assetHasChanged = false;

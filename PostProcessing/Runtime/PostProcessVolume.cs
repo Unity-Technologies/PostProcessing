@@ -65,6 +65,9 @@ namespace UnityEngine.Experimental.PostProcessing
         
         [Min(0f), Tooltip("Outer distance to start blending from. A value of 0 means no blending and the volume overrides will be applied immediatly upon entry.")]
         public float blendDistance = 0f;
+
+        [Range(0f, 1f), Tooltip("Total weight of this volume in the scene. 0 means it won't do anything, 1 means full effect.")]
+        public float weight = 1f;
         
         [Tooltip("Volume priority in the stack. Higher number means higher priority. Negative values are supported.")]
         public float priority = 0f;

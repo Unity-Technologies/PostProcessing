@@ -84,6 +84,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 // Create an instance for each effect type, these will be used for the lowest
                 // priority global volume as we need a default state when exiting volume ranges
                 var inst = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
+                inst.SetDisabledState();
                 inst.SetAllOverridesTo(true, false);
                 m_BaseSettings.Add(inst);
             }
@@ -238,7 +239,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 foreach (var volume in volumes)
                 {
                     // Skip disabled volumes and volumes without any data
-                    if (!volume.enabled || volume.profileRef == null)
+                    if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                         continue;
 
                     var settings = volume.profileRef.settings;
@@ -246,7 +247,7 @@ namespace UnityEngine.Experimental.PostProcessing
                     // Global volume always have influence
                     if (volume.isGlobal)
                     {
-                        postProcessLayer.OverrideSettings(settings, 1f);
+                        postProcessLayer.OverrideSettings(settings, volume.weight);
                         continue;
                     }
 
@@ -291,7 +292,7 @@ namespace UnityEngine.Experimental.PostProcessing
                         interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
 
                     // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
-                    postProcessLayer.OverrideSettings(settings, interpFactor);
+                    postProcessLayer.OverrideSettings(settings, interpFactor * volume.weight);
                 }
             }
         }
