@@ -127,14 +127,14 @@ namespace UnityEngine.Experimental.PostProcessing
         [DisplayName("Gain"), Tooltip("Controls the lightest portions of the render."), Trackball(TrackballAttribute.Mode.Gain)]
         public Vector4Parameter gain = new Vector4Parameter { value = new Vector4(1f, 1f, 1f, 0f) };
 
-        public GradingCurveParameter masterCurve   = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
-        public GradingCurveParameter redCurve      = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
-        public GradingCurveParameter greenCurve    = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
-        public GradingCurveParameter blueCurve     = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
-        public GradingCurveParameter hueVsHueCurve = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(), 0.5f, true, new Vector2(0f, 1f)) };
-        public GradingCurveParameter hueVsSatCurve = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(), 0.5f, true, new Vector2(0f, 1f)) };
-        public GradingCurveParameter satVsSatCurve = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
-        public GradingCurveParameter lumVsSatCurve = new GradingCurveParameter { value = new ColorGradingCurve(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
+        public SplineParameter masterCurve   = new SplineParameter { value = new Spline(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
+        public SplineParameter redCurve      = new SplineParameter { value = new Spline(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
+        public SplineParameter greenCurve    = new SplineParameter { value = new Spline(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
+        public SplineParameter blueCurve     = new SplineParameter { value = new Spline(new AnimationCurve(new Keyframe(0f, 0f, 1f, 1f), new Keyframe(1f, 1f, 1f, 1f)), 0f, false, new Vector2(0f, 1f)) };
+        public SplineParameter hueVsHueCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, true, new Vector2(0f, 1f)) };
+        public SplineParameter hueVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, true, new Vector2(0f, 1f)) };
+        public SplineParameter satVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
+        public SplineParameter lumVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
 
         public override bool IsEnabledAndSupported()
         {
@@ -157,7 +157,7 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         Texture2D m_GradingCurves;
-        readonly Color[] m_Pixels = new Color[ColorGradingCurve.k_Precision * 2]; // Avoids GC stress
+        readonly Color[] m_Pixels = new Color[Spline.k_Precision * 2]; // Avoids GC stress
 
         RenderTexture m_InternalLdrLut;
         RenderTexture m_InternalLogLut;
@@ -410,7 +410,7 @@ namespace UnityEngine.Experimental.PostProcessing
             if (m_GradingCurves == null)
             {
                 var format = GetCurveFormat();
-                m_GradingCurves = new Texture2D(ColorGradingCurve.k_Precision, 2, format, false, true)
+                m_GradingCurves = new Texture2D(Spline.k_Precision, 2, format, false, true)
                 {
                     name = "Internal Curves Texture",
                     hideFlags = HideFlags.DontSave,
@@ -431,7 +431,7 @@ namespace UnityEngine.Experimental.PostProcessing
             
             var pixels = m_Pixels;
 
-            for (int i = 0; i < ColorGradingCurve.k_Precision; i++)
+            for (int i = 0; i < Spline.k_Precision; i++)
             {
                 // Secondary/VS curves
                 float x = hueVsHueCurve.cachedData[i];
@@ -447,7 +447,7 @@ namespace UnityEngine.Experimental.PostProcessing
                     float r = redCurve.cachedData[i];
                     float g = greenCurve.cachedData[i];
                     float b = blueCurve.cachedData[i];
-                    pixels[i + ColorGradingCurve.k_Precision] = new Color(r, g, b, m);
+                    pixels[i + Spline.k_Precision] = new Color(r, g, b, m);
                 }
             }
 

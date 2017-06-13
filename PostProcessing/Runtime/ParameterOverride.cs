@@ -157,15 +157,15 @@ namespace UnityEngine.Experimental.PostProcessing
     }
 
     [Serializable]
-    public sealed class GradingCurveParameter : ParameterOverride<ColorGradingCurve>
+    public sealed class SplineParameter : ParameterOverride<Spline>
     {
-        public override void Interp(ColorGradingCurve from, ColorGradingCurve to, float t)
+        public override void Interp(Spline from, Spline to, float t)
         {
             int frameCount = Time.renderedFrameCount;
             from.Cache(frameCount);
             to.Cache(frameCount);
 
-            for (int i = 0; i < ColorGradingCurve.k_Precision; i++)
+            for (int i = 0; i < Spline.k_Precision; i++)
             {
                 float a = from.cachedData[i];
                 float b = to.cachedData[i];

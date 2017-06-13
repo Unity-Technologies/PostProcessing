@@ -4,7 +4,7 @@ namespace UnityEngine.Experimental.PostProcessing
 {
     // Small wrapper on top of AnimationCurve to handle zero-key curves and keyframe looping
     [Serializable]
-    public sealed class ColorGradingCurve
+    public sealed class Spline
     {
         public const int k_Precision = 128;
         public const float k_Step = 1f / k_Precision;
@@ -29,7 +29,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // store the curve data in a float array and blend these instead.
         internal float[] cachedData;
 
-        public ColorGradingCurve(AnimationCurve curve, float zeroValue, bool loop, Vector2 bounds)
+        public Spline(AnimationCurve curve, float zeroValue, bool loop, Vector2 bounds)
         {
             this.curve = curve;
             m_ZeroValue = zeroValue;
