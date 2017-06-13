@@ -6,6 +6,9 @@ namespace UnityEngine.Experimental.PostProcessing
     [Serializable]
     public sealed class ColorGradingCurve
     {
+        public const int k_Precision = 128;
+        public const float k_Step = 1f / k_Precision;
+
         public AnimationCurve curve;
 
         [SerializeField]
@@ -19,34 +22,48 @@ namespace UnityEngine.Experimental.PostProcessing
 
         AnimationCurve m_InternalLoopingCurve;
 
+        // Used to track frame changes for data caching
+        int frameCount = -1;
+
+        // Instead of trying to be smart and blend two curves by generating a new one, we'll simply
+        // store the curve data in a float array and blend these instead.
+        internal float[] cachedData;
+
         public ColorGradingCurve(AnimationCurve curve, float zeroValue, bool loop, Vector2 bounds)
         {
             this.curve = curve;
             m_ZeroValue = zeroValue;
             m_Loop = loop;
             m_Range = bounds.magnitude;
+            cachedData = new float[k_Precision];
         }
 
-        public void Cache()
+        public void Cache(int frame)
         {
-            if (!m_Loop)
+            // Only cache once per frame
+            if (frame == frameCount)
                 return;
 
             var length = curve.length;
 
-            if (length < 2)
-                return;
+            if (m_Loop && length > 1)
+            {
+                if (m_InternalLoopingCurve == null)
+                    m_InternalLoopingCurve = new AnimationCurve();
 
-            if (m_InternalLoopingCurve == null)
-                m_InternalLoopingCurve = new AnimationCurve();
+                var prev = curve[length - 1];
+                prev.time -= m_Range;
+                var next = curve[0];
+                next.time += m_Range;
+                m_InternalLoopingCurve.keys = curve.keys;
+                m_InternalLoopingCurve.AddKey(prev);
+                m_InternalLoopingCurve.AddKey(next);
+            }
 
-            var prev = curve[length - 1];
-            prev.time -= m_Range;
-            var next = curve[0];
-            next.time += m_Range;
-            m_InternalLoopingCurve.keys = curve.keys;
-            m_InternalLoopingCurve.AddKey(prev);
-            m_InternalLoopingCurve.AddKey(next);
+            for (int i = 0; i < k_Precision; i++)
+                cachedData[i] = Evaluate((float)i * k_Step);
+
+            frameCount = Time.renderedFrameCount;
         }
 
         public float Evaluate(float t)

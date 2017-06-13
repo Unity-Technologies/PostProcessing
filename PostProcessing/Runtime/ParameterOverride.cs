@@ -157,20 +157,20 @@ namespace UnityEngine.Experimental.PostProcessing
     }
 
     [Serializable]
-    public sealed class CurveParameter : ParameterOverride<AnimationCurve>
-    {
-        public override void Interp(AnimationCurve from, AnimationCurve to, float t)
-        {
-            RuntimeUtilities.Lerp(from, to, t, value);
-        }
-    }
-
-    [Serializable]
     public sealed class GradingCurveParameter : ParameterOverride<ColorGradingCurve>
     {
         public override void Interp(ColorGradingCurve from, ColorGradingCurve to, float t)
         {
-            RuntimeUtilities.Lerp(from.curve, to.curve, t, value.curve);
+            int frameCount = Time.renderedFrameCount;
+            from.Cache(frameCount);
+            to.Cache(frameCount);
+
+            for (int i = 0; i < ColorGradingCurve.k_Precision; i++)
+            {
+                float a = from.cachedData[i];
+                float b = to.cachedData[i];
+                value.cachedData[i] = a + (b - a) * t;
+            }
         }
     }
 

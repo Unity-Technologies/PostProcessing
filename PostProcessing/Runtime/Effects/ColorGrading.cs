@@ -30,7 +30,6 @@ namespace UnityEngine.Experimental.PostProcessing
     [Serializable]
     public sealed class TonemapperParameter : ParameterOverride<Tonemapper> {}
 
-    // TODO: Bug with the curve editor when working with any of the YRGB curves, the last key isn't properly deleted somehow (?!)
     [Serializable]
     [PostProcess(typeof(ColorGradingRenderer), "Unity/Color Grading")]
     public sealed class ColorGrading : PostProcessEffectSettings
@@ -158,9 +157,7 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         Texture2D m_GradingCurves;
-        const int k_CurvePrecision = 128; // If you change this don't forget to update Colors.hlsl:YrgbCurve()
-        const float k_CurveStep = 1f / k_CurvePrecision;
-        readonly Color[] m_Pixels = new Color[k_CurvePrecision * 2]; // Avoids GC stress
+        readonly Color[] m_Pixels = new Color[ColorGradingCurve.k_Precision * 2]; // Avoids GC stress
 
         RenderTexture m_InternalLdrLut;
         RenderTexture m_InternalLogLut;
@@ -413,35 +410,44 @@ namespace UnityEngine.Experimental.PostProcessing
             if (m_GradingCurves == null)
             {
                 var format = GetCurveFormat();
-                m_GradingCurves = new Texture2D(k_CurvePrecision, 2, format, false, true)
+                m_GradingCurves = new Texture2D(ColorGradingCurve.k_Precision, 2, format, false, true)
                 {
-                    name = "Internal Curves Texture", hideFlags = HideFlags.DontSave, anisoLevel = 0, wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear
+                    name = "Internal Curves Texture",
+                    hideFlags = HideFlags.DontSave,
+                    anisoLevel = 0,
+                    wrapMode = TextureWrapMode.Clamp,
+                    filterMode = FilterMode.Bilinear
                 };
             }
 
-            settings.hueVsHueCurve.value.Cache();
-            settings.hueVsSatCurve.value.Cache();
+            var hueVsHueCurve = settings.hueVsHueCurve.value;
+            var hueVsSatCurve = settings.hueVsSatCurve.value;
+            var satVsSatCurve = settings.hueVsSatCurve.value;
+            var lumVsSatCurve = settings.hueVsSatCurve.value;
+            var masterCurve = settings.masterCurve.value;
+            var redCurve = settings.redCurve.value;
+            var greenCurve = settings.greenCurve.value;
+            var blueCurve = settings.blueCurve.value;
+            
             var pixels = m_Pixels;
 
-            for (int i = 0; i < k_CurvePrecision; i++)
+            for (int i = 0; i < ColorGradingCurve.k_Precision; i++)
             {
-                float t = i * k_CurveStep;
-
                 // Secondary/VS curves
-                float x = settings.hueVsHueCurve.value.Evaluate(t);
-                float y = settings.hueVsSatCurve.value.Evaluate(t);
-                float z = settings.satVsSatCurve.value.Evaluate(t);
-                float w = settings.lumVsSatCurve.value.Evaluate(t);
+                float x = hueVsHueCurve.cachedData[i];
+                float y = hueVsSatCurve.cachedData[i];
+                float z = satVsSatCurve.cachedData[i];
+                float w = lumVsSatCurve.cachedData[i];
                 pixels[i] = new Color(x, y, z, w);
 
                 // YRGB
                 if (!hdr)
                 {
-                    float m = settings.masterCurve.value.Evaluate(t);
-                    float r = settings.redCurve.value.Evaluate(t);
-                    float g = settings.greenCurve.value.Evaluate(t);
-                    float b = settings.blueCurve.value.Evaluate(t);
-                    pixels[i + k_CurvePrecision] = new Color(r, g, b, m);
+                    float m = masterCurve.cachedData[i];
+                    float r = redCurve.cachedData[i];
+                    float g = greenCurve.cachedData[i];
+                    float b = blueCurve.cachedData[i];
+                    pixels[i + ColorGradingCurve.k_Precision] = new Color(r, g, b, m);
                 }
             }
 
