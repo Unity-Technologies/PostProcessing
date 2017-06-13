@@ -422,8 +422,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
             var hueVsHueCurve = settings.hueVsHueCurve.value;
             var hueVsSatCurve = settings.hueVsSatCurve.value;
-            var satVsSatCurve = settings.hueVsSatCurve.value;
-            var lumVsSatCurve = settings.hueVsSatCurve.value;
+            var satVsSatCurve = settings.satVsSatCurve.value;
+            var lumVsSatCurve = settings.lumVsSatCurve.value;
             var masterCurve = settings.masterCurve.value;
             var redCurve = settings.redCurve.value;
             var greenCurve = settings.greenCurve.value;
