@@ -11,6 +11,7 @@ Quickstart guides:
 
 * [Quickstart](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Quickstart)
 * [Writing custom effects](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Writing-custom-effects)
+* [Scripting the stack](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Scripting-the-stack)
 * [External LUT authoring](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-External-LUT-authoring)
   - [DaVinci Resolve](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-DaVinci-Resolve)
   - [Adobe Photoshop](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Adobe-Photoshop)
