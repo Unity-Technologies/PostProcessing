@@ -93,17 +93,12 @@ namespace UnityEngine.Experimental.PostProcessing
                             m_InternalProfile.settings.Add(itemCopy);
                         }
                     }
-
-                    m_IsInternalProfileRef = true;
                 }
 
                 return m_InternalProfile;
             }
             set
             {
-                if (m_InternalProfile != null)
-                    TryReleaseInternalProfileRef();
-
                 m_InternalProfile = value;
             }
         }
@@ -117,8 +112,6 @@ namespace UnityEngine.Experimental.PostProcessing
                     : m_InternalProfile;
             }
         }
-
-        bool m_IsInternalProfileRef = false;
 
         int m_PreviousLayer;
         float m_PreviousPriority;
@@ -135,7 +128,6 @@ namespace UnityEngine.Experimental.PostProcessing
         void OnDisable()
         {
             PostProcessManager.instance.Unregister(this);
-            TryReleaseInternalProfileRef();
         }
 
         void Update()
@@ -188,14 +180,6 @@ namespace UnityEngine.Experimental.PostProcessing
             }
 
             colliders.Clear();
-        }
-
-        void TryReleaseInternalProfileRef()
-        {
-            if (m_IsInternalProfileRef)
-                RuntimeUtilities.DestroyProfile(m_InternalProfile, false);
-
-            m_IsInternalProfileRef = false;
         }
     }
 }
