@@ -193,7 +193,7 @@ namespace UnityEngine.Experimental.PostProcessing
         void TryReleaseInternalProfileRef()
         {
             if (m_IsInternalProfileRef)
-                RuntimeUtilities.Destroy(m_InternalProfile);
+                RuntimeUtilities.DestroyProfile(m_InternalProfile, false);
 
             m_IsInternalProfileRef = false;
         }

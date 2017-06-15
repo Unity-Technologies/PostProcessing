@@ -189,6 +189,25 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
+        public static void DestroyProfile(PostProcessProfile profile, bool destroyEffects)
+        {
+            if (destroyEffects)
+            {
+                foreach (var effect in profile.settings)
+                    Destroy(effect);
+            }
+
+            Destroy(profile);
+        }
+
+        public static void DestroyVolume(PostProcessVolume volume, bool destroySharedProfile)
+        {
+            if (destroySharedProfile)
+                DestroyProfile(volume.sharedProfile, true);
+
+            Destroy(volume);
+        }
+
         // Returns ALL scene objects in the hierarchy, included inactive objects
         // Beware, this method will be slow for big scenes
         public static IEnumerable<T> GetAllSceneObjects<T>()
