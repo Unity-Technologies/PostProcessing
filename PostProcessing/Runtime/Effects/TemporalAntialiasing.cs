@@ -158,7 +158,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             var rt = m_HistoryTextures[id];
 
-            if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != context.width || rt.height != context.height)
+            if (m_ResetHistory || rt == null || !rt.IsCreated())
             {
                 RenderTexture.ReleaseTemporary(rt);
 
@@ -169,8 +169,20 @@ namespace UnityEngine.Experimental.PostProcessing
 
                 context.command.BlitFullscreenTriangle(context.source, rt, sheet, (int)Pass.AlphaClear);
             }
+            else if (rt.width != context.width || rt.height != context.height)
+            {
+                // On size change, simply copy the old history to the new one. This looks better
+                // than completely discarding the history and seeing a few aliased frames.
+                var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
+                rt2.name = "Temporal Anti-aliasing History";
+                rt2.filterMode = FilterMode.Bilinear;
+                m_HistoryTextures[id] = rt2;
 
-            return rt;
+                context.command.BlitFullscreenTriangle(rt, rt2);
+                RenderTexture.ReleaseTemporary(rt);
+            }
+
+            return m_HistoryTextures[id];
         }
 
         internal void Render(PostProcessRenderContext context)
