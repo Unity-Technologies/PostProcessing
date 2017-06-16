@@ -239,17 +239,20 @@ namespace UnityEngine.Experimental.PostProcessing
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
 
+            // We need to use the internal Blit method to copy the camera target or it'll fail on
+            // tiled GPU as it won't be able to resolve
+
             if (HasOpaqueOnlyEffects())
             {
                 m_LegacyCmdBufferOpaque.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
-                m_LegacyCmdBufferOpaque.BlitFullscreenTriangle(BuiltinRenderTextureType.CameraTarget, tempRt);
+                m_LegacyCmdBufferOpaque.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
                 context.command = m_LegacyCmdBufferOpaque;
                 RenderOpaqueOnly(context);
                 m_LegacyCmdBufferOpaque.ReleaseTemporaryRT(tempRt);
             }
 
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
-            m_LegacyCmdBuffer.BlitFullscreenTriangle(BuiltinRenderTextureType.CameraTarget, tempRt);
+            m_LegacyCmdBuffer.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
             context.command = m_LegacyCmdBuffer;
             Render(context);
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
