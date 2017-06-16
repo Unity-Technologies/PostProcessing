@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -75,7 +76,7 @@ namespace UnityEngine.Experimental.PostProcessing
             sheet.properties.SetFloat(Uniforms._Phase, time % 10f);
 
             context.command.BeginSample("GrainLookup");
-            context.command.BlitFullscreenTriangle((Texture)null, m_GrainLookupRT, sheet, settings.colored.value ? 1 : 0);
+            context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_GrainLookupRT, sheet, settings.colored.value ? 1 : 0);
             context.command.EndSample("GrainLookup");
 
             // Send everything to the uber shader

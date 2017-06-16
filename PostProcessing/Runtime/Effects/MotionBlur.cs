@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -79,7 +80,7 @@ namespace UnityEngine.Experimental.PostProcessing
             int vbuffer = Uniforms._VelocityTex;
             cmd.GetTemporaryRT(vbuffer, context.width, context.height, 0, FilterMode.Point,
                 packedRTFormat, RenderTextureReadWrite.Linear);
-            cmd.BlitFullscreenTriangle((Texture)null, vbuffer, sheet, (int)Pass.VelocitySetup);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, vbuffer, sheet, (int)Pass.VelocitySetup);
 
             // Pass 2 - First TileMax filter (1/2 downsize)
             int tile2 = Uniforms._Tile2RT;

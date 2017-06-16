@@ -345,7 +345,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 context.command.BeginSample("LdrColorGradingLut");
                 var userLut = settings.ldrLut.value;
                 if (userLut == null)
-                    context.command.BlitFullscreenTriangle((Texture)null, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
+                    context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
                 else
                     context.command.BlitFullscreenTriangle(userLut, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDR);
                 context.command.EndSample("LdrColorGradingLut");

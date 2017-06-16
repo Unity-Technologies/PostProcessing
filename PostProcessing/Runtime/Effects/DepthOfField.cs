@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -143,7 +144,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // CoC calculation pass
             cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat);
-            cmd.BlitFullscreenTriangle((Texture)null, Uniforms._CoCTex, sheet, (int)Pass.CoCCalculation);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, Uniforms._CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled
             if (context.IsTemporalAntialiasingActive())

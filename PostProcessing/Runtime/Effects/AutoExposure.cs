@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -100,7 +101,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 // We don't want eye adaptation when not in play mode because the GameView isn't
                 // animated, thus making it harder to tweak. Just use the final audo exposure value.
                 m_CurrentAutoExposure = m_AutoExposurePool[0];
-                cmd.BlitFullscreenTriangle((Texture)null, m_CurrentAutoExposure, sheet, (int)EyeAdaptation.Fixed);
+                cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_CurrentAutoExposure, sheet, (int)EyeAdaptation.Fixed);
 
                 // Copy current exposure to the other pingpong target to avoid adapting from black
                 RuntimeUtilities.CopyTexture(cmd, m_AutoExposurePool[0], m_AutoExposurePool[1]);
