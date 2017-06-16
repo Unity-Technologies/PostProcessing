@@ -36,8 +36,10 @@ namespace UnityEngine.Experimental.PostProcessing
                     case TextureFormat.BC5: return RenderTextureFormat.RGHalf;
                     case TextureFormat.BC6H: return RenderTextureFormat.ARGBHalf;
                     case TextureFormat.BC7: return RenderTextureFormat.ARGB32;
+                #if !UNITY_IOS
                     case TextureFormat.DXT1Crunched: return RenderTextureFormat.ARGB32;
                     case TextureFormat.DXT5Crunched: return RenderTextureFormat.ARGB32;
+                #endif
                     case TextureFormat.PVRTC_RGB2: return RenderTextureFormat.ARGB32;
                     case TextureFormat.PVRTC_RGBA2: return RenderTextureFormat.ARGB32;
                     case TextureFormat.PVRTC_RGB4: return RenderTextureFormat.ARGB32;
