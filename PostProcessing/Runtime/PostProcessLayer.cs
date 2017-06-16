@@ -417,7 +417,14 @@ namespace UnityEngine.Experimental.PostProcessing
             if (context.IsTemporalAntialiasingActive() && !context.isSceneView)
             {
                 temporalAntialiasing.SetProjectionMatrix(context.camera);
-                lastTarget = RenderEffect(context, m_TargetPool.Get(), temporalAntialiasing.Render);
+
+                lastTarget = m_TargetPool.Get();
+                var finalDestination = context.destination;
+                context.command.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = lastTarget;
+                temporalAntialiasing.Render(context);
+                context.source = lastTarget;
+                context.destination = finalDestination;
             }
 
             // Right before the builtin stack
@@ -610,19 +617,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 cmd.ReleaseTemporaryRT(releaseTargetAfterUse);
 
             cmd.EndSample("FinalPass");
-        }
-
-        int RenderEffect(PostProcessRenderContext context, int tempTarget, Action<PostProcessRenderContext> renderFunc)
-        {
-            var finalDestination = context.destination;
-
-            context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-            context.destination = tempTarget;
-            renderFunc(context);
-            context.source = tempTarget;
-            context.destination = finalDestination;
-
-            return tempTarget;
         }
 
         int RenderEffect<T>(PostProcessRenderContext context, bool useTempTarget = false)
