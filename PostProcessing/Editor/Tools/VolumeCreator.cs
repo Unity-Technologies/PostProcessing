@@ -11,6 +11,7 @@ namespace UnityEditor.Experimental.PostProcessing
             var gameObject = new GameObject("Post-process Volume");
             var collider = gameObject.AddComponent<BoxCollider>();
             collider.size = Vector3.one;
+            collider.isTrigger = true;
             gameObject.AddComponent<PostProcessVolume>();
 
             Selection.objects = new [] { gameObject };
