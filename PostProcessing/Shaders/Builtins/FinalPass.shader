@@ -63,13 +63,12 @@ Shader "Hidden/PostProcessing/FinalPass"
                     0.0,                        // fxaaConsoleRcpFrameOpt (unused)
                     0.0,                        // fxaaConsoleRcpFrameOpt2 (unused)
                     0.0,                        // fxaaConsole360RcpFrameOpt2 (unused)
+                    1.0,                        // fxaaQualitySubpix
 
                 #if FXAA_LOW
-                    0.75,                       // fxaaQualitySubpix
-                    0.166,                      // fxaaQualityEdgeThreshold
-                    0.0833,                     // fxaaQualityEdgeThresholdMin
+                    0.125,                      // fxaaQualityEdgeThreshold
+                    0.0625,                     // fxaaQualityEdgeThresholdMin
                 #else
-                    1.0,                        // fxaaQualitySubpix
                     0.063,                      // fxaaQualityEdgeThreshold
                     0.0312,                     // fxaaQualityEdgeThresholdMin
                 #endif
