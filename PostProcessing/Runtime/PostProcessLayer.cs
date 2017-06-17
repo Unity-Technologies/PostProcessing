@@ -9,7 +9,7 @@ namespace UnityEngine.Experimental.PostProcessing
     // TODO: XMLDoc everything (?)
     // TODO: Add "keep alpha" checkbox
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
-    [AddComponentMenu("Rendering/Post Process Layer", -1)]
+    [AddComponentMenu("Rendering/Post-process Layer", -1)]
     [RequireComponent(typeof(Camera))]
     public sealed class PostProcessLayer : MonoBehaviour
     {

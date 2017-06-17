@@ -54,6 +54,7 @@ namespace UnityEngine.Experimental.PostProcessing
     // TODO: Deal with unsupported collider types for editor/sceneview previz
     // TODO: Do outer skin previz for colliders (need mesh manipulation stuff)
     [ExecuteInEditMode]
+    [AddComponentMenu("Rendering/Post-process Volume", -1)]
     public sealed class PostProcessVolume : MonoBehaviour
     {
         // Modifying sharedProfile will change the behavior of all volumes using this profile, and
