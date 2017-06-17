@@ -204,6 +204,20 @@ namespace UnityEditor.Experimental.PostProcessing
                         Selection.objects = volumes;
                 }
 
+                if (GUILayout.Button(EditorUtilities.GetContent("Select all active volumes|Selects all volumes currently affecting the layer."), EditorStyles.miniButton))
+                {
+                    var volumes = new List<PostProcessVolume>();
+                    PostProcessManager.instance.GetActiveVolumes(m_Target, volumes);
+
+                    if (volumes.Count > 0)
+                    {
+                        Selection.objects = volumes
+                            .Select(x => x.gameObject)
+                            .Cast<UnityEngine.Object>()
+                            .ToArray();
+                    }
+                }
+
                 EditorGUILayout.Space();
             }
 
