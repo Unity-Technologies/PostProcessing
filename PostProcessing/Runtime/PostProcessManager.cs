@@ -90,6 +90,76 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
+        // Gets a list of all volumes currently affecting the given layer. Results aren't sorted.
+        // Volume with weight of 0 or no profile set will be skipped. Results list won't be cleared.
+        public void GetActiveVolumes(PostProcessLayer layer, List<PostProcessVolume> results)
+        {
+            // If no trigger is set, only global volumes will have influence
+            int mask = layer.volumeLayer.value;
+            var volumeTrigger = layer.volumeTrigger;
+            bool onlyGlobal = volumeTrigger == null;
+            var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
+
+            for (int i = 0; i < k_MaxLayerCount; i++)
+            {
+                // Skip layers not in the mask
+                if ((mask & (1 << i)) == 0)
+                    continue;
+
+                // Skip empty layers
+                var volumes = m_Volumes[i];
+
+                if (volumes == null)
+                    continue;
+
+                // Traverse all volumes
+                foreach (var volume in volumes)
+                {
+                    // Skip disabled volumes and volumes without any data or weight
+                    if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
+                        continue;
+
+                    // Global volume always have influence
+                    if (volume.isGlobal)
+                    {
+                        results.Add(volume);
+                        continue;
+                    }
+
+                    if (onlyGlobal)
+                        continue;
+
+                    // If volume isn't global and has no collider, skip it as it's useless
+                    var colliders = m_TempColliders;
+                    volume.GetComponents(colliders);
+                    if (colliders.Count == 0)
+                        continue;
+
+                    // Find closest distance to volume, 0 means it's inside it
+                    float closestDistanceSqr = float.PositiveInfinity;
+
+                    foreach (var collider in colliders)
+                    {
+                        if (!collider.enabled)
+                            continue;
+
+                        var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
+                        var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
+
+                        if (d < closestDistanceSqr)
+                            closestDistanceSqr = d;
+                    }
+
+                    colliders.Clear();
+                    float blendDistSqr = volume.blendDistance * volume.blendDistance;
+
+                    // Check for influence
+                    if (closestDistanceSqr <= blendDistSqr)
+                        results.Add(volume);
+                }
+            }
+        }
+
         public PostProcessVolume GetHighestPriorityVolume(PostProcessLayer layer)
         {
             if (layer == null)
@@ -207,12 +277,11 @@ namespace UnityEngine.Experimental.PostProcessing
             // Reset to base state
             postProcessLayer.OverrideSettings(m_BaseSettings, 1f);
 
-            var volumeLayer = postProcessLayer.volumeLayer;
-            int mask = volumeLayer.value;
-
             // If no trigger is set, only global volumes will have influence
+            int mask = postProcessLayer.volumeLayer.value;
             var volumeTrigger = postProcessLayer.volumeTrigger;
             bool onlyGlobal = volumeTrigger == null;
+            var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
 
             for (int i = 0; i < k_MaxLayerCount; i++)
             {
@@ -234,8 +303,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 }
 
                 // Traverse all volumes
-                var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
-
                 foreach (var volume in volumes)
                 {
                     // Skip disabled volumes and volumes without any data or weight
