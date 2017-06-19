@@ -601,6 +601,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 uberSheet.ClearKeywords();
                 uberSheet.properties.Clear();
                 context.uberSheet = uberSheet;
+                int tempTarget = -1;
 
                 if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
                 {
@@ -611,7 +612,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 }
                 else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing)
                 {
-                    var tempTarget = m_TargetPool.Get();
+                    tempTarget = m_TargetPool.Get();
                     var finalDestination = context.destination;
                     context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
                     context.destination = tempTarget;
@@ -623,6 +624,9 @@ namespace UnityEngine.Experimental.PostProcessing
                 dithering.Render(context);
 
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !context.isSceneView) ? 1 : 0);
+
+                if (tempTarget > -1)
+                    cmd.ReleaseTemporaryRT(tempTarget);
             }
 
             if (releaseTargetAfterUse > -1)

@@ -48,8 +48,11 @@
 // -----------------------------------------------------------------------------
 // Compatibility functions
 
-#ifndef rcp
-#define rcp(a) (1.0 / a)
+#if (SHADER_TARGET < 50 && !defined(SHADER_API_PSSL))
+float rcp(float value)
+{
+    return 1.0 / value;
+}
 #endif
 
 #ifndef mad
