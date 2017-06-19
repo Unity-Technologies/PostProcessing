@@ -10,6 +10,9 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
         internal static readonly int _FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");
         internal static readonly int _HistoryTex                      = Shader.PropertyToID("_HistoryTex");
+        
+        internal static readonly int _SMAA_Flip                       = Shader.PropertyToID("_SMAA_Flip");
+        internal static readonly int _SMAA_Flop                       = Shader.PropertyToID("_SMAA_Flop");
 
         internal static readonly int _VelocityScale                   = Shader.PropertyToID("_VelocityScale");
         internal static readonly int _MaxBlurRadius                   = Shader.PropertyToID("_MaxBlurRadius");

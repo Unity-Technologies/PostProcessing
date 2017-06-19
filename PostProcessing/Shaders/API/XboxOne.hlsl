@@ -38,3 +38,6 @@
 
 #define CBUFFER_START(name) cbuffer name {
 #define CBUFFER_END };
+
+#define FXAA_HLSL_5 1
+#define SMAA_HLSL_4_1 1

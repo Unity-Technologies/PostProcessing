@@ -114,31 +114,47 @@ namespace UnityEngine.Experimental.PostProcessing
 
         // Use a custom blit method to draw a fullscreen triangle instead of a fullscreen quad
         // https://michaldrobot.com/2014/04/01/gcn-execution-patterns-in-full-screen-passes/
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false)
         {
             cmd.SetGlobalTexture(Uniforms._MainTex, source);
             cmd.SetRenderTarget(destination);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, copyMaterial, 0, 0);
         }
 
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(Uniforms._MainTex, source);
             cmd.SetRenderTarget(destination);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(Uniforms._MainTex, source);
             cmd.SetRenderTarget(destination, depth);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier[] destinations, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier[] destinations, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(Uniforms._MainTex, source);
             cmd.SetRenderTarget(destinations, depth);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 

@@ -19,6 +19,7 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader grainBaker;
             public Shader motionBlur;
             public Shader temporalAntialiasing;
+            public Shader subpixelMorphologicalAntialiasing;
             public Shader texture2dLerp;
             public Shader uber;
             public Shader lut2DBaker;
@@ -33,7 +34,15 @@ namespace UnityEngine.Experimental.PostProcessing
             public ComputeShader texture3dLerp;
         }
 
+        [Serializable]
+        public sealed class SMAALuts
+        {
+            public Texture2D area;
+            public Texture2D search;
+        }
+        
         public Texture2D[] blueNoise;
+        public SMAALuts smaaLuts;
         public Shaders shaders;
         public ComputeShaders computeShaders;
     }

@@ -38,3 +38,6 @@
 
 #define CBUFFER_START(name) cbuffer name {
 #define CBUFFER_END };
+
+#define FXAA_HLSL_4 1 // See UNITY_GATHER_SUPPORTED
+#define SMAA_HLSL_4 1

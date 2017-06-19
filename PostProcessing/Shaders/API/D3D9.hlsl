@@ -34,3 +34,6 @@
 
 #define CBUFFER_START(name)
 #define CBUFFER_END
+
+#define FXAA_HLSL_3 1
+#define SMAA_HLSL_3 1

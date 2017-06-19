@@ -17,6 +17,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             None,
             FastApproximateAntialiasing,
+            SubpixelMorphologicalAntialiasing,
             TemporalAntialiasing
         }
 
@@ -27,6 +28,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // Builtins / hardcoded effects that don't benefit from volume blending
         public Antialiasing antialiasingMode = Antialiasing.None;
         public TemporalAntialiasing temporalAntialiasing;
+        public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
         public Dithering dithering;
 
@@ -606,6 +608,16 @@ namespace UnityEngine.Experimental.PostProcessing
                         ? "FXAA_LOW"
                         : "FXAA"
                     );
+                }
+                else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing)
+                {
+                    var tempTarget = m_TargetPool.Get();
+                    var finalDestination = context.destination;
+                    context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                    context.destination = tempTarget;
+                    subpixelMorphologicalAntialiasing.Render(context);
+                    context.source = tempTarget;
+                    context.destination = finalDestination;
                 }
 
                 dithering.Render(context);

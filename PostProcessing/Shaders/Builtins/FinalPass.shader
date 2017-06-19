@@ -10,29 +10,24 @@ Shader "Hidden/PostProcessing/FinalPass"
         // PS3 and XBOX360 aren't supported in Unity anymore, only use the PC variant
         #define FXAA_PC 1
 
-    #if SHADER_TARGET < 50
-        #define FXAA_HLSL_3 1
-    #else
-        #define FXAA_HLSL_5 1 // Use Gather() on platforms that support it
-    #endif
+        // Luma is encoded in alpha after the first Uber pass
+        #define FXAA_GREEN_AS_LUMA 0
 
-    #if FXAA_LOW
-        #define FXAA_QUALITY__PRESET 28
-    #else
-        #define FXAA_QUALITY__PRESET 39
-    #endif
-
-        #define FXAA_GREEN_AS_LUMA 0 // Luma is encoded in alpha after the first Uber pass
+        #if FXAA_LOW
+            #define FXAA_QUALITY__PRESET 28
+            #define FXAA_QUALITY_SUBPIX 1.0
+            #define FXAA_QUALITY_EDGE_THRESHOLD 0.125
+            #define FXAA_QUALITY_EDGE_THRESHOLD_MIN 0.0625
+        #else
+            #define FXAA_QUALITY__PRESET 39
+            #define FXAA_QUALITY_SUBPIX 1.0
+            #define FXAA_QUALITY_EDGE_THRESHOLD 0.063
+            #define FXAA_QUALITY_EDGE_THRESHOLD_MIN 0.0312
+        #endif
 
         #include "FastApproximateAntialiasing.hlsl"
 
-    #if FXAA_HLSL_5
-        Texture2D _MainTex;
-        SamplerState sampler_MainTex;
-    #else
-        sampler2D _MainTex;
-    #endif
-
+        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _MainTex_TexelSize;
 
         // Dithering
@@ -43,15 +38,16 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             half4 color = 0.0;
 
+            // Fast Approximate Anti-aliasing
             #if FXAA || FXAA_LOW
             {
-            #if FXAA_HLSL_5
-                FxaaTex mainTex;
-                mainTex.tex = _MainTex;
-                mainTex.smpl = sampler_MainTex;
-            #else
-                FxaaTex mainTex = _MainTex;
-            #endif
+                #if FXAA_HLSL_4 || FXAA_HLSL_5
+                    FxaaTex mainTex;
+                    mainTex.tex = _MainTex;
+                    mainTex.smpl = sampler_MainTex;
+                #else
+                    FxaaTex mainTex = _MainTex;
+                #endif
 
                 color = FxaaPixelShader(
                     i.texcoord,                 // pos
@@ -63,16 +59,9 @@ Shader "Hidden/PostProcessing/FinalPass"
                     0.0,                        // fxaaConsoleRcpFrameOpt (unused)
                     0.0,                        // fxaaConsoleRcpFrameOpt2 (unused)
                     0.0,                        // fxaaConsole360RcpFrameOpt2 (unused)
-                    1.0,                        // fxaaQualitySubpix
-
-                #if FXAA_LOW
-                    0.125,                      // fxaaQualityEdgeThreshold
-                    0.0625,                     // fxaaQualityEdgeThresholdMin
-                #else
-                    0.063,                      // fxaaQualityEdgeThreshold
-                    0.0312,                     // fxaaQualityEdgeThresholdMin
-                #endif
-
+                    FXAA_QUALITY_SUBPIX,
+                    FXAA_QUALITY_EDGE_THRESHOLD,
+                    FXAA_QUALITY_EDGE_THRESHOLD_MIN,
                     0.0,                        // fxaaConsoleEdgeSharpness (unused)
                     0.0,                        // fxaaConsoleEdgeThreshold (unused)
                     0.0,                        // fxaaConsoleEdgeThresholdMin (unused)
@@ -81,11 +70,7 @@ Shader "Hidden/PostProcessing/FinalPass"
             }
             #else
             {
-            #if FXAA_HLSL_5
-                color = _MainTex.Sample(sampler_MainTex, i.texcoord);
-            #else
-                color = tex2D(_MainTex, i.texcoord);
-            #endif
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
             }
             #endif
 
@@ -96,9 +81,9 @@ Shader "Hidden/PostProcessing/FinalPass"
                 noise = sign(noise) * (1.0 - sqrt(1.0 - abs(noise)));
 
                 #if UNITY_COLORSPACE_GAMMA
-                color.rgb += noise / 255.0;
+                    color.rgb += noise / 255.0;
                 #else
-                color.rgb = SRGBToLinear(LinearToSRGB(color.rgb) + noise / 255.0);
+                    color.rgb = SRGBToLinear(LinearToSRGB(color.rgb) + noise / 255.0);
                 #endif
             }
 
@@ -106,6 +91,33 @@ Shader "Hidden/PostProcessing/FinalPass"
         }
 
     ENDHLSL
+
+    SubShader
+    {
+        Cull Off ZWrite Off ZTest Always
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment Frag
+                #pragma target 5.0
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefaultNoFlip
+                #pragma fragment Frag
+                #pragma target 5.0
+
+            ENDHLSL
+        }
+    }
 
     SubShader
     {

@@ -33,8 +33,9 @@ namespace UnityEditor.Experimental.PostProcessing
         static GUIContent[] s_AntialiasingMethodNames =
         {
             new GUIContent("No Anti-aliasing"),
-            new GUIContent("Fast Approximate Anti-aliasing"),
-            new GUIContent("Temporal Anti-aliasing")
+            new GUIContent("Fast Approximate Anti-aliasing (FXAA)"),
+            new GUIContent("Subpixel Morphological Anti-aliasing (SMAA)"),
+            new GUIContent("Temporal Anti-aliasing (TAA)")
         };
 
         enum ExportMode
