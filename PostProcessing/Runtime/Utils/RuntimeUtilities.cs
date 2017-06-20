@@ -190,6 +190,19 @@ namespace UnityEngine.Experimental.PostProcessing
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+        public static bool isSinglePassStereoEnabled
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return UnityEditor.PlayerSettings.virtualRealitySupported
+                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+#else
+                return false; // TODO: Check for SPSR support at runtime
+#endif
+            }
+        }
+
         public static void Destroy(UnityObject obj)
         {
             if (obj != null)

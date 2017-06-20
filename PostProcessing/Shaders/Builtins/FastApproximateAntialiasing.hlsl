@@ -1,6 +1,8 @@
 #ifndef __FXAA3_INC__
 #define __FXAA3_INC__
 
+#include "../xRLib.hlsl"
+
 /*============================================================================
 
 
@@ -648,57 +650,57 @@ API PORTING
 // And at least,
 //  #extension GL_EXT_gpu_shader4 : enable
 //  (or set FXAA_FAST_PIXEL_OFFSET 1 to work like DX9)
-#define FxaaTexTop(t, p) texture2DLod(t, p, 0.0)
+#define FxaaTexTop(t, p) texture2DLod(t, UnityStereoTransformScreenSpaceTex(p), 0.0)
 #if (FXAA_FAST_PIXEL_OFFSET == 1)
-#define FxaaTexOff(t, p, o, r) texture2DLodOffset(t, p, 0.0, o)
+#define FxaaTexOff(t, p, o, r) texture2DLodOffset(t, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
 #else
-#define FxaaTexOff(t, p, o, r) texture2DLod(t, p + (o * r), 0.0)
+#define FxaaTexOff(t, p, o, r) texture2DLod(t, UnityStereoTransformScreenSpaceTex(p + (o * r)), 0.0)
 #endif
 #if (FXAA_GATHER4_ALPHA == 1)
 // use #extension GL_ARB_gpu_shader5 : enable
-#define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
-#define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
-#define FxaaTexGreen4(t, p) textureGather(t, p, 1)
-#define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
+#define FxaaTexAlpha4(t, p) textureGather(t, UnityStereoTransformScreenSpaceTex(p), 3)
+#define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, UnityStereoTransformScreenSpaceTex(p), o, 3)
+#define FxaaTexGreen4(t, p) textureGather(t, UnityStereoTransformScreenSpaceTex(p), 1)
+#define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, UnityStereoTransformScreenSpaceTex(p), o, 1)
 #endif
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_GLSL_130 == 1)
 // Requires "#version 130" or better
-#define FxaaTexTop(t, p) textureLod(t, p, 0.0)
-#define FxaaTexOff(t, p, o, r) textureLodOffset(t, p, 0.0, o)
+#define FxaaTexTop(t, p) textureLod(t, UnityStereoTransformScreenSpaceTex(p), 0.0)
+#define FxaaTexOff(t, p, o, r) textureLodOffset(t, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
 #if (FXAA_GATHER4_ALPHA == 1)
 // use #extension GL_ARB_gpu_shader5 : enable
-#define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
-#define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
-#define FxaaTexGreen4(t, p) textureGather(t, p, 1)
-#define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
+#define FxaaTexAlpha4(t, p) textureGather(t, UnityStereoTransformScreenSpaceTex(p), 3)
+#define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, UnityStereoTransformScreenSpaceTex(p), o, 3)
+#define FxaaTexGreen4(t, p) textureGather(t, UnityStereoTransformScreenSpaceTex(p), 1)
+#define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, UnityStereoTransformScreenSpaceTex(p), o, 1)
 #endif
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_3 == 1) || (FXAA_360 == 1) || (FXAA_PS3 == 1)
 #define FxaaInt2 float2
 #define FxaaTex sampler2D
-#define FxaaTexTop(t, p) tex2Dlod(t, float4(p, 0.0, 0.0))
-#define FxaaTexOff(t, p, o, r) tex2Dlod(t, float4(p + (o * r), 0, 0))
+#define FxaaTexTop(t, p) tex2Dlod(t, float4(UnityStereoTransformScreenSpaceTex(p), 0.0, 0.0))
+#define FxaaTexOff(t, p, o, r) tex2Dlod(t, float4(UnityStereoTransformScreenSpaceTex(p + (o * r)), 0, 0))
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_4 == 1)
 #define FxaaInt2 int2
 struct FxaaTex { SamplerState smpl; Texture2D tex; };
-#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
-#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
+#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
+#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_5 == 1)
 #define FxaaInt2 int2
 struct FxaaTex { SamplerState smpl; Texture2D tex; };
-#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
-#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
-#define FxaaTexAlpha4(t, p) t.tex.GatherAlpha(t.smpl, p)
-#define FxaaTexOffAlpha4(t, p, o) t.tex.GatherAlpha(t.smpl, p, o)
-#define FxaaTexGreen4(t, p) t.tex.GatherGreen(t.smpl, p)
-#define FxaaTexOffGreen4(t, p, o) t.tex.GatherGreen(t.smpl, p, o)
+#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
+#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
+#define FxaaTexAlpha4(t, p) t.tex.GatherAlpha(t.smpl, UnityStereoTransformScreenSpaceTex(p))
+#define FxaaTexOffAlpha4(t, p, o) t.tex.GatherAlpha(t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
+#define FxaaTexGreen4(t, p) t.tex.GatherGreen(t.smpl, UnityStereoTransformScreenSpaceTex(p))
+#define FxaaTexOffGreen4(t, p, o) t.tex.GatherGreen(t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
 #endif
 
 

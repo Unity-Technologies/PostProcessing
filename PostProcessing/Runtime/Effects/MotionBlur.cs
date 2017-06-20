@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    // TODO: VR support
     [Serializable]
     [PostProcess(typeof(MotionBlurRenderer), "Unity/Motion Blur", false)]
     public sealed class MotionBlur : PostProcessEffectSettings
@@ -23,7 +24,8 @@ namespace UnityEngine.Experimental.PostProcessing
                 && Application.isPlaying
             #endif
                 && SystemInfo.supportsMotionVectors
-                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGHalf);
+                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGHalf)
+                && !RuntimeUtilities.isSinglePassStereoEnabled;
         }
     }
     

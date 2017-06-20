@@ -174,6 +174,8 @@ float2 TransformTriangleVertexToUV(float2 vertex)
     return uv;
 }
 
+#include "xRLib.hlsl"
+
 // -----------------------------------------------------------------------------
 // Default vertex shaders
 

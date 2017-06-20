@@ -12,6 +12,11 @@ namespace UnityEngine.Experimental.PostProcessing
             NeighborhoodBlending
         }
 
+        public bool IsSupported()
+        {
+            return !RuntimeUtilities.isSinglePassStereoEnabled;
+        }
+
         internal void Render(PostProcessRenderContext context)
         {
             var sheet = context.propertySheets.Get(context.resources.shaders.subpixelMorphologicalAntialiasing);

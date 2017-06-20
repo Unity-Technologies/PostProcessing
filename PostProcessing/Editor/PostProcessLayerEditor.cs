@@ -11,6 +11,7 @@ namespace UnityEditor.Experimental.PostProcessing
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
 
+    // TODO: Bug on domain reload when the inspector is opened with a post-process layer disabled
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
@@ -139,14 +140,22 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Anti-aliasing"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
-                m_AntialiasingMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The anti-aliasing method to use. FXAA is fast but low quality. TAA is a bit slower but higher quality."), m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
+                m_AntialiasingMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The anti-aliasing method to use. FXAA is fast but low quality. SMAA works well for non-HDR scenes. TAA is a bit slower but higher quality and works well with HDR."), m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
 
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
                 {
+                    if (RuntimeUtilities.isSinglePassStereoEnabled)
+                        EditorGUILayout.HelpBox("TAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
+
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
                     EditorGUILayout.PropertyField(m_TaaMotionBlending);
                     EditorGUILayout.PropertyField(m_TaaSharpen);
+                }
+                else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing)
+                {
+                    if (RuntimeUtilities.isSinglePassStereoEnabled)
+                        EditorGUILayout.HelpBox("SMAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {

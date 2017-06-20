@@ -37,6 +37,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         float4 Frag(VaryingsDefault i) : SV_Target
         {
             half4 color = 0.0;
+            float2 uvSPR = UnityStereoTransformScreenSpaceTex(i.texcoord);
 
             // Fast Approximate Anti-aliasing
             #if FXAA || FXAA_LOW
@@ -70,7 +71,7 @@ Shader "Hidden/PostProcessing/FinalPass"
             }
             #else
             {
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvSPR);
             }
             #endif
 

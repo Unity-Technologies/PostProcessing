@@ -63,6 +63,7 @@ Shader "Hidden/PostProcessing/Uber"
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
             float2 uv = i.texcoord;
+            float2 uvSPR = UnityStereoTransformScreenSpaceTex(i.texcoord);
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             half3 color = (0.0).xxx;
 
@@ -82,7 +83,7 @@ Shader "Hidden/PostProcessing/Uber"
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
-                    half3 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, pos, 0).rgb;
+                    half3 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(pos), 0).rgb;
                     half3 filter = SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0), 0).rgb;
 
                     sum += s * filter;
@@ -106,7 +107,7 @@ Shader "Hidden/PostProcessing/Uber"
                 for (int i = 0; i < 3; i++)
                 {
                     half t = (i + 0.5) / 3;
-                    half3 s = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, pos).rgb;
+                    half3 s = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(pos)).rgb;
                     half3 filter = SAMPLE_TEXTURE2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0)).rgb;
 
                     sum += s * filter;
@@ -118,7 +119,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvSPR).rgb;
             }
             #endif
 
@@ -133,7 +134,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if BLOOM
             {
-                half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x).rgb;
+                half3 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvSPR, _BloomTex_TexelSize.xy, _Bloom_Settings.x).rgb;
                 half3 dirt = SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord).rgb;
 
                 // Additive bloom (artist friendly)
@@ -165,7 +166,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if GRAIN
             {
-                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoord * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
                 float lum = 1.0 - sqrt(Luminance(saturate(color)));

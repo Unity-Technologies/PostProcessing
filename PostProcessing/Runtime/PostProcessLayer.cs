@@ -610,7 +610,7 @@ namespace UnityEngine.Experimental.PostProcessing
                         : "FXAA"
                     );
                 }
-                else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing)
+                else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported())
                 {
                     tempTarget = m_TargetPool.Get();
                     var finalDestination = context.destination;

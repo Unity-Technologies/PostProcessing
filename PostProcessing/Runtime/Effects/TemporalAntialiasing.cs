@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
+    // TODO: VR support
     [Serializable]
     public sealed class TemporalAntialiasing
     {
@@ -48,7 +49,8 @@ namespace UnityEngine.Experimental.PostProcessing
         public bool IsSupported()
         {
             return SystemInfo.supportedRenderTargetCount >= 2
-                && SystemInfo.supportsMotionVectors;
+                && SystemInfo.supportsMotionVectors
+                && !RuntimeUtilities.isSinglePassStereoEnabled;
         }
 
         internal DepthTextureMode GetLegacyCameraFlags()
