@@ -120,14 +120,17 @@ namespace UnityEditor.Experimental.PostProcessing
 
                 var asset = Instantiate(origin);
                 asset.settings.Clear();
+                AssetDatabase.CreateAsset(asset, path);
 
                 foreach (var item in origin.settings)
                 {
                     var itemCopy = Instantiate(item);
+                    itemCopy.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
+                    itemCopy.name = item.name;
                     asset.settings.Add(itemCopy);
+                    AssetDatabase.AddObjectToAsset(itemCopy, asset);
                 }
 
-                AssetDatabase.CreateAsset(asset, path);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 
