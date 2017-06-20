@@ -105,7 +105,8 @@ namespace UnityEngine.PostProcessing
             material.SetFloat(Uniforms._RcpAspect, 1f / aspect);
 
             // CoC calculation pass
-            var rtCoC = context.renderTextureFactory.Get(context.width, context.height, 0, cocFormat);
+			// HACK by hdh, add RenderTextureReadWrite.Linear setting. in DX9 shader model 3 Linear rendering, without this will have bug
+            var rtCoC = context.renderTextureFactory.Get(context.width, context.height, 0, cocFormat, RenderTextureReadWrite.Linear);
             Graphics.Blit(null, rtCoC, material, 0);
 
             if (antialiasCoC)
