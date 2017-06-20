@@ -27,7 +27,7 @@ half3 _TaaParams; // Jitter.x, Jitter.y, Blending
 // CoC calculation
 half4 FragCoC(VaryingsDefault i) : SV_Target
 {
-    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord));
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(i.texcoord)));
     half coc = (depth - _Distance) * _LensCoeff / max(depth, 1e-5);
     return saturate(coc * 0.5 * _RcpMaxCoC + 0.5);
 }
@@ -39,8 +39,8 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 
 #if UNITY_GATHER_SUPPORTED
 
-    half4 cocTL = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.xy * 0.5); // top-left
-    half4 cocBR = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.xy * 0.5); // bottom-right
+    half4 cocTL = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord - uvOffs.xy * 0.5)); // top-left
+    half4 cocBR = GATHER_RED_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord + uvOffs.xy * 0.5)); // bottom-right
     half coc1 = cocTL.x; // top
     half coc2 = cocTL.z; // left
     half coc3 = cocBR.x; // bottom
@@ -48,15 +48,15 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 
 #else
 
-    half coc1 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.xz).r; // top
-    half coc2 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - uvOffs.zy).r; // left
-    half coc3 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.zy).r; // bottom
-    half coc4 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + uvOffs.xz).r; // right
+    half coc1 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord - uvOffs.xz)).r; // top
+    half coc2 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord - uvOffs.zy)).r; // left
+    half coc3 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord + uvOffs.zy)).r; // bottom
+    half coc4 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord + uvOffs.xz)).r; // right
 
 #endif
 
     // Dejittered center sample.
-    half coc0 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - _TaaParams.xy).r;
+    half coc0 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, UnityStereoTransformScreenSpaceTex(i.texcoord - _TaaParams.xy)).r;
 
     // CoC dilation: determine the closest point in the four neighbors
     float3 closest = float3(0.0, 0.0, coc0);
@@ -66,8 +66,8 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
     closest = coc4 < closest.z ? float3( uvOffs.xz, coc4) : closest;
 
     // Sample the history buffer with the motion vector at the closest point
-    float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoord + closest.xy).xy;
-    half cocHis = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord - motion).r;
+    float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, UnityStereoTransformScreenSpaceTex(i.texcoord + closest.xy)).xy;
+    half cocHis = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - motion)).r;
 
     // Neighborhood clamping
     half cocMin = closest.z;
@@ -84,6 +84,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 #if UNITY_GATHER_SUPPORTED
 
     // Sample source colors
+    i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
     half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
     half4 c_g = GATHER_GREEN_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
     half4 c_b = GATHER_BLUE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
@@ -103,18 +104,22 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 #else
 
     float3 duv = _MainTex_TexelSize.xyx * float3(0.5, 0.5, -0.5);
+    float2 uv0 = UnityStereoTransformScreenSpaceTex(i.texcoord - duv.xy);
+    float2 uv1 = UnityStereoTransformScreenSpaceTex(i.texcoord - duv.zy);
+    float2 uv2 = UnityStereoTransformScreenSpaceTex(i.texcoord + duv.zy);
+    float2 uv3 = UnityStereoTransformScreenSpaceTex(i.texcoord + duv.xy);
 
     // Sample source colors
-    half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord - duv.xy).rgb;
-    half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord - duv.zy).rgb;
-    half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.zy).rgb;
+    half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv0).rgb;
+    half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv1).rgb;
+    half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv2).rgb;
     half3 c3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.xy).rgb;
 
     // Sample CoCs
-    half coc0 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - duv.xy).r * 2.0 - 1.0;
-    half coc1 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord - duv.zy).r * 2.0 - 1.0;
-    half coc2 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + duv.zy).r * 2.0 - 1.0;
-    half coc3 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord + duv.xy).r * 2.0 - 1.0;
+    half coc0 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv0).r * 2.0 - 1.0;
+    half coc1 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv1).r * 2.0 - 1.0;
+    half coc2 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv2).r * 2.0 - 1.0;
+    half coc3 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv3).r * 2.0 - 1.0;
 
 #endif
 
@@ -146,7 +151,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 // Bokeh filter with disk-shaped kernels
 half4 FragBlur(VaryingsDefault i) : SV_Target
 {
-    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
 
     half4 bgAcc = 0.0; // Background: far field bokeh
     half4 fgAcc = 0.0; // Foreground: near field bokeh
@@ -158,7 +163,7 @@ half4 FragBlur(VaryingsDefault i) : SV_Target
         float dist = length(disp);
 
         float2 duv = float2(disp.x * _RcpAspect, disp.y);
-        half4 samp = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv);
+        half4 samp = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + duv));
 
         // BG: Compare CoC of the current sample and the center sample
         // and select smaller one.
@@ -203,16 +208,17 @@ half4 FragPostBlur(VaryingsDefault i) : SV_Target
     // 9 tap tent filter with 4 bilinear samples
     const float4 duv = _MainTex_TexelSize.xyxy * float4(0.5, 0.5, -0.5, 0);
     half4 acc;
-    acc  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord - duv.xy);
-    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord - duv.zy);
-    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.zy);
-    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.xy);
+    acc  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - duv.xy));
+    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - duv.zy));
+    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + duv.zy));
+    acc += SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + duv.xy));
     return acc / 4.0;
 }
 
 // Combine with source
 half4 FragCombine(VaryingsDefault i) : SV_Target
 {
+    i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
     half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
     half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord).r;
     coc = (coc - 0.5) * 2.0 * _MaxCoC;
