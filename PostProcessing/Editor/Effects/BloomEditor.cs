@@ -44,6 +44,13 @@ namespace UnityEditor.Experimental.PostProcessing
                 
             PropertyField(m_LensTexture);
             PropertyField(m_LensIntensity);
+
+            if (RuntimeUtilities.isVREnabled)
+            {
+                if ((m_LensIntensity.overrideState.boolValue && m_LensIntensity.value.floatValue > 0f)
+                 || (m_LensTexture.overrideState.boolValue && m_LensTexture.value.objectReferenceValue != null))
+                    EditorGUILayout.HelpBox("Using lens dirt in VR is not recommended.", MessageType.Warning);
+            }
         }
     }
 }

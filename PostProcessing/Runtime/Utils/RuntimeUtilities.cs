@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
+using UnityEngine.VR;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
@@ -199,6 +200,18 @@ namespace UnityEngine.Experimental.PostProcessing
                     && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
 #else
                 return false; // TODO: Check for SPSR support at runtime
+#endif
+            }
+        }
+
+        public static bool isVREnabled
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return UnityEditor.PlayerSettings.virtualRealitySupported;
+#else
+                return VRSettings.enabled;
 #endif
             }
         }
