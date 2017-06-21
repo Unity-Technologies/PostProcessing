@@ -166,7 +166,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if GRAIN
             {
-                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, uv * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+                float3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, uvSPR * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
                 float lum = 1.0 - sqrt(Luminance(saturate(color)));

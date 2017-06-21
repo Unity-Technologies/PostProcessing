@@ -3,7 +3,6 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.PostProcessing
 {
-    // TODO: VR support
     [Serializable]
     [PostProcess(typeof(GrainRenderer), "Unity/Grain")]
     public sealed class Grain : PostProcessEffectSettings
