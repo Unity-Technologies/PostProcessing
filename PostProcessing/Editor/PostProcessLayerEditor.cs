@@ -11,7 +11,6 @@ namespace UnityEditor.Experimental.PostProcessing
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
 
-    // TODO: Bug on domain reload when the inspector is opened with a post-process layer disabled
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
@@ -63,10 +62,11 @@ namespace UnityEditor.Experimental.PostProcessing
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
             m_DebugLightMeter = FindProperty(x => x.debugView.lightMeter);
 
-            // See the comment on haveBundlesBeenInited in PostProcessLayer for more info as to why
-            // we need to do this
-            if (!m_Target.haveBundlesBeenInited)
-                m_Target.InitBundles();
+            // In case of domain reload, if the inspector is opened on a disabled PostProcessLayer
+            // component it won't go through its OnEnable() and thus will miss bundle initialization
+            // so force it there - also for some reason, an editor's OnEnable() can be called before
+            // the component's so this will fix that as well.
+            m_Target.InitBundles();
 
             // Create a reorderable list for each injection event
             m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
