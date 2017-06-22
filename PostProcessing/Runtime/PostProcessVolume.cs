@@ -51,8 +51,6 @@ namespace UnityEngine.Experimental.PostProcessing
     // modification on both Classic and Scriptable Render Pipelines.
     //
 
-    // TODO: Deal with unsupported collider types for editor/sceneview previz
-    // TODO: Do outer skin previz for colliders (need mesh manipulation stuff)
     [ExecuteInEditMode]
     [AddComponentMenu("Rendering/Post-process Volume", -1)]
     public sealed class PostProcessVolume : MonoBehaviour
@@ -154,10 +152,12 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
+        // TODO: Look into a better volume previsualization system
         void OnDrawGizmos()
         {
             var colliders = m_TempColliders;
             GetComponents(colliders);
+
             if (isGlobal || colliders == null)
                 return;
 
@@ -170,6 +170,13 @@ namespace UnityEngine.Experimental.PostProcessing
                 if (!collider.enabled)
                     continue;
 
+                // We'll just use scaling as an approximation for volume skin. It's far from being
+                // correct (and is completely wrong in some cases). Ultimately we'd use a distance
+                // field or at least a tesselate + push modifier on the collider's mesh to get a
+                // better approximation, but the current Gizmo system is a bit limited and because
+                // everything is dynamic in Unity and can be changed at anytime, it's hard to keep
+                // track of changes in an elegant way (which we'd need to implement a nice cache
+                // system for generated volume meshes).
                 var type = collider.GetType();
 
                 if (type == typeof(BoxCollider))
@@ -178,6 +185,27 @@ namespace UnityEngine.Experimental.PostProcessing
                     Gizmos.DrawCube(c.center, c.size);
                     Gizmos.DrawWireCube(c.center, c.size + new Vector3(blendDistance, blendDistance, blendDistance));
                 }
+                else if (type == typeof(SphereCollider))
+                {
+                    var c = (SphereCollider)collider;
+                    Gizmos.DrawSphere(c.center, c.radius);
+                    Gizmos.DrawWireSphere(c.center, c.radius + blendDistance);
+                }
+                else if (type == typeof(MeshCollider))
+                {
+                    var c = (MeshCollider)collider;
+
+                    // Only convex mesh colliders are allowed
+                    if (!c.convex)
+                        c.convex = true;
+
+                    // Mesh pivot should be centered or this won't work
+                    Gizmos.DrawMesh(c.sharedMesh);
+                    Gizmos.DrawWireMesh(c.sharedMesh, Vector3.zero, Quaternion.identity, new Vector3(1f + blendDistance, 1f + blendDistance, 1f + blendDistance));
+                }
+
+                // Nothing for capsule (DrawCapsule isn't exposed in Gizmo), terrain, wheel and
+                // other colliders...
             }
 
             colliders.Clear();
