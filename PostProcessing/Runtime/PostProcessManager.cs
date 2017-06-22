@@ -84,7 +84,6 @@ namespace UnityEngine.Experimental.PostProcessing
                 // Create an instance for each effect type, these will be used for the lowest
                 // priority global volume as we need a default state when exiting volume ranges
                 var inst = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
-                inst.SetDisabledState();
                 inst.SetAllOverridesTo(true, false);
                 m_BaseSettings.Add(inst);
             }

@@ -41,10 +41,6 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
-        public virtual void SetDisabledState()
-        {
-        }
-
         public virtual bool IsEnabledAndSupported()
         {
             return enabled.value;

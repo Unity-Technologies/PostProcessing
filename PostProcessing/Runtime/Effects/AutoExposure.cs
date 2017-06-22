@@ -20,13 +20,13 @@ namespace UnityEngine.Experimental.PostProcessing
         public Vector2Parameter filtering = new Vector2Parameter { value = new Vector2(50f, 95f) };
 
         [DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure (in EV).")]
-        public FloatParameter minLuminance = new FloatParameter { value = -5f };
+        public FloatParameter minLuminance = new FloatParameter { value = 0f };
 
         [DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
-        public FloatParameter maxLuminance = new FloatParameter { value = 1f };
+        public FloatParameter maxLuminance = new FloatParameter { value = 0f };
 
         [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
-        public FloatParameter keyValue = new FloatParameter { value = 0.25f };
+        public FloatParameter keyValue = new FloatParameter { value = 1f };
 
         [DisplayName("Type"), Tooltip("Use \"Progressive\" if you want auto exposure to be animated. Use \"Fixed\" otherwise.")]
         public EyeAdaptationParameter eyeAdaptation = new EyeAdaptationParameter { value = EyeAdaptation.Progressive };
@@ -42,14 +42,6 @@ namespace UnityEngine.Experimental.PostProcessing
             return enabled.value
                 && SystemInfo.supportsComputeShaders
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat);
-        }
-
-        public override void SetDisabledState()
-        {
-            filtering.value = new Vector2(1f, 99f);
-            minLuminance.value = 0f;
-            maxLuminance.value = 0f;
-            keyValue.value = 1f;
         }
     }
 

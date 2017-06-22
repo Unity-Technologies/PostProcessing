@@ -35,12 +35,6 @@ namespace UnityEngine.Experimental.PostProcessing
             return enabled.value
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
         }
-
-        public override void SetDisabledState()
-        {
-            aperture.value = 0.1f;
-            focalLength.value = 0.1f;
-        }
     }
     
     // TODO: Look into minimum blur amount in the distance, right now it's lerped until a point

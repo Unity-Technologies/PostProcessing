@@ -10,7 +10,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public TextureParameter spectralLut = new TextureParameter { value = null };
 
         [Range(0f, 1f), Tooltip("Amount of tangential distortion.")]
-        public FloatParameter intensity = new FloatParameter { value = 0.1f };
+        public FloatParameter intensity = new FloatParameter { value = 0f };
 
         [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
         public BoolParameter mobileOptimized = new BoolParameter { value = false };
@@ -19,11 +19,6 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             return enabled.value
                 && intensity.value > 0f;
-        }
-
-        public override void SetDisabledState()
-        {
-            intensity.value = 0f;
         }
     }
 

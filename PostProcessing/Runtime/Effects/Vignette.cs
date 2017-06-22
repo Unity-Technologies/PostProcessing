@@ -25,7 +25,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public Vector2Parameter center = new Vector2Parameter { value = new Vector2(0.5f, 0.5f) };
 
         [Range(0f, 1f), Tooltip("Amount of vignetting on screen.")]
-        public FloatParameter intensity = new FloatParameter { value = 0.45f };
+        public FloatParameter intensity = new FloatParameter { value = 0f };
 
         [Range(0.01f, 1f), Tooltip("Smoothness of the vignette borders.")]
         public FloatParameter smoothness = new FloatParameter { value = 0.2f };
@@ -47,11 +47,6 @@ namespace UnityEngine.Experimental.PostProcessing
             return enabled.value
                 && ((mode.value == VignetteMode.Classic && intensity.value > 0f)
                 ||  (mode.value == VignetteMode.Masked && opacity.value > 0f && mask.value != null));
-        }
-
-        public override void SetDisabledState()
-        {
-            intensity.value = 0f;
         }
     }
 

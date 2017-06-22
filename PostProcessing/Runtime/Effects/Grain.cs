@@ -11,7 +11,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public BoolParameter colored = new BoolParameter { value = true };
 
         [Range(0f, 1f), Tooltip("Grain strength. Higher means more visible grain.")]
-        public FloatParameter intensity = new FloatParameter { value = 0.4f };
+        public FloatParameter intensity = new FloatParameter { value = 0f };
 
         [Range(0.3f, 3f), Tooltip("Grain particle size.")]
         public FloatParameter size = new FloatParameter { value = 1f };
@@ -24,11 +24,6 @@ namespace UnityEngine.Experimental.PostProcessing
             return enabled.value
                 && intensity.value > 0f
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
-        }
-
-        public override void SetDisabledState()
-        {
-            intensity.value = 0f;
         }
     }
     
