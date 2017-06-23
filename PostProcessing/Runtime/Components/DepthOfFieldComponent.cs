@@ -105,7 +105,7 @@ namespace UnityEngine.PostProcessing
             material.SetFloat(Uniforms._RcpAspect, 1f / aspect);
 
             // CoC calculation pass
-            var rtCoC = context.renderTextureFactory.Get(context.width, context.height, 0, cocFormat);
+            var rtCoC = context.renderTextureFactory.Get(context.width, context.height, 0, cocFormat, RenderTextureReadWrite.Linear);
             Graphics.Blit(null, rtCoC, material, 0);
 
             if (antialiasCoC)
