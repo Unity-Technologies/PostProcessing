@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.Experimental.PostProcessing;
 
 namespace UnityEditor.Experimental.PostProcessing
@@ -30,6 +31,9 @@ namespace UnityEditor.Experimental.PostProcessing
 
         public override void OnInspectorGUI()
         {
+            if (!SystemInfo.supportsComputeShaders)
+                EditorGUILayout.HelpBox("Auto exposure requires compute shader support.", MessageType.Warning);
+
             EditorUtilities.DrawHeaderLabel("Exposure");
 
             PropertyField(m_Filtering);
