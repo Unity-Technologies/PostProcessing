@@ -182,8 +182,6 @@ namespace UnityEngine.PostProcessing
         }
 
         // Classic render target pipeline for RT-based effects
-        // Note that any effect that happens after this stack will work in LDR
-        [ImageEffectTransformsToLDR]
         void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
             if (profile == null || m_Camera == null)
