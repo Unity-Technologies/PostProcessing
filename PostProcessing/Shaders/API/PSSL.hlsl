@@ -42,5 +42,10 @@
 #define CBUFFER_START(name) ConstantBuffer name {
 #define CBUFFER_END };
 
-#define FXAA_HLSL_5 1
-#define SMAA_HLSL_4_1 1
+#if UNITY_GATHER_SUPPORTED
+    #define FXAA_HLSL_5 1
+    #define SMAA_HLSL_4_1 1
+#else
+    #define FXAA_HLSL_4 1
+    #define SMAA_HLSL_4 1
+#endif

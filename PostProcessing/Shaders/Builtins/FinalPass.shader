@@ -130,6 +130,7 @@ Shader "Hidden/PostProcessing/FinalPass"
 
                 #pragma vertex VertDefault
                 #pragma fragment Frag
+                #pragma target 3.0
 
             ENDHLSL
         }
@@ -140,6 +141,7 @@ Shader "Hidden/PostProcessing/FinalPass"
 
                 #pragma vertex VertDefaultNoFlip
                 #pragma fragment Frag
+                #pragma target 3.0
 
             ENDHLSL
         }
