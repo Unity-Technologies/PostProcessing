@@ -209,7 +209,7 @@ namespace UnityEngine.Experimental.PostProcessing
             {
 #if UNITY_EDITOR
                 return UnityEditor.PlayerSettings.virtualRealitySupported;
-#elif UNITY_2017_1_OR_NEWER
+#elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.enabled;
 #elif UNITY_5_6_OR_NEWER
                 return UnityEngine.VR.VRSettings.enabled;
