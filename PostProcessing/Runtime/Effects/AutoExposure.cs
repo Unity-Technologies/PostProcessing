@@ -37,7 +37,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Min(0f), Tooltip("Adaptation speed from a light to a dark environment.")]
         public FloatParameter speedDown = new FloatParameter { value = 1f };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && SystemInfo.supportsComputeShaders

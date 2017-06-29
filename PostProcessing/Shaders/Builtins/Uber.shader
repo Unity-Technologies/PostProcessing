@@ -15,6 +15,8 @@ Shader "Hidden/PostProcessing/Uber"
         #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
 
+        #define MAX_CHROMATIC_SAMPLES 16
+
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _MainTex_TexelSize;
 
@@ -75,7 +77,7 @@ Shader "Hidden/PostProcessing/Uber"
                 float2 end = uv - coords * dot(coords, coords) * _ChromaticAberration_Amount;
 
                 float2 diff = end - uv;
-                int samples = clamp(int(length(_MainTex_TexelSize.zw * diff / 2.0)), 3, 16);
+                int samples = clamp(int(length(_MainTex_TexelSize.zw * diff / 2.0)), 3, MAX_CHROMATIC_SAMPLES);
                 float2 delta = diff / samples;
                 float2 pos = uv;
                 half3 sum = (0.0).xxx, filterSum = (0.0).xxx;

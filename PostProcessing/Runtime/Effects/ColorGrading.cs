@@ -136,7 +136,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public SplineParameter satVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
         public SplineParameter lumVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             if (gradingMode.value == GradingMode.HighDefinitionRange || gradingMode.value == GradingMode.External)
             {

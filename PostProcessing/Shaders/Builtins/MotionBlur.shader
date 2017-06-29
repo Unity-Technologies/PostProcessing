@@ -154,14 +154,6 @@ Shader "Hidden/PostProcessing/MotionBlur"
             return frac(phase / interval) > 0.499;
         }
 
-        // Interleaved gradient function from Jimenez 2014 http://goo.gl/eomGso
-        float GradientNoise(float2 uv)
-        {
-            uv = floor(uv * _ScreenParams.xy);
-            float f = dot(float2(0.06711056, 0.00583715), uv);
-            return frac(52.9829189 * frac(f));
-        }
-
         // Jitter function for tile lookup
         float2 JitterTile(float2 uv)
         {

@@ -34,7 +34,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Min(0f), Tooltip("Amount of lens dirtiness."), DisplayName("Intensity")]
         public FloatParameter lensIntensity = new FloatParameter { value = 1f };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && intensity.value > 0f;

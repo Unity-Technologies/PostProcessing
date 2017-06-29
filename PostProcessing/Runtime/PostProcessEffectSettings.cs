@@ -41,7 +41,7 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
-        public virtual bool IsEnabledAndSupported()
+        public virtual bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value;
         }

@@ -30,7 +30,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [DisplayName("Max Blur Size"), Tooltip("Convolution kernel size of the bokeh filter, which determines the maximum radius of bokeh. It also affects performances (the larger the kernel is, the longer the GPU time is required).")]
         public KernelSizeParameter kernelSize = new KernelSizeParameter { value = KernelSize.Medium };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
@@ -62,7 +62,7 @@ namespace UnityEngine.Experimental.PostProcessing
         // TODO: Should be set by a physical camera
         const float k_FilmHeight = 0.024f;
 
-        public override DepthTextureMode GetLegacyCameraFlags()
+        public override DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth;
         }
@@ -137,7 +137,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.BeginSample("DepthOfField");
 
             // CoC calculation pass
-            cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat);
+            cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat); // TODO: Fix DX9 bug with R8/Linear
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, Uniforms._CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled

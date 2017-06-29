@@ -14,6 +14,14 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _SMAA_Flip                       = Shader.PropertyToID("_SMAA_Flip");
         internal static readonly int _SMAA_Flop                       = Shader.PropertyToID("_SMAA_Flop");
 
+        internal static readonly int _AOParams                        = Shader.PropertyToID("_AOParams");
+        internal static readonly int _OcclusionTexture1               = Shader.PropertyToID("_OcclusionTexture1");
+        internal static readonly int _OcclusionTexture2               = Shader.PropertyToID("_OcclusionTexture2");
+        internal static readonly int _OcclusionTexture                = Shader.PropertyToID("_OcclusionTexture");
+        
+        internal static readonly int _FogColor                        = Shader.PropertyToID("_FogColor");
+        internal static readonly int _FogParams                       = Shader.PropertyToID("_FogParams");
+
         internal static readonly int _VelocityScale                   = Shader.PropertyToID("_VelocityScale");
         internal static readonly int _MaxBlurRadius                   = Shader.PropertyToID("_MaxBlurRadius");
         internal static readonly int _RcpMaxBlurRadius                = Shader.PropertyToID("_RcpMaxBlurRadius");

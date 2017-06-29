@@ -128,8 +128,10 @@ float4 PositivePow(float4 base, float4 power)
 // Std unity data
 
 float4x4 unity_CameraProjection;
+float4x4 unity_WorldToCamera;
 float3 _WorldSpaceCameraPos;
 float4 _ProjectionParams;         // x: 1 (-1 flipped), y: near,     z: far,       w: 1/far
+float4 unity_ColorSpaceLuminance;
 float4 unity_DeltaTime;           // x: dt,             y: 1/dt,     z: smoothDt,  w: 1/smoothDt
 float4 unity_OrthoParams;         // x: width,          y: height,   z: unused,    w: ortho ? 1 : 0
 float4 _ZBufferParams;            // x: 1-far/near,     y: far/near, z: x/far,     w: y/far
@@ -165,6 +167,27 @@ half3 SafeHDR(half3 c)
 half4 SafeHDR(half4 c)
 {
     return min(c, HALF_MAX);
+}
+
+// Decode normals stored in _CameraDepthNormalsTexture
+float3 DecodeViewNormalStereo(float4 enc4)
+{
+    float kScale = 1.7777;
+    float3 nn = enc4.xyz * float3(2.0 * kScale, 2.0 * kScale, 0) + float3(-kScale, -kScale, 1);
+    float g = 2.0 / dot(nn.xyz, nn.xyz);
+    float3 n;
+    n.xy = g * nn.xy;
+    n.z = g - 1.0;
+    return n;
+}
+
+// Interleaved gradient function from Jimenez 2014
+// http://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
+float GradientNoise(float2 uv)
+{
+    uv = floor(uv * _ScreenParams.xy);
+    float f = dot(float2(0.06711056, 0.00583715), uv);
+    return frac(52.9829189 * frac(f));
 }
 
 // Vertex manipulation

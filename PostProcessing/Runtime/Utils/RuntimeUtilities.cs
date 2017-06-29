@@ -232,6 +232,11 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
+        public static bool isLinearColorSpace
+        {
+            get { return QualitySettings.activeColorSpace == ColorSpace.Linear; }
+        }
+
         public static void DestroyProfile(PostProcessProfile profile, bool destroyEffects)
         {
             if (destroyEffects)

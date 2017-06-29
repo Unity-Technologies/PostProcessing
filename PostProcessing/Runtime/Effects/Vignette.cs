@@ -42,7 +42,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Range(0f, 1f), Tooltip("Mask opacity.")]
         public FloatParameter opacity = new FloatParameter { value = 1f };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && ((mode.value == VignetteMode.Classic && intensity.value > 0f)

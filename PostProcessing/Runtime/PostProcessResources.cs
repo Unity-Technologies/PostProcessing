@@ -24,6 +24,8 @@ namespace UnityEngine.Experimental.PostProcessing
             public Shader uber;
             public Shader lut2DBaker;
             public Shader lightMeter;
+            public Shader deferredFog;
+            public Shader ambientOcclusion;
         }
 
         [Serializable]

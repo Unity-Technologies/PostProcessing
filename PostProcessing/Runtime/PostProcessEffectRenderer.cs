@@ -10,7 +10,7 @@ namespace UnityEngine.Experimental.PostProcessing
         }
 
         // Unused with scriptable render pipelines
-        public virtual DepthTextureMode GetLegacyCameraFlags()
+        public virtual DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.None;
         }

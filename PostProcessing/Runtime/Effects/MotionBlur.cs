@@ -13,7 +13,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Range(4, 32), Tooltip("The amount of sample points, which affects quality and performances.")]
         public IntParameter sampleCount = new IntParameter { value = 10 };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && shutterAngle.value > 0f
@@ -40,7 +40,7 @@ namespace UnityEngine.Experimental.PostProcessing
             Reconstruction
         }
 
-        public override DepthTextureMode GetLegacyCameraFlags()
+        public override DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
         }

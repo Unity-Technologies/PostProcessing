@@ -23,6 +23,15 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_FxaaMobileOptimized;
+        
+        SerializedProperty m_AOEnabled;
+        SerializedProperty m_AOIntensity;
+        SerializedProperty m_AORadius;
+        SerializedProperty m_AOQuality;
+        SerializedProperty m_AOAmbientOnly;
+
+        SerializedProperty m_FogEnabled;
+        SerializedProperty m_FogExcludeSkybox;
 
         SerializedProperty m_DebugDisplay;
         SerializedProperty m_DebugMonitor;
@@ -57,6 +66,15 @@ namespace UnityEditor.Experimental.PostProcessing
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
+            
+            m_AOEnabled = FindProperty(x => x.ambientOcclusion.enabled);
+            m_AOIntensity = FindProperty(x => x.ambientOcclusion.intensity);
+            m_AORadius = FindProperty(x => x.ambientOcclusion.radius);
+            m_AOQuality = FindProperty(x => x.ambientOcclusion.quality);
+            m_AOAmbientOnly = FindProperty(x => x.ambientOcclusion.ambientOnly);
+
+            m_FogEnabled = FindProperty(x => x.fog.enabled);
+            m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
 
             m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
@@ -105,7 +123,25 @@ namespace UnityEditor.Experimental.PostProcessing
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            
+            var camera = m_Target.GetComponent<Camera>();
 
+            DoVolumeBlending();
+            DoAntialiasing();
+            DoAmbientOcclusion(camera);
+            DoFog(camera);
+            DoDebugLayer();
+            DoToolkit();
+            DoCustomEffectSorter();
+
+            EditorUtilities.DrawSplitter();
+            EditorGUILayout.Space();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        void DoVolumeBlending()
+        {
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Volume blending"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
@@ -136,7 +172,10 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
+        }
 
+        void DoAntialiasing()
+        {
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Anti-aliasing"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
@@ -165,7 +204,59 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
+        }
 
+        void DoAmbientOcclusion(Camera camera)
+        {
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                return;
+
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Ambient Occlusion"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            {
+                EditorGUILayout.PropertyField(m_AOEnabled);
+
+                if (m_AOEnabled.boolValue)
+                {
+                    EditorGUILayout.PropertyField(m_AOIntensity);
+                    EditorGUILayout.PropertyField(m_AORadius);
+                    EditorGUILayout.PropertyField(m_AOQuality);
+                    
+                    if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)
+                        EditorGUILayout.PropertyField(m_AOAmbientOnly);
+                }
+            }
+            EditorGUI.indentLevel--;
+
+            EditorGUILayout.Space();
+        }
+
+        void DoFog(Camera camera)
+        {
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                return;
+
+            if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
+                return;
+
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Fog (Deferred)"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            {
+                EditorGUILayout.PropertyField(m_FogEnabled);
+
+                if (m_FogEnabled.boolValue)
+                {
+                    EditorGUILayout.PropertyField(m_FogExcludeSkybox);
+                    EditorGUILayout.HelpBox("This effect adds fog compatibility to the deferred rendering path; actual fog settings should be set in the Lighting panel.", MessageType.Info);
+                }
+            }
+            EditorGUI.indentLevel--;
+
+            EditorGUILayout.Space();
+        }
+
+        void DoDebugLayer()
+        {
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Debug Layer"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
@@ -183,14 +274,16 @@ namespace UnityEditor.Experimental.PostProcessing
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
+        }
 
-            // Toolkit
+        void DoToolkit()
+        {
             EditorUtilities.DrawSplitter();
             GlobalSettings.showLayerToolkit = EditorUtilities.DrawHeader("Toolkit", GlobalSettings.showLayerToolkit);
 
             if (GlobalSettings.showLayerToolkit)
             {
-                EditorGUILayout.Space();
+                GUILayout.Space(2);
 
                 if (GUILayout.Button(EditorUtilities.GetContent("Export frame to EXR..."), EditorStyles.miniButton))
                 {
@@ -228,16 +321,18 @@ namespace UnityEditor.Experimental.PostProcessing
                     }
                 }
 
-                EditorGUILayout.Space();
+                GUILayout.Space(3);
             }
+        }
 
-            // Custom user effects sorter
+        void DoCustomEffectSorter()
+        {
             EditorUtilities.DrawSplitter();
             GlobalSettings.showCustomSorter = EditorUtilities.DrawHeader("Custom Effect Sorting", GlobalSettings.showCustomSorter);
 
             if (GlobalSettings.showCustomSorter)
             {
-                EditorGUILayout.Space();
+                GUILayout.Space(5);
 
                 bool anyList = false;
                 if (m_CustomLists != null)
@@ -258,14 +353,9 @@ namespace UnityEditor.Experimental.PostProcessing
                 if (!anyList)
                 {
                     EditorGUILayout.HelpBox("No custom effect loaded.", MessageType.Info);
-                    EditorGUILayout.Space();
+                    GUILayout.Space(3);
                 }
             }
-
-            EditorUtilities.DrawSplitter();
-            EditorGUILayout.Space();
-
-            serializedObject.ApplyModifiedProperties();
         }
 
         void ExportFrameToExr(ExportMode mode)

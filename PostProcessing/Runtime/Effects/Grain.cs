@@ -19,7 +19,7 @@ namespace UnityEngine.Experimental.PostProcessing
         [Range(0f, 1f), Tooltip("Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas.")]
         public FloatParameter lumContrib = new FloatParameter { value = 0.8f };
 
-        public override bool IsEnabledAndSupported()
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
                 && intensity.value > 0f

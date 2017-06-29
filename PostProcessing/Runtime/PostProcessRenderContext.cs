@@ -90,6 +90,7 @@ namespace UnityEngine.Experimental.PostProcessing
         public bool IsTemporalAntialiasingActive()
         {
             return antialiasing == PostProcessLayer.Antialiasing.TemporalAntialiasing
+                && !isSceneView
                 && temporalAntialiasing.IsSupported();
         }
 

@@ -133,6 +133,14 @@ float3 PQToLinear(float3 x)
 //
 // sRGB transfer functions
 //
+half SRGBToLinear(half c)
+{
+    half linearRGBLo = c / 12.92;
+    half linearRGBHi = PositivePow((c + 0.055) / 1.055, 2.4);
+    half linearRGB = (c <= 0.04045) ? linearRGBLo : linearRGBHi;
+    return linearRGB;
+}
+
 half3 SRGBToLinear(half3 c)
 {
     half3 linearRGBLo = c / 12.92;
@@ -144,6 +152,14 @@ half3 SRGBToLinear(half3 c)
 half4 SRGBToLinear(half4 c)
 {
     return half4(SRGBToLinear(c.rgb), c.a);
+}
+
+half LinearToSRGB(half c)
+{
+    half sRGBLo = c * 12.92;
+    half sRGBHi = (PositivePow(c, 1.0 / 2.4) * 1.055) - 0.055;
+    half sRGB = (c <= 0.0031308) ? sRGBLo : sRGBHi;
+    return sRGB;
 }
 
 half3 LinearToSRGB(half3 c)

@@ -30,6 +30,8 @@ namespace UnityEngine.Experimental.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
+        public AmbientOcclusion ambientOcclusion;
+        public Fog fog;
         public Dithering dithering;
 
         public PostProcessDebugView debugView;
@@ -76,6 +78,7 @@ namespace UnityEngine.Experimental.PostProcessing
         Dictionary<Type, PostProcessBundle> m_Bundles;
 
         PropertySheetFactory m_PropertySheetFactory;
+        CommandBuffer m_LegacyCmdBufferBeforeReflections;
         CommandBuffer m_LegacyCmdBufferOpaque;
         CommandBuffer m_LegacyCmdBuffer;
         Camera m_Camera;
@@ -101,14 +104,16 @@ namespace UnityEngine.Experimental.PostProcessing
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
 
-            // Scriptable render pipeline handles their own command buffers
+            // Scriptable render pipelines handle their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
+            m_LegacyCmdBufferBeforeReflections = new CommandBuffer { name = "Deferred Ambient Occlusion" };
             m_LegacyCmdBufferOpaque = new CommandBuffer { name = "Opaque Only Post-processing" };
+            m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
             m_Camera = GetComponent<Camera>();
+            m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
 
@@ -194,6 +199,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             if (!RuntimeUtilities.scriptableRenderPipelineActive)
             {
+                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
             }
@@ -235,20 +241,25 @@ namespace UnityEngine.Experimental.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-            context.source = new RenderTargetIdentifier(tempRt);
-            context.destination = BuiltinRenderTextureType.CameraTarget;
 
+            m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
+
+            SetupContext(context);
 
             // We need to use the internal Blit method to copy the camera target or it'll fail on
             // tiled GPU as it won't be able to resolve
 
-            if (HasOpaqueOnlyEffects())
+            RenderLightingEffects(context);
+
+            if (HasOpaqueOnlyEffects(context))
             {
                 m_LegacyCmdBufferOpaque.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
                 m_LegacyCmdBufferOpaque.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
                 context.command = m_LegacyCmdBufferOpaque;
+                context.source = new RenderTargetIdentifier(tempRt);
+                context.destination = BuiltinRenderTextureType.CameraTarget;
                 RenderOpaqueOnly(context);
                 m_LegacyCmdBufferOpaque.ReleaseTemporaryRT(tempRt);
             }
@@ -256,6 +267,8 @@ namespace UnityEngine.Experimental.PostProcessing
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, m_Camera.pixelWidth, m_Camera.pixelHeight, 24, FilterMode.Bilinear, sourceFormat);
             m_LegacyCmdBuffer.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
             context.command = m_LegacyCmdBuffer;
+            context.source = new RenderTargetIdentifier(tempRt);
+            context.destination = BuiltinRenderTextureType.CameraTarget;
             Render(context);
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
         }
@@ -266,7 +279,7 @@ namespace UnityEngine.Experimental.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            if (m_CurrentContext.IsTemporalAntialiasingActive() && !m_IsRenderingInSceneView)
+            if (m_CurrentContext.IsTemporalAntialiasingActive())
                 m_Camera.ResetProjectionMatrix();
         }
 
@@ -310,17 +323,23 @@ namespace UnityEngine.Experimental.PostProcessing
         // scriptable render pipelines.
         void SetLegacyCameraFlags(PostProcessRenderContext context)
         {
-            var flags = DepthTextureMode.None;
+            var flags = context.camera.depthTextureMode;
 
             foreach (var bundle in m_Bundles)
             {
-                if (bundle.Value.settings.IsEnabledAndSupported())
-                    flags |= bundle.Value.renderer.GetLegacyCameraFlags();
+                if (bundle.Value.settings.IsEnabledAndSupported(context))
+                    flags |= bundle.Value.renderer.GetCameraFlags();
             }
 
-            // Special case for TAA
+            // Special case for AA & lighting effects
             if (context.IsTemporalAntialiasingActive())
-                flags |= temporalAntialiasing.GetLegacyCameraFlags();
+                flags |= temporalAntialiasing.GetCameraFlags();
+
+            if (ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context))
+                flags |= ambientOcclusion.GetCameraFlags();
+
+            if (fog.IsEnabledAndSupported(context))
+                flags |= fog.GetCameraFlags();
 
             context.camera.depthTextureMode = flags;
         }
@@ -335,18 +354,18 @@ namespace UnityEngine.Experimental.PostProcessing
             temporalAntialiasing.ResetHistory();
         }
 
-        public bool HasOpaqueOnlyEffects()
+        public bool HasOpaqueOnlyEffects(PostProcessRenderContext context)
         {
-            return HasActiveEffects(PostProcessEvent.BeforeTransparent);
+            return HasActiveEffects(PostProcessEvent.BeforeTransparent, context);
         }
 
-        public bool HasActiveEffects(PostProcessEvent evt)
+        public bool HasActiveEffects(PostProcessEvent evt, PostProcessRenderContext context)
         {
             var list = sortedBundles[evt];
 
             foreach (var item in list)
             {
-                if (item.bundle.settings.IsEnabledAndSupported())
+                if (item.bundle.settings.IsEnabledAndSupported(context))
                     return true;
             }
 
@@ -365,6 +384,7 @@ namespace UnityEngine.Experimental.PostProcessing
             SetLegacyCameraFlags(context);
 
             // Unsafe to keep this around but we need it for OnGUI events for debug views
+            // Will be removed eventually
             m_CurrentContext = context;
         }
 
@@ -381,12 +401,57 @@ namespace UnityEngine.Experimental.PostProcessing
             m_SettingsUpdateNeeded = false;
         }
 
+        // Only used in vanilla render pipelines - fog & ambient occlusion
+        // Returns true if an effect was rendered in the opaque-only command buffer
+        void RenderLightingEffects(PostProcessRenderContext context)
+        {
+            // TODO: Optimize this, lots of useless passes and resolve going on here
+            //>>>
+            bool isAmbientOcclusionActive = ambientOcclusion.IsEnabledAndSupported(context);
+            bool isAmbientOcclusionDeferred = ambientOcclusion.IsAmbientOnly(context);
+            bool isFogActive = fog.IsEnabledAndSupported(context);
+
+            if (isAmbientOcclusionActive && isAmbientOcclusionDeferred)
+            {
+                context.command = m_LegacyCmdBufferBeforeReflections;
+                ambientOcclusion.RenderAmbientOnly(context);
+            }
+            else if (isAmbientOcclusionActive)
+            {
+                var cmd = m_LegacyCmdBufferOpaque;
+                int tempRt = m_TargetPool.Get();
+                cmd.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
+                context.command = cmd;
+                context.source = tempRt;
+                context.destination = BuiltinRenderTextureType.CameraTarget;
+                ambientOcclusion.RenderAfterOpaque(context);
+                cmd.ReleaseTemporaryRT(tempRt);
+            }
+
+            if (isFogActive)
+            {
+                var cmd = m_LegacyCmdBufferOpaque;
+                int tempRt = m_TargetPool.Get();
+                cmd.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.Blit(BuiltinRenderTextureType.CameraTarget, tempRt);
+                context.command = cmd;
+                context.source = tempRt;
+                context.destination = BuiltinRenderTextureType.CameraTarget;
+                fog.Render(context);
+                cmd.ReleaseTemporaryRT(tempRt);
+            }
+            //<<<
+        }
+
         // Renders before-transparent effects.
         // Make sure you check `HasOpaqueOnlyEffects()` before calling this method as it won't
         // automatically blit source into destination if no opaque effects are active.
         public void RenderOpaqueOnly(PostProcessRenderContext context)
         {
-            SetupContext(context);
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                SetupContext(context);
+
             TextureLerper.instance.BeginFrame(context);
 
             // Update & override layer settings first (volume blending), will only be done once per
@@ -407,7 +472,9 @@ namespace UnityEngine.Experimental.PostProcessing
         // Final pass should be skipped when outputting to a HDR display.
         public void Render(PostProcessRenderContext context)
         {
-            SetupContext(context);
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                SetupContext(context);
+
             TextureLerper.instance.BeginFrame(context);
 
             // Update & override layer settings first (volume blending) if the opaque only pass
@@ -416,7 +483,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Do temporal anti-aliasing first
             int lastTarget = -1;
-            if (context.IsTemporalAntialiasingActive() && !context.isSceneView)
+            if (context.IsTemporalAntialiasingActive())
             {
                 temporalAntialiasing.SetProjectionMatrix(context.camera);
 
@@ -449,7 +516,7 @@ namespace UnityEngine.Experimental.PostProcessing
         int RenderInjectionPoint(PostProcessEvent evt, PostProcessRenderContext context, string marker, int releaseTargetAfterUse = -1)
         {
             // Make sure we have active effects in this injection point, skip it otherwise
-            bool hasActiveEffects = HasActiveEffects(evt);
+            bool hasActiveEffects = HasActiveEffects(evt, context);
 
             if (!hasActiveEffects)
                 return releaseTargetAfterUse;
@@ -480,7 +547,7 @@ namespace UnityEngine.Experimental.PostProcessing
             for (int i = 0; i < list.Count; i++)
             {
                 var effect = list[i].bundle;
-                if (effect.settings.IsEnabledAndSupported())
+                if (effect.settings.IsEnabledAndSupported(context))
                 {
                     if (!context.isSceneView || (context.isSceneView && effect.attribute.allowInSceneView))
                         m_ActiveEffects.Add(effect.renderer);
@@ -555,7 +622,7 @@ namespace UnityEngine.Experimental.PostProcessing
             int motionBlurTarget = RenderEffect<MotionBlur>(context, true);
 
             // Prepare exposure histogram if needed
-            if (ShouldGenerateLogHistogram())
+            if (ShouldGenerateLogHistogram(context))
                 m_LogHistogram.Generate(context);
 
             // Uber effects
@@ -640,7 +707,7 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             var effect = GetBundle<T>();
 
-            if (!effect.settings.IsEnabledAndSupported())
+            if (!effect.settings.IsEnabledAndSupported(context))
                 return -1;
 
             if (m_IsRenderingInSceneView && !effect.attribute.allowInSceneView)
@@ -662,9 +729,9 @@ namespace UnityEngine.Experimental.PostProcessing
             return tempTarget;
         }
 
-        bool ShouldGenerateLogHistogram()
+        bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
-            bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported();
+            bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
             bool debug = debugView.IsEnabledAndSupported() && debugView.lightMeter;
             return autoExpo || debug;
         }

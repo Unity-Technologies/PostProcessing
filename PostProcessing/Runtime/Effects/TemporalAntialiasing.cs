@@ -53,7 +53,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 && !RuntimeUtilities.isSinglePassStereoEnabled;
         }
 
-        internal DepthTextureMode GetLegacyCameraFlags()
+        internal DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
         }
