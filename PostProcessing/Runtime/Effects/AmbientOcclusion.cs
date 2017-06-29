@@ -77,7 +77,7 @@ namespace UnityEngine.Experimental.PostProcessing
 
             // Material setup
             // Always use a quater-res AO buffer unless High/Ultra quality is set.
-            bool downsampling = (int)quality >= (int)Quality.High;
+            bool downsampling = (int)quality < (int)Quality.High;
             float px = intensity;
             float py = radius;
             float pz = downsampling ? 0.5f : 1f;
