@@ -29,7 +29,7 @@ namespace UnityEditor.Experimental.PostProcessing
             this.target = target;
             m_Inspector = inspector;
             serializedObject = new SerializedObject(target);
-            m_Enabled = serializedObject.FindProperty("enabled");
+            m_Enabled = serializedObject.FindProperty("enabled.value");
             activeProperty = serializedObject.FindProperty("active");
             OnEnable();
         }
@@ -72,12 +72,10 @@ namespace UnityEditor.Experimental.PostProcessing
 
                 GUILayout.FlexibleSpace();
 
-                var property = m_Enabled.Copy();
-                property.Next(true);
-                bool enabled = property.boolValue;
+                bool enabled = m_Enabled.boolValue;
                 enabled = GUILayout.Toggle(enabled, EditorUtilities.GetContent("On|Enable this effect."), EditorStyles.miniButtonLeft, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
                 enabled = !GUILayout.Toggle(!enabled, EditorUtilities.GetContent("Off|Disable this effect."), EditorStyles.miniButtonRight, GUILayout.Width(35f), GUILayout.ExpandWidth(false));
-                property.boolValue = enabled;
+                m_Enabled.boolValue = enabled;
             }
         }
 

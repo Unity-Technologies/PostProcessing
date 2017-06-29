@@ -302,7 +302,6 @@ namespace UnityEditor.Experimental.PostProcessing
             var effect = (PostProcessEffectSettings)ScriptableObject.CreateInstance(type);
             effect.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
             effect.name = type.Name;
-            effect.enabled.overrideState = true;
             effect.enabled.value = true;
             return effect;
         }

@@ -31,7 +31,6 @@ namespace UnityEngine.Experimental.PostProcessing
             var effect = (PostProcessEffectSettings)CreateInstance(type);
             effect.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
             effect.name = type.Name;
-            effect.enabled.overrideState = true;
             effect.enabled.value = true;
             settings.Add(effect);
             isDirty = true;
