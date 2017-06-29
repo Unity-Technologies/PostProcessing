@@ -137,7 +137,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.BeginSample("DepthOfField");
 
             // CoC calculation pass
-            cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat); // TODO: Fix DX9 bug with R8/Linear
+            cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, Uniforms._CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled
