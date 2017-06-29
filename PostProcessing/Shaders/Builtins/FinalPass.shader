@@ -79,7 +79,7 @@ Shader "Hidden/PostProcessing/FinalPass"
                 // Final dithering
                 // Symmetric triangular distribution on [-1,1] with maximal density at 0
                 float noise = SAMPLE_TEXTURE2D(_DitheringTex, sampler_DitheringTex, i.texcoord * _Dithering_Coords.xy + _Dithering_Coords.zw).a * 2.0 - 1.0;
-                noise = sign(noise) * (1.0 - sqrt(1.0 - abs(noise)));
+                noise = FastSign(noise) * (1.0 - sqrt(1.0 - abs(noise)));
 
                 #if UNITY_COLORSPACE_GAMMA
                     color.rgb += noise / 255.0;

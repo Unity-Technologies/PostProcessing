@@ -101,6 +101,28 @@ float4 Max3(float4 a, float4 b, float4 c)
 }
 #endif // INTRINSIC_MINMAX3
 
+// https://twitter.com/SebAaltonen/status/878250919879639040
+// madd_sat + madd
+float FastSign(float x)
+{
+    return saturate(x * FLT_MAX + 0.5) * 2.0 - 1.0;
+}
+
+float2 FastSign(float2 x)
+{
+    return saturate(x * FLT_MAX + 0.5) * 2.0 - 1.0;
+}
+
+float3 FastSign(float3 x)
+{
+    return saturate(x * FLT_MAX + 0.5) * 2.0 - 1.0;
+}
+
+float4 FastSign(float4 x)
+{
+    return saturate(x * FLT_MAX + 0.5) * 2.0 - 1.0;
+}
+
 // Using pow often result to a warning like this
 // "pow(f, e) will not work for negative f, use abs(f) or conditionally handle negative values if you expect them"
 // PositivePow remove this warning when you know the value is positive and avoid inf/NAN.

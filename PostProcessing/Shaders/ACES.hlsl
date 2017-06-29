@@ -347,7 +347,7 @@ half sigmoid_shaper(half x)
     // Sigmoid function in the range 0 to 1 spanning -2 to +2.
 
     half t = max(1.0 - abs(x / 2.0), 0.0);
-    half y = 1.0 + sign(x) * (1.0 - t * t);
+    half y = 1.0 + FastSign(x) * (1.0 - t * t);
 
     return y / 2.0;
 }
