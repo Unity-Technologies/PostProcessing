@@ -90,7 +90,7 @@ namespace UnityEngine.Experimental.PostProcessing
             return false;
         }
 
-        public bool HasSettings<T>(out T outSetting)
+        public bool TryGetSettings<T>(out T outSetting)
             where T : PostProcessEffectSettings
         {
             var type = typeof(T);
