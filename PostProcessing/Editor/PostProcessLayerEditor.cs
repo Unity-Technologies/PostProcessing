@@ -154,7 +154,7 @@ namespace UnityEditor.Experimental.PostProcessing
                 var buttonRect = new Rect(fieldRect.xMax, lineRect.y, 60f, lineRect.height);
 
                 EditorGUI.PrefixLabel(labelRect, EditorUtilities.GetContent("Trigger|A transform that will act as a trigger for volume blending."));
-                m_VolumeTrigger.objectReferenceValue = (Transform)EditorGUI.ObjectField(fieldRect, m_VolumeTrigger.objectReferenceValue, typeof(Transform), false);
+                m_VolumeTrigger.objectReferenceValue = (Transform)EditorGUI.ObjectField(fieldRect, m_VolumeTrigger.objectReferenceValue, typeof(Transform), true);
                 if (GUI.Button(buttonRect, EditorUtilities.GetContent("This|Assigns the current GameObject as a trigger."), EditorStyles.miniButton))
                     m_VolumeTrigger.objectReferenceValue = m_Target.transform;
 
