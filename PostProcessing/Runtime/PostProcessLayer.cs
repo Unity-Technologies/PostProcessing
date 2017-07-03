@@ -498,7 +498,9 @@ namespace UnityEngine.Experimental.PostProcessing
 
             bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
             bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
-            bool needsFinalPass = (hasAfterStackEffects || antialiasingMode == Antialiasing.FastApproximateAntialiasing) && !breakBeforeColorGrading;
+            bool needsFinalPass = (hasAfterStackEffects
+                || (antialiasingMode == Antialiasing.FastApproximateAntialiasing) || (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported()))
+                && !breakBeforeColorGrading;
 
             // Right before the builtin stack
             if (hasBeforeStackEffects)
