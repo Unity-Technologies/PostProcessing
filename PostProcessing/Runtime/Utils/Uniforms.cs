@@ -45,7 +45,6 @@ namespace UnityEngine.Experimental.PostProcessing
         internal static readonly int _CoCTex                          = Shader.PropertyToID("_CoCTex");
         internal static readonly int _TaaParams                       = Shader.PropertyToID("_TaaParams");
 
-        internal static readonly int _AutoExposureCopyTex             = Shader.PropertyToID("_AutoExposureCopyTex");
         internal static readonly int _AutoExposureTex                 = Shader.PropertyToID("_AutoExposureTex");
         internal static readonly int _HistogramBuffer                 = Shader.PropertyToID("_HistogramBuffer");
         internal static readonly int _Params                          = Shader.PropertyToID("_Params");

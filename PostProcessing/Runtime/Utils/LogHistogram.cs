@@ -16,23 +16,11 @@ namespace UnityEngine.Experimental.PostProcessing
         {
             if (data == null)
                 data = new ComputeBuffer(k_Bins, sizeof(uint));
-
+            
+            var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
             var compute = context.resources.computeShaders.exposureHistogram;
             var cmd = context.command;
             cmd.BeginSample("LogHistogram");
-
-            // Downscale the framebuffer, we don't need an absolute precision to compute the average
-            // luminance (and it'll make it a tiny bit more stable - bonus side-effect)
-            var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
-
-            cmd.GetTemporaryRT(Uniforms._AutoExposureCopyTex,
-                (int)scaleOffsetRes.z,
-                (int)scaleOffsetRes.w,
-                0,
-                FilterMode.Bilinear,
-                context.sourceFormat
-            );
-            cmd.BlitFullscreenTriangle(context.source, Uniforms._AutoExposureCopyTex);
 
             // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
             int kernel = compute.FindKernel("KEyeHistogramClear");
@@ -42,16 +30,13 @@ namespace UnityEngine.Experimental.PostProcessing
             // Get a log histogram
             kernel = compute.FindKernel("KEyeHistogram");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", data);
-            cmd.SetComputeTextureParam(compute, kernel, "_Source", Uniforms._AutoExposureCopyTex);
+            cmd.SetComputeTextureParam(compute, kernel, "_Source", context.source);
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
             cmd.DispatchCompute(compute, kernel,
                 Mathf.CeilToInt(scaleOffsetRes.z / (float)k_ThreadX),
                 Mathf.CeilToInt(scaleOffsetRes.w / (float)k_ThreadY),
                 1
             );
-
-            // Cleanup
-            cmd.ReleaseTemporaryRT(Uniforms._AutoExposureCopyTex);
 
             cmd.EndSample("LogHistogram");
         }
@@ -61,7 +46,7 @@ namespace UnityEngine.Experimental.PostProcessing
             float diff = rangeMax - rangeMin;
             float scale = 1f / diff;
             float offset = -rangeMin * scale;
-            return new Vector4(scale, offset, Mathf.Floor(context.width / 2f), Mathf.Floor(context.height / 2f));
+            return new Vector4(scale, offset, context.width, context.height);
         }
 
         public void Release()
