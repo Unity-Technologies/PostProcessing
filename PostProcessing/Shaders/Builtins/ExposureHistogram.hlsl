@@ -29,6 +29,7 @@ float FindMaxHistogramValue(StructuredBuffer<uint> buffer)
 {
     uint maxValue = 0u;
 
+    UNITY_UNROLL
     for (uint i = 0; i < HISTOGRAM_BINS; i++)
     {
         uint h = buffer[i];
@@ -63,9 +64,9 @@ float GetAverageLuminance(StructuredBuffer<uint> buffer, float4 params, float ma
     uint i;
     float totalSum = 0.0;
 
-    UNITY_LOOP
-        for (i = 0; i < HISTOGRAM_BINS; i++)
-            totalSum += GetBinValue(buffer, i, maxHistogramValue);
+    UNITY_UNROLL
+    for (i = 0; i < HISTOGRAM_BINS; i++)
+        totalSum += GetBinValue(buffer, i, maxHistogramValue);
 
     // Skip darker and lighter parts of the histogram to stabilize the auto exposure
     // x: filtered sum
@@ -73,9 +74,9 @@ float GetAverageLuminance(StructuredBuffer<uint> buffer, float4 params, float ma
     // zw: fractions
     float4 filter = float4(0.0, 0.0, totalSum * params.xy);
 
-    UNITY_LOOP
-        for (i = 0; i < HISTOGRAM_BINS; i++)
-            FilterLuminance(buffer, i, maxHistogramValue, scaleOffset, filter);
+    UNITY_UNROLL
+    for (i = 0; i < HISTOGRAM_BINS; i++)
+        FilterLuminance(buffer, i, maxHistogramValue, scaleOffset, filter);
 
     // Clamp to user brightness range
     return clamp(filter.x / max(filter.y, EPSILON), params.z, params.w);
