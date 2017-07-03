@@ -496,18 +496,24 @@ namespace UnityEngine.Experimental.PostProcessing
                 context.destination = finalDestination;
             }
 
+            bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
+            bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
+            bool needsFinalPass = (hasAfterStackEffects || antialiasingMode == Antialiasing.FastApproximateAntialiasing) && !breakBeforeColorGrading;
+
             // Right before the builtin stack
-            lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
+            if (hasBeforeStackEffects)
+                lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
 
             // Builtin stack
-            lastTarget = RenderBuiltins(context, lastTarget);
+            lastTarget = RenderBuiltins(context, !needsFinalPass, lastTarget);
 
             // After the builtin stack but before the final pass (before FXAA & Dithering)
-            if (!breakBeforeColorGrading)
+            if (hasAfterStackEffects)
                 lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
 
             // And close with the final pass
-            RenderFinalPass(context, lastTarget);
+            if (needsFinalPass)
+                RenderFinalPass(context, lastTarget);
 
             TextureLerper.instance.EndFrame();
             m_SettingsUpdateNeeded = true;
@@ -515,12 +521,6 @@ namespace UnityEngine.Experimental.PostProcessing
 
         int RenderInjectionPoint(PostProcessEvent evt, PostProcessRenderContext context, string marker, int releaseTargetAfterUse = -1)
         {
-            // Make sure we have active effects in this injection point, skip it otherwise
-            bool hasActiveEffects = HasActiveEffects(evt, context);
-
-            if (!hasActiveEffects)
-                return releaseTargetAfterUse;
-
             int tempTarget = m_TargetPool.Get();
             var finalDestination = context.destination;
 
@@ -595,7 +595,7 @@ namespace UnityEngine.Experimental.PostProcessing
             cmd.EndSample(marker);
         }
 
-        int RenderBuiltins(PostProcessRenderContext context, int releaseTargetAfterUse = -1)
+        int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1)
         {
             var uberSheet = context.propertySheets.Get(context.resources.shaders.uber);
             uberSheet.ClearKeywords();
@@ -606,11 +606,16 @@ namespace UnityEngine.Experimental.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("BuiltinStack");
 
-            // Render to an intermediate target as this won't be the final pass
-            int tempTarget = m_TargetPool.Get();
-            cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+            int tempTarget = -1;
             var finalDestination = context.destination;
-            context.destination = tempTarget;
+
+            if (!isFinalPass)
+            {
+                // Render to an intermediate target as this won't be the final pass
+                tempTarget = m_TargetPool.Get();
+                cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = tempTarget;
+            }
 
             // Depth of field final combination pass used to be done in Uber which led to artifacts
             // when used at the same time as Bloom (because both effects used the same source, so
@@ -636,7 +641,13 @@ namespace UnityEngine.Experimental.PostProcessing
 
             if (!breakBeforeColorGrading)
                 RenderEffect<ColorGrading>(context);
-            
+
+            if (isFinalPass)
+            {
+                uberSheet.EnableKeyword("FINALPASS");
+                dithering.Render(context);
+            }
+
             cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
             context.source = context.destination;

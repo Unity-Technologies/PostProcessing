@@ -6,6 +6,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         #pragma multi_compile __ FXAA FXAA_LOW
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
+        #include "Dithering.hlsl"
 
         // PS3 and XBOX360 aren't supported in Unity anymore, only use the PC variant
         #define FXAA_PC 1
@@ -29,10 +30,6 @@ Shader "Hidden/PostProcessing/FinalPass"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _MainTex_TexelSize;
-
-        // Dithering
-        TEXTURE2D_SAMPLER2D(_DitheringTex, sampler_DitheringTex);
-        float4 _Dithering_Coords;
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
@@ -75,19 +72,7 @@ Shader "Hidden/PostProcessing/FinalPass"
             }
             #endif
 
-            {
-                // Final dithering
-                // Symmetric triangular distribution on [-1,1] with maximal density at 0
-                float noise = SAMPLE_TEXTURE2D(_DitheringTex, sampler_DitheringTex, i.texcoord * _Dithering_Coords.xy + _Dithering_Coords.zw).a * 2.0 - 1.0;
-                noise = FastSign(noise) * (1.0 - sqrt(1.0 - abs(noise)));
-
-                #if UNITY_COLORSPACE_GAMMA
-                    color.rgb += noise / 255.0;
-                #else
-                    color.rgb = SRGBToLinear(LinearToSRGB(color.rgb) + noise / 255.0);
-                #endif
-            }
-
+            color.rgb = Dither(color.rgb, i.texcoord);
             return float4(color.rgb, 1.0);
         }
 

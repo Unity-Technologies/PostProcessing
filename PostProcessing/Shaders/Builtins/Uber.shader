@@ -10,10 +10,12 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ COLOR_GRADING_LDR COLOR_GRADING_HDR
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
+        #pragma multi_compile __ FINALPASS
         
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
+        #include "Dithering.hlsl"
 
         #define MAX_CHROMATIC_SAMPLES 16
 
@@ -191,10 +193,21 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
-            // necessary as RGB values will potentially still be HDR for the FXAA pass
-            half luma = Luminance(saturate(color));
-            half4 output = half4(color, luma);
+            half4 output;
+
+            #if FINALPASS
+            {
+                color.rgb = Dither(color.rgb, i.texcoord);
+                output = half4(color, 1.0);
+            }
+            #else
+            {
+                // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
+                // necessary as RGB values will potentially still be HDR for the FXAA pass
+                half luma = Luminance(saturate(color));
+                output = half4(color, luma);
+            }
+            #endif
 
             #if UNITY_COLORSPACE_GAMMA
             {
@@ -203,7 +216,6 @@ Shader "Hidden/PostProcessing/Uber"
             #endif
 
             // Output RGB is still HDR at that point (unless range was crunched by a tonemapper)
-            // Alpha is luminance of saturate(rgb)
             return output;
         }
 
