@@ -21,10 +21,10 @@ namespace UnityEngine.Experimental.PostProcessing
         public bool enabled = true;
 
         [Range(0f, 4f), Tooltip("Degree of darkness produced by the effect.")]
-        public float intensity = 1f;
+        public float intensity = 0.5f;
 
         [Tooltip("Radius of sample points, which affects extent of darkened areas.")]
-        public float radius = 0.3f;
+        public float radius = 0.25f;
 
         [Tooltip("Number of sample points, which affects quality and performance. Lowest, Low & Medium passes are downsampled. High and Ultra are not and should only be used on high-end hardware.")]
         public Quality quality = Quality.Medium;
