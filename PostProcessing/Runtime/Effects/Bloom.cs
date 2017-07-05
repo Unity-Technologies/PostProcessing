@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // For now and by popular request, this bloom effect is geared toward artists so they have full
     // control over how it looks at the expense of physical correctness.

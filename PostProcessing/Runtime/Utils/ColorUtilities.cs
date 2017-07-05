@@ -1,4 +1,4 @@
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     public static class ColorUtilities
     {

@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
-using UnityEngine.Experimental.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     [Decorator(typeof(RangeAttribute))]
     public sealed class RangeDecorator : AttributeDecorator

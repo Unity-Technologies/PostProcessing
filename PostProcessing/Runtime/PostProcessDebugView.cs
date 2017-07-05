@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // TODO: Make a nice debug view with ALL TEH SHIT
     [Serializable]

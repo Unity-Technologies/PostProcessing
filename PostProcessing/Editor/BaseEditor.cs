@@ -1,9 +1,9 @@
 using System;
 using System.Linq.Expressions;
 using UnityEngine;
-using UnityEngine.Experimental.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     public class BaseEditor<T> : Editor
         where T : MonoBehaviour

@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class PostProcessAttribute : Attribute

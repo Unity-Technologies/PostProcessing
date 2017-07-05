@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [Serializable]
     public sealed class FastApproximateAntialiasing

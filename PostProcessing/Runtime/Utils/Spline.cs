@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // Small wrapper on top of AnimationCurve to handle zero-key curves and keyframe looping
     [Serializable]

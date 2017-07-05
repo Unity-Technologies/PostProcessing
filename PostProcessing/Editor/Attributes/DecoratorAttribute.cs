@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class DecoratorAttribute : Attribute

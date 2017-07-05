@@ -1,8 +1,8 @@
 using System.IO;
 using UnityEngine;
-using UnityEngine.Experimental.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     [CustomEditor(typeof(PostProcessVolume))]
     public sealed class PostProcessVolumeEditor : BaseEditor<PostProcessVolume>

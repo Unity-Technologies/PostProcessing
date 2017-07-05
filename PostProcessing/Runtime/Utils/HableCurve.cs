@@ -1,4 +1,4 @@
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // Raw, mostly unoptimized implementation of Hable's artist-friendly tonemapping curve
     // http://filmicworlds.com/blog/filmic-tonemapping-with-piecewise-power-curves/

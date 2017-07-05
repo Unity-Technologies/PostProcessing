@@ -1,7 +1,7 @@
 using UnityEngine;
-using UnityEngine.Experimental.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     [PostProcessEditor(typeof(AutoExposure))]
     public sealed class AutoExposureEditor : PostProcessEffectEditor<AutoExposure>

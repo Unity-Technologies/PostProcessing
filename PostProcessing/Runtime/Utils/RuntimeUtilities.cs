@@ -7,7 +7,7 @@ using System.Text;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     using SceneManagement;
     using UnityObject = UnityEngine.Object;

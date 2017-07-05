@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Linq;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [Serializable]
     public class PostProcessEffectSettings : ScriptableObject

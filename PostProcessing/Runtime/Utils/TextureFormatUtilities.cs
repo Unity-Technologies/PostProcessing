@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // Temporary code dump until the texture format refactor goes into trunk...
     public static class TextureFormatUtilities

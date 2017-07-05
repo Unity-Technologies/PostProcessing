@@ -1,6 +1,6 @@
 using UnityEngine.Rendering;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // Context object passed around all post-fx in a frame
     public sealed class PostProcessRenderContext

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     public sealed class SerializedParameterOverride
     {

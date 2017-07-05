@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public sealed class DisplayNameAttribute : Attribute

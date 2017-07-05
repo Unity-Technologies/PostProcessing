@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Assertions;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [Serializable]
     public sealed class Dithering

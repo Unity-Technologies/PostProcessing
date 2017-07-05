@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Rendering;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [Serializable]
     [PostProcess(typeof(GrainRenderer), "Unity/Grain")]

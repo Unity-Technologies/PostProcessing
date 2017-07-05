@@ -1,4 +1,4 @@
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // Pre-hashed uniform ids - naming conventions are a bit off in this file as we use the same
     // fields names as in the shaders for ease of use

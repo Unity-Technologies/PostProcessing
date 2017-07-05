@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // This asset is used to store references to shaders and other resources we might need at
     // runtime without having to use a `Resources` folder. This allows for better memory management,

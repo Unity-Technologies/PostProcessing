@@ -1,6 +1,6 @@
-using UnityEngine.Experimental.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
-namespace UnityEditor.Experimental.PostProcessing
+namespace UnityEditor.Rendering.PostProcessing
 {
     [PostProcessEditor(typeof(Bloom))]
     public sealed class BloomEditor : PostProcessEffectEditor<Bloom>

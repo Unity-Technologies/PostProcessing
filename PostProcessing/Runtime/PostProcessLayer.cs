@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
-namespace UnityEngine.Experimental.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     // TODO: XMLDoc everything (?)
     // TODO: Add "keep alpha" checkbox
