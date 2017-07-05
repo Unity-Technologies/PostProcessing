@@ -3,7 +3,7 @@ using UnityEngine.Experimental.PostProcessing;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
-    public static class VolumeCreator
+    public static class VolumeFactory
     {
         [MenuItem("GameObject/3D Object/Post-process Volume")]
         static void CreateVolume()

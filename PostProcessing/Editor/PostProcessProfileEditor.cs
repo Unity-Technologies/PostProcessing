@@ -1,5 +1,3 @@
-using System;
-using System.Linq.Expressions;
 using UnityEngine.Experimental.PostProcessing;
 
 namespace UnityEditor.Experimental.PostProcessing

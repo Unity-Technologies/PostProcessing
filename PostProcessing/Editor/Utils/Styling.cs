@@ -57,4 +57,4 @@ namespace UnityEditor.Experimental.PostProcessing
             preLabel = new GUIStyle("ShurikenLabel");
         }
     }
-}
+} 

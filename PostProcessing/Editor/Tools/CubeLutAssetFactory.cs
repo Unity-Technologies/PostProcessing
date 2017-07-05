@@ -8,7 +8,7 @@ namespace UnityEditor.Experimental.PostProcessing
 {
     // CUBE lut specs:
     // http://wwwimages.adobe.com/content/dam/Adobe/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf
-    static class CubeLutAssetGenerator
+    static class CubeLutAssetFactory
     {
         const int kVersion = 1;
         const int kSize = 33;

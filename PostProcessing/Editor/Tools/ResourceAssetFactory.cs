@@ -3,7 +3,7 @@ using UnityEngine.Experimental.PostProcessing;
 
 namespace UnityEditor.Experimental.PostProcessing
 {
-    static class ResourceAssetGenerator
+    static class ResourceAssetFactory
     {
 #if POSTFX_DEBUG_MENUS
         [MenuItem("Tools/Post-processing/Create Resources Asset")]
