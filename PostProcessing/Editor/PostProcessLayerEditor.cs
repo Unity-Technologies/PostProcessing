@@ -37,6 +37,9 @@ namespace UnityEditor.Experimental.PostProcessing
         SerializedProperty m_DebugMonitor;
         SerializedProperty m_DebugLightMeter;
 
+        SerializedProperty m_ShowToolkit;
+        SerializedProperty m_ShowCustomSorter;
+
         Dictionary<PostProcessEvent, ReorderableList> m_CustomLists;
 
         static GUIContent[] s_AntialiasingMethodNames =
@@ -79,6 +82,9 @@ namespace UnityEditor.Experimental.PostProcessing
             m_DebugDisplay = FindProperty(x => x.debugView.display);
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
             m_DebugLightMeter = FindProperty(x => x.debugView.lightMeter);
+
+            m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
+            m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
             // In case of domain reload, if the inspector is opened on a disabled PostProcessLayer
             // component it won't go through its OnEnable() and thus will miss bundle initialization
@@ -279,9 +285,9 @@ namespace UnityEditor.Experimental.PostProcessing
         void DoToolkit()
         {
             EditorUtilities.DrawSplitter();
-            GlobalSettings.showLayerToolkit = EditorUtilities.DrawHeader("Toolkit", GlobalSettings.showLayerToolkit);
+            m_ShowToolkit.boolValue = EditorUtilities.DrawHeader("Toolkit", m_ShowToolkit.boolValue);
 
-            if (GlobalSettings.showLayerToolkit)
+            if (m_ShowToolkit.boolValue)
             {
                 GUILayout.Space(2);
 
@@ -328,9 +334,9 @@ namespace UnityEditor.Experimental.PostProcessing
         void DoCustomEffectSorter()
         {
             EditorUtilities.DrawSplitter();
-            GlobalSettings.showCustomSorter = EditorUtilities.DrawHeader("Custom Effect Sorting", GlobalSettings.showCustomSorter);
+            m_ShowCustomSorter.boolValue = EditorUtilities.DrawHeader("Custom Effect Sorting", m_ShowCustomSorter.boolValue);
 
-            if (GlobalSettings.showCustomSorter)
+            if (m_ShowCustomSorter.boolValue)
             {
                 GUILayout.Space(5);
 

@@ -39,6 +39,13 @@ namespace UnityEngine.Experimental.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
+        // UI states
+        [SerializeField]
+        bool m_ShowToolkit;
+
+        [SerializeField]
+        bool m_ShowCustomSorter;
+
         // Will stop applying post-processing effects just before color grading is applied
         // Currently used to export to exr without color grading
         public bool breakBeforeColorGrading = false;

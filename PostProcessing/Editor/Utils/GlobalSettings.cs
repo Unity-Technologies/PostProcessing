@@ -11,8 +11,6 @@ namespace UnityEditor.Experimental.PostProcessing
             internal const string volumeGizmoColor     = "PostProcessing.Volume.GizmoColor";
             internal const string currentChannelMixer  = "PostProcessing.ChannelMixer.CurrentChannel";
             internal const string currentCurve         = "PostProcessing.Curve.Current";
-            internal const string showLayerToolkit     = "PostProcessing.Layer.showLayerToolkit";
-            internal const string showCustomSorter     = "PostProcessing.Layer.ShowCustomSorter";
         }
 
         static bool m_Loaded = false;
@@ -45,20 +43,6 @@ namespace UnityEditor.Experimental.PostProcessing
             set { TrySave(ref m_CurrentCurve, value, Keys.currentCurve); }
         }
 
-        static bool m_ShowCustomSorter = false;
-        internal static bool showCustomSorter
-        {
-            get { return m_ShowCustomSorter; }
-            set { TrySave(ref m_ShowCustomSorter, value, Keys.showCustomSorter); }
-        }
-
-        static bool m_ShowLayerToolkit = false;
-        internal static bool showLayerToolkit
-        {
-            get { return m_ShowLayerToolkit; }
-            set { TrySave(ref m_ShowLayerToolkit, value, Keys.showLayerToolkit); }
-        }
-
         static GlobalSettings()
         {
             Load();
@@ -82,8 +66,6 @@ namespace UnityEditor.Experimental.PostProcessing
             m_VolumeGizmoColor     = GetColor(Keys.volumeGizmoColor, new Color(0.2f, 0.8f, 0.1f, 0.5f));
             m_CurrentChannelMixer  = EditorPrefs.GetInt(Keys.currentChannelMixer, 0);
             m_CurrentCurve         = EditorPrefs.GetInt(Keys.currentCurve, 0);
-            m_ShowLayerToolkit     = EditorPrefs.GetBool(Keys.showLayerToolkit, false);
-            m_ShowCustomSorter     = EditorPrefs.GetBool(Keys.showCustomSorter, false);
 
             m_Loaded = true;
         }
