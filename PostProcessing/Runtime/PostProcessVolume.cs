@@ -152,7 +152,6 @@ namespace UnityEngine.Experimental.PostProcessing
             }
         }
 
-#if UNITY_EDITOR
         // TODO: Look into a better volume previsualization system
         void OnDrawGizmos()
         {
@@ -161,7 +160,8 @@ namespace UnityEngine.Experimental.PostProcessing
 
             if (isGlobal || colliders == null)
                 return;
-
+            
+#if UNITY_EDITOR
             // Can't access the UnityEditor.Experimental.PostProcessing namespace from here, so
             // we'll get the preferred color manually
             unchecked
@@ -169,6 +169,7 @@ namespace UnityEngine.Experimental.PostProcessing
                 int value = UnityEditor.EditorPrefs.GetInt("PostProcessing.Volume.GizmoColor", (int)0x8033cc1a);
                 Gizmos.color = ColorUtilities.ToRGBA((uint)value);
             }
+#endif
 
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
 
@@ -218,6 +219,5 @@ namespace UnityEngine.Experimental.PostProcessing
 
             colliders.Clear();
         }
-#endif
     }
 }
