@@ -669,13 +669,18 @@ namespace UnityEngine.Rendering.PostProcessing
             if (!breakBeforeColorGrading)
                 RenderEffect<ColorGrading>(context);
 
+            int pass = 0;
+
             if (isFinalPass)
             {
                 uberSheet.EnableKeyword("FINALPASS");
                 dithering.Render(context);
+
+                if (context.flip && !context.isSceneView)
+                    pass = 1;
             }
 
-            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, pass);
 
             context.source = context.destination;
             context.destination = finalDestination;

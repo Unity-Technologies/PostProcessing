@@ -234,5 +234,15 @@ Shader "Hidden/PostProcessing/Uber"
 
             ENDHLSL
         }
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefaultNoFlip
+                #pragma fragment FragUber
+
+            ENDHLSL
+        }
     }
 }
