@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using UnityEngine.Assertions;
-using UnityEngine.Rendering;
 
 namespace UnityEngine.Rendering.PostProcessing
 {

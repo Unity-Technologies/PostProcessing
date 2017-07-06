@@ -1,5 +1,3 @@
-using UnityEngine.Rendering;
-
 namespace UnityEngine.Rendering.PostProcessing
 {
     // Context object passed around all post-fx in a frame

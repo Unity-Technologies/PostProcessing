@@ -36,7 +36,8 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_DebugDisplay;
         SerializedProperty m_DebugMonitor;
         SerializedProperty m_DebugLightMeter;
-
+        
+        SerializedProperty m_ShowDebugLayer;
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -83,6 +84,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_DebugMonitor = FindProperty(x => x.debugView.monitor);
             m_DebugLightMeter = FindProperty(x => x.debugView.lightMeter);
 
+            m_ShowDebugLayer = serializedObject.FindProperty("m_ShowDebugLayer");
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
@@ -245,7 +247,7 @@ namespace UnityEditor.Rendering.PostProcessing
             if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
                 return;
 
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Fog (Deferred)"), EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Deferred Fog"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
                 EditorGUILayout.PropertyField(m_FogEnabled);
@@ -263,23 +265,32 @@ namespace UnityEditor.Rendering.PostProcessing
 
         void DoDebugLayer()
         {
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Debug Layer"), EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
+            EditorUtilities.DrawSplitter();
+            m_ShowDebugLayer.boolValue = EditorUtilities.DrawHeader("Debug Layer", m_ShowDebugLayer.boolValue);
+
+            if (m_ShowDebugLayer.boolValue)
             {
-                EditorGUILayout.PropertyField(m_DebugDisplay, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
+                GUILayout.Space(2);
 
-                if (m_DebugDisplay.boolValue)
+                EditorGUI.indentLevel++;
                 {
+                    EditorGUILayout.PropertyField(m_DebugDisplay, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
+
+                    using (new EditorGUI.DisabledScope(!m_DebugDisplay.boolValue))
+                    {
+                        EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
+                        EditorGUILayout.PropertyField(m_DebugLightMeter, EditorUtilities.GetContent("HDR Light Meter|Light metering utility used to setup auto exposure. Note that it will only display correct values when using a full-HDR workflow (HDR camera, HDR/Custom color grading)."));
+                    }
+
                     if (!SystemInfo.supportsComputeShaders)
-                        EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Info);
-
-                    EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
-                    EditorGUILayout.PropertyField(m_DebugLightMeter, EditorUtilities.GetContent("HDR Light Meter|Light metering utility used to setup auto exposure. Note that it will only display correct values when using a full-HDR workflow (HDR camera, HDR/Custom color grading)."));
+                        EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Warning);
+                    
+                    EditorGUILayout.HelpBox("This feature is still a work in progress.", MessageType.Info);
                 }
-            }
-            EditorGUI.indentLevel--;
+                EditorGUI.indentLevel--;
 
-            EditorGUILayout.Space();
+                GUILayout.Space(3);
+            }
         }
 
         void DoToolkit()

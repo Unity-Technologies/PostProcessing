@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Rendering;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -58,9 +57,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal bool IsAmbientOnly(PostProcessRenderContext context)
         {
+            var camera = context.camera;
             return ambientOnly
-                && context.camera.actualRenderingPath == RenderingPath.DeferredShading
-                && context.camera.allowHDR;
+                && camera.actualRenderingPath == RenderingPath.DeferredShading
+                && camera.allowHDR;
         }
 
         internal bool IsEnabledAndSupported(PostProcessRenderContext context)
