@@ -14,7 +14,7 @@ namespace UnityEngine.Rendering.PostProcessing
             Assert.IsTrue(blueNoise != null && blueNoise.Length > 0);
 
         #if POSTFX_DEBUG_STATIC_DITHERING // Used by QA for automated testing
-            textureIndex = 0;
+            m_NoiseTextureIndex = 0;
             float rndOffsetX = 0f;
             float rndOffsetY = 0f;
         #else
