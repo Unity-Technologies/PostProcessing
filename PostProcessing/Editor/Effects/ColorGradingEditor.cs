@@ -340,7 +340,6 @@ namespace UnityEditor.Rendering.PostProcessing
                         && importer.mipmapEnabled == false
                         && importer.sRGBTexture == false
                         && importer.textureCompression == TextureImporterCompression.Uncompressed
-                        && importer.filterMode == FilterMode.Bilinear
                         && importer.wrapMode == TextureWrapMode.Clamp;
 
                     if (!valid)
@@ -352,7 +351,6 @@ namespace UnityEditor.Rendering.PostProcessing
         void SetLutImportSettings(TextureImporter importer)
         {
             importer.textureType = TextureImporterType.Default;
-            importer.filterMode = FilterMode.Bilinear;
             importer.mipmapEnabled = false;
             importer.anisoLevel = 0;
             importer.sRGBTexture = false;
