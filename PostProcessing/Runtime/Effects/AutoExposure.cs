@@ -81,11 +81,11 @@ namespace UnityEngine.Rendering.PostProcessing
             lowPercent = Mathf.Clamp(lowPercent, 1f, highPercent - kMinDelta);
 
             // Compute auto exposure
-            sheet.properties.SetBuffer(Uniforms._HistogramBuffer, context.logHistogram.data);
-            sheet.properties.SetVector(Uniforms._Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
-            sheet.properties.SetVector(Uniforms._Speed, new Vector2(settings.speedDown.value, settings.speedUp.value));
-            sheet.properties.SetVector(Uniforms._ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context));
-            sheet.properties.SetFloat(Uniforms._ExposureCompensation, settings.keyValue.value);
+            sheet.properties.SetBuffer(ShaderIDs.HistogramBuffer, context.logHistogram.data);
+            sheet.properties.SetVector(ShaderIDs.Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
+            sheet.properties.SetVector(ShaderIDs.Speed, new Vector2(settings.speedDown.value, settings.speedUp.value));
+            sheet.properties.SetVector(ShaderIDs.ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context));
+            sheet.properties.SetFloat(ShaderIDs.ExposureCompensation, settings.keyValue.value);
 
             if (m_FirstFrame || !Application.isPlaying)
             {

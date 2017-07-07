@@ -1,0 +1,103 @@
+namespace UnityEngine.Rendering.PostProcessing
+{
+    // Pre-hashed shader ids - naming conventions are a bit off in this file as we use the same
+    // fields names as in the shaders for ease of use... Would be nice to clean this up at some
+    // point.
+    static class ShaderIDs
+    {
+        internal static readonly int MainTex                         = Shader.PropertyToID("_MainTex");
+
+        internal static readonly int Jitter                          = Shader.PropertyToID("_Jitter");
+        internal static readonly int SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
+        internal static readonly int FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");
+        internal static readonly int HistoryTex                      = Shader.PropertyToID("_HistoryTex");
+        
+        internal static readonly int SMAA_Flip                       = Shader.PropertyToID("_SMAA_Flip");
+        internal static readonly int SMAA_Flop                       = Shader.PropertyToID("_SMAA_Flop");
+
+        internal static readonly int AOParams                        = Shader.PropertyToID("_AOParams");
+        internal static readonly int OcclusionTexture1               = Shader.PropertyToID("_OcclusionTexture1");
+        internal static readonly int OcclusionTexture2               = Shader.PropertyToID("_OcclusionTexture2");
+        internal static readonly int OcclusionTexture                = Shader.PropertyToID("_OcclusionTexture");
+        
+        internal static readonly int FogColor                        = Shader.PropertyToID("_FogColor");
+        internal static readonly int FogParams                       = Shader.PropertyToID("_FogParams");
+
+        internal static readonly int VelocityScale                   = Shader.PropertyToID("_VelocityScale");
+        internal static readonly int MaxBlurRadius                   = Shader.PropertyToID("_MaxBlurRadius");
+        internal static readonly int RcpMaxBlurRadius                = Shader.PropertyToID("_RcpMaxBlurRadius");
+        internal static readonly int VelocityTex                     = Shader.PropertyToID("_VelocityTex");
+        internal static readonly int Tile2RT                         = Shader.PropertyToID("_Tile2RT");
+        internal static readonly int Tile4RT                         = Shader.PropertyToID("_Tile4RT");
+        internal static readonly int Tile8RT                         = Shader.PropertyToID("_Tile8RT");
+        internal static readonly int TileMaxOffs                     = Shader.PropertyToID("_TileMaxOffs");
+        internal static readonly int TileMaxLoop                     = Shader.PropertyToID("_TileMaxLoop");
+        internal static readonly int TileVRT                         = Shader.PropertyToID("_TileVRT");
+        internal static readonly int NeighborMaxTex                  = Shader.PropertyToID("_NeighborMaxTex");
+        internal static readonly int LoopCount                       = Shader.PropertyToID("_LoopCount");
+
+        internal static readonly int DepthOfFieldTemp                = Shader.PropertyToID("_DepthOfFieldTemp");
+        internal static readonly int DepthOfFieldTex                 = Shader.PropertyToID("_DepthOfFieldTex");
+        internal static readonly int Distance                        = Shader.PropertyToID("_Distance");
+        internal static readonly int LensCoeff                       = Shader.PropertyToID("_LensCoeff");
+        internal static readonly int MaxCoC                          = Shader.PropertyToID("_MaxCoC");
+        internal static readonly int RcpMaxCoC                       = Shader.PropertyToID("_RcpMaxCoC");
+        internal static readonly int RcpAspect                       = Shader.PropertyToID("_RcpAspect");
+        internal static readonly int CoCTex                          = Shader.PropertyToID("_CoCTex");
+        internal static readonly int TaaParams                       = Shader.PropertyToID("_TaaParams");
+
+        internal static readonly int AutoExposureTex                 = Shader.PropertyToID("_AutoExposureTex");
+        internal static readonly int HistogramBuffer                 = Shader.PropertyToID("_HistogramBuffer");
+        internal static readonly int Params                          = Shader.PropertyToID("_Params");
+        internal static readonly int Speed                           = Shader.PropertyToID("_Speed");
+        internal static readonly int ScaleOffsetRes                  = Shader.PropertyToID("_ScaleOffsetRes");
+        internal static readonly int ExposureCompensation            = Shader.PropertyToID("_ExposureCompensation");
+
+        internal static readonly int BloomTex                        = Shader.PropertyToID("_BloomTex");
+        internal static readonly int SampleScale                     = Shader.PropertyToID("_SampleScale");
+        internal static readonly int Threshold                       = Shader.PropertyToID("_Threshold");
+        internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
+        internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
+        internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
+        internal static readonly int Bloom_Threshold                 = Shader.PropertyToID("_Bloom_Threshold");
+
+        internal static readonly int ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
+        internal static readonly int ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
+
+        internal static readonly int Lut2D                           = Shader.PropertyToID("_Lut2D");
+        internal static readonly int Lut3D                           = Shader.PropertyToID("_Lut3D");
+        internal static readonly int Lut3D_Params                    = Shader.PropertyToID("_Lut3D_Params");
+        internal static readonly int Lut2D_Params                    = Shader.PropertyToID("_Lut2D_Params");
+        internal static readonly int PostExposure                    = Shader.PropertyToID("_PostExposure");
+        internal static readonly int ColorBalance                    = Shader.PropertyToID("_ColorBalance");
+        internal static readonly int ColorFilter                     = Shader.PropertyToID("_ColorFilter");
+        internal static readonly int HueSatCon                       = Shader.PropertyToID("_HueSatCon");
+        internal static readonly int Brightness                      = Shader.PropertyToID("_Brightness");
+        internal static readonly int ChannelMixerRed                 = Shader.PropertyToID("_ChannelMixerRed");
+        internal static readonly int ChannelMixerGreen               = Shader.PropertyToID("_ChannelMixerGreen");
+        internal static readonly int ChannelMixerBlue                = Shader.PropertyToID("_ChannelMixerBlue");
+        internal static readonly int Lift                            = Shader.PropertyToID("_Lift");
+        internal static readonly int InvGamma                        = Shader.PropertyToID("_InvGamma");
+        internal static readonly int Gain                            = Shader.PropertyToID("_Gain");
+        internal static readonly int Curves                          = Shader.PropertyToID("_Curves");
+
+        internal static readonly int Vignette_Color                  = Shader.PropertyToID("_Vignette_Color");
+        internal static readonly int Vignette_Center                 = Shader.PropertyToID("_Vignette_Center");
+        internal static readonly int Vignette_Settings               = Shader.PropertyToID("_Vignette_Settings");
+        internal static readonly int Vignette_Mask                   = Shader.PropertyToID("_Vignette_Mask");
+        internal static readonly int Vignette_Opacity                = Shader.PropertyToID("_Vignette_Opacity");
+        internal static readonly int Vignette_Mode                   = Shader.PropertyToID("_Vignette_Mode");
+
+        internal static readonly int Grain_Params1                   = Shader.PropertyToID("_Grain_Params1");
+        internal static readonly int Grain_Params2                   = Shader.PropertyToID("_Grain_Params2");
+        internal static readonly int GrainTex                        = Shader.PropertyToID("_GrainTex");
+        internal static readonly int Phase                           = Shader.PropertyToID("_Phase");
+
+        internal static readonly int DitheringTex                    = Shader.PropertyToID("_DitheringTex");
+        internal static readonly int Dithering_Coords                = Shader.PropertyToID("_Dithering_Coords");
+
+        internal static readonly int From                            = Shader.PropertyToID("_From");
+        internal static readonly int To                              = Shader.PropertyToID("_To");
+        internal static readonly int Interp                          = Shader.PropertyToID("_Interp");
+    }
+}

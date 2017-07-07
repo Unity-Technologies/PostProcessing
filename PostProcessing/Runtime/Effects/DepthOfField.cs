@@ -126,18 +126,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var sheet = context.propertySheets.Get(context.resources.shaders.depthOfField);
             sheet.properties.Clear();
-            sheet.properties.SetFloat(Uniforms._Distance, s1);
-            sheet.properties.SetFloat(Uniforms._LensCoeff, coeff);
-            sheet.properties.SetFloat(Uniforms._MaxCoC, maxCoC);
-            sheet.properties.SetFloat(Uniforms._RcpMaxCoC, 1f / maxCoC);
-            sheet.properties.SetFloat(Uniforms._RcpAspect, 1f / aspect);
+            sheet.properties.SetFloat(ShaderIDs.Distance, s1);
+            sheet.properties.SetFloat(ShaderIDs.LensCoeff, coeff);
+            sheet.properties.SetFloat(ShaderIDs.MaxCoC, maxCoC);
+            sheet.properties.SetFloat(ShaderIDs.RcpMaxCoC, 1f / maxCoC);
+            sheet.properties.SetFloat(ShaderIDs.RcpAspect, 1f / aspect);
 
             var cmd = context.command;
             cmd.BeginSample("DepthOfField");
 
             // CoC calculation pass
-            cmd.GetTemporaryRT(Uniforms._CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat, RenderTextureReadWrite.Linear);
-            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, Uniforms._CoCTex, sheet, (int)Pass.CoCCalculation);
+            cmd.GetTemporaryRT(ShaderIDs.CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat, RenderTextureReadWrite.Linear);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, ShaderIDs.CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled
             if (context.IsTemporalAntialiasingActive())
@@ -146,7 +146,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 float blend = m_ResetHistory ? 0f : motionBlending; // Handles first frame blending
                 var jitter = context.temporalAntialiasing.jitter;
                 
-                sheet.properties.SetVector(Uniforms._TaaParams, new Vector3(jitter.x, jitter.y, blend));
+                sheet.properties.SetVector(ShaderIDs.TaaParams, new Vector3(jitter.x, jitter.y, blend));
 
                 int pp = m_HistoryPingPong;
                 var historyRead = CheckHistory(++pp % 2, context.width, context.height, cocFormat);
@@ -154,28 +154,28 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_HistoryPingPong = ++pp % 2;
 
                 cmd.BlitFullscreenTriangle(historyRead, historyWrite, sheet, (int)Pass.CoCTemporalFilter);
-                cmd.ReleaseTemporaryRT(Uniforms._CoCTex);
-                cmd.SetGlobalTexture(Uniforms._CoCTex, historyWrite);
+                cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
+                cmd.SetGlobalTexture(ShaderIDs.CoCTex, historyWrite);
             }
 
             // Downsampling and prefiltering pass
-            cmd.GetTemporaryRT(Uniforms._DepthOfFieldTex, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
-            cmd.BlitFullscreenTriangle(context.source, Uniforms._DepthOfFieldTex, sheet, (int)Pass.DownsampleAndPrefilter);
+            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTex, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
+            cmd.BlitFullscreenTriangle(context.source, ShaderIDs.DepthOfFieldTex, sheet, (int)Pass.DownsampleAndPrefilter);
 
             // Bokeh simulation pass
-            cmd.GetTemporaryRT(Uniforms._DepthOfFieldTemp, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
-            cmd.BlitFullscreenTriangle(Uniforms._DepthOfFieldTex, Uniforms._DepthOfFieldTemp, sheet, (int)Pass.BokehSmallKernel + (int)settings.kernelSize.value);
+            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTemp, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
+            cmd.BlitFullscreenTriangle(ShaderIDs.DepthOfFieldTex, ShaderIDs.DepthOfFieldTemp, sheet, (int)Pass.BokehSmallKernel + (int)settings.kernelSize.value);
 
             // Postfilter pass
-            cmd.BlitFullscreenTriangle(Uniforms._DepthOfFieldTemp, Uniforms._DepthOfFieldTex, sheet, (int)Pass.PostFilter);
-            cmd.ReleaseTemporaryRT(Uniforms._DepthOfFieldTemp);
+            cmd.BlitFullscreenTriangle(ShaderIDs.DepthOfFieldTemp, ShaderIDs.DepthOfFieldTex, sheet, (int)Pass.PostFilter);
+            cmd.ReleaseTemporaryRT(ShaderIDs.DepthOfFieldTemp);
 
             // Combine pass
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Combine);
-            cmd.ReleaseTemporaryRT(Uniforms._DepthOfFieldTex);
+            cmd.ReleaseTemporaryRT(ShaderIDs.DepthOfFieldTex);
 
             if (!context.IsTemporalAntialiasingActive())
-                cmd.ReleaseTemporaryRT(Uniforms._CoCTex);
+                cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
 
             cmd.EndSample("DepthOfField");
 

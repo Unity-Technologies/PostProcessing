@@ -69,18 +69,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 var material = context.propertySheets.Get(context.resources.shaders.lightMeter).material;
                 material.shaderKeywords = null;
-                material.SetBuffer(Uniforms._HistogramBuffer, histogram.data);
+                material.SetBuffer(ShaderIDs.HistogramBuffer, histogram.data);
 
                 var scaleOffsetRes = histogram.GetHistogramScaleOffsetRes(context);
                 scaleOffsetRes.z = 1f / rect.width;
                 scaleOffsetRes.w = 1f / rect.height;
 
-                material.SetVector(Uniforms._ScaleOffsetRes, scaleOffsetRes);
+                material.SetVector(ShaderIDs.ScaleOffsetRes, scaleOffsetRes);
 
                 if (context.logLut != null)
                 {
                     material.EnableKeyword("COLOR_GRADING_HDR");
-                    material.SetTexture(Uniforms._Lut3D, context.logLut);
+                    material.SetTexture(ShaderIDs.Lut3D, context.logLut);
                 }
 
                 if (context.autoExposure != null)
@@ -95,7 +95,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     lowPercent = Mathf.Clamp(lowPercent, 1f, highPercent - kMinDelta);
 
                     material.EnableKeyword("AUTO_EXPOSURE");
-                    material.SetVector(Uniforms._Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
+                    material.SetVector(ShaderIDs.Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
                 }
 
                 RuntimeUtilities.BlitFullscreenTriangle(null, m_LightMeterRT, material, 0);

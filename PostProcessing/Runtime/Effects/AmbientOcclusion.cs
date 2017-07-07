@@ -85,14 +85,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var sheet = context.propertySheets.Get(context.resources.shaders.ambientOcclusion);
             sheet.ClearKeywords();
-            sheet.properties.SetVector(Uniforms._AOParams, new Vector4(px, py, pz, pw));
+            sheet.properties.SetVector(ShaderIDs.AOParams, new Vector4(px, py, pz, pw));
 
             // In forward fog is applied at the object level in the grometry pass so we need to
             // apply it to AO as well or it'll drawn on top of the fog effect.
             // Not needed in Deferred.
             if (context.camera.actualRenderingPath == RenderingPath.Forward && RenderSettings.fog)
             {
-                sheet.properties.SetVector(Uniforms._FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
+                sheet.properties.SetVector(ShaderIDs.FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
 
                 switch (RenderSettings.fogMode)
                 {
@@ -117,14 +117,14 @@ namespace UnityEngine.Rendering.PostProcessing
             const FilterMode kFilter = FilterMode.Bilinear;
 
             // AO buffer
-            var rtMask = Uniforms._OcclusionTexture1;
+            var rtMask = ShaderIDs.OcclusionTexture1;
             cmd.GetTemporaryRT(rtMask, tw / ts, th / ts, 0, kFilter, kFormat, kRWMode);
 
             // AO estimation
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, rtMask, sheet, (int)Pass.OcclusionEstimationForward + occlusionSource);
 
             // Blur buffer
-            var rtBlur = Uniforms._OcclusionTexture2;
+            var rtBlur = ShaderIDs.OcclusionTexture2;
 
             // Separable blur (horizontal pass)
             cmd.GetTemporaryRT(rtBlur, tw, th, 0, kFilter, kFormat, kRWMode);
@@ -132,7 +132,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.ReleaseTemporaryRT(rtMask);
 
             // Separable blur (vertical pass)
-            rtMask = Uniforms._OcclusionTexture;
+            rtMask = ShaderIDs.OcclusionTexture;
             cmd.GetTemporaryRT(rtMask, tw, th, 0, kFilter, kFormat, kRWMode);
             cmd.BlitFullscreenTriangle(rtBlur, rtMask, sheet, (int)Pass.VerticalBlur);
             cmd.ReleaseTemporaryRT(rtBlur);

@@ -189,9 +189,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("COLOR_GRADING_HDR");
-            uberSheet.properties.SetTexture(Uniforms._Lut3D, lut);
-            uberSheet.properties.SetVector(Uniforms._Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
-            uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
+            uberSheet.properties.SetTexture(ShaderIDs.Lut3D, lut);
+            uberSheet.properties.SetVector(ShaderIDs.Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
+            uberSheet.properties.SetFloat(ShaderIDs.PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
             context.logLut = lut;
         }
 
@@ -294,9 +294,9 @@ namespace UnityEngine.Rendering.PostProcessing
             var lut = m_InternalLogLut;
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("COLOR_GRADING_HDR");
-            uberSheet.properties.SetTexture(Uniforms._Lut3D, lut);
-            uberSheet.properties.SetVector(Uniforms._Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
-            uberSheet.properties.SetFloat(Uniforms._PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
+            uberSheet.properties.SetTexture(ShaderIDs.Lut3D, lut);
+            uberSheet.properties.SetVector(ShaderIDs.Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
+            uberSheet.properties.SetFloat(ShaderIDs.PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
 
             context.logLut = lut;
         }
@@ -312,33 +312,33 @@ namespace UnityEngine.Rendering.PostProcessing
                 var lutSheet = context.propertySheets.Get(context.resources.shaders.lut2DBaker);
                 lutSheet.ClearKeywords();
 
-                lutSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector4(k_Lut2DSize, 0.5f / (k_Lut2DSize * k_Lut2DSize), 0.5f / k_Lut2DSize, k_Lut2DSize / (k_Lut2DSize - 1f)));
+                lutSheet.properties.SetVector(ShaderIDs.Lut2D_Params, new Vector4(k_Lut2DSize, 0.5f / (k_Lut2DSize * k_Lut2DSize), 0.5f / k_Lut2DSize, k_Lut2DSize / (k_Lut2DSize - 1f)));
 
                 var colorBalance = ColorUtilities.ComputeColorBalance(settings.temperature.value, settings.tint.value);
-                lutSheet.properties.SetVector(Uniforms._ColorBalance, colorBalance);
-                lutSheet.properties.SetVector(Uniforms._ColorFilter, settings.colorFilter.value);
+                lutSheet.properties.SetVector(ShaderIDs.ColorBalance, colorBalance);
+                lutSheet.properties.SetVector(ShaderIDs.ColorFilter, settings.colorFilter.value);
 
                 float hue = settings.hueShift.value / 360f;         // Remap to [-0.5;0.5]
                 float sat = settings.saturation.value / 100f + 1f;  // Remap to [0;2]
                 float con = settings.contrast.value / 100f + 1f;    // Remap to [0;2]
-                lutSheet.properties.SetVector(Uniforms._HueSatCon, new Vector3(hue, sat, con));
+                lutSheet.properties.SetVector(ShaderIDs.HueSatCon, new Vector3(hue, sat, con));
 
                 var channelMixerR = new Vector3(settings.mixerRedOutRedIn, settings.mixerRedOutGreenIn, settings.mixerRedOutBlueIn);
                 var channelMixerG = new Vector3(settings.mixerGreenOutRedIn, settings.mixerGreenOutGreenIn, settings.mixerGreenOutBlueIn);
                 var channelMixerB = new Vector3(settings.mixerBlueOutRedIn, settings.mixerBlueOutGreenIn, settings.mixerBlueOutBlueIn);
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerRed, channelMixerR / 100f);            // Remap to [-2;2]
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerGreen, channelMixerG / 100f);
-                lutSheet.properties.SetVector(Uniforms._ChannelMixerBlue, channelMixerB / 100f);
+                lutSheet.properties.SetVector(ShaderIDs.ChannelMixerRed, channelMixerR / 100f);            // Remap to [-2;2]
+                lutSheet.properties.SetVector(ShaderIDs.ChannelMixerGreen, channelMixerG / 100f);
+                lutSheet.properties.SetVector(ShaderIDs.ChannelMixerBlue, channelMixerB / 100f);
 
                 var lift = ColorUtilities.ColorToLift(settings.lift.value);
                 var gain = ColorUtilities.ColorToGain(settings.gain.value);
                 var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value);
-                lutSheet.properties.SetVector(Uniforms._Lift, lift);
-                lutSheet.properties.SetVector(Uniforms._InvGamma, invgamma);
-                lutSheet.properties.SetVector(Uniforms._Gain, gain);
+                lutSheet.properties.SetVector(ShaderIDs.Lift, lift);
+                lutSheet.properties.SetVector(ShaderIDs.InvGamma, invgamma);
+                lutSheet.properties.SetVector(ShaderIDs.Gain, gain);
 
-                lutSheet.properties.SetFloat(Uniforms._Brightness, (settings.brightness.value + 100f) / 100f);
-                lutSheet.properties.SetTexture(Uniforms._Curves, GetCurveTexture(false));
+                lutSheet.properties.SetFloat(ShaderIDs.Brightness, (settings.brightness.value + 100f) / 100f);
+                lutSheet.properties.SetTexture(ShaderIDs.Curves, GetCurveTexture(false));
 
                 // Generate the lut
                 context.command.BeginSample("LdrColorGradingLut");
@@ -353,8 +353,8 @@ namespace UnityEngine.Rendering.PostProcessing
             var lut = m_InternalLdrLut;
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("COLOR_GRADING_LDR");
-            uberSheet.properties.SetVector(Uniforms._Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
-            uberSheet.properties.SetTexture(Uniforms._Lut2D, lut);
+            uberSheet.properties.SetVector(ShaderIDs.Lut2D_Params, new Vector3(1f / lut.width, 1f / lut.height, lut.height - 1f));
+            uberSheet.properties.SetTexture(ShaderIDs.Lut2D, lut);
         }
 
         void CheckInternalLogLut()

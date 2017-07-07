@@ -73,30 +73,30 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Pass 1 - Velocity/depth packing
             var velocityScale = settings.shutterAngle / 360f;
-            sheet.properties.SetFloat(Uniforms._VelocityScale, velocityScale);
-            sheet.properties.SetFloat(Uniforms._MaxBlurRadius, maxBlurPixels);
-            sheet.properties.SetFloat(Uniforms._RcpMaxBlurRadius, 1f / maxBlurPixels);
+            sheet.properties.SetFloat(ShaderIDs.VelocityScale, velocityScale);
+            sheet.properties.SetFloat(ShaderIDs.MaxBlurRadius, maxBlurPixels);
+            sheet.properties.SetFloat(ShaderIDs.RcpMaxBlurRadius, 1f / maxBlurPixels);
 
-            int vbuffer = Uniforms._VelocityTex;
+            int vbuffer = ShaderIDs.VelocityTex;
             cmd.GetTemporaryRT(vbuffer, context.width, context.height, 0, FilterMode.Point,
                 packedRTFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, vbuffer, sheet, (int)Pass.VelocitySetup);
 
             // Pass 2 - First TileMax filter (1/2 downsize)
-            int tile2 = Uniforms._Tile2RT;
+            int tile2 = ShaderIDs.Tile2RT;
             cmd.GetTemporaryRT(tile2, context.width / 2, context.height / 2, 0, FilterMode.Point,
                 vectorRTFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(vbuffer, tile2, sheet, (int)Pass.TileMax1);
 
             // Pass 3 - Second TileMax filter (1/2 downsize)
-            int tile4 = Uniforms._Tile4RT;
+            int tile4 = ShaderIDs.Tile4RT;
             cmd.GetTemporaryRT(tile4, context.width / 4, context.height / 4, 0, FilterMode.Point,
                 vectorRTFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(tile2, tile4, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile2);
 
             // Pass 4 - Third TileMax filter (1/2 downsize)
-            int tile8 = Uniforms._Tile8RT;
+            int tile8 = ShaderIDs.Tile8RT;
             cmd.GetTemporaryRT(tile8, context.width / 8, context.height / 8, 0, FilterMode.Point,
                 vectorRTFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(tile4, tile8, sheet, (int)Pass.TileMax2);
@@ -104,17 +104,17 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Pass 5 - Fourth TileMax filter (reduce to tileSize)
             var tileMaxOffs = Vector2.one * (tileSize / 8f - 1f) * -0.5f;
-            sheet.properties.SetVector(Uniforms._TileMaxOffs, tileMaxOffs);
-            sheet.properties.SetFloat(Uniforms._TileMaxLoop, (int)(tileSize / 8f));
+            sheet.properties.SetVector(ShaderIDs.TileMaxOffs, tileMaxOffs);
+            sheet.properties.SetFloat(ShaderIDs.TileMaxLoop, (int)(tileSize / 8f));
 
-            int tile = Uniforms._TileVRT;
+            int tile = ShaderIDs.TileVRT;
             cmd.GetTemporaryRT(tile, context.width / tileSize, context.height / tileSize, 0,
                 FilterMode.Point, vectorRTFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(tile8, tile, sheet, (int)Pass.TileMaxV);
             cmd.ReleaseTemporaryRT(tile8);
 
             // Pass 6 - NeighborMax filter
-            int neighborMax = Uniforms._NeighborMaxTex;
+            int neighborMax = ShaderIDs.NeighborMaxTex;
             int neighborMaxWidth = context.width / tileSize;
             int neighborMaxHeight = context.height / tileSize;
             cmd.GetTemporaryRT(neighborMax, neighborMaxWidth, neighborMaxHeight, 0,
@@ -123,7 +123,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.ReleaseTemporaryRT(tile);
 
             // Pass 7 - Reconstruction pass
-            sheet.properties.SetFloat(Uniforms._LoopCount, Mathf.Clamp(settings.sampleCount / 2, 1, 64));
+            sheet.properties.SetFloat(ShaderIDs.LoopCount, Mathf.Clamp(settings.sampleCount / 2, 1, 64));
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Reconstruction);
 
             cmd.ReleaseTemporaryRT(vbuffer);

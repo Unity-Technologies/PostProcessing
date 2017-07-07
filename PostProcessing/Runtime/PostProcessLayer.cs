@@ -659,7 +659,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Uber effects
             RenderEffect<AutoExposure>(context);
-            uberSheet.properties.SetTexture(Uniforms._AutoExposureTex, context.autoExposureTexture);
+            uberSheet.properties.SetTexture(ShaderIDs.AutoExposureTex, context.autoExposureTexture);
 
             RenderEffect<ChromaticAberration>(context);
             RenderEffect<Bloom>(context);

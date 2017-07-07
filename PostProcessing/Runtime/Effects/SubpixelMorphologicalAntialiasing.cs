@@ -26,16 +26,16 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("SubpixelMorphologicalAntialiasing");
 
-            cmd.GetTemporaryRT(Uniforms._SMAA_Flip, context.width, context.height, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Linear);
-            cmd.GetTemporaryRT(Uniforms._SMAA_Flop, context.width, context.height, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Linear);
+            cmd.GetTemporaryRT(ShaderIDs.SMAA_Flip, context.width, context.height, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Linear);
+            cmd.GetTemporaryRT(ShaderIDs.SMAA_Flop, context.width, context.height, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Linear);
 
-            cmd.BlitFullscreenTriangle(context.source, Uniforms._SMAA_Flip, sheet, (int)Pass.EdgeDetection, true);
-            cmd.BlitFullscreenTriangle(Uniforms._SMAA_Flip, Uniforms._SMAA_Flop, sheet, (int)Pass.BlendWeights);
-            cmd.SetGlobalTexture("_BlendTex", Uniforms._SMAA_Flop);
+            cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SMAA_Flip, sheet, (int)Pass.EdgeDetection, true);
+            cmd.BlitFullscreenTriangle(ShaderIDs.SMAA_Flip, ShaderIDs.SMAA_Flop, sheet, (int)Pass.BlendWeights);
+            cmd.SetGlobalTexture("_BlendTex", ShaderIDs.SMAA_Flop);
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.NeighborhoodBlending);
 
-            cmd.ReleaseTemporaryRT(Uniforms._SMAA_Flip);
-            cmd.ReleaseTemporaryRT(Uniforms._SMAA_Flop);
+            cmd.ReleaseTemporaryRT(ShaderIDs.SMAA_Flip);
+            cmd.ReleaseTemporaryRT(ShaderIDs.SMAA_Flop);
             
             cmd.EndSample("SubpixelMorphologicalAntialiasing");
         }

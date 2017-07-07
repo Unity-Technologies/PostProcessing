@@ -199,10 +199,10 @@ namespace UnityEngine.Rendering.PostProcessing
             m_HistoryPingPong = ++pp % 2;
 
             const float kMotionAmplification = 100f * 60f;
-            sheet.properties.SetVector(Uniforms._Jitter, jitter);
-            sheet.properties.SetFloat(Uniforms._SharpenParameters, sharpen);
-            sheet.properties.SetVector(Uniforms._FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
-            sheet.properties.SetTexture(Uniforms._HistoryTex, historyRead);
+            sheet.properties.SetVector(ShaderIDs.Jitter, jitter);
+            sheet.properties.SetFloat(ShaderIDs.SharpenParameters, sharpen);
+            sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
+            sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
 
             int pass = context.camera.orthographic ? (int)Pass.SolverNoDilate : (int)Pass.SolverDilate;
             m_Mrt[0] = context.destination;
