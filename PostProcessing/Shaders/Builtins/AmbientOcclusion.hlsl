@@ -205,7 +205,7 @@ float4 FragAO(VaryingsDefault i) : SV_Target
     float depth_o = SampleDepthNormal(uv, norm_o);
 
     // Reconstruct the view-space position.
-    float3 vpos_o = ReconstructViewPos(i.texcoord, depth_o, p11_22, p13_31);
+    float3 vpos_o = ReconstructViewPos(uv, depth_o, p11_22, p13_31);
 
     float ao = 0.0;
 

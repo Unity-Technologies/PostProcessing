@@ -142,14 +142,20 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal void RenderAfterOpaque(PostProcessRenderContext context)
         {
+            var cmd = context.command;
+            cmd.BeginSample("Ambient Occlusion");
             var sheet = PreRender(context, 0); // Forward
-            context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.CompositionForward);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.CompositionForward);
+            cmd.EndSample("Ambient Occlusion");
         }
 
         internal void RenderAmbientOnly(PostProcessRenderContext context)
         {
+            var cmd = context.command;
+            cmd.BeginSample("Ambient Occlusion");
             var sheet = PreRender(context, 1); // Deferred
-            context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_MRT, BuiltinRenderTextureType.CameraTarget, sheet, (int)Pass.CompositionDeferred);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_MRT, BuiltinRenderTextureType.CameraTarget, sheet, (int)Pass.CompositionDeferred);
+            cmd.EndSample("Ambient Occlusion");
         }
     }
 }
