@@ -88,7 +88,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetTexture(ShaderIDs.AutoExposureTex, context.autoExposureTexture);
 
             // Determine the iteration count
-            float logh = Mathf.Log(context.height, 2f) + settings.diffusion.value - 10f;
+            float logh = Mathf.Log(context.height, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logh_i = Mathf.FloorToInt(logh);
             int iterations = Mathf.Clamp(logh_i, 1, k_MaxPyramidSize);
             float sampleScale = 0.5f + logh - logh_i;
