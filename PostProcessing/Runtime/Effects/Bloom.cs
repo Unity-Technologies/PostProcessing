@@ -87,17 +87,18 @@ namespace UnityEngine.Rendering.PostProcessing
             // Apply auto exposure adjustment in the prefiltering pass
             sheet.properties.SetTexture(ShaderIDs.AutoExposureTex, context.autoExposureTexture);
 
-            // Determine the iteration count
-            float logh = Mathf.Log(context.height, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
-            int logh_i = Mathf.FloorToInt(logh);
-            int iterations = Mathf.Clamp(logh_i, 1, k_MaxPyramidSize);
-            float sampleScale = 0.5f + logh - logh_i;
-            sheet.properties.SetFloat(ShaderIDs.SampleScale, sampleScale);
-
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
             int tw = context.width / 2;
             int th = context.height / 2;
+
+            // Determine the iteration count
+            int s = Mathf.Max(tw, th);
+            float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
+            int logs_i = Mathf.FloorToInt(logs);
+            int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
+            float sampleScale = 0.5f + logs - logs_i;
+            sheet.properties.SetFloat(ShaderIDs.SampleScale, sampleScale);
 
             // Prefiltering parameters
             float lthresh = Mathf.GammaToLinearSpace(settings.threshold.value);
@@ -122,7 +123,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 cmd.BlitFullscreenTriangle(last, mipDown, sheet, pass);
 
                 last = mipDown;
-                tw /= 2; th /= 2;
+                tw = Mathf.Max(tw / 2, 1);
+                th = Mathf.Max(th / 2, 1);
             }
 
             // Upsample
