@@ -1,5 +1,10 @@
 Shader "Hidden/PostProcessing/Editor/ConvertToLog"
 {
+    Properties
+    {
+        _MainTex ("", 2D) = "white" {}
+    }
+
     CGINCLUDE
 
         #include "UnityCG.cginc"
