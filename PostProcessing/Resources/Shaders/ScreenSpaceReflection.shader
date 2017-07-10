@@ -749,16 +749,15 @@ Shader "Hidden/Post FX/Screen Space Reflection"
             float confidence = temp.w;
             float3 colorResult = confidence > 0.0 ? tex2D(_MainTex, hitPoint).rgb : tex2D(_CameraReflectionsTexture, tsP).rgb;
 
-#ifdef UNITY_COMPILER_HLSL
-            /*if (any(isnan(colorResult)))
+            if (any(isnan(colorResult)))
                 colorResult = float3(0.0, 0.0, 0.0);
 
             // As of 11/29/2015, on Unity 5.3 on a Windows 8.1 computer with a NVIDIA GeForce 980,
             // with driver 347.62, the above check does not actually work to get rid of NaNs!
             // So we add this "redundant" check.
             if (!all(isfinite(colorResult)))
-                colorResult = float3(0.0, 0.0, 0.0);*/
-#endif
+                colorResult = float3(0.0, 0.0, 0.0);
+
             return float4(colorResult, confidence);
         }
 
