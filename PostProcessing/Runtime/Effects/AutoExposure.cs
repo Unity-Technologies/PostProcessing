@@ -18,10 +18,10 @@ namespace UnityEngine.Rendering.PostProcessing
         [MinMax(1f, 99f), DisplayName("Filtering (%)"), Tooltip("Filters the bright & dark part of the histogram when computing the average luminance to avoid very dark pixels & very bright pixels from contributing to the auto exposure. Unit is in percent.")]
         public Vector2Parameter filtering = new Vector2Parameter { value = new Vector2(50f, 95f) };
 
-        [DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure (in EV).")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure (in EV).")]
         public FloatParameter minLuminance = new FloatParameter { value = 0f };
 
-        [DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
         public FloatParameter maxLuminance = new FloatParameter { value = 0f };
 
         [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
