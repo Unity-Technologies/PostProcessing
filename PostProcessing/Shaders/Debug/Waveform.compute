@@ -28,7 +28,7 @@ void KWaveformGather(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupTh
         // Convert channel values to histogram bins
         uint3 idx = (uint3)(round(color * (_BufferParams.y - 1)));
 
-        uint bufferX = uint(floor(coords.x * _BufferParams.x));
+        uint bufferX = uint(round(coords.x * (_BufferParams.x - 1)));
         if (idx.x > 0u) InterlockedAdd(_WaveformBuffer[idx.x * uint(_BufferParams.x) + bufferX].x, 1u); // Red
         if (idx.y > 0u) InterlockedAdd(_WaveformBuffer[idx.y * uint(_BufferParams.x) + bufferX].y, 1u); // Green
         if (idx.z > 0u) InterlockedAdd(_WaveformBuffer[idx.z * uint(_BufferParams.x) + bufferX].z, 1u); // Blue
