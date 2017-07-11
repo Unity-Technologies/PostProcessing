@@ -44,7 +44,7 @@ namespace UnityEngine.Rendering.PostProcessing
             bool histogramActive = histogram.IsEnabledAndSupported();
             bool waveformActive = waveform.IsEnabledAndSupported();
             bool vectorscopeActive = vectorscope.IsEnabledAndSupported();
-            bool needHalfRes = histogramActive || vectorscopeActive;
+            bool needHalfRes = histogramActive || vectorscopeActive || waveformActive;
             bool anyActive = lightMeterActive
                 || histogramActive
                 || waveformActive
