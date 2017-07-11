@@ -32,12 +32,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
         SerializedProperty m_FogEnabled;
         SerializedProperty m_FogExcludeSkybox;
-
-        SerializedProperty m_DebugDisplay;
-        SerializedProperty m_DebugMonitor;
-        SerializedProperty m_DebugLightMeter;
         
-        SerializedProperty m_ShowDebugLayer;
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -80,11 +75,6 @@ namespace UnityEditor.Rendering.PostProcessing
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
 
-            m_DebugDisplay = FindProperty(x => x.debugView.display);
-            m_DebugMonitor = FindProperty(x => x.debugView.monitor);
-            m_DebugLightMeter = FindProperty(x => x.debugView.lightMeter);
-
-            m_ShowDebugLayer = serializedObject.FindProperty("m_ShowDebugLayer");
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
@@ -138,7 +128,6 @@ namespace UnityEditor.Rendering.PostProcessing
             DoAntialiasing();
             DoAmbientOcclusion(camera);
             DoFog(camera);
-            DoDebugLayer();
             DoToolkit();
             DoCustomEffectSorter();
 
@@ -263,36 +252,6 @@ namespace UnityEditor.Rendering.PostProcessing
             EditorGUILayout.Space();
         }
 
-        void DoDebugLayer()
-        {
-            EditorUtilities.DrawSplitter();
-            m_ShowDebugLayer.boolValue = EditorUtilities.DrawHeader("Debug Layer", m_ShowDebugLayer.boolValue);
-
-            if (m_ShowDebugLayer.boolValue)
-            {
-                GUILayout.Space(2);
-
-                EditorGUI.indentLevel++;
-                {
-                    EditorGUILayout.PropertyField(m_DebugDisplay, EditorUtilities.GetContent("Display|Toggle visibility of the debug layer on & off in the Game View."));
-
-                    using (new EditorGUI.DisabledScope(!m_DebugDisplay.boolValue))
-                    {
-                        EditorGUILayout.PropertyField(m_DebugMonitor, EditorUtilities.GetContent("Monitor|The real-time monitor to display on the debug layer."));
-                        EditorGUILayout.PropertyField(m_DebugLightMeter, EditorUtilities.GetContent("HDR Light Meter|Light metering utility used to setup auto exposure. Note that it will only display correct values when using a full-HDR workflow (HDR camera, HDR/Custom color grading)."));
-                    }
-
-                    if (!SystemInfo.supportsComputeShaders)
-                        EditorGUILayout.HelpBox("The debug layer only works on compute-shader enabled platforms.", MessageType.Warning);
-                    
-                    EditorGUILayout.HelpBox("This feature is still a work in progress.", MessageType.Info);
-                }
-                EditorGUI.indentLevel--;
-
-                GUILayout.Space(3);
-            }
-        }
-
         void DoToolkit()
         {
             EditorUtilities.DrawSplitter();
@@ -389,7 +348,7 @@ namespace UnityEditor.Rendering.PostProcessing
             var h = camera.pixelHeight;
 
             var texOut = new Texture2D(w, h, TextureFormat.RGBAFloat, false, true);
-            var target = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear, 1);
+            var target = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
 
             var lastActive = RenderTexture.active;
             var lastTargetSet = camera.targetTexture;

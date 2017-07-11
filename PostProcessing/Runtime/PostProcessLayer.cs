@@ -33,7 +33,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public Fog fog;
         public Dithering dithering;
 
-        public PostProcessDebugView debugView;
+        public PostProcessMonitors monitors;
 
         [SerializeField]
         PostProcessResources m_Resources;
@@ -107,6 +107,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_LogHistogram = new LogHistogram();
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
+
+            if (monitors == null)
+                monitors = new PostProcessMonitors();
+
+            monitors.OnEnable();
 
             // Scriptable render pipelines handle their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
@@ -216,7 +221,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Bundles.Clear();
             m_PropertySheetFactory.Release();
-            debugView.Release();
+
+            if (monitors != null)
+                monitors.OnDisable();
 
             // Might be an issue if several layers are blending in the same frame...
             TextureLerper.instance.Clear();
@@ -501,6 +508,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 SetupContext(context);
 
             TextureLerper.instance.BeginFrame(context);
+            var cmd = context.command;
 
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
@@ -514,7 +522,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 lastTarget = m_TargetPool.Get();
                 var finalDestination = context.destination;
-                context.command.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
                 context.destination = lastTarget;
                 temporalAntialiasing.Render(context);
                 context.source = lastTarget;
@@ -541,6 +549,9 @@ namespace UnityEngine.Rendering.PostProcessing
             // And close with the final pass
             if (needsFinalPass)
                 RenderFinalPass(context, lastTarget);
+
+            // Render debug monitors if needed
+            monitors.Render(context);
 
             TextureLerper.instance.EndFrame();
             m_SettingsUpdateNeeded = true;
@@ -775,15 +786,8 @@ namespace UnityEngine.Rendering.PostProcessing
         bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
             bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
-            bool debug = debugView.IsEnabledAndSupported() && debugView.lightMeter;
-            return autoExpo || debug;
-        }
-
-        // Debug view display
-        void OnGUI()
-        {
-            if (debugView.IsEnabledAndSupported())
-                debugView.OnGUI(m_CurrentContext);
+            bool lightMeter = monitors.lightMeter.IsEnabledAndSupported();
+            return autoExpo || lightMeter;
         }
     }
 }

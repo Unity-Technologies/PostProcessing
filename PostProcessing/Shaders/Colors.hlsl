@@ -470,6 +470,25 @@ float3 WhiteBalance(float3 c, float3 balance)
 }
 
 //
+// RGB / Full-range YCbCr conversions (ITU-R BT.601)
+//
+float3 RgbToYCbCr(float3 c)
+{
+    float Y  =  0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+    float Cb = -0.169 * c.r - 0.331 * c.g + 0.500 * c.b;
+    float Cr =  0.500 * c.r - 0.419 * c.g - 0.081 * c.b;
+    return float3(Y, Cb, Cr);
+}
+
+float3 YCbCrToRgb(float3 c)
+{
+    float R = c.x + 0.000 * c.y + 1.403 * c.z;
+    float G = c.x - 0.344 * c.y - 0.714 * c.z;
+    float B = c.x - 1.773 * c.y + 0.000 * c.z;
+    return float3(R, G, B);
+}
+
+//
 // Hue, Saturation, Value
 // Ranges:
 //  Hue [0.0, 1.0]
