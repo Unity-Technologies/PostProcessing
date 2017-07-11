@@ -1,8 +1,8 @@
 # Post-processing Stack v2
 
-This branch is under active development, it is considered somewhat unstable and shouldn't be used in production. Do not use the issue system to report bugs from this branch. Use at your own risk.
+This branch is under active development and holds the upcoming version of the post-processing stack. Although it is fairly stable at this point it is still considered to be in a **beta** state.
 
-If you're looking for a stable post-processing stack you should grab version [1.x](https://github.com/Unity-Technologies/PostProcessing/tree/v1) instead.
+If you're looking for the previous version of the post-processing stack, checkout the [v1 branch](https://github.com/Unity-Technologies/PostProcessing/tree/v1) instead.
 
 Instructions
 ------------
@@ -16,7 +16,7 @@ Quickstart guides:
   - [DaVinci Resolve](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-DaVinci-Resolve)
   - [Adobe Photoshop](https://github.com/Unity-Technologies/PostProcessing/wiki/(v2)-Adobe-Photoshop)
 
-Requires Unity 5.6+.
+Requires Unity 5.6.1+ or 2017.1+.
 
 License
 -------
