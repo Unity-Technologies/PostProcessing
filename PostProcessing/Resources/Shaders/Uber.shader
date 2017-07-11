@@ -54,6 +54,7 @@ Shader "Hidden/Post FX/Uber Shader"
 
         sampler2D _Bloom_DirtTex;
         half _Bloom_DirtIntensity;
+		float4 _Bloom_DirtTex_Scale_Offset; 
 
         // Color grading & tonemapping
         sampler2D _LogLut;
@@ -229,7 +230,7 @@ Shader "Hidden/Post FX/Uber Shader"
 
                 #if BLOOM_LENS_DIRT
                 {
-                    half3 dirt = tex2D(_Bloom_DirtTex, i.uvFlipped).rgb * _Bloom_DirtIntensity;
+                    half3 dirt = tex2D(_Bloom_DirtTex, _Bloom_DirtTex_Scale_Offset.zw + i.uvFlipped * _Bloom_DirtTex_Scale_Offset.xy).rgb * _Bloom_DirtIntensity;
                     color += bloom * dirt;
                 }
                 #endif

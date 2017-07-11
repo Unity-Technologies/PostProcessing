@@ -21,7 +21,10 @@ namespace UnityEditor.PostProcessing
         {
             public SerializedProperty texture;
             public SerializedProperty intensity;
-        }
+			public SerializedProperty scale;
+			public SerializedProperty offset;
+			public SerializedProperty keepAspectRatio;
+		}
 
         BloomSettings m_Bloom;
         LensDirtSettings m_LensDirt;
@@ -40,8 +43,11 @@ namespace UnityEditor.PostProcessing
             m_LensDirt = new LensDirtSettings
             {
                 texture = FindSetting((Settings x) => x.lensDirt.texture),
-                intensity = FindSetting((Settings x) => x.lensDirt.intensity)
-            };
+                intensity = FindSetting((Settings x) => x.lensDirt.intensity),
+				scale = FindSetting((Settings x) => x.lensDirt.scale),
+				offset = FindSetting((Settings x) => x.lensDirt.offset),
+				keepAspectRatio = FindSetting((Settings x) => x.lensDirt.keepAspectRatio)
+			};
         }
 
         public override void OnInspectorGUI()
@@ -62,7 +68,10 @@ namespace UnityEditor.PostProcessing
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(m_LensDirt.texture);
             EditorGUILayout.PropertyField(m_LensDirt.intensity);
-            EditorGUI.indentLevel--;
+			EditorGUILayout.PropertyField(m_LensDirt.scale);
+			EditorGUILayout.PropertyField(m_LensDirt.offset);
+			EditorGUILayout.PropertyField(m_LensDirt.keepAspectRatio);
+			EditorGUI.indentLevel--;
         }
 
         #region Graph

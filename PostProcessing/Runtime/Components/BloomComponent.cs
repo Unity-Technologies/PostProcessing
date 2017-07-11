@@ -14,7 +14,8 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _Bloom_Settings      = Shader.PropertyToID("_Bloom_Settings");
             internal static readonly int _Bloom_DirtTex       = Shader.PropertyToID("_Bloom_DirtTex");
             internal static readonly int _Bloom_DirtIntensity = Shader.PropertyToID("_Bloom_DirtIntensity");
-        }
+			internal static readonly int _Bloom_Dirt_Scale_Offset = Shader.PropertyToID("_Bloom_DirtTex_Scale_Offset");
+		}
 
         const int k_MaxPyramidBlurLevel = 16;
         readonly RenderTexture[] m_BlurBuffer1 = new RenderTexture[k_MaxPyramidBlurLevel];
@@ -130,9 +131,21 @@ namespace UnityEngine.PostProcessing
 
             if (lensDirt.intensity > 0f && lensDirt.texture != null)
             {
-                uberMaterial.SetTexture(Uniforms._Bloom_DirtTex, lensDirt.texture);
+	            Vector2 scale = lensDirt.scale;
+	            if (lensDirt.keepAspectRatio)
+	            {
+		            float ws = (float)source.width / lensDirt.texture.width;
+					float hs = (float)source.height / lensDirt.texture.height;
+		            float s = (float)Mathf.Min(lensDirt.texture.width, lensDirt.texture.height) / Mathf.Max(source.width, source.height);
+					Vector2 aspectRationScale = new Vector2(ws * s, hs * s);
+					scale.Scale(aspectRationScale);
+				}
+				
+				uberMaterial.SetTexture(Uniforms._Bloom_DirtTex, lensDirt.texture);
                 uberMaterial.SetFloat(Uniforms._Bloom_DirtIntensity, lensDirt.intensity);
-                uberMaterial.EnableKeyword("BLOOM_LENS_DIRT");
+				uberMaterial.SetVector(Uniforms._Bloom_Dirt_Scale_Offset,new Vector4(scale.x, scale.y,lensDirt.offset.x,lensDirt.offset.y));
+
+				uberMaterial.EnableKeyword("BLOOM_LENS_DIRT");
             }
             else
             {

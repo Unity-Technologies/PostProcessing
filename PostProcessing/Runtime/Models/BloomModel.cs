@@ -54,6 +54,13 @@ namespace UnityEngine.PostProcessing
             [Min(0f), Tooltip("Amount of lens dirtiness.")]
             public float intensity;
 
+	        public Vector2 scale;
+
+	        public Vector2 offset;
+
+			[Tooltip("Fit the dirt texture in screen and preserve its aspect ratio")]
+	        public bool keepAspectRatio;
+
             public static LensDirtSettings defaultSettings
             {
                 get
@@ -61,7 +68,8 @@ namespace UnityEngine.PostProcessing
                     return new LensDirtSettings
                     {
                         texture = null,
-                        intensity = 3f
+                        intensity = 3f,
+						scale = Vector2.one
                     };
                 }
             }
