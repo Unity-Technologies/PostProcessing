@@ -56,9 +56,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (needHalfRes)
             {
-                var format = RenderTextureFormat.ARGBHalf;
-                format = SystemInfo.SupportsRenderTextureFormat(format) ? format : RenderTextureFormat.ARGB32;
-                cmd.GetTemporaryRT(ShaderIDs.HalfResFinalCopy, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, format);
+                cmd.GetTemporaryRT(ShaderIDs.HalfResFinalCopy, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, context.sourceFormat);
                 cmd.Blit(context.destination, ShaderIDs.HalfResFinalCopy);
             }
 

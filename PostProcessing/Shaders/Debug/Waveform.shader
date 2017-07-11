@@ -27,7 +27,7 @@ Shader "Hidden/PostProcessing/Debug/Waveform"
             float3 color = float3(0.0, 0.0, 0.0);
 
             uint2 uvI = i.vertex.xy;
-            float3 w = _WaveformBuffer[uvI.y * _Params.x + uvI.x];
+            float3 w = _WaveformBuffer[uvI.x * _Params.y + uvI.y].xyz;
 
             color += red * w.r;
             color += green * w.g;

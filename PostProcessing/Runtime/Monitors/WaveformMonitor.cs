@@ -45,8 +45,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("Waveform");
 
             var parameters = new Vector4(
-                context.width / 2,
-                context.height / 2,
+                width,
+                height,
                 RuntimeUtilities.isLinearColorSpace ? 1 : 0,
                 0f
             );
@@ -55,15 +55,21 @@ namespace UnityEngine.Rendering.PostProcessing
             int kernel = compute.FindKernel("KWaveformClear");
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.SetComputeVectorParam(compute, "_BufferParams", new Vector4(width, height, 0f, 0f));
             cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / 16f), Mathf.CeilToInt(height / 16f), 1);
+
+            // For performance reasons, especially on consoles, we'll just downscale the source
+            // again to reduce VMEM stalls. Eventually the whole algorithm needs to be rewritten as
+            // it's currently pretty naive.
+            cmd.GetTemporaryRT(ShaderIDs.WaveformSource, width, height, 0, FilterMode.Bilinear, context.sourceFormat);
+            cmd.BlitFullscreenTriangle(ShaderIDs.HalfResFinalCopy, ShaderIDs.WaveformSource);
 
             // Gather all pixels and fill in our waveform
             kernel = compute.FindKernel("KWaveformGather");
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
-            cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.HalfResFinalCopy);
+            cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.WaveformSource);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(context.width / 2f), Mathf.CeilToInt(context.width / 2f / 256f), 1);
+            cmd.DispatchCompute(compute, kernel, width, Mathf.CeilToInt(height / 256f), 1);
+            cmd.ReleaseTemporaryRT(ShaderIDs.WaveformSource);
 
             // Generate the waveform texture
             var sheet = context.propertySheets.Get(context.resources.shaders.waveform);

@@ -101,6 +101,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int Interp                          = Shader.PropertyToID("_Interp");
 
         internal static readonly int HalfResFinalCopy                = Shader.PropertyToID("_HalfResFinalCopy");
+        internal static readonly int WaveformSource                  = Shader.PropertyToID("_WaveformSource");
         internal static readonly int WaveformBuffer                  = Shader.PropertyToID("_WaveformBuffer");
         internal static readonly int VectorscopeBuffer               = Shader.PropertyToID("_VectorscopeBuffer");
     }
