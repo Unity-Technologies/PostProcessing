@@ -148,12 +148,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             return Solve(motion, i.texcoord);
         }
 
-        float4 FragAlphaClear(VaryingsDefault i) : SV_Target
-        {
-            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
-            return float4(color, 0.0);
-        }
-
     ENDHLSL
 
     SubShader
@@ -178,17 +172,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragSolverNoDilate
-
-            ENDHLSL
-        }
-
-        // 2: Alpha clear
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment FragAlphaClear
 
             ENDHLSL
         }

@@ -30,8 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
         enum Pass
         {
             SolverDilate,
-            SolverNoDilate,
-            AlphaClear
+            SolverNoDilate
         }
 
         readonly RenderTargetIdentifier[] m_Mrt = new RenderTargetIdentifier[2];
@@ -155,7 +154,7 @@ namespace UnityEngine.Rendering.PostProcessing
             jitter = new Vector2(jitter.x / camera.pixelWidth, jitter.y / camera.pixelHeight);
         }
 
-        RenderTexture CheckHistory(int id, PostProcessRenderContext context, PropertySheet sheet)
+        RenderTexture CheckHistory(int id, PostProcessRenderContext context)
         {
             var rt = m_HistoryTextures[id];
 
@@ -168,7 +167,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 rt.filterMode = FilterMode.Bilinear;
                 m_HistoryTextures[id] = rt;
 
-                context.command.BlitFullscreenTriangle(context.source, rt, sheet, (int)Pass.AlphaClear);
+                context.command.BlitFullscreenTriangle(context.source, rt);
             }
             else if (rt.width != context.width || rt.height != context.height)
             {
@@ -194,8 +193,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("TemporalAntialiasing");
 
             int pp = m_HistoryPingPong;
-            var historyRead = CheckHistory(++pp % 2, context, sheet);
-            var historyWrite = CheckHistory(++pp % 2, context, sheet);
+            var historyRead = CheckHistory(++pp % 2, context);
+            var historyWrite = CheckHistory(++pp % 2, context);
             m_HistoryPingPong = ++pp % 2;
 
             const float kMotionAmplification = 100f * 60f;
