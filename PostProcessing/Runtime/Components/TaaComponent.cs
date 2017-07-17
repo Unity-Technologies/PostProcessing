@@ -56,11 +56,11 @@ namespace UnityEngine.PostProcessing
 
             if (VR.VRSettings.isDeviceActive)
             {
-                // This saves off the device generated projection matrices as the non-jittered set
-                context.camera.CopyStereoDeviceProjectionMatrixToNonJittered();
-
                 for (Camera.StereoscopicEye eye = Camera.StereoscopicEye.Left; eye <= Camera.StereoscopicEye.Right; eye++)
                 {
+                    // This saves off the device generated projection matrices as non-jittered
+                    context.camera.CopyStereoDeviceProjectionMatrixToNonJittered(eye);
+
                     Matrix4x4 originalProj = context.camera.GetStereoNonJitteredProjectionMatrix(eye);
 
                     // Currently no support for custom jitter func, as VR devices would need to provide
