@@ -63,7 +63,10 @@ namespace UnityEditor.Rendering.PostProcessing
             if (m_PostProcessLayer.objectReferenceValue == null)
                 return;
 
-            EditorGUILayout.Space();
+            if (AnyEnabled() && !m_Target.enabled)
+                EditorGUILayout.HelpBox("The component is disabled but some monitors are still enabled and will be rendered internally. It is recommended to disable them to save performances unless they're needed elsewhere.", MessageType.Warning);
+            else
+                EditorGUILayout.Space();
 
             m_Monitors.Update();
             
@@ -73,6 +76,16 @@ namespace UnityEditor.Rendering.PostProcessing
             DoMonitorGUI(EditorUtilities.GetContent("Vectoscope"), m_VectorscopeEnabled, m_VectorscopeExposure);
 
             m_Monitors.ApplyModifiedProperties();
+        }
+
+        bool AnyEnabled()
+        {
+            bool any = false;
+            any |= m_LightMeterEnabled.boolValue;
+            any |= m_HistogramEnabled.boolValue;
+            any |= m_WaveformEnabled.boolValue;
+            any |= m_VectorscopeEnabled.boolValue;
+            return any;
         }
 
         void DoMonitorGUI(GUIContent content, SerializedProperty prop, params SerializedProperty[] settings)
