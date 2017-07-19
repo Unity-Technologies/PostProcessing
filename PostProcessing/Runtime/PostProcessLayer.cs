@@ -518,7 +518,13 @@ namespace UnityEngine.Rendering.PostProcessing
             int lastTarget = -1;
             if (context.IsTemporalAntialiasingActive())
             {
-                temporalAntialiasing.SetProjectionMatrix(context.camera);
+                if (!RuntimeUtilities.scriptableRenderPipelineActive)
+                {
+                    var camera = context.camera;
+                    camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
+                    camera.projectionMatrix = temporalAntialiasing.GetJitteredProjectionMatrix(camera);
+                    camera.useJitteredProjectionMatrixForTransparentRendering = false;
+                }
 
                 lastTarget = m_TargetPool.Get();
                 var finalDestination = context.destination;

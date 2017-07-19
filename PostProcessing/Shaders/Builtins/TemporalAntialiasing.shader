@@ -1,12 +1,18 @@
 Shader "Hidden/PostProcessing/TemporalAntialiasing"
 {
     HLSLINCLUDE
-        
+
         #pragma exclude_renderers gles
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
 
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+    #if UNITY_VERSION >= 201710
+        #define _MainTexSampler sampler_LinearClamp
+    #else
+        #define _MainTexSampler sampler_MainTex
+    #endif
+
+        TEXTURE2D_SAMPLER2D(_MainTex, _MainTexSampler);
         float4 _MainTex_TexelSize;
 
         TEXTURE2D_SAMPLER2D(_HistoryTex, sampler_HistoryTex);
@@ -86,10 +92,10 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             const float2 k = _MainTex_TexelSize.xy;
             float2 uv = texcoord - _Jitter;
 
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+            float4 color = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv);
 
-            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv - k * 0.5);
-            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv + k * 0.5);
+            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv - k * 0.5);
+            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv + k * 0.5);
 
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
