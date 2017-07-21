@@ -192,7 +192,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     var c = (BoxCollider)collider;
                     Gizmos.DrawCube(c.center, c.size);
-                    Gizmos.DrawWireCube(c.center, c.size + new Vector3(blendDistance, blendDistance, blendDistance));
+                    Gizmos.DrawWireCube(c.center, c.size + new Vector3(blendDistance, blendDistance, blendDistance) * 2);
                 }
                 else if (type == typeof(SphereCollider))
                 {
