@@ -171,7 +171,9 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 #endif
 
-            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
+            var scale = transform.localScale;
+            var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, scale);
 
             // Draw a separate gizmo for each collider
             foreach (var collider in colliders)
@@ -192,13 +194,13 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     var c = (BoxCollider)collider;
                     Gizmos.DrawCube(c.center, c.size);
-                    Gizmos.DrawWireCube(c.center, c.size + new Vector3(blendDistance, blendDistance, blendDistance));
+                    Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
                 }
                 else if (type == typeof(SphereCollider))
                 {
                     var c = (SphereCollider)collider;
                     Gizmos.DrawSphere(c.center, c.radius);
-                    Gizmos.DrawWireSphere(c.center, c.radius + blendDistance);
+                    Gizmos.DrawWireSphere(c.center, c.radius + invScale.x * blendDistance * 2f);
                 }
                 else if (type == typeof(MeshCollider))
                 {
@@ -210,7 +212,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     // Mesh pivot should be centered or this won't work
                     Gizmos.DrawMesh(c.sharedMesh);
-                    Gizmos.DrawWireMesh(c.sharedMesh, Vector3.zero, Quaternion.identity, new Vector3(1f + blendDistance, 1f + blendDistance, 1f + blendDistance));
+                    Gizmos.DrawWireMesh(c.sharedMesh, Vector3.zero, Quaternion.identity, Vector3.one + invScale * blendDistance * 4f);
                 }
 
                 // Nothing for capsule (DrawCapsule isn't exposed in Gizmo), terrain, wheel and
