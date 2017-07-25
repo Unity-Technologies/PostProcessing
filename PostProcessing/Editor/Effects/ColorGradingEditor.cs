@@ -215,6 +215,25 @@ namespace UnityEditor.Rendering.PostProcessing
         void DoExternalModeGUI()
         {
             PropertyField(m_ExternalLut);
+
+            var lut = m_ExternalLut.value.objectReferenceValue;
+            if (lut != null)
+            {
+                if (lut.GetType() == typeof(Texture3D))
+                {
+                    var o = (Texture3D)lut;
+                    if (o.width == o.height && o.height == o.depth)
+                        return;
+                }
+                else if (lut.GetType() == typeof(RenderTexture))
+                {
+                    var o = (RenderTexture)lut;
+                    if (o.width == o.height && o.height == o.volumeDepth)
+                        return;
+                }
+
+                EditorGUILayout.HelpBox("Custom LUTs have to be log-encoded 3D textures or 3D render textures with cube format.", MessageType.Warning);
+            }
         }
 
         void DoStandardModeGUI(bool hdr)
