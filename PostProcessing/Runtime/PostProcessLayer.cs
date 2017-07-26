@@ -816,7 +816,7 @@ namespace UnityEngine.Rendering.PostProcessing
         bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
             bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
-            bool lightMeter = monitors.lightMeter.IsEnabledAndSupported();
+            bool lightMeter = monitors.lightMeter.IsRequestedAndSupported();
             return autoExpo || lightMeter;
         }
     }
