@@ -74,7 +74,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (s_FullscreenTriangle != null)
                     return s_FullscreenTriangle;
-                
+
                 s_FullscreenTriangle = new Mesh { name = "Fullscreen Triangle" };
 
                 // Because we have to support older platforms (GLES2/3, DX9 etc) we can't do all of
@@ -116,7 +116,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-                if (s_CopySheet != null)
+                if (s_CopySheet == null)
                     s_CopySheet = new PropertySheet(copyMaterial);
 
                 return s_CopySheet;
