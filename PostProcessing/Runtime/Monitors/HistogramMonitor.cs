@@ -31,6 +31,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Data = null;
         }
 
+        internal override bool NeedsHalfRes()
+        {
+            return true;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             CheckOutput(width, height);

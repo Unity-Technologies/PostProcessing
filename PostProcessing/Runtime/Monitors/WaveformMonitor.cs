@@ -20,6 +20,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Data = null;
         }
 
+        internal override bool NeedsHalfRes()
+        {
+            return true;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             // Waveform show localized data, so width depends on the aspect ratio

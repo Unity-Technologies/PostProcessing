@@ -7,20 +7,24 @@ namespace UnityEditor.Rendering.PostProcessing
     public sealed class PostProcessDebugEditor : BaseEditor<PostProcessDebug>
     {
         SerializedProperty m_PostProcessLayer;
+        SerializedProperty m_LightMeterEnabled;
+        SerializedProperty m_HistogramEnabled;
+        SerializedProperty m_WaveformEnabled;
+        SerializedProperty m_VectorscopeEnabled;
 
         SerializedObject m_Monitors;
-        SerializedProperty m_LightMeterEnabled;
         SerializedProperty m_LightMeterShowCurves;
-        SerializedProperty m_HistogramEnabled;
         SerializedProperty m_HistogramChannel;
-        SerializedProperty m_WaveformEnabled;
         SerializedProperty m_WaveformExposure;
-        SerializedProperty m_VectorscopeEnabled;
         SerializedProperty m_VectorscopeExposure;
 
         void OnEnable()
         {
             m_PostProcessLayer = FindProperty(x => x.postProcessLayer);
+            m_LightMeterEnabled = FindProperty(x => x.lightMeter);
+            m_HistogramEnabled = FindProperty(x => x.histogram);
+            m_WaveformEnabled = FindProperty(x => x.waveform);
+            m_VectorscopeEnabled = FindProperty(x => x.vectorscope);
 
             if (m_PostProcessLayer.objectReferenceValue != null)
                 RebuildProperties();
@@ -33,16 +37,9 @@ namespace UnityEditor.Rendering.PostProcessing
 
             m_Monitors = new SerializedObject(m_Target.postProcessLayer);
 
-            m_LightMeterEnabled = m_Monitors.FindProperty("monitors.lightMeter.enabled");
             m_LightMeterShowCurves = m_Monitors.FindProperty("monitors.lightMeter.showCurves");
-
-            m_HistogramEnabled = m_Monitors.FindProperty("monitors.histogram.enabled");
             m_HistogramChannel = m_Monitors.FindProperty("monitors.histogram.channel");
-
-            m_WaveformEnabled = m_Monitors.FindProperty("monitors.waveform.enabled");
             m_WaveformExposure = m_Monitors.FindProperty("monitors.waveform.exposure");
-
-            m_VectorscopeEnabled = m_Monitors.FindProperty("monitors.vectorscope.enabled");
             m_VectorscopeExposure = m_Monitors.FindProperty("monitors.vectorscope.exposure");
         }
 
@@ -58,34 +55,19 @@ namespace UnityEditor.Rendering.PostProcessing
                     RebuildProperties();
             }
 
+            if (m_PostProcessLayer.objectReferenceValue != null)
+            {
+                m_Monitors.Update();
+
+                DoMonitorGUI(EditorUtilities.GetContent("Light Meter"), m_LightMeterEnabled, m_LightMeterShowCurves);
+                DoMonitorGUI(EditorUtilities.GetContent("Histogram"), m_HistogramEnabled, m_HistogramChannel);
+                DoMonitorGUI(EditorUtilities.GetContent("Waveform"), m_WaveformEnabled, m_WaveformExposure);
+                DoMonitorGUI(EditorUtilities.GetContent("Vectoscope"), m_VectorscopeEnabled, m_VectorscopeExposure);
+
+                m_Monitors.ApplyModifiedProperties();
+            }
+
             serializedObject.ApplyModifiedProperties();
-
-            if (m_PostProcessLayer.objectReferenceValue == null)
-                return;
-
-            if (AnyEnabled() && !m_Target.enabled)
-                EditorGUILayout.HelpBox("The component is disabled but some monitors are still enabled and will be rendered internally. It is recommended to disable them to save performances unless they're needed elsewhere.", MessageType.Warning);
-            else
-                EditorGUILayout.Space();
-
-            m_Monitors.Update();
-            
-            DoMonitorGUI(EditorUtilities.GetContent("Light Meter"), m_LightMeterEnabled, m_LightMeterShowCurves);
-            DoMonitorGUI(EditorUtilities.GetContent("Histogram"), m_HistogramEnabled, m_HistogramChannel);
-            DoMonitorGUI(EditorUtilities.GetContent("Waveform"), m_WaveformEnabled, m_WaveformExposure);
-            DoMonitorGUI(EditorUtilities.GetContent("Vectoscope"), m_VectorscopeEnabled, m_VectorscopeExposure);
-
-            m_Monitors.ApplyModifiedProperties();
-        }
-
-        bool AnyEnabled()
-        {
-            bool any = false;
-            any |= m_LightMeterEnabled.boolValue;
-            any |= m_HistogramEnabled.boolValue;
-            any |= m_WaveformEnabled.boolValue;
-            any |= m_VectorscopeEnabled.boolValue;
-            return any;
         }
 
         void DoMonitorGUI(GUIContent content, SerializedProperty prop, params SerializedProperty[] settings)

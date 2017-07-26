@@ -1,14 +1,28 @@
 ﻿namespace UnityEngine.Rendering.PostProcessing
 {
+    public enum MonitorType
+    {
+        LightMeter,
+        Histogram,
+        Waveform,
+        Vectorscope
+    }
+
     public abstract class Monitor
     {
-        public bool enabled = false;
         public RenderTexture output { get; protected set; }
 
-        public bool IsEnabledAndSupported()
+        internal bool requested = false;
+
+        public bool IsRequestedAndSupported()
         {
-            return enabled
+            return requested
                 && SystemInfo.supportsComputeShaders;
+        }
+
+        internal virtual bool NeedsHalfRes()
+        {
+            return false;
         }
 
         protected void CheckOutput(int width, int height)

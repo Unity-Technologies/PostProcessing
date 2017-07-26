@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -9,6 +10,13 @@ namespace UnityEngine.Rendering.PostProcessing
         public HistogramMonitor histogram;
         public WaveformMonitor waveform;
         public VectorscopeMonitor vectorscope;
+
+        Dictionary<MonitorType, Monitor> m_Monitors;
+
+        public void RequestMonitorPass(MonitorType monitor)
+        {
+            m_Monitors[monitor].requested = true;
+        }
 
         internal void OnEnable()
         {
@@ -24,55 +32,57 @@ namespace UnityEngine.Rendering.PostProcessing
             if (vectorscope == null)
                 vectorscope = new VectorscopeMonitor();
 
-            lightMeter.OnEnable();
-            histogram.OnEnable();
-            waveform.OnEnable();
-            vectorscope.OnEnable();
+            m_Monitors = new Dictionary<MonitorType, Monitor>
+            {
+                { MonitorType.LightMeter, lightMeter },
+                { MonitorType.Histogram, histogram },
+                { MonitorType.Waveform, waveform },
+                { MonitorType.Vectorscope, vectorscope }
+            };
+
+            foreach (var kvp in m_Monitors)
+                kvp.Value.OnEnable();
         }
 
         internal void OnDisable()
         {
-            lightMeter.OnDisable();
-            histogram.OnDisable();
-            waveform.OnDisable();
-            vectorscope.OnDisable();
+            foreach (var kvp in m_Monitors)
+                kvp.Value.OnDisable();
         }
 
         internal void Render(PostProcessRenderContext context)
         {
-            bool lightMeterActive = lightMeter.IsEnabledAndSupported();
-            bool histogramActive = histogram.IsEnabledAndSupported();
-            bool waveformActive = waveform.IsEnabledAndSupported();
-            bool vectorscopeActive = vectorscope.IsEnabledAndSupported();
-            bool needHalfRes = histogramActive || vectorscopeActive || waveformActive;
-            bool anyActive = lightMeterActive
-                || histogramActive
-                || waveformActive
-                || vectorscopeActive;
+            bool anyActive = false;
+            bool needsHalfRes = false;
+
+            foreach (var kvp in m_Monitors)
+            {
+                bool active = kvp.Value.IsRequestedAndSupported();
+                anyActive |= active;
+                needsHalfRes |= active && kvp.Value.NeedsHalfRes();
+            }
 
             var cmd = context.command;
             if (anyActive)
                 cmd.BeginSample("Monitors");
 
-            if (needHalfRes)
+            if (needsHalfRes)
             {
                 cmd.GetTemporaryRT(ShaderIDs.HalfResFinalCopy, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, context.sourceFormat);
                 cmd.Blit(context.destination, ShaderIDs.HalfResFinalCopy);
             }
 
-            if (lightMeterActive)
-                lightMeter.Render(context);
+            foreach (var kvp in m_Monitors)
+            {
+                var monitor = kvp.Value;
 
-            if (histogramActive)
-                histogram.Render(context);
+                if (monitor.requested)
+                    monitor.Render(context);
 
-            if (waveformActive)
-                waveform.Render(context);
+                monitor.requested = false;
+            }
 
-            if (vectorscopeActive)
-                vectorscope.Render(context);
-
-            if (needHalfRes)
+            if (needsHalfRes)
                 cmd.ReleaseTemporaryRT(ShaderIDs.HalfResFinalCopy);
             
             if (anyActive)
