@@ -38,10 +38,8 @@ void KHistogramGather(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupT
         float channel;
         uint c = uint(_Params.w);
 
-        if (c == 0) channel = color.r;
-        else if (c == 1) channel = color.g;
-        else if (c == 2) channel = color.b;
-        else channel = Luminance(color);
+        if (c > 2) channel = Luminance(color);
+        else channel = color[c];
 
         uint idx = (uint)(round(channel * 255.0));
 
