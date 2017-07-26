@@ -111,6 +111,18 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        static PropertySheet s_CopySheet;
+        public static PropertySheet copySheet
+        {
+            get
+            {
+                if (s_CopySheet != null)
+                    s_CopySheet = new PropertySheet(copyMaterial);
+
+                return s_CopySheet;
+            }
+        }
+
         // Use a custom blit method to draw a fullscreen triangle instead of a fullscreen quad
         // https://michaldrobot.com/2014/04/01/gcn-execution-patterns-in-full-screen-passes/
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false)

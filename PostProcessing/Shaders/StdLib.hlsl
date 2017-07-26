@@ -150,6 +150,8 @@ float4 PositivePow(float4 base, float4 power)
 // Std unity data
 
 float4x4 unity_CameraProjection;
+float4x4 unity_MatrixVP;
+float4x4 unity_ObjectToWorld;
 float4x4 unity_WorldToCamera;
 float3 _WorldSpaceCameraPos;
 float4 _ProjectionParams;         // x: 1 (-1 flipped), y: near,     z: far,       w: 1/far

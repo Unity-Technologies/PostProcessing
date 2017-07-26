@@ -23,6 +23,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // Settings
         public Transform volumeTrigger;
         public LayerMask volumeLayer;
+        public bool stopNaNPropagation = true;
 
         // Builtins / hardcoded effects that don't benefit from volume blending
         public Antialiasing antialiasingMode = Antialiasing.None;
@@ -39,7 +40,7 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
-        [SerializeField] bool m_ShowDebugLayer;
+        [SerializeField] bool m_ShowRenderingFeatures;
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
 
@@ -93,6 +94,8 @@ namespace UnityEngine.Rendering.PostProcessing
         bool m_IsRenderingInSceneView = false;
 
         TargetPool m_TargetPool;
+
+        bool m_NaNKilled = false;
 
         // Recycled list - used to reduce GC stress when gathering active effects in a bundle list
         // on each frame
@@ -157,7 +160,7 @@ namespace UnityEngine.Rendering.PostProcessing
             UpdateBundleSortList(m_BeforeStackBundles, PostProcessEvent.BeforeStack);
             UpdateBundleSortList(m_AfterStackBundles, PostProcessEvent.AfterStack);
 
-            // Push all sorted lists in a dictionary for easier access 
+            // Push all sorted lists in a dictionary for easier access
             sortedBundles = new Dictionary<PostProcessEvent, List<SerializedBundleRef>>(new PostProcessEventComparer())
             {
                 { PostProcessEvent.BeforeTransparent, m_BeforeTransparentBundles },
@@ -275,10 +278,10 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 opaqueOnlyEffects++;
             }
-            
+
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
-            
+
             var cameraTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
 
             if (opaqueOnlyEffects > 0)
@@ -336,13 +339,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 cmd.ReleaseTemporaryRT(tempTarget0);
             }
-            
+
             // Post-transparency stack
+            // Same as before, first blit needs to use the builtin Blit command to properly handle
+            // tiled GPUs
             int tempRt = m_TargetPool.Get();
+
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt);
+            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
+            m_NaNKilled = stopNaNPropagation;
+
             context.command = m_LegacyCmdBuffer;
-            context.source = new RenderTargetIdentifier(tempRt);
+            context.source = tempRt;
             context.destination = cameraTarget;
             Render(context);
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
@@ -514,8 +522,18 @@ namespace UnityEngine.Rendering.PostProcessing
             // hasn't been called this frame.
             UpdateSettingsIfNeeded(context);
 
-            // Do temporal anti-aliasing first
+            // Do a NaN killing pass if needed
             int lastTarget = -1;
+            if (stopNaNPropagation && !m_NaNKilled)
+            {
+                lastTarget = m_TargetPool.Get();
+                cmd.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
+                context.source = lastTarget;
+                m_NaNKilled = true;
+            }
+
+            // Do temporal anti-aliasing first
             if (context.IsTemporalAntialiasingActive())
             {
                 if (!RuntimeUtilities.scriptableRenderPipelineActive)
@@ -526,13 +544,18 @@ namespace UnityEngine.Rendering.PostProcessing
                     camera.useJitteredProjectionMatrixForTransparentRendering = false;
                 }
 
-                lastTarget = m_TargetPool.Get();
+                var taaTarget = m_TargetPool.Get();
                 var finalDestination = context.destination;
-                cmd.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
-                context.destination = lastTarget;
+                cmd.GetTemporaryRT(taaTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                context.destination = taaTarget;
                 temporalAntialiasing.Render(context);
-                context.source = lastTarget;
+                context.source = taaTarget;
                 context.destination = finalDestination;
+
+                if (lastTarget > -1)
+                    cmd.ReleaseTemporaryRT(lastTarget);
+
+                lastTarget = taaTarget;
             }
 
             bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
@@ -561,6 +584,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             TextureLerper.instance.EndFrame();
             m_SettingsUpdateNeeded = true;
+            m_NaNKilled = false;
         }
 
         int RenderInjectionPoint(PostProcessEvent evt, PostProcessRenderContext context, string marker, int releaseTargetAfterUse = -1)
@@ -599,7 +623,7 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             int count = m_ActiveEffects.Count;
-            
+
             // If there's only one active effect, we can simply execute it and skip the rest
             if (count == 1)
             {
@@ -630,7 +654,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     context.destination = m_Targets[i + 1];
                     m_ActiveEffects[i].Render(context);
                 }
-                
+
                 cmd.ReleaseTemporaryRT(tempTarget1);
                 if (count > 2)
                     cmd.ReleaseTemporaryRT(tempTarget2);
@@ -705,7 +729,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (releaseTargetAfterUse > -1) cmd.ReleaseTemporaryRT(releaseTargetAfterUse);
             if (motionBlurTarget > -1) cmd.ReleaseTemporaryRT(motionBlurTarget);
             if (depthOfFieldTarget > -1) cmd.ReleaseTemporaryRT(motionBlurTarget);
-            
+
             cmd.EndSample("BuiltinStack");
 
             return tempTarget;

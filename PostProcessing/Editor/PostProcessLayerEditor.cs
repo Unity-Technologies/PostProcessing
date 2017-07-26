@@ -14,6 +14,7 @@ namespace UnityEditor.Rendering.PostProcessing
     [CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
+        SerializedProperty m_StopNaNPropagation;
         SerializedProperty m_VolumeTrigger;
         SerializedProperty m_VolumeLayer;
 
@@ -23,7 +24,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_FxaaMobileOptimized;
-        
+
         SerializedProperty m_AOEnabled;
         SerializedProperty m_AOIntensity;
         SerializedProperty m_AORadius;
@@ -32,7 +33,8 @@ namespace UnityEditor.Rendering.PostProcessing
 
         SerializedProperty m_FogEnabled;
         SerializedProperty m_FogExcludeSkybox;
-        
+
+        SerializedProperty m_ShowRenderingFeatures;
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -56,6 +58,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
         void OnEnable()
         {
+            m_StopNaNPropagation = FindProperty(x => x.stopNaNPropagation);
             m_VolumeTrigger = FindProperty(x => x.volumeTrigger);
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
 
@@ -65,7 +68,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
-            
+
             m_AOEnabled = FindProperty(x => x.ambientOcclusion.enabled);
             m_AOIntensity = FindProperty(x => x.ambientOcclusion.intensity);
             m_AORadius = FindProperty(x => x.ambientOcclusion.radius);
@@ -75,6 +78,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
 
+            m_ShowRenderingFeatures = serializedObject.FindProperty("m_ShowRenderingFeatures");
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
@@ -90,7 +94,7 @@ namespace UnityEditor.Rendering.PostProcessing
             {
                 var bundles = m_Target.sortedBundles[evt];
                 var listName = ObjectNames.NicifyVariableName(evt.ToString());
-                    
+
                 var list = new ReorderableList(bundles, typeof(SerializedBundleRef), true, true, false, false);
 
                 list.drawHeaderCallback = (rect) =>
@@ -121,13 +125,16 @@ namespace UnityEditor.Rendering.PostProcessing
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            
+
             var camera = m_Target.GetComponent<Camera>();
 
             DoVolumeBlending();
             DoAntialiasing();
-            DoAmbientOcclusion(camera);
-            DoFog(camera);
+
+            EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix."));
+            EditorGUILayout.Space();
+
+            DoRenderingFeatures(camera);
             DoToolkit();
             DoCustomEffectSorter();
 
@@ -203,11 +210,25 @@ namespace UnityEditor.Rendering.PostProcessing
             EditorGUILayout.Space();
         }
 
-        void DoAmbientOcclusion(Camera camera)
+        void DoRenderingFeatures(Camera camera)
         {
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
+            EditorUtilities.DrawSplitter();
+            m_ShowRenderingFeatures.boolValue = EditorUtilities.DrawHeader("Rendering Features", m_ShowRenderingFeatures.boolValue);
+
+            if (m_ShowRenderingFeatures.boolValue)
+            {
+                GUILayout.Space(2);
+
+                DoAmbientOcclusion(camera);
+                DoFog(camera);
+            }
+        }
+
+        void DoAmbientOcclusion(Camera camera)
+        {
             EditorGUILayout.LabelField(EditorUtilities.GetContent("Ambient Occlusion"), EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             {
@@ -218,7 +239,7 @@ namespace UnityEditor.Rendering.PostProcessing
                     EditorGUILayout.PropertyField(m_AOIntensity);
                     EditorGUILayout.PropertyField(m_AORadius);
                     EditorGUILayout.PropertyField(m_AOQuality);
-                    
+
                     if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)
                         EditorGUILayout.PropertyField(m_AOAmbientOnly);
                 }
@@ -230,9 +251,6 @@ namespace UnityEditor.Rendering.PostProcessing
 
         void DoFog(Camera camera)
         {
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
-                return;
-
             if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
                 return;
 
