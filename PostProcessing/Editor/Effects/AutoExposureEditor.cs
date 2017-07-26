@@ -37,9 +37,15 @@ namespace UnityEditor.Rendering.PostProcessing
             EditorUtilities.DrawHeaderLabel("Exposure");
 
             PropertyField(m_Filtering);
-
             PropertyField(m_MinLuminance);
             PropertyField(m_MaxLuminance);
+
+            // Clamp min/max adaptation values
+            float minLum = m_MinLuminance.value.floatValue;
+            float maxLum = m_MaxLuminance.value.floatValue;
+            m_MinLuminance.value.floatValue = Mathf.Min(minLum, maxLum);
+            m_MaxLuminance.value.floatValue = Mathf.Max(minLum, maxLum);
+
             PropertyField(m_KeyValue);
             
             EditorGUILayout.Space();

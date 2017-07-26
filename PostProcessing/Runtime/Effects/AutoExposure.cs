@@ -80,6 +80,12 @@ namespace UnityEngine.Rendering.PostProcessing
             highPercent = Mathf.Clamp(highPercent, 1f + kMinDelta, 99f);
             lowPercent = Mathf.Clamp(lowPercent, 1f, highPercent - kMinDelta);
 
+            // Clamp min/max adaptation values as well
+            float minLum = settings.minLuminance.value;
+            float maxLum = settings.maxLuminance.value;
+            settings.minLuminance.value = Mathf.Min(minLum, maxLum);
+            settings.maxLuminance.value = Mathf.Max(minLum, maxLum);
+
             // Compute auto exposure
             sheet.properties.SetBuffer(ShaderIDs.HistogramBuffer, context.logHistogram.data);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
