@@ -148,7 +148,17 @@ namespace UnityEditor.Rendering.PostProcessing
                     }
 
                     // Default unity field
-                    EditorGUILayout.PropertyField(property.value, title);
+                    if (property.value.hasVisibleChildren
+                        && property.value.propertyType != SerializedPropertyType.Vector2
+                        && property.value.propertyType != SerializedPropertyType.Vector3)
+                    {
+                        GUILayout.Space(12f);
+                        EditorGUILayout.PropertyField(property.value, title, true);
+                    }
+                    else
+                    {
+                        EditorGUILayout.PropertyField(property.value, title);
+                    }
                 }
             }
         }
