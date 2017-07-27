@@ -17,7 +17,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         [Tooltip("Enables ambient occlusion.")]
-        public bool enabled = true;
+        public bool enabled = false;
 
         [Range(0f, 4f), Tooltip("Degree of darkness produced by the effect.")]
         public float intensity = 0.5f;
