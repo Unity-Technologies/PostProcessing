@@ -31,6 +31,7 @@ namespace UnityEngine.Rendering.PostProcessing
     }
     
     // TODO: Look into minimum blur amount in the distance, right now it's lerped until a point
+    // TODO: Doesn't play nice with alpha propagation, see if it can be fixed without killing performances
     public sealed class DepthOfFieldRenderer : PostProcessEffectRenderer<DepthOfField>
     {
         enum Pass

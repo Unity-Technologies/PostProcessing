@@ -192,7 +192,7 @@ half Luminance(half4 linearRgba)
 // Quadratic color thresholding
 // curve = (threshold - knee, knee * 2, 0.25 / knee)
 //
-half3 QuadraticThreshold(half3 color, half threshold, half3 curve)
+half4 QuadraticThreshold(half4 color, half threshold, half3 curve)
 {
     // Pixel brightness
     half br = Max3(color.r, color.g, color.b);

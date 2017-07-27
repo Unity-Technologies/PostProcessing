@@ -73,7 +73,7 @@ Shader "Hidden/PostProcessing/FinalPass"
             #endif
 
             color.rgb = Dither(color.rgb, i.texcoord);
-            return float4(color.rgb, 1.0);
+            return color;
         }
 
     ENDHLSL

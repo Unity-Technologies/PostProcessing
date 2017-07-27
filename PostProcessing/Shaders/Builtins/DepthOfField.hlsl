@@ -226,20 +226,22 @@ half4 FragCombine(VaryingsDefault i) : SV_Target
     // Convert CoC to far field alpha value.
     float ffa = smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, coc);
 
-    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
+    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
 #if defined(UNITY_COLORSPACE_GAMMA)
     color = SRGBToLinear(color);
 #endif
 
+    half alpha = Max3(dof.r, dof.g, dof.b);
+
     // lerp(lerp(color, dof, ffa), dof, dof.a)
-    color = lerp(color, dof.rgb, ffa + dof.a - ffa * dof.a);
+    color = lerp(color, float4(dof.rgb, alpha), ffa + dof.a - ffa * dof.a);
 
 #if defined(UNITY_COLORSPACE_GAMMA)
     color = LinearToSRGB(color);
 #endif
 
-    return half4(color, 1.0);
+    return color;
 }
 
 #endif // UNITY_POSTFX_DEPTH_OF_FIELD
