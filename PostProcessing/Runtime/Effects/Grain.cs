@@ -21,8 +21,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
-                && intensity.value > 0f
-                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
+                && intensity.value > 0f;
         }
     }
     
