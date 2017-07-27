@@ -346,6 +346,7 @@ namespace UnityEngine.Rendering.PostProcessing
             int tempRt = m_TargetPool.Get();
 
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
+            m_LegacyCmdBuffer.SetGlobalTexture(ShaderIDs.MainTex, cameraTarget);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
             m_NaNKilled = stopNaNPropagation;
 
