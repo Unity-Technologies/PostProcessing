@@ -28,7 +28,6 @@ namespace UnityEngine.PostProcessing
             get
             {
                 return model.enabled
-                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf)
                        && !context.interrupted;
             }
         }
@@ -81,11 +80,11 @@ namespace UnityEngine.PostProcessing
         public void Prepare(RenderTexture source, Material uberMaterial, bool antialiasCoC, Vector2 taaJitter, float taaBlending)
         {
             var settings = model.settings;
-            var colorFormat = RenderTextureFormat.ARGBHalf;
+            var colorFormat = RenderTextureFormat.DefaultHDR;
             var cocFormat = SelectFormat(RenderTextureFormat.R8, RenderTextureFormat.RHalf);
 
             // Avoid using R8 on OSX with Metal. #896121, https://goo.gl/MgKqu6
-            #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            #if (UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX) && !UNITY_2017_1_OR_NEWER
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal)
                 cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
             #endif
