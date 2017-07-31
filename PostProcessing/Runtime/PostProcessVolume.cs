@@ -178,15 +178,20 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 #endif
 
-            var scale = transform.localScale;
-            var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
-            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, scale);
+           // var scale = transform.localScale;
+           // var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
+            //Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, scale);
 
             // Draw a separate gizmo for each collider
             foreach (var collider in colliders)
             {
                 if (!collider.enabled)
                     continue;
+
+				var pos = collider.transform.position;
+				var lossyScale = collider.transform.lossyScale;
+				var scale = transform.localScale;
+				var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
 
                 // We'll just use scaling as an approximation for volume skin. It's far from being
                 // correct (and is completely wrong in some cases). Ultimately we'd use a distance
@@ -200,8 +205,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (type == typeof(BoxCollider))
                 {
                     var c = (BoxCollider)collider;
-                    Gizmos.DrawCube(c.center, c.size);
-                    Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
+
+					Gizmos.DrawCube(pos + Vector3.Scale(c.center, scale), Vector3.Scale(lossyScale, c.size));
+                  //  Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
                 }
                 else if (type == typeof(SphereCollider))
                 {
