@@ -65,6 +65,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Min(0f), Tooltip("Outer distance to start blending from. A value of 0 means no blending and the volume overrides will be applied immediatly upon entry.")]
         public float blendDistance = 0f;
 
+		[Tooltip("Should volumes be calculated based on colliders from children objects as well?")]
+		public bool useChildColliders = false;
+
         [Range(0f, 1f), Tooltip("Total weight of this volume in the scene. 0 means it won't do anything, 1 means full effect.")]
         public float weight = 1f;
         
@@ -156,7 +159,11 @@ namespace UnityEngine.Rendering.PostProcessing
         void OnDrawGizmos()
         {
             var colliders = m_TempColliders;
-            GetComponents(colliders);
+
+			if (useChildColliders)
+				GetComponentsInChildren (colliders);
+			else
+            	GetComponents(colliders);
 
             if (isGlobal || colliders == null)
                 return;
