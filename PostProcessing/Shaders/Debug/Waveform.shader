@@ -2,6 +2,7 @@ Shader "Hidden/PostProcessing/Debug/Waveform"
 {
     HLSLINCLUDE
 
+        #pragma target 4.5
         #include "../StdLib.hlsl"
 
         StructuredBuffer<uint4> _WaveformBuffer;
