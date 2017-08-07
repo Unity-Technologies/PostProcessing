@@ -51,34 +51,19 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             return (uv + result.xy * k);
         }
 
-        // Adapted from Playdead's TAA implementation
-        // https://github.com/playdeadgames/temporal
-        float4 ClipToAABB(float4 color, float4 p, float3 minimum, float3 maximum)
+        float4 ClipToAABB(float4 color, float3 minimum, float3 maximum)
         {
-            float4 r = color - p;
+            // Note: only clips towards aabb center (but fast!)
+            float3 center = 0.5 * (maximum + minimum);
+            float3 extents = 0.5 * (maximum - minimum);
 
-            maximum = maximum - p.xyz;
-            minimum = minimum - p.xyz;
+            // This is actually `distance`, however the keyword is reserved
+            float3 offset = color.rgb - center;
 
-            if (r.x > maximum.x + 0.00000001)
-                r *= (maximum.x / r.x);
-
-            if (r.y > maximum.y + 0.00000001)
-                r *= (maximum.y / r.y);
-
-            if (r.z > maximum.z + 0.00000001)
-                r *= (maximum.z / r.z);
-
-            if (r.x < minimum.x - 0.00000001)
-                r *= (minimum.x / r.x);
-
-            if (r.y < minimum.y - 0.00000001)
-                r *= (minimum.y / r.y);
-
-            if (r.z < minimum.z - 0.00000001)
-                r *= (minimum.z / r.z);
-
-            return p + r;
+            float3 ts = abs(extents / (offset + 0.0001));
+            float t = saturate(Min3(ts.x, ts.y, ts.z));
+            color.rgb = center + offset * t;
+            return color;
         }
 
         struct OutputSolver
@@ -124,7 +109,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             history = FastTonemap(history);
 
             // Clip history samples
-            history = ClipToAABB(history, clamp(color, minimum, maximum), minimum.xyz, maximum.xyz);
+            history = ClipToAABB(history, minimum.xyz, maximum.xyz);
 
             // Blend method
             float weight = clamp(
