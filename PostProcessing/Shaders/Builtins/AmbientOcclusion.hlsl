@@ -103,7 +103,7 @@ float CheckBounds(float2 uv, float d)
 // Depth/normal sampling functions
 float SampleDepth(float2 uv)
 {
-    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv)));
+    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv), 0));
     return d * _ProjectionParams.z + CheckBounds(uv, d);
 }
 
