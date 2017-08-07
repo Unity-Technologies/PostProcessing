@@ -209,8 +209,10 @@ float3 PickSamplePoint(float2 uv, float index)
     // Uniformaly distributed points on a unit sphere http://goo.gl/X2F1Ho
 #if defined(FIX_SAMPLING_PATTERN)
     float gn = GradientNoise(uv * _Downsample);
-    float u = frac(UVRandom(0.0, index) + gn) * 2.0 - 1.0;
-    float theta = (UVRandom(1.0, index) + gn) * UNITY_PI_2;
+    // FIXME: This was added to avoid a NVIDIA driver issue.
+    //                                   vvvvvvvvvvvv
+    float u = frac(UVRandom(0.0, index + uv.x * 1e-10) + gn) * 2.0 - 1.0;
+    float theta = (UVRandom(1.0, index + uv.x * 1e-10) + gn) * UNITY_PI_2;
 #else
     float u = UVRandom(uv.x + _Time.x, uv.y + index) * 2.0 - 1.0;
     float theta = UVRandom(-uv.x - _Time.x, uv.y + index) * UNITY_PI_2;
