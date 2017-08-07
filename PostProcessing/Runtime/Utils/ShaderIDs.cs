@@ -93,6 +93,8 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int GrainTex                        = Shader.PropertyToID("_GrainTex");
         internal static readonly int Phase                           = Shader.PropertyToID("_Phase");
 
+        internal static readonly int LumaInAlpha                     = Shader.PropertyToID("_LumaInAlpha");
+
         internal static readonly int DitheringTex                    = Shader.PropertyToID("_DitheringTex");
         internal static readonly int Dithering_Coords                = Shader.PropertyToID("_Dithering_Coords");
 

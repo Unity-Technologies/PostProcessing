@@ -64,6 +64,9 @@ Shader "Hidden/PostProcessing/Uber"
         half2 _Grain_Params1; // x: lum_contrib, y: intensity
         float4 _Grain_Params2; // x: xscale, h: yscale, z: xoffset, w: yoffset
 
+        // Misc
+        half _LumaInAlpha;
+
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
             float2 uv = i.texcoord;
@@ -170,8 +173,8 @@ Shader "Hidden/PostProcessing/Uber"
                     }
                     #endif
 
-                    half3 new_color = color * lerp(_Vignette_Color, (1.0).xxx, vfactor);
-                    color.rgb = lerp(color, new_color, _Vignette_Opacity);
+                    half3 new_color = color.rgb * lerp(_Vignette_Color, (1.0).xxx, vfactor);
+                    color.rgb = lerp(color.rgb, new_color, _Vignette_Opacity);
                     color.a = lerp(1.0, color.a, vfactor);
                 }
             }
@@ -202,19 +205,21 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            half4 output;
+            half4 output = color;
 
             #if FINALPASS
             {
-                color.rgb = Dither(color.rgb, i.texcoord);
-                output = color;
+                output.rgb = Dither(output.rgb, i.texcoord);
             }
             #else
             {
-                // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
-                // necessary as RGB values will potentially still be HDR for the FXAA pass
-                half luma = Luminance(saturate(color));
-                output = half4(color.rgb, luma);
+                if (_LumaInAlpha > 0.5)
+                {
+                    // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
+                    // necessary as RGB values will potentially still be HDR for the FXAA pass
+                    half luma = Luminance(saturate(output));
+                    output.a = luma;
+                }
             }
             #endif
 

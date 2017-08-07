@@ -684,6 +684,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 tempTarget = m_TargetPool.Get();
                 cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
                 context.destination = tempTarget;
+
+                // Handle FXAA's keep alpha mode
+                if (antialiasingMode == Antialiasing.FastApproximateAntialiasing && !fastApproximateAntialiasing.keepAlpha)
+                    uberSheet.properties.SetFloat(ShaderIDs.LumaInAlpha, 1f);
             }
 
             // Depth of field final combination pass used to be done in Uber which led to artifacts
@@ -761,6 +765,9 @@ namespace UnityEngine.Rendering.PostProcessing
                         ? "FXAA_LOW"
                         : "FXAA"
                     );
+
+                    if (fastApproximateAntialiasing.keepAlpha)
+                        uberSheet.EnableKeyword("FXAA_KEEP_ALPHA");
                 }
                 else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported())
                 {

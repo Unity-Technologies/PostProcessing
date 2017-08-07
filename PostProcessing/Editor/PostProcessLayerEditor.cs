@@ -24,6 +24,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_FxaaMobileOptimized;
+        SerializedProperty m_FxaaKeepAlpha;
 
         SerializedProperty m_AOEnabled;
         SerializedProperty m_AOIntensity;
@@ -68,6 +69,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
+            m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
             m_AOEnabled = FindProperty(x => x.ambientOcclusion.enabled);
             m_AOIntensity = FindProperty(x => x.ambientOcclusion.intensity);
@@ -203,6 +205,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {
                     EditorGUILayout.PropertyField(m_FxaaMobileOptimized);
+                    EditorGUILayout.PropertyField(m_FxaaKeepAlpha);
                 }
             }
             EditorGUI.indentLevel--;
