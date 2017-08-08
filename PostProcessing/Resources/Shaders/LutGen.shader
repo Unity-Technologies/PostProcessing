@@ -74,8 +74,9 @@ Shader "Hidden/Post FX/Lut Generator"
 
         #elif TONEMAPPING_NEUTRAL
 
-            color = ACEScg_to_unity(acescg);
+            color = ACEScg_to_ACES(acescg);
             color = NeutralTonemap(color, _NeutralTonemapperParams1, _NeutralTonemapperParams2);
+            color = ACES_to_unity(color);
 
         #else
 
