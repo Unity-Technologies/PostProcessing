@@ -6,7 +6,6 @@ using UnityEngine.Assertions;
 namespace UnityEngine.Rendering.PostProcessing
 {
     // TODO: XMLDoc everything (?)
-    // TODO: Add "keep alpha" checkbox
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", -1)]
     [RequireComponent(typeof(Camera))]
@@ -125,6 +124,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
             m_Camera = GetComponent<Camera>();
+            m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
@@ -344,7 +344,6 @@ namespace UnityEngine.Rendering.PostProcessing
             // Same as before, first blit needs to use the builtin Blit command to properly handle
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
-
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
             m_LegacyCmdBuffer.SetGlobalTexture(ShaderIDs.MainTex, cameraTarget);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
