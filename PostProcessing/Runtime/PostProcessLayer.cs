@@ -251,6 +251,13 @@ namespace UnityEngine.Rendering.PostProcessing
             var context = m_CurrentContext;
             var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
 
+            // Resets the projection matrix from previous frame in case TAA was enabled.
+            // We also need to force reset the non-jittered projection matrix here as it's not done
+            // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
+            // is switched off and the FOV or any other camera property changes.
+            m_Camera.ResetProjectionMatrix();
+            m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
+
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
@@ -354,16 +361,6 @@ namespace UnityEngine.Rendering.PostProcessing
             context.destination = cameraTarget;
             Render(context);
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
-        }
-
-        void OnPostRender()
-        {
-            // Unused in scriptable render pipelines
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
-                return;
-
-            if (m_CurrentContext.IsTemporalAntialiasingActive())
-                m_Camera.ResetProjectionMatrix();
         }
 
         PostProcessBundle GetBundle<T>()
