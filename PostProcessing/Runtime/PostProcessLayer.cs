@@ -363,6 +363,16 @@ namespace UnityEngine.Rendering.PostProcessing
             m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
         }
 
+        void OnPostRender()
+         {
+             // Unused in scriptable render pipelines
+             if (RuntimeUtilities.scriptableRenderPipelineActive)
+                 return;
+ 
+             if (m_CurrentContext.IsTemporalAntialiasingActive())
+                 m_Camera.ResetProjectionMatrix();
+         }
+
         PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
         {
