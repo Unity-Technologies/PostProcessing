@@ -1,5 +1,10 @@
 Shader "Hidden/PostProcessing/Copy"
 {
+    Properties
+    {
+        _MainTex ("", 2D) = "white" {}
+    }
+
     HLSLINCLUDE
 
         #include "../StdLib.hlsl"
@@ -10,15 +15,21 @@ Shader "Hidden/PostProcessing/Copy"
             float2 texcoord : TEXCOORD0;
         };
 
+        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        float4 _MainTex_ST;
+
         VaryingsDefault VertClassic(AttributesClassic v)
         {
             VaryingsDefault o;
-            o.vertex = mul(unity_MatrixVP, mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0)));
-            o.texcoord = v.texcoord;
+            o.vertex = float4(v.vertex.xy * 2.0 - 1.0, 0.0, 1.0);
+            o.texcoord = v.texcoord * _MainTex_ST.xy + _MainTex_ST.zw; // We need this for VR
+
+            #if UNITY_UV_STARTS_AT_TOP
+            o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
+            #endif
+
             return o;
         }
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
