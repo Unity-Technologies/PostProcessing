@@ -351,8 +351,31 @@ namespace UnityEngine.Rendering.PostProcessing
             // Same as before, first blit needs to use the builtin Blit command to properly handle
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
-            m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
+
+            RenderTextureDescriptor desc = new RenderTextureDescriptor(context.width, context.height, sourceFormat, 24);
+            bool rtArray = false;
+            if (XR.XRSettings.isDeviceActive)
+            {
+                desc = XR.XRSettings.eyeTextureDesc;
+                desc.colorFormat = sourceFormat;
+                desc.depthBufferBits = 24;
+
+                if (desc.dimension == TextureDimension.Tex2DArray)
+                    rtArray = true;
+
+                Debug.Log("XR Width Height: " + desc.width + " " + desc.height);
+                Debug.Log("Context Width Height: " + context.width + " " + context.height);
+            }
+            m_LegacyCmdBuffer.GetTemporaryRT(tempRt, desc, FilterMode.Bilinear);
+
+            if (rtArray)
+            {
+                m_LegacyCmdBuffer.SetRenderTarget(tempRt, 0, CubemapFace.Unknown, -1);
+                m_LegacyCmdBuffer.Blit(cameraTarget, BuiltinRenderTextureType.CurrentActive, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
+            }
+            else
+                m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
+
             m_NaNKilled = stopNaNPropagation;
 
             context.command = m_LegacyCmdBuffer;
