@@ -7,7 +7,34 @@ namespace UnityEngine.Rendering.PostProcessing
         // The following should be filled by the render pipeline
 
         // Camera currently rendering
-        public Camera camera { get; set; }
+        private Camera m_camera;
+        public Camera camera
+        {
+            get
+            {
+                return this.m_camera;
+            }
+
+            set
+            {
+                this.m_camera = value;
+
+                if (XR.XRSettings.isDeviceActive)
+                {
+                    RenderTextureDescriptor xrDesc = XR.XRSettings.eyeTextureDesc;
+                    m_width = xrDesc.width;
+                    m_height = xrDesc.height;
+                    // we should create eye-specific params
+                    // in order to support knowing the size of each eye
+                }
+                else
+                {
+                    m_width = m_camera.pixelWidth;
+                    m_height = m_camera.pixelHeight;
+                }
+            }
+        }
+
 
         // The command buffer to fill in
         public CommandBuffer command { get; set; }
@@ -41,15 +68,17 @@ namespace UnityEngine.Rendering.PostProcessing
         public object userData { get; set; }
 
         // Current camera width in pixels
+        private int m_width;
         public int width
         {
-            get { return camera.pixelWidth; }
+            get { return m_width; }
         }
 
         // Current camera height in pixels
+        private int m_height;
         public int height
         {
-            get { return camera.pixelHeight; }
+            get { return m_height; }
         }
 
         // Are we currently rendering in the scene view?
@@ -64,7 +93,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Reset()
         {
-            camera = null;
+            m_camera = null;
+            m_width = 0;
+            m_height = 0;
+
             command = null;
             source = 0;
             destination = 0;
