@@ -145,12 +145,32 @@ namespace UnityEngine.Rendering.PostProcessing
                 iterations
             );
 
+            // Lens dirtiness
+            // Keep the aspect ratio correct & center the dirt texture, we don't want it to be
+            // stretched or squashed
             var dirtTexture = settings.lensTexture.value == null
                 ? RuntimeUtilities.blackTexture
                 : settings.lensTexture.value;
 
+            var dirtRatio = (float)dirtTexture.width / (float)dirtTexture.height;
+            var screenRatio = (float)context.width / (float)context.height;
+            var dirtTileOffset = new Vector4(1f, 1f, 0f, 0f);
+
+            if (dirtRatio > screenRatio)
+            {
+                dirtTileOffset.x = screenRatio / dirtRatio;
+                dirtTileOffset.z = (1f - dirtTileOffset.x) * 0.5f;
+            }
+            else if (screenRatio > dirtRatio)
+            {
+                dirtTileOffset.y = dirtRatio / screenRatio;
+                dirtTileOffset.w = (1f - dirtTileOffset.y) * 0.5f;
+            }
+
+            // Shader properties
             var uberSheet = context.uberSheet;
             uberSheet.EnableKeyword("BLOOM");
+            uberSheet.properties.SetVector(ShaderIDs.Bloom_DirtTileOffset, dirtTileOffset);
             uberSheet.properties.SetVector(ShaderIDs.Bloom_Settings, shaderSettings);
             uberSheet.properties.SetColor(ShaderIDs.Bloom_Color, settings.color.value.linear);
             uberSheet.properties.SetTexture(ShaderIDs.Bloom_DirtTex, dirtTexture);
