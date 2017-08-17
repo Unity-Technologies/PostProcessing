@@ -92,6 +92,25 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        static Material s_CopyStdMaterial;
+        public static Material copyStdMaterial
+        {
+            get
+            {
+                if (s_CopyStdMaterial != null)
+                    return s_CopyStdMaterial;
+
+                var shader = Shader.Find("Hidden/PostProcessing/CopyStd");
+                s_CopyStdMaterial = new Material(shader)
+                {
+                    name = "PostProcess - CopyStd",
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+
+                return s_CopyStdMaterial;
+            }
+        }
+
         static Material s_CopyMaterial;
         public static Material copyMaterial
         {
