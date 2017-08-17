@@ -41,15 +41,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
+        // TODO: We need to make left/right arrays
         readonly RenderTexture[] m_HistoryTextures = new RenderTexture[2];
+        //readonly RenderTexture[][] m_HistoryTextures = new RenderTexture[2][];
+        //m_HistoryTextures[0][] = new RenderTexture[2];
         int m_HistoryPingPong;
 
         public bool IsSupported()
         {
             return SystemInfo.supportedRenderTargetCount >= 2
                 && SystemInfo.supportsMotionVectors
-                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2
-                && !RuntimeUtilities.isSinglePassStereoEnabled;
+                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
+                //&& !RuntimeUtilities.isSinglePassStereoEnabled;
         }
 
         internal DepthTextureMode GetCameraFlags()
@@ -94,6 +97,36 @@ namespace UnityEngine.Rendering.PostProcessing
 
             jitter = new Vector2(jitter.x / camera.pixelWidth, jitter.y / camera.pixelHeight);
             return cameraProj;
+        }
+
+        public void ConfiguredJitteredProjectionMatrix(PostProcessRenderContext context)
+        {
+            var camera = context.camera;
+            camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
+            camera.projectionMatrix = GetJitteredProjectionMatrix(camera);
+            camera.useJitteredProjectionMatrixForTransparentRendering = false;
+        }
+
+        public void ConfiguredStereoJitteredProjectionMatrices(PostProcessRenderContext context)
+        {
+            var camera = context.camera;
+            jitter = GenerateRandomOffset();
+            jitter *= jitterSpread;
+
+            for (Camera.StereoscopicEye eye = Camera.StereoscopicEye.Left; eye <= Camera.StereoscopicEye.Right; eye++)
+            {
+                // This saves off the device generated projection matrices as non-jittered
+                context.camera.CopyStereoDeviceProjectionMatrixToNonJittered(eye);
+                var originalProj = context.camera.GetStereoNonJitteredProjectionMatrix(eye);
+
+                // Currently no support for custom jitter func, as VR devices would need to provide
+                // original projection matrix as input along with jitter 
+                var jitteredMatrix = RuntimeUtilities.GenerateJitteredProjectionMatrixFromOriginal(context, originalProj, jitter);
+                context.camera.SetStereoProjectionMatrix(eye, jitteredMatrix);
+            }
+
+            jitter = new Vector2(jitter.x / context.singleEyeWidth, jitter.y / context.height);
+            camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)

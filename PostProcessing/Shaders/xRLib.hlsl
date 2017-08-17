@@ -50,9 +50,15 @@ float4 UnityStereoTransformScreenSpaceTex(float4 uv)
 {
     return float4(UnityStereoTransformScreenSpaceTex(uv.xy), UnityStereoTransformScreenSpaceTex(uv.zw));
 }
+
+float2 UnityStereoClamp(float2 uv, float4 scaleAndOffset)
+{
+    return float2(clamp(uv.x, scaleAndOffset.z, scaleAndOffset.z + scaleAndOffset.x), uv.y);
+}
 #else
 #define TransformStereoScreenSpaceTex(uv, w) uv
 #define UnityStereoTransformScreenSpaceTex(uv) uv
+#define UnityStereoClamp(uv, scaleAndOffset) uv
 #endif
 
 #endif // UNITY_POSTFX_XRLIB

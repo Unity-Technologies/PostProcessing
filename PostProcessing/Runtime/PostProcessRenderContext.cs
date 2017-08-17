@@ -26,11 +26,20 @@ namespace UnityEngine.Rendering.PostProcessing
                     m_height = xrDesc.height;
                     // we should create eye-specific params
                     // in order to support knowing the size of each eye
+
+                    if ((xrDesc.vrUsage == VRTextureUsage.TwoEyes) &&
+                        (xrDesc.dimension != TextureDimension.Tex2DArray))
+                    {
+                        m_singleEyeWidth = m_width / 2;
+                    }
+                    else
+                        m_singleEyeWidth = m_width;
                 }
                 else
                 {
                     m_width = m_camera.pixelWidth;
                     m_height = m_camera.pixelHeight;
+                    m_singleEyeWidth = m_width;
                 }
             }
         }
@@ -81,6 +90,12 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return m_height; }
         }
 
+        private int m_singleEyeWidth;
+        public int singleEyeWidth
+        {
+            get { return m_singleEyeWidth; }
+        }
+
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
         
@@ -96,6 +111,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_camera = null;
             m_width = 0;
             m_height = 0;
+            m_singleEyeWidth = 0;
 
             command = null;
             source = 0;
