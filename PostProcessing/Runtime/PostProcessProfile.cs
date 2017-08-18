@@ -59,7 +59,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             for (int i = 0; i < settings.Count; i++)
             {
-                if (settings.GetType() == type)
+                if (settings[i].GetType() == type)
                 {
                     toRemove = i;
                     break;
