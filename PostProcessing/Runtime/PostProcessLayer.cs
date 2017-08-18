@@ -256,9 +256,14 @@ namespace UnityEngine.Rendering.PostProcessing
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
             // is switched off and the FOV or any other camera property changes.
             m_Camera.ResetProjectionMatrix();
-            m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
+            //m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
             if (XR.XRSettings.isDeviceActive)
+            {
                 m_Camera.ResetStereoProjectionMatrices();
+                //m_Camera.nonJitteredProjectionMatrix = m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+            }
+            else
+                m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
             context.Reset();
             context.camera = m_Camera;
@@ -381,6 +386,8 @@ namespace UnityEngine.Rendering.PostProcessing
             // is switched off and the FOV or any other camera property changes.
             //m_Camera.ResetProjectionMatrix();
             //m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
+            //m_Camera.nonJitteredProjectionMatrix = m_Camera.GetStereoNonJitteredProjectionMatrix(Camera.StereoscopicEye.Right);
+            //m_Camera.projectionMatrix = m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
 
             context.Reset();
             context.camera = m_Camera;
@@ -496,8 +503,13 @@ namespace UnityEngine.Rendering.PostProcessing
             if (m_CurrentContext.IsTemporalAntialiasingActive())
             {
                 m_Camera.ResetProjectionMatrix();
+
                 if (XR.XRSettings.isDeviceActive)
-                    m_Camera.ResetStereoProjectionMatrices();
+                {
+                    if (m_CurrentContext.xrSinglePass ||
+                        (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right))
+                        m_Camera.ResetStereoProjectionMatrices();
+                }
             }
         }
 

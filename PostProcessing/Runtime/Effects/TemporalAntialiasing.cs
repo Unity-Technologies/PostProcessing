@@ -42,10 +42,17 @@ namespace UnityEngine.Rendering.PostProcessing
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
         // TODO: We need to make left/right arrays
-        readonly RenderTexture[] m_HistoryTextures = new RenderTexture[2];
-        //readonly RenderTexture[][] m_HistoryTextures = new RenderTexture[2][];
-        //m_HistoryTextures[0][] = new RenderTexture[2];
-        int m_HistoryPingPong;
+        //readonly RenderTexture[] m_HistoryTextures = new RenderTexture[2];
+        readonly RenderTexture[][] m_HistoryTextures = new RenderTexture[2][];
+
+        //int m_HistoryPingPong;
+        int[] m_HistoryPingPong = new int [2];
+
+        public TemporalAntialiasing()
+        {
+            m_HistoryTextures[0] = new RenderTexture[2];
+            m_HistoryTextures[1] = new RenderTexture[2];
+        }
 
         public bool IsSupported()
         {
@@ -131,16 +138,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)
         {
-            var rt = m_HistoryTextures[id];
+            //var rt = m_HistoryTextures[id];
+            var rt = m_HistoryTextures[context.activeEye][id];
 
             if (m_ResetHistory || rt == null || !rt.IsCreated())
             {
                 RenderTexture.ReleaseTemporary(rt);
 
                 rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                rt.name = "Temporal Anti-aliasing History";
+                rt.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.activeEye.ToString();
                 rt.filterMode = FilterMode.Bilinear;
-                m_HistoryTextures[id] = rt;
+                //m_HistoryTextures[id] = rt;
+                m_HistoryTextures[context.activeEye][id] = rt;
 
                 context.command.BlitFullscreenTriangle(context.source, rt);
             }
@@ -149,15 +158,18 @@ namespace UnityEngine.Rendering.PostProcessing
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
                 var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                rt2.name = "Temporal Anti-aliasing History";
+                //rt2.name = "Temporal Anti-aliasing History";
+                rt2.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.activeEye.ToString();
                 rt2.filterMode = FilterMode.Bilinear;
-                m_HistoryTextures[id] = rt2;
+                //m_HistoryTextures[id] = rt2;
+                m_HistoryTextures[context.activeEye][id] = rt2;
 
                 context.command.BlitFullscreenTriangle(rt, rt2);
                 RenderTexture.ReleaseTemporary(rt);
             }
 
-            return m_HistoryTextures[id];
+            //return m_HistoryTextures[id];
+            return m_HistoryTextures[context.activeEye][id];
         }
 
         internal void Render(PostProcessRenderContext context)
@@ -167,10 +179,12 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("TemporalAntialiasing");
 
-            int pp = m_HistoryPingPong;
+            //int pp = m_HistoryPingPong;
+            int pp = m_HistoryPingPong[context.activeEye];
             var historyRead = CheckHistory(++pp % 2, context);
             var historyWrite = CheckHistory(++pp % 2, context);
-            m_HistoryPingPong = ++pp % 2;
+            //m_HistoryPingPong = ++pp % 2;
+            m_HistoryPingPong[context.activeEye] = ++pp % 2;
 
             const float kMotionAmplification = 100f * 60f;
             sheet.properties.SetVector(ShaderIDs.Jitter, jitter);
@@ -192,12 +206,17 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             for (int i = 0; i < m_HistoryTextures.Length; i++)
             {
-                RenderTexture.ReleaseTemporary(m_HistoryTextures[i]);
+                for (int j = 0; j < m_HistoryTextures[i].Length; j++)
+                {
+                    RenderTexture.ReleaseTemporary(m_HistoryTextures[i][j]);
+                    m_HistoryTextures[i][j] = null;
+                }
                 m_HistoryTextures[i] = null;
             }
 
             m_SampleIndex = 0;
-            m_HistoryPingPong = 0;
+            m_HistoryPingPong[0] = 0;
+            m_HistoryPingPong[1] = 0;
             
             ResetHistory();
         }

@@ -27,6 +27,9 @@ namespace UnityEngine.Rendering.PostProcessing
                     // we should create eye-specific params
                     // in order to support knowing the size of each eye
 
+                    if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                        m_activeEye = (int)Camera.StereoscopicEye.Right;
+
                     if ((xrDesc.vrUsage == VRTextureUsage.TwoEyes) &&
                         (xrDesc.dimension != TextureDimension.Tex2DArray))
                     {
@@ -34,6 +37,9 @@ namespace UnityEngine.Rendering.PostProcessing
                     }
                     else
                         m_singleEyeWidth = m_width;
+
+                    // if the intermediate texture is being used for two eyes, that's single pass
+                    m_xrSinglePass = (xrDesc.vrUsage == VRTextureUsage.TwoEyes);
                 }
                 else
                 {
@@ -96,6 +102,12 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return m_singleEyeWidth; }
         }
 
+        private bool m_xrSinglePass;
+        public bool xrSinglePass
+        {
+            get { return m_xrSinglePass; }
+        }
+
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
         
@@ -106,12 +118,21 @@ namespace UnityEngine.Rendering.PostProcessing
         // to do temporal reprojection (see: Depth of Field)
         public TemporalAntialiasing temporalAntialiasing { get; internal set; }
 
+        private int m_activeEye;
+        public int activeEye
+        {
+            get { return m_activeEye; }
+        }
+
         public void Reset()
         {
             m_camera = null;
             m_width = 0;
             m_height = 0;
+
             m_singleEyeWidth = 0;
+            m_activeEye = (int)Camera.StereoscopicEye.Left;
+            m_xrSinglePass = false;
 
             command = null;
             source = 0;
