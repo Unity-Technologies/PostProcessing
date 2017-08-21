@@ -256,14 +256,9 @@ namespace UnityEngine.Rendering.PostProcessing
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
             // is switched off and the FOV or any other camera property changes.
             m_Camera.ResetProjectionMatrix();
-            //m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
+            m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
             if (XR.XRSettings.isDeviceActive)
-            {
                 m_Camera.ResetStereoProjectionMatrices();
-                //m_Camera.nonJitteredProjectionMatrix = m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
-            }
-            else
-                m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
             context.Reset();
             context.camera = m_Camera;
@@ -372,28 +367,30 @@ namespace UnityEngine.Rendering.PostProcessing
         void OnPreRender()
         {
             // Unused in scriptable render pipelines
-            // we only execute this for right eye
+            // Only needed for multi-pass stereo right eye
             if (RuntimeUtilities.scriptableRenderPipelineActive ||
                 (m_Camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right))
                 return;
 
+            // Probably should re-factor everything below to share common code between OnPreCull
+            // and OnPreRender.  
+
             var context = m_CurrentContext;
             var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
-
-            // Resets the projection matrix from previous frame in case TAA was enabled.
-            // We also need to force reset the non-jittered projection matrix here as it's not done
-            // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
-            // is switched off and the FOV or any other camera property changes.
-            //m_Camera.ResetProjectionMatrix();
-            //m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
-            //m_Camera.nonJitteredProjectionMatrix = m_Camera.GetStereoNonJitteredProjectionMatrix(Camera.StereoscopicEye.Right);
-            //m_Camera.projectionMatrix = m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
 
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
 
-            // TODO: I assume these are all executed for left eye before coming here
+            // I don't think I need the big hammer of clearing out the command buffers totally for the right eye.
+            // Really, I just need to clear out any effect that relies on history frames (like TAA), since each
+            // eye will have their own retained state.  The command buffers might be re-usable, assuming
+            // they start out being sourced from camera targets.
+            // Also, clearing of these buffers is dependent on their use being completed on the left eye first.
+            // Materials and render textures are what I am curious about, as far as re-use.  
+            // There is also the possibility of separating out the history-based effects into their own command
+            // buffers, and adding those per eye.  I don't think the bang-for-buck is there for that though,
+            // especially since single-pass is the path moving forward.
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
@@ -421,6 +418,7 @@ namespace UnityEngine.Rendering.PostProcessing
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
+            // This works on right eye because it is resolved/populated at runtime
             var cameraTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
 
             if (opaqueOnlyEffects > 0)

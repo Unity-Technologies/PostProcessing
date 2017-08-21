@@ -192,6 +192,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 cmd.BlitFullscreenTriangle(source, destination);
         }
 
+        // TODO: Generalize the GetTemporaryRT and Blit commands in order to support
+        // RT Arrays for Stereo Instancing/MultiView
+
         #endregion
 
         #region Unity specifics

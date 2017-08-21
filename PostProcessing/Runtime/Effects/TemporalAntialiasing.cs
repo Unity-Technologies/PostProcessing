@@ -41,17 +41,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
-        // TODO: We need to make left/right arrays
-        //readonly RenderTexture[] m_HistoryTextures = new RenderTexture[2];
-        readonly RenderTexture[][] m_HistoryTextures = new RenderTexture[2][];
+        const int k_NumEyes = 2;
+        const int k_NumHistoryTextures = 2;
+        readonly RenderTexture[][] m_HistoryTextures = new RenderTexture[k_NumEyes][];
 
-        //int m_HistoryPingPong;
-        int[] m_HistoryPingPong = new int [2];
+        int[] m_HistoryPingPong = new int [k_NumEyes];
 
         public TemporalAntialiasing()
         {
-            m_HistoryTextures[0] = new RenderTexture[2];
-            m_HistoryTextures[1] = new RenderTexture[2];
+            m_HistoryTextures[(int)Camera.StereoscopicEye.Left] = new RenderTexture[k_NumHistoryTextures];
+            m_HistoryTextures[(int)Camera.StereoscopicEye.Right] = new RenderTexture[k_NumHistoryTextures];
         }
 
         public bool IsSupported()
@@ -132,24 +131,28 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.camera.SetStereoProjectionMatrix(eye, jitteredMatrix);
             }
 
+            // jitter has to be scaled for the actual eye texture size, not just the intermediate texture size
+            // which could be double-wide in certain stereo rendering scenarios
             jitter = new Vector2(jitter.x / context.singleEyeWidth, jitter.y / context.height);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)
         {
-            //var rt = m_HistoryTextures[id];
-            var rt = m_HistoryTextures[context.activeEye][id];
+            var rt = m_HistoryTextures[context.xrActiveEye][id];
 
             if (m_ResetHistory || rt == null || !rt.IsCreated())
             {
                 RenderTexture.ReleaseTemporary(rt);
 
                 rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                rt.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.activeEye.ToString();
+                if (XR.XRSettings.isDeviceActive)
+                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
+                else
+                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
+
                 rt.filterMode = FilterMode.Bilinear;
-                //m_HistoryTextures[id] = rt;
-                m_HistoryTextures[context.activeEye][id] = rt;
+                m_HistoryTextures[context.xrActiveEye][id] = rt;
 
                 context.command.BlitFullscreenTriangle(context.source, rt);
             }
@@ -158,18 +161,19 @@ namespace UnityEngine.Rendering.PostProcessing
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
                 var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                //rt2.name = "Temporal Anti-aliasing History";
-                rt2.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.activeEye.ToString();
+                if (XR.XRSettings.isDeviceActive)
+                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
+                else
+                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString();
+
                 rt2.filterMode = FilterMode.Bilinear;
-                //m_HistoryTextures[id] = rt2;
-                m_HistoryTextures[context.activeEye][id] = rt2;
+                m_HistoryTextures[context.xrActiveEye][id] = rt2;
 
                 context.command.BlitFullscreenTriangle(rt, rt2);
                 RenderTexture.ReleaseTemporary(rt);
             }
 
-            //return m_HistoryTextures[id];
-            return m_HistoryTextures[context.activeEye][id];
+            return m_HistoryTextures[context.xrActiveEye][id];
         }
 
         internal void Render(PostProcessRenderContext context)
@@ -179,12 +183,10 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("TemporalAntialiasing");
 
-            //int pp = m_HistoryPingPong;
-            int pp = m_HistoryPingPong[context.activeEye];
+            int pp = m_HistoryPingPong[context.xrActiveEye];
             var historyRead = CheckHistory(++pp % 2, context);
             var historyWrite = CheckHistory(++pp % 2, context);
-            //m_HistoryPingPong = ++pp % 2;
-            m_HistoryPingPong[context.activeEye] = ++pp % 2;
+            m_HistoryPingPong[context.xrActiveEye] = ++pp % 2;
 
             const float kMotionAmplification = 100f * 60f;
             sheet.properties.SetVector(ShaderIDs.Jitter, jitter);

@@ -24,28 +24,22 @@ namespace UnityEngine.Rendering.PostProcessing
                     RenderTextureDescriptor xrDesc = XR.XRSettings.eyeTextureDesc;
                     m_width = xrDesc.width;
                     m_height = xrDesc.height;
-                    // we should create eye-specific params
-                    // in order to support knowing the size of each eye
+
+                    m_xrSinglePass = (xrDesc.vrUsage == VRTextureUsage.TwoEyes);
 
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
-                        m_activeEye = (int)Camera.StereoscopicEye.Right;
+                        m_xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
-                    if ((xrDesc.vrUsage == VRTextureUsage.TwoEyes) &&
-                        (xrDesc.dimension != TextureDimension.Tex2DArray))
-                    {
-                        m_singleEyeWidth = m_width / 2;
-                    }
+                    if (m_xrSinglePass && (xrDesc.dimension != TextureDimension.Tex2DArray))
+                        m_xrSingleEyeWidth = m_width / 2;
                     else
-                        m_singleEyeWidth = m_width;
-
-                    // if the intermediate texture is being used for two eyes, that's single pass
-                    m_xrSinglePass = (xrDesc.vrUsage == VRTextureUsage.TwoEyes);
+                        m_xrSingleEyeWidth = m_width;
                 }
                 else
                 {
                     m_width = m_camera.pixelWidth;
                     m_height = m_camera.pixelHeight;
-                    m_singleEyeWidth = m_width;
+                    m_xrSingleEyeWidth = m_width;
                 }
             }
         }
@@ -96,16 +90,25 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return m_height; }
         }
 
-        private int m_singleEyeWidth;
-        public int singleEyeWidth
-        {
-            get { return m_singleEyeWidth; }
-        }
-
+        // Is XR running in single-pass stereo mode?
         private bool m_xrSinglePass;
         public bool xrSinglePass
         {
             get { return m_xrSinglePass; }
+        }
+
+        // Current active rendering eye (for XR)
+        private int m_xrActiveEye;
+        public int xrActiveEye
+        {
+            get { return m_xrActiveEye; }
+        }
+
+        // Current single eye width in pixels (for XR)
+        private int m_xrSingleEyeWidth;
+        public int singleEyeWidth
+        {
+            get { return m_xrSingleEyeWidth; }
         }
 
         // Are we currently rendering in the scene view?
@@ -118,21 +121,15 @@ namespace UnityEngine.Rendering.PostProcessing
         // to do temporal reprojection (see: Depth of Field)
         public TemporalAntialiasing temporalAntialiasing { get; internal set; }
 
-        private int m_activeEye;
-        public int activeEye
-        {
-            get { return m_activeEye; }
-        }
-
         public void Reset()
         {
             m_camera = null;
             m_width = 0;
             m_height = 0;
 
-            m_singleEyeWidth = 0;
-            m_activeEye = (int)Camera.StereoscopicEye.Left;
             m_xrSinglePass = false;
+            m_xrActiveEye = (int)Camera.StereoscopicEye.Left;
+            m_xrSingleEyeWidth = 0;
 
             command = null;
             source = 0;
