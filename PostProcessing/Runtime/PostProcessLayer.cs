@@ -248,9 +248,6 @@ namespace UnityEngine.Rendering.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            var context = m_CurrentContext;
-            var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
-
             // Resets the projection matrix from previous frame in case TAA was enabled.
             // We also need to force reset the non-jittered projection matrix here as it's not done
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
@@ -260,108 +257,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (XR.XRSettings.isDeviceActive)
                 m_Camera.ResetStereoProjectionMatrices();
 
-            context.Reset();
-            context.camera = m_Camera;
-            context.sourceFormat = sourceFormat;
-
-            m_LegacyCmdBufferBeforeReflections.Clear();
-            m_LegacyCmdBufferOpaque.Clear();
-            m_LegacyCmdBuffer.Clear();
-
-            SetupContext(context);
-
-            // Lighting & opaque-only effects
-            int opaqueOnlyEffects = 0;
-            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            bool isAmbientOcclusionDeferred = ambientOcclusion.IsEnabledAndSupported(context) && ambientOcclusion.IsAmbientOnly(context);
-            bool isAmbientOcclusionOpaque = ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context);
-            bool isFogActive = fog.IsEnabledAndSupported(context);
-
-            // Ambient-only AO is done in a separate command buffer, before reflections
-            if (isAmbientOcclusionDeferred)
-            {
-                context.command = m_LegacyCmdBufferBeforeReflections;
-                ambientOcclusion.RenderAmbientOnly(context);
-            }
-            else if (isAmbientOcclusionOpaque)
-            {
-                opaqueOnlyEffects++;
-            }
-
-            opaqueOnlyEffects += isFogActive ? 1 : 0;
-            opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
-
-            var cameraTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
-
-            if (opaqueOnlyEffects > 0)
-            {
-                var cmd = m_LegacyCmdBufferOpaque;
-                context.command = cmd;
-
-                // We need to use the internal Blit method to copy the camera target or it'll fail
-                // on tiled GPU as it won't be able to resolve
-                int tempTarget0 = m_TargetPool.Get();
-                cmd.GetTemporaryRT(tempTarget0, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-                cmd.Blit(cameraTarget, tempTarget0);
-                context.source = tempTarget0;
-
-                int tempTarget1 = -1;
-
-                if (opaqueOnlyEffects > 1)
-                {
-                    tempTarget1 = m_TargetPool.Get();
-                    cmd.GetTemporaryRT(tempTarget1, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-                    context.destination = tempTarget1;
-                }
-                else
-                {
-                    context.destination = cameraTarget;
-                }
-
-                if (isAmbientOcclusionOpaque)
-                {
-                    ambientOcclusion.RenderAfterOpaque(context);
-                    opaqueOnlyEffects--;
-                    var prevSource = context.source;
-                    context.source = context.destination;
-                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
-                }
-
-                // TODO: Insert SSR here
-
-                if (isFogActive)
-                {
-                    fog.Render(context);
-                    opaqueOnlyEffects--;
-                    var prevSource = context.source;
-                    context.source = context.destination;
-                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
-                }
-
-                if (hasCustomOpaqueOnlyEffects)
-                {
-                    RenderOpaqueOnly(context);
-                }
-
-                if (opaqueOnlyEffects > 1)
-                    cmd.ReleaseTemporaryRT(tempTarget1);
-
-                cmd.ReleaseTemporaryRT(tempTarget0);
-            }
-
-            // Post-transparency stack
-            // Same as before, first blit needs to use the builtin Blit command to properly handle
-            // tiled GPUs
-            int tempRt = m_TargetPool.Get();
-            m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
-            m_NaNKilled = stopNaNPropagation;
-
-            context.command = m_LegacyCmdBuffer;
-            context.source = tempRt;
-            context.destination = cameraTarget;
-            Render(context);
-            m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
+            BuildCommandBuffers();
         }
 
         void OnPreRender()
@@ -372,9 +268,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 (m_Camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right))
                 return;
 
-            // Probably should re-factor everything below to share common code between OnPreCull
-            // and OnPreRender.  
+            BuildCommandBuffers();
+        }
 
+        void BuildCommandBuffers()
+        {
             var context = m_CurrentContext;
             var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
 
