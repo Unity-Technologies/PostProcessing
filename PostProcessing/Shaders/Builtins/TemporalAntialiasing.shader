@@ -14,17 +14,13 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         TEXTURE2D_SAMPLER2D(_MainTex, _MainTexSampler);
         float4 _MainTex_TexelSize;
-        float4 _MainTex_ST;
 
         TEXTURE2D_SAMPLER2D(_HistoryTex, sampler_HistoryTex);
-        float4 _HistoryTex_ST;
 
         TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
         float4 _CameraDepthTexture_TexelSize;
-        float4 _CameraDepthTexture_ST;
 
         TEXTURE2D_SAMPLER2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture);
-        float4 _CameraMotionVectorsTexture_ST;
 
         float2 _Jitter;
         float4 _FinalBlendParameters; // x: static, y: dynamic, z: motion amplification
@@ -33,14 +29,12 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         float2 GetClosestFragment(float2 uv)
         {
             const float2 k = _CameraDepthTexture_TexelSize.xy;
-            // TODO: All the neighborhood sample addresses need to run through UnityStereoClamp
-            // probably do something like UnityStereoClamp(bleh, unity_StereoScaleOffset[unity_StereoEyeIndex])
-            // or UnityStereoClamp(bleh, _CameraDepthTexture_ST);
+
             const float4 neighborhood = float4(
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv - k),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(k.x, -k.y)),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-k.x, k.y)),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + k)
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv - k)),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(k.x, -k.y))),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(-k.x, k.y))),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + k))
             );
 
         #if defined(UNITY_REVERSED_Z)
@@ -55,7 +49,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             result = lerp(result, float3(-1.0,  1.0, neighborhood.z), COMPARE_DEPTH(neighborhood.z, result.z));
             result = lerp(result, float3( 1.0,  1.0, neighborhood.w), COMPARE_DEPTH(neighborhood.w, result.z));
 
-            // TODO: do I need to clamp this?  Should be lerping between clamped coords...
             return (uv + result.xy * k);
         }
 
@@ -83,13 +76,12 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         OutputSolver Solve(float2 motion, float2 texcoord)
         {
             const float2 k = _MainTex_TexelSize.xy;
-            float2 uv = texcoord - _Jitter;
+            float2 uv = UnityStereoClamp(texcoord - _Jitter);
 
             float4 color = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv);
 
-            // TODO: clamp the coords here
-            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv - k * 0.5);
-            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv + k * 0.5);
+            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv - k * 0.5));
+            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv + k * 0.5));
 
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
@@ -105,8 +97,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             color = FastTonemap(color);
 
-            // TODO: clamp the coords here
-            float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, texcoord - motion);
+            float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(texcoord - motion));
 
             float motionLength = length(motion);
             float2 luma = float2(Luminance(average), Luminance(color));
@@ -139,15 +130,8 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         {
             float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
 
-            // TODO: either use TRANSFORM_TEX or UnityStereoTransformScreenSpaceTex on i.texcoord
-            //float2 closest = GetClosestFragment(i.texcoord);
             float2 closest = GetClosestFragment(adjustedTexCoord);
-
-            // TODO: since closest is based off the transformed tex coord, we should be ok
             float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
-
-            // TODO: again, either use TRANSFORM_TEX or UnityStereoTransformScreenSpaceTex on i.texcoord
-            //return Solve(motion, i.texcoord);
             return Solve(motion, adjustedTexCoord);
         }
 
@@ -156,12 +140,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
 
             // Don't dilate in ortho !
-            // TODO: either use TRANSFORM_TEX or UnityStereoTransformScreenSpaceTex on i.texcoord
-            //float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoord).xy;
-
-            // TODO: again, either use TRANSFORM_TEX or UnityStereoTransformScreenSpaceTex on i.texcoord
-            //return Solve(motion, i.texcoord);
-
             float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, adjustedTexCoord).xy;
             return Solve(motion, adjustedTexCoord);
         }

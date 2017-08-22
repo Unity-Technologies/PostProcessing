@@ -58,7 +58,6 @@ namespace UnityEngine.Rendering.PostProcessing
             return SystemInfo.supportedRenderTargetCount >= 2
                 && SystemInfo.supportsMotionVectors
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
-                //&& !RuntimeUtilities.isSinglePassStereoEnabled;
         }
 
         internal DepthTextureMode GetCameraFlags()
