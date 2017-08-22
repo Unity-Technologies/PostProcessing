@@ -380,7 +380,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
             m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
-            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyMaterial, stopNaNPropagation ? 3 : 2);
+            m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
             m_NaNKilled = stopNaNPropagation;
 
             context.command = m_LegacyCmdBuffer;

@@ -29,7 +29,8 @@ Shader "Hidden/PostProcessing/Uber"
         TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
         TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
-        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens intensity
+        float4 _Bloom_DirtTileOffset; // xy: tiling, zw: offset
+        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens dirt intensity
         half3 _Bloom_Color;
 
         // Chromatic aberration
@@ -142,7 +143,7 @@ Shader "Hidden/PostProcessing/Uber"
             #if BLOOM
             {
                 half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvSPR, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
-                half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord).rgb, 0.0);
+                half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
 
                 // Additive bloom (artist friendly)
                 bloom *= _Bloom_Settings.y;

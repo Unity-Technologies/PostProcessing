@@ -13,6 +13,7 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader autoExposure;
             public Shader bloom;
             public Shader copy;
+            public Shader copyStd;
             public Shader discardAlpha;
             public Shader depthOfField;
             public Shader finalPass;
