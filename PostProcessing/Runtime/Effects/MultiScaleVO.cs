@@ -22,6 +22,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0, 2), Tooltip("Degree of darkness added by ambient occlusion.")]
         public float intensity = 1;
 
+        [ColorUsage(false), Tooltip("Custom color to use for the ambient occlusion.")]
+        public Color color = Color.black;
+
         internal enum MipLevel { Original, L1, L2, L3, L4, L5, L6 }
 
         internal enum TextureType
@@ -271,6 +274,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.height
             );
 
+            m_PropertySheet.properties.SetVector(ShaderIDs.AOColor, Color.white - color);
+
 #if !UNITY_2017_1_OR_NEWER
              m_TiledDepth1.AllocateNow();
              m_TiledDepth2.AllocateNow();
@@ -279,9 +284,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 
             m_Result.AllocateNow();
-
-            // Rebuild the render commands.
-            cmd.Clear();
 
             PushDownsampleCommands(context, cmd);
 
@@ -518,8 +520,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("Ambient Occlusion");
             DoLazyInitialization(context);
             RebuildCommandBuffers(context);
-            cmd.SetGlobalTexture(ShaderIDs.OcclusionTexture, m_Result.id);
-            cmd.Blit(null, BuiltinRenderTextureType.CameraTarget, m_PropertySheet.material, 2);
+            cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, 2);
             cmd.EndSample("Ambient Occlusion");
         }
 
@@ -537,8 +539,8 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion Composite");
             cmd.SetRenderTarget(m_MRT, BuiltinRenderTextureType.CameraTarget);
-            cmd.SetGlobalTexture(ShaderIDs.OcclusionTexture, m_Result.id);
-            cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, 1, MeshTopology.Triangles, 3);
+            cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
+            cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, 1, MeshTopology.Triangles, 3, 1, m_PropertySheet.properties);
             cmd.EndSample("Ambient Occlusion Composite");
         }
 

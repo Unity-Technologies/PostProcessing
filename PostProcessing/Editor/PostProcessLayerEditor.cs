@@ -31,8 +31,10 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_SAOIntensity;
         SerializedProperty m_SAORadius;
         SerializedProperty m_SAOQuality;
+        SerializedProperty m_SAOColor;
         SerializedProperty m_MSVOIntensity;
         SerializedProperty m_MSVOThicknessModifier;
+        SerializedProperty m_MSVOColor;
         SerializedProperty m_AOAmbientOnly;
 
         SerializedProperty m_FogEnabled;
@@ -86,8 +88,10 @@ namespace UnityEditor.Rendering.PostProcessing
             m_SAOIntensity = FindProperty(x => x.ambientOcclusion.scalableAO.intensity);
             m_SAORadius = FindProperty(x => x.ambientOcclusion.scalableAO.radius);
             m_SAOQuality = FindProperty(x => x.ambientOcclusion.scalableAO.quality);
+            m_SAOColor = FindProperty(x => x.ambientOcclusion.scalableAO.color);
             m_MSVOIntensity = FindProperty(x => x.ambientOcclusion.multiScaleVO.intensity);
             m_MSVOThicknessModifier = FindProperty(x => x.ambientOcclusion.multiScaleVO.thicknessModifier);
+            m_MSVOColor = FindProperty(x => x.ambientOcclusion.multiScaleVO.color);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
@@ -259,11 +263,13 @@ namespace UnityEditor.Rendering.PostProcessing
                         EditorGUILayout.PropertyField(m_SAOIntensity);
                         EditorGUILayout.PropertyField(m_SAORadius);
                         EditorGUILayout.PropertyField(m_SAOQuality);
+                        EditorGUILayout.PropertyField(m_SAOColor);
                     }
                     else if (aoMode == (int)AmbientOcclusion.Mode.MSVO)
                     {
                         EditorGUILayout.PropertyField(m_MSVOIntensity);
                         EditorGUILayout.PropertyField(m_MSVOThicknessModifier);
+                        EditorGUILayout.PropertyField(m_MSVOColor);
                     }
 
                     if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)

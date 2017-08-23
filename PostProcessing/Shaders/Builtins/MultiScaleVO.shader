@@ -4,6 +4,9 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
         #include "../StdLib.hlsl"
 
+        TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);
+        float3 _AOColor;
+
         // Full screen triangle with procedural draw
         // This can't be used when the destination can be the back buffer because
         // this doesn't support the situations that requires vertical flipping.
@@ -22,27 +25,6 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         #endif
 
             o.texcoord = TransformStereoScreenSpaceTex(o.texcoord, 1);
-            return o;
-        }
-
-        // The standard vertex shader for blit, slightly modified for supporting
-        // single-pass stereo rendering.
-        struct AttributesStd
-        {
-            float4 vertex : POSITION;
-            float2 texcoord : TEXCOORD0;
-        };
-
-        VaryingsDefault VertStd(AttributesStd v)
-        {
-            VaryingsDefault o;
-            o.vertex = float4(v.vertex.xy * 2.0 - 1.0, 0.0, 1.0);
-            o.texcoord = TransformStereoScreenSpaceTex(v.texcoord, 1);
-
-            #if UNITY_UV_STARTS_AT_TOP
-            o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
-            #endif
-
             return o;
         }
 
@@ -80,7 +62,6 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
                 #pragma vertex VertProcedural
                 #pragma fragment Frag
 
-                TEXTURE2D_SAMPLER2D(_OcclusionTexture, sampler_OcclusionTexture);
 
                 struct Output
                 {
@@ -90,31 +71,33 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
                 Output Frag(VaryingsDefault i)
                 {
-                    float ao = 1.0 - SAMPLE_TEXTURE2D(_OcclusionTexture, sampler_OcclusionTexture, i.texcoord).r;
+                    float ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoord).r;
                     Output o;
                     o.gbuffer0 = float4(0.0, 0.0, 0.0, ao);
-                    o.gbuffer3 = float4(ao, ao, ao, 0.0);
+                    o.gbuffer3 = float4(ao * _AOColor, 0.0);
                     return o;
                 }
 
             ENDHLSL
         }
 
-        // 2 - Composite to the frame buffer with the standard blit
+        // 2 - Composite to the frame buffer
         Pass
         {
-            Blend Zero SrcAlpha
-
             HLSLPROGRAM
 
-                #pragma vertex VertStd
+                #pragma vertex VertDefault
                 #pragma fragment Frag
 
-                TEXTURE2D_SAMPLER2D(_OcclusionTexture, sampler_OcclusionTexture);
+                TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
-                    return SAMPLE_TEXTURE2D(_OcclusionTexture, sampler_OcclusionTexture, i.texcoord).rrrr;
+                    float2 texcoord = TransformStereoScreenSpaceTex(i.texcoord, 1);
+                    half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, texcoord).r;
+                    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, texcoord);
+                    color.rgb *= 1.0 - ao * _AOColor;
+                    return color;
                 }
 
             ENDHLSL

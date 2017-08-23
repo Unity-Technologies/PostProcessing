@@ -26,6 +26,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Tooltip("Number of sample points, which affects quality and performance. Lowest, Low & Medium passes are downsampled. High and Ultra are not and should only be used on high-end hardware.")]
         public Quality quality = Quality.Medium;
 
+        [ColorUsage(false), Tooltip("Custom color to use for the ambient occlusion.")]
+        public Color color = Color.black;
+
         RenderTexture m_Result;
         PropertySheet m_PropertySheet;
 
@@ -105,6 +108,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var sheet = m_PropertySheet;
             sheet.ClearKeywords();
             sheet.properties.SetVector(ShaderIDs.AOParams, new Vector4(px, py, pz, pw));
+            sheet.properties.SetVector(ShaderIDs.AOColor, Color.white - color);
 
             // In forward fog is applied at the object level in the grometry pass so we need to
             // apply it to AO as well or it'll drawn on top of the fog effect.
@@ -160,6 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion");
             Render(context, cmd, 0);
+            cmd.SetGlobalTexture(ShaderIDs.SAOcclusionTexture, m_Result);
             cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, (int)Pass.CompositionForward);
             cmd.EndSample("Ambient Occlusion");
         }
@@ -176,7 +181,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion Composite");
-            cmd.SetGlobalTexture(ShaderIDs.OcclusionTexture, m_Result);
+            cmd.SetGlobalTexture(ShaderIDs.SAOcclusionTexture, m_Result);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_MRT, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionDeferred);
             cmd.EndSample("Ambient Occlusion Composite");
         }
