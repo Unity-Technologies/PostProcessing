@@ -11,7 +11,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_Diffusion;
         SerializedParameterOverride m_Color;
         SerializedParameterOverride m_MobileOptimized;
-        
+
         SerializedParameterOverride m_LensTexture;
         SerializedParameterOverride m_LensIntensity;
 
@@ -31,17 +31,17 @@ namespace UnityEditor.Rendering.PostProcessing
         public override void OnInspectorGUI()
         {
             EditorUtilities.DrawHeaderLabel("Bloom");
-            
+
             PropertyField(m_Intensity);
             PropertyField(m_Threshold);
             PropertyField(m_SoftKnee);
             PropertyField(m_Diffusion);
             PropertyField(m_Color);
             PropertyField(m_MobileOptimized);
-            
+
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Lens Dirtiness");
-                
+
             PropertyField(m_LensTexture);
             PropertyField(m_LensIntensity);
 

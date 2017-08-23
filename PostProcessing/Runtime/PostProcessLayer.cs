@@ -83,6 +83,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         PropertySheetFactory m_PropertySheetFactory;
         CommandBuffer m_LegacyCmdBufferBeforeReflections;
+        CommandBuffer m_LegacyCmdBufferBeforeLighting;
         CommandBuffer m_LegacyCmdBufferOpaque;
         CommandBuffer m_LegacyCmdBuffer;
         Camera m_Camera;
@@ -103,15 +104,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void OnEnable()
         {
+            Init(null);
+
             if (!haveBundlesBeenInited)
                 InitBundles();
 
             m_LogHistogram = new LogHistogram();
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
-
-            if (monitors == null)
-                monitors = new PostProcessMonitors();
 
             monitors.OnEnable();
 
@@ -120,17 +120,32 @@ namespace UnityEngine.Rendering.PostProcessing
                 return;
 
             m_LegacyCmdBufferBeforeReflections = new CommandBuffer { name = "Deferred Ambient Occlusion" };
+            m_LegacyCmdBufferBeforeLighting = new CommandBuffer { name = "Deferred Ambient Occlusion" };
             m_LegacyCmdBufferOpaque = new CommandBuffer { name = "Opaque Only Post-processing" };
             m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
             m_Camera = GetComponent<Camera>();
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
+            m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
 
             // Internal context used if no SRP is set
             m_CurrentContext = new PostProcessRenderContext();
+        }
+
+        public void Init(PostProcessResources resources)
+        {
+            if (resources != null) m_Resources = resources;
+            
+            RuntimeUtilities.CreateIfNull(ref monitors);
+            RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
+            RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
+            RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
+            RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
+            RuntimeUtilities.CreateIfNull(ref dithering);
+            RuntimeUtilities.CreateIfNull(ref fog);
         }
 
         public void InitBundles()
@@ -212,11 +227,13 @@ namespace UnityEngine.Rendering.PostProcessing
             if (!RuntimeUtilities.scriptableRenderPipelineActive)
             {
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
+                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
             }
 
             temporalAntialiasing.Release();
+            ambientOcclusion.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -261,8 +278,9 @@ namespace UnityEngine.Rendering.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-
+            
             m_LegacyCmdBufferBeforeReflections.Clear();
+            m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
 
@@ -271,15 +289,24 @@ namespace UnityEngine.Rendering.PostProcessing
             // Lighting & opaque-only effects
             int opaqueOnlyEffects = 0;
             bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            bool isAmbientOcclusionDeferred = ambientOcclusion.IsEnabledAndSupported(context) && ambientOcclusion.IsAmbientOnly(context);
-            bool isAmbientOcclusionOpaque = ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context);
+            bool aoSupported = ambientOcclusion.IsEnabledAndSupported(context);
+            bool aoAmbientOnly = ambientOcclusion.IsAmbientOnly(context);
+            bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
+            bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
             bool isFogActive = fog.IsEnabledAndSupported(context);
 
-            // Ambient-only AO is done in a separate command buffer, before reflections
+            // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
+                var ao = ambientOcclusion.Get();
+
+                // Render as soon as possible - should be done async in SRPs when available
                 context.command = m_LegacyCmdBufferBeforeReflections;
-                ambientOcclusion.RenderAmbientOnly(context);
+                ao.RenderAmbientOnly(context);
+
+                // Composite with GBuffer right before the lighting pass
+                context.command = m_LegacyCmdBufferBeforeLighting;
+                ao.CompositeAmbientOnly(context);
             }
             else if (isAmbientOcclusionOpaque)
             {
@@ -311,14 +338,11 @@ namespace UnityEngine.Rendering.PostProcessing
                     cmd.GetTemporaryRT(tempTarget1, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
                     context.destination = tempTarget1;
                 }
-                else
-                {
-                    context.destination = cameraTarget;
-                }
+                else context.destination = cameraTarget;
 
                 if (isAmbientOcclusionOpaque)
                 {
-                    ambientOcclusion.RenderAfterOpaque(context);
+                    ambientOcclusion.Get().RenderAfterOpaque(context);
                     opaqueOnlyEffects--;
                     var prevSource = context.source;
                     context.source = context.destination;
@@ -337,9 +361,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
 
                 if (hasCustomOpaqueOnlyEffects)
-                {
                     RenderOpaqueOnly(context);
-                }
 
                 if (opaqueOnlyEffects > 1)
                     cmd.ReleaseTemporaryRT(tempTarget1);
@@ -425,7 +447,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 flags |= temporalAntialiasing.GetCameraFlags();
 
             if (ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context))
-                flags |= ambientOcclusion.GetCameraFlags();
+                flags |= ambientOcclusion.Get().GetCameraFlags();
 
             if (fog.IsEnabledAndSupported(context))
                 flags |= fog.GetCameraFlags();
