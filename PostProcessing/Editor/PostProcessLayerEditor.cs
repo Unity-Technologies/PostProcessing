@@ -267,6 +267,9 @@ namespace UnityEditor.Rendering.PostProcessing
                     }
                     else if (aoMode == (int)AmbientOcclusion.Mode.MSVO)
                     {
+                        if (!SystemInfo.supportsComputeShaders)
+                            EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires compute shader support.", MessageType.Warning);
+
                         EditorGUILayout.PropertyField(m_MSVOIntensity);
                         EditorGUILayout.PropertyField(m_MSVOThicknessModifier);
                         EditorGUILayout.PropertyField(m_MSVOColor);
