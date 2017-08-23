@@ -281,6 +281,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.height
             );
 
+            m_PropertySheet.ClearKeywords();
             m_PropertySheet.properties.SetVector(ShaderIDs.AOColor, Color.white - color);
 
 #if !UNITY_2017_1_OR_NEWER
@@ -526,9 +527,36 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion");
             DoLazyInitialization(context);
+
+            var sheet = m_PropertySheet;
+
+            // In forward fog is applied at the object level in the grometry pass so we need to
+            // apply it to AO as well or it'll drawn on top of the fog effect.
+            // Not needed in Deferred.
+            if (context.camera.actualRenderingPath == RenderingPath.Forward && RenderSettings.fog)
+            {
+                sheet.properties.SetVector(
+                    ShaderIDs.FogParams,
+                    new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance)
+                );
+
+                switch (RenderSettings.fogMode)
+                {
+                    case FogMode.Linear:
+                        sheet.EnableKeyword("FOG_LINEAR");
+                        break;
+                    case FogMode.Exponential:
+                        sheet.EnableKeyword("FOG_EXP");
+                        break;
+                    case FogMode.ExponentialSquared:
+                        sheet.EnableKeyword("FOG_EXP2");
+                        break;
+                }
+            }
+
             RebuildCommandBuffers(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
-            cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, (int)Pass.CompositeForward);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.CompositeForward);
             cmd.EndSample("Ambient Occlusion");
         }
 

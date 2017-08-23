@@ -3,6 +3,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
     HLSLINCLUDE
 
         #include "../StdLib.hlsl"
+        #include "Fog.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);
         float3 _AOColor;
@@ -86,15 +87,25 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         {
             HLSLPROGRAM
 
+                #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #pragma vertex VertDefault
                 #pragma fragment Frag
 
                 TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+                TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
                     float2 texcoord = TransformStereoScreenSpaceTex(i.texcoord, 1);
                     half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, texcoord).r;
+
+                    // Apply fog when enabled (forward-only)
+                #if (FOG_LINEAR || FOG_EXP || FOG_EXP2)
+                    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, texcoord));
+                    d = ComputeFogDistance(d);
+                    ao *= ComputeFog(d);
+                #endif
+
                     half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, texcoord);
                     color.rgb *= 1.0 - ao * _AOColor;
                     return color;

@@ -115,7 +115,10 @@ namespace UnityEngine.Rendering.PostProcessing
             // Not needed in Deferred.
             if (context.camera.actualRenderingPath == RenderingPath.Forward && RenderSettings.fog)
             {
-                sheet.properties.SetVector(ShaderIDs.FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
+                sheet.properties.SetVector(
+                    ShaderIDs.FogParams,
+                    new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance)
+                );
 
                 switch (RenderSettings.fogMode)
                 {
