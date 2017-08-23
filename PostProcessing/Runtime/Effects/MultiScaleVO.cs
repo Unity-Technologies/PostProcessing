@@ -34,6 +34,13 @@ namespace UnityEngine.Rendering.PostProcessing
             FixedTiledUAV, HalfTiledUAV, FloatTiledUAV // Texture array
         }
 
+        enum Pass
+        {
+            DepthCopy,
+            CompositionDeferred,
+            CompositeForward
+        }
+
         PropertySheet m_PropertySheet;
         RTHandle m_DepthCopy;
         RTHandle m_LinearDepth;
@@ -335,7 +342,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_DepthCopy.PushAllocationCommand(cmd);
                 cmd.SetRenderTarget(m_DepthCopy.id);
-                cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, 0, MeshTopology.Triangles, 3);
+                cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, (int)Pass.DepthCopy, MeshTopology.Triangles, 3);
             }
 
             // Temporary buffer allocations.
@@ -521,7 +528,7 @@ namespace UnityEngine.Rendering.PostProcessing
             DoLazyInitialization(context);
             RebuildCommandBuffers(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
-            cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, 2);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, (int)Pass.CompositeForward);
             cmd.EndSample("Ambient Occlusion");
         }
 
@@ -540,7 +547,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("Ambient Occlusion Composite");
             cmd.SetRenderTarget(m_MRT, BuiltinRenderTextureType.CameraTarget);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
-            cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, 1, MeshTopology.Triangles, 3, 1, m_PropertySheet.properties);
+            cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, (int)Pass.CompositionDeferred, MeshTopology.Triangles, 3, 1, m_PropertySheet.properties);
             cmd.EndSample("Ambient Occlusion Composite");
         }
 
