@@ -32,7 +32,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public TextureParameter lensTexture = new TextureParameter { value = null };
 
         [Min(0f), Tooltip("Amount of lens dirtiness."), DisplayName("Intensity")]
-        public FloatParameter lensIntensity = new FloatParameter { value = 1f };
+        public FloatParameter lensIntensity = new FloatParameter { value = 0f };
 
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
