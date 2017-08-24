@@ -38,7 +38,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             DepthCopy,
             CompositionDeferred,
-            CompositeForward
+            CompositionForward
         }
 
         PropertySheet m_PropertySheet;
@@ -236,11 +236,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void DoLazyInitialization(PostProcessRenderContext context)
         {
-            if (m_PropertySheet == null)
-            {
-                var shader = context.resources.shaders.multiScaleAO;
-                m_PropertySheet = context.propertySheets.Get(shader);
-            }
+            var shader = context.resources.shaders.multiScaleAO;
+            m_PropertySheet = context.propertySheets.Get(shader);
+            m_PropertySheet.ClearKeywords();
 
             // Render texture handles
             if (m_Result == null)
@@ -281,7 +279,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.height
             );
 
-            m_PropertySheet.ClearKeywords();
             m_PropertySheet.properties.SetVector(ShaderIDs.AOColor, Color.white - color);
 
 #if !UNITY_2017_1_OR_NEWER
@@ -556,7 +553,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             RebuildCommandBuffers(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.CompositeForward);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward);
             cmd.EndSample("Ambient Occlusion");
         }
 
@@ -573,9 +570,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion Composite");
-            cmd.SetRenderTarget(m_MRT, BuiltinRenderTextureType.CameraTarget);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_Result.id);
-            cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, (int)Pass.CompositionDeferred, MeshTopology.Triangles, 3, 1, m_PropertySheet.properties);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_MRT, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionDeferred);
             cmd.EndSample("Ambient Occlusion Composite");
         }
 
@@ -583,10 +579,12 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (m_Result != null)
             {
+#if !UNITY_2017_1_OR_NEWER
                 m_TiledDepth1.Destroy();
                 m_TiledDepth2.Destroy();
                 m_TiledDepth3.Destroy();
                 m_TiledDepth4.Destroy();
+#endif
                 m_Result.Destroy();
             }
             
@@ -595,6 +593,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_TiledDepth3 = null;
             m_TiledDepth4 = null;
             m_Result = null;
+
         }
     }
 }

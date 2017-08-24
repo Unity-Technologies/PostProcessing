@@ -385,9 +385,7 @@ float4 FragComposition(VaryingsDefault i) : SV_Target
 {
     float2 delta = _MainTex_TexelSize.xy / DOWNSAMPLE;
     half ao = BlurSmall(TEXTURE2D_PARAM(_SAOcclusionTexture, sampler_SAOcclusionTexture), i.texcoord, delta);
-    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
-    color.rgb *= 1.0 - EncodeAO(ao) * _AOColor;
-    return color;
+    return float4(EncodeAO(ao) * _AOColor, 0.0);
 }
 
 #if !SHADER_API_GLES // Excluding the MRT pass under GLES2

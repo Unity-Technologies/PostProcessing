@@ -310,7 +310,8 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             else if (isAmbientOcclusionOpaque)
             {
-                opaqueOnlyEffects++;
+                context.command = m_LegacyCmdBufferOpaque;
+                ambientOcclusion.Get().RenderAfterOpaque(context);
             }
 
             opaqueOnlyEffects += isFogActive ? 1 : 0;
@@ -339,15 +340,6 @@ namespace UnityEngine.Rendering.PostProcessing
                     context.destination = tempTarget1;
                 }
                 else context.destination = cameraTarget;
-
-                if (isAmbientOcclusionOpaque)
-                {
-                    ambientOcclusion.Get().RenderAfterOpaque(context);
-                    opaqueOnlyEffects--;
-                    var prevSource = context.source;
-                    context.source = context.destination;
-                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
-                }
 
                 // TODO: Insert SSR here
 

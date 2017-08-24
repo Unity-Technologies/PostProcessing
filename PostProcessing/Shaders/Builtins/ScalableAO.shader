@@ -85,6 +85,8 @@ Shader "Hidden/PostProcessing/ScalableAO"
         // 6 - Final composition
         Pass
         {
+            Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
+
             HLSLPROGRAM
 
                 #pragma vertex VertDefault

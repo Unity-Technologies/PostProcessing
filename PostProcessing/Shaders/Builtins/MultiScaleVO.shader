@@ -5,24 +5,18 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         #include "../StdLib.hlsl"
         #include "Fog.hlsl"
 
+        TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
         TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);
         float3 _AOColor;
 
-        // Full screen triangle with procedural draw
-        // This can't be used when the destination can be the back buffer because
-        // this doesn't support the situations that requires vertical flipping.
-        VaryingsDefault VertProcedural(uint vid : SV_VertexID)
+        VaryingsDefault Vert(AttributesDefault v)
         {
-            float x = vid == 1 ? 2 : 0;
-            float y = vid >  1 ? 2 : 0;
-
             VaryingsDefault o;
-            o.vertex = float4(x * 2.0 - 1.0, 1.0 - y * 2.0, 0.0, 1.0);
+            o.vertex = float4(v.vertex.xy, 0.0, 1.0);
+            o.texcoord = TransformTriangleVertexToUV(v.vertex.xy);
 
         #if UNITY_UV_STARTS_AT_TOP
-            o.texcoord = float2(x, y);
-        #else
-            o.texcoord = float2(x, 1.0 - y);
+            o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
         #endif
 
             o.texcoord = TransformStereoScreenSpaceTex(o.texcoord, 1);
@@ -40,10 +34,8 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         {
             HLSLPROGRAM
 
-                #pragma vertex VertProcedural
+                #pragma vertex Vert
                 #pragma fragment Frag
-
-                TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
@@ -60,9 +52,8 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
             HLSLPROGRAM
 
-                #pragma vertex VertProcedural
+                #pragma vertex Vert
                 #pragma fragment Frag
-
 
                 struct Output
                 {
@@ -85,14 +76,13 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         // 2 - Composite to the frame buffer
         Pass
         {
+            Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
+
             HLSLPROGRAM
 
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
-                #pragma vertex VertDefault
+                #pragma vertex Vert
                 #pragma fragment Frag
-
-                TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-                TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
@@ -106,9 +96,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
                     ao *= ComputeFog(d);
                 #endif
 
-                    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, texcoord);
-                    color.rgb *= 1.0 - ao * _AOColor;
-                    return color;
+                    return float4(ao * _AOColor, 0.0);
                 }
 
             ENDHLSL

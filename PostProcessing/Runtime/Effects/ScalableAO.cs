@@ -64,8 +64,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void DoLazyInitialization(PostProcessRenderContext context)
         {
-            if (m_PropertySheet == null)
-                m_PropertySheet = context.propertySheets.Get(context.resources.shaders.scalableAO);
+            m_PropertySheet = context.propertySheets.Get(context.resources.shaders.scalableAO);
 
             bool reset = false;
 
@@ -168,7 +167,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("Ambient Occlusion");
             Render(context, cmd, 0);
             cmd.SetGlobalTexture(ShaderIDs.SAOcclusionTexture, m_Result);
-            cmd.BlitFullscreenTriangle(context.source, context.destination, m_PropertySheet, (int)Pass.CompositionForward);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward);
             cmd.EndSample("Ambient Occlusion");
         }
 
