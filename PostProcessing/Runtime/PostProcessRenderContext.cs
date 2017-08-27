@@ -24,6 +24,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     RenderTextureDescriptor xrDesc = XR.XRSettings.eyeTextureDesc;
                     m_width = xrDesc.width;
                     m_height = xrDesc.height;
+                    m_sourceDescriptor = xrDesc;
 
                     m_xrSinglePass = (xrDesc.vrUsage == VRTextureUsage.TwoEyes);
 
@@ -39,6 +40,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     m_width = m_camera.pixelWidth;
                     m_height = m_camera.pixelHeight;
+
+                    m_sourceDescriptor.width = m_width;
+                    m_sourceDescriptor.height = m_height;
+
                     m_xrSingleEyeWidth = m_width;
                 }
             }
@@ -90,6 +95,30 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return m_height; }
         }
 
+        private RenderTextureDescriptor m_sourceDescriptor;
+        public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        {
+            RenderTextureDescriptor modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
+                                                                                m_sourceDescriptor.colorFormat, depthBufferBits);
+            modifiedDesc.dimension = m_sourceDescriptor.dimension;
+            modifiedDesc.volumeDepth = m_sourceDescriptor.volumeDepth;
+            modifiedDesc.vrUsage = m_sourceDescriptor.vrUsage;
+            modifiedDesc.msaaSamples = m_sourceDescriptor.msaaSamples;
+            modifiedDesc.memoryless = m_sourceDescriptor.memoryless;
+
+            modifiedDesc.useMipMap = m_sourceDescriptor.useMipMap;
+            modifiedDesc.autoGenerateMips = m_sourceDescriptor.autoGenerateMips;
+            modifiedDesc.enableRandomWrite = m_sourceDescriptor.enableRandomWrite;
+            modifiedDesc.shadowSamplingMode = m_sourceDescriptor.shadowSamplingMode;
+
+            if (colorFormat != RenderTextureFormat.Default)
+                modifiedDesc.colorFormat = colorFormat;
+            if (readWrite != RenderTextureReadWrite.Default)
+                modifiedDesc.sRGB = (readWrite != RenderTextureReadWrite.Linear);
+
+            return modifiedDesc;
+        }
+
         // Is XR running in single-pass stereo mode?
         private bool m_xrSinglePass;
         public bool xrSinglePass
@@ -126,6 +155,8 @@ namespace UnityEngine.Rendering.PostProcessing
             m_camera = null;
             m_width = 0;
             m_height = 0;
+
+            m_sourceDescriptor = new RenderTextureDescriptor();
 
             m_xrSinglePass = false;
             m_xrActiveEye = (int)Camera.StereoscopicEye.Left;
