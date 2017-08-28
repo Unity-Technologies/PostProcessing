@@ -9,9 +9,10 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_Threshold;
         SerializedParameterOverride m_SoftKnee;
         SerializedParameterOverride m_Diffusion;
+        SerializedParameterOverride m_AnamorphicRatio;
         SerializedParameterOverride m_Color;
         SerializedParameterOverride m_MobileOptimized;
-        
+
         SerializedParameterOverride m_LensTexture;
         SerializedParameterOverride m_LensIntensity;
 
@@ -21,6 +22,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_Threshold = FindParameterOverride(x => x.threshold);
             m_SoftKnee = FindParameterOverride(x => x.softKnee);
             m_Diffusion = FindParameterOverride(x => x.diffusion);
+            m_AnamorphicRatio = FindParameterOverride(x => x.anamorphicRatio);
             m_Color = FindParameterOverride(x => x.color);
             m_MobileOptimized = FindParameterOverride(x => x.mobileOptimized);
             
@@ -31,17 +33,18 @@ namespace UnityEditor.Rendering.PostProcessing
         public override void OnInspectorGUI()
         {
             EditorUtilities.DrawHeaderLabel("Bloom");
-            
+
             PropertyField(m_Intensity);
             PropertyField(m_Threshold);
             PropertyField(m_SoftKnee);
             PropertyField(m_Diffusion);
+            PropertyField(m_AnamorphicRatio);
             PropertyField(m_Color);
             PropertyField(m_MobileOptimized);
-            
+
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("Lens Dirtiness");
-                
+
             PropertyField(m_LensTexture);
             PropertyField(m_LensIntensity);
 
