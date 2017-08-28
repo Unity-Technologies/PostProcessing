@@ -27,9 +27,14 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_FxaaKeepAlpha;
 
         SerializedProperty m_AOEnabled;
-        SerializedProperty m_AOIntensity;
-        SerializedProperty m_AORadius;
-        SerializedProperty m_AOQuality;
+        SerializedProperty m_AOMode;
+        SerializedProperty m_SAOIntensity;
+        SerializedProperty m_SAORadius;
+        SerializedProperty m_SAOQuality;
+        SerializedProperty m_SAOColor;
+        SerializedProperty m_MSVOIntensity;
+        SerializedProperty m_MSVOThicknessModifier;
+        SerializedProperty m_MSVOColor;
         SerializedProperty m_AOAmbientOnly;
 
         SerializedProperty m_FogEnabled;
@@ -47,6 +52,12 @@ namespace UnityEditor.Rendering.PostProcessing
             new GUIContent("Fast Approximate Anti-aliasing (FXAA)"),
             new GUIContent("Subpixel Morphological Anti-aliasing (SMAA)"),
             new GUIContent("Temporal Anti-aliasing (TAA)")
+        };
+
+        static GUIContent[] s_AmbientOcclusionMethodNames =
+        {
+            new GUIContent("Scalable Ambient Obscurance (Classic)"),
+            new GUIContent("Multi-scale Volumetric Obscurance (Modern)") 
         };
 
         enum ExportMode
@@ -70,12 +81,17 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
-
+            
             m_AOEnabled = FindProperty(x => x.ambientOcclusion.enabled);
-            m_AOIntensity = FindProperty(x => x.ambientOcclusion.intensity);
-            m_AORadius = FindProperty(x => x.ambientOcclusion.radius);
-            m_AOQuality = FindProperty(x => x.ambientOcclusion.quality);
+            m_AOMode = FindProperty(x => x.ambientOcclusion.mode);
             m_AOAmbientOnly = FindProperty(x => x.ambientOcclusion.ambientOnly);
+            m_SAOIntensity = FindProperty(x => x.ambientOcclusion.scalableAO.intensity);
+            m_SAORadius = FindProperty(x => x.ambientOcclusion.scalableAO.radius);
+            m_SAOQuality = FindProperty(x => x.ambientOcclusion.scalableAO.quality);
+            m_SAOColor = FindProperty(x => x.ambientOcclusion.scalableAO.color);
+            m_MSVOIntensity = FindProperty(x => x.ambientOcclusion.multiScaleVO.intensity);
+            m_MSVOThicknessModifier = FindProperty(x => x.ambientOcclusion.multiScaleVO.thicknessModifier);
+            m_MSVOColor = FindProperty(x => x.ambientOcclusion.multiScaleVO.color);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
@@ -239,9 +255,25 @@ namespace UnityEditor.Rendering.PostProcessing
 
                 if (m_AOEnabled.boolValue)
                 {
-                    EditorGUILayout.PropertyField(m_AOIntensity);
-                    EditorGUILayout.PropertyField(m_AORadius);
-                    EditorGUILayout.PropertyField(m_AOQuality);
+                    int aoMode = m_AOMode.intValue;
+                    m_AOMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The ambient occlusion method to use. \"Modern\" is higher quality and faster on desktop & console platforms but requires compute shader support."), aoMode, s_AmbientOcclusionMethodNames);
+
+                    if (aoMode == (int)AmbientOcclusion.Mode.SAO)
+                    {
+                        EditorGUILayout.PropertyField(m_SAOIntensity);
+                        EditorGUILayout.PropertyField(m_SAORadius);
+                        EditorGUILayout.PropertyField(m_SAOQuality);
+                        EditorGUILayout.PropertyField(m_SAOColor);
+                    }
+                    else if (aoMode == (int)AmbientOcclusion.Mode.MSVO)
+                    {
+                        if (!SystemInfo.supportsComputeShaders)
+                            EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires compute shader support.", MessageType.Warning);
+
+                        EditorGUILayout.PropertyField(m_MSVOIntensity);
+                        EditorGUILayout.PropertyField(m_MSVOThicknessModifier);
+                        EditorGUILayout.PropertyField(m_MSVOColor);
+                    }
 
                     if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)
                         EditorGUILayout.PropertyField(m_AOAmbientOnly);
