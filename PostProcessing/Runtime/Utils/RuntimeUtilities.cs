@@ -205,6 +205,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // Assumes that both textures have the exact same type and format
         public static void CopyTexture(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
         {
+            // TODO: Not sure if this works with texture arrays...
             if (SystemInfo.copyTextureSupport > CopyTextureSupport.None)
                 cmd.CopyTexture(source, destination);
             else

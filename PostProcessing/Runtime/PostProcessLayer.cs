@@ -280,6 +280,8 @@ namespace UnityEngine.Rendering.PostProcessing
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
 
+            var tempDescriptor = context.GetDescriptor(24, sourceFormat);
+
             // I don't think I need the big hammer of clearing out the command buffers totally for the right eye.
             // Really, I just need to clear out any effect that relies on history frames (like TAA), since each
             // eye will have their own retained state.  The command buffers might be re-usable, assuming
@@ -327,7 +329,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // We need to use the internal Blit method to copy the camera target or it'll fail
                 // on tiled GPU as it won't be able to resolve
                 int tempTarget0 = m_TargetPool.Get();
-                cmd.GetTemporaryRT(tempTarget0, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
+                cmd.GetTemporaryRT(tempTarget0, tempDescriptor, FilterMode.Bilinear);
                 cmd.Blit(cameraTarget, tempTarget0);
                 context.source = tempTarget0;
 
@@ -336,7 +338,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (opaqueOnlyEffects > 1)
                 {
                     tempTarget1 = m_TargetPool.Get();
-                    cmd.GetTemporaryRT(tempTarget1, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
+                    cmd.GetTemporaryRT(tempTarget1, tempDescriptor, FilterMode.Bilinear);
                     context.destination = tempTarget1;
                 }
                 else
@@ -379,7 +381,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Same as before, first blit needs to use the builtin Blit command to properly handle
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
-            m_LegacyCmdBuffer.GetTemporaryRT(tempRt, context.width, context.height, 24, FilterMode.Bilinear, sourceFormat);
+            m_LegacyCmdBuffer.GetTemporaryRT(tempRt, tempDescriptor, FilterMode.Bilinear);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
             m_NaNKilled = stopNaNPropagation;
 
@@ -561,6 +563,8 @@ namespace UnityEngine.Rendering.PostProcessing
             TextureLerper.instance.BeginFrame(context);
             var cmd = context.command;
 
+            var tempDescriptor = context.GetDescriptor(24, context.sourceFormat);
+
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
             UpdateSettingsIfNeeded(context);
@@ -570,7 +574,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (stopNaNPropagation && !m_NaNKilled)
             {
                 lastTarget = m_TargetPool.Get();
-                cmd.GetTemporaryRT(lastTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.GetTemporaryRT(lastTarget, tempDescriptor, FilterMode.Bilinear);
                 cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
                 context.source = lastTarget;
                 m_NaNKilled = true;
@@ -598,7 +602,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 var taaTarget = m_TargetPool.Get();
                 var finalDestination = context.destination;
-                cmd.GetTemporaryRT(taaTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.GetTemporaryRT(taaTarget, tempDescriptor, FilterMode.Bilinear);
                 context.destination = taaTarget;
                 temporalAntialiasing.Render(context);
                 context.source = taaTarget;
@@ -645,7 +649,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var finalDestination = context.destination;
 
             var cmd = context.command;
-            cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+            cmd.GetTemporaryRT(tempTarget, context.GetDescriptor(24, context.sourceFormat), FilterMode.Bilinear);
             context.destination = tempTarget;
             RenderList(sortedBundles[evt], context, marker);
             context.source = tempTarget;
@@ -696,9 +700,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Targets.Add(context.destination); // Last target is always destination
 
                 // Render
-                cmd.GetTemporaryRT(tempTarget1, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                var tempDescriptor = context.GetDescriptor(24, context.sourceFormat);
+                cmd.GetTemporaryRT(tempTarget1, tempDescriptor, FilterMode.Bilinear);
                 if (count > 2)
-                    cmd.GetTemporaryRT(tempTarget2, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                    cmd.GetTemporaryRT(tempTarget2, tempDescriptor, FilterMode.Bilinear);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -733,7 +738,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 // Render to an intermediate target as this won't be the final pass
                 tempTarget = m_TargetPool.Get();
-                cmd.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                cmd.GetTemporaryRT(tempTarget, context.GetDescriptor(24, context.sourceFormat), FilterMode.Bilinear);
                 context.destination = tempTarget;
 
                 // Handle FXAA's keep alpha mode
@@ -824,7 +829,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     tempTarget = m_TargetPool.Get();
                     var finalDestination = context.destination;
-                    context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+                    context.command.GetTemporaryRT(tempTarget, context.GetDescriptor(24, context.sourceFormat), FilterMode.Bilinear);
                     context.destination = tempTarget;
                     subpixelMorphologicalAntialiasing.Render(context);
                     context.source = tempTarget;
@@ -864,7 +869,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var finalDestination = context.destination;
             var tempTarget = m_TargetPool.Get();
-            context.command.GetTemporaryRT(tempTarget, context.width, context.height, 24, FilterMode.Bilinear, context.sourceFormat);
+            context.command.GetTemporaryRT(tempTarget, context.GetDescriptor(24, context.sourceFormat), FilterMode.Bilinear);
             context.destination = tempTarget;
             effect.renderer.Render(context);
             context.source = tempTarget;

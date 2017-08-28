@@ -156,7 +156,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_width = 0;
             m_height = 0;
 
-            m_sourceDescriptor = new RenderTextureDescriptor();
+            m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
 
             m_xrSinglePass = false;
             m_xrActiveEye = (int)Camera.StereoscopicEye.Left;
