@@ -9,7 +9,8 @@ namespace UnityEngine.Rendering.PostProcessing
         public float exposure = 0.12f;
 
         ComputeBuffer m_Data;
-        const int k_ThreadGroupSize = 16;
+        private int threadGroupSizeX;
+		private int threadGroupSizeY;
 
         internal override void OnDisable()
         {
@@ -20,6 +21,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Data = null;
         }
+
+		internal override void OnEnable()
+		{
+			base.OnEnable();
+
+			bool isMobilePlatform = Application.isMobilePlatform;
+
+			threadGroupSizeX = isMobilePlatform ? 16 : 16;
+			threadGroupSizeY = isMobilePlatform ? 8 : 16;
+		}
 
         internal override bool NeedsHalfRes()
         {
@@ -56,8 +67,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_VectorscopeBuffer", m_Data);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
             cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(size / (float)k_ThreadGroupSize),
-                Mathf.CeilToInt(size / (float)k_ThreadGroupSize),
+                Mathf.CeilToInt(size / (float)threadGroupSizeX),
+                Mathf.CeilToInt(size / (float)threadGroupSizeY),
                 1
             );
 
@@ -66,8 +77,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_VectorscopeBuffer", m_Data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.HalfResFinalCopy);
             cmd.DispatchCompute(compute, kernel, 
-                Mathf.CeilToInt(parameters.x / k_ThreadGroupSize),
-                Mathf.CeilToInt(parameters.y / k_ThreadGroupSize),
+                Mathf.CeilToInt(parameters.x / threadGroupSizeX),
+                Mathf.CeilToInt(parameters.y / threadGroupSizeY),
                 1
             );
 

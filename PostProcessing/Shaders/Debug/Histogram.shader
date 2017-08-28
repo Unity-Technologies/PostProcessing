@@ -5,7 +5,11 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
         #pragma target 4.5
         #include "../StdLib.hlsl"
 
-        #define HISTOGRAM_BINS 256
+        #if SHADER_API_GLES3
+        	#define HISTOGRAM_BINS 128
+        #else
+        	#define HISTOGRAM_BINS 256
+        #endif
 
         struct VaryingsHistogram
         {
@@ -41,7 +45,11 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
             o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
         #endif
 
+        #if SHADER_API_GLES3
+        	o.maxValue = 0.0;
+        #else
             o.maxValue = _Params.y / FindMaxHistogramValue();
+        #endif
 
             return o;
         }
