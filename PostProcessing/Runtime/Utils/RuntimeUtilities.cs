@@ -206,9 +206,12 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void CopyTexture(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
         {
             if (SystemInfo.copyTextureSupport > CopyTextureSupport.None)
+            {
                 cmd.CopyTexture(source, destination);
-            else
-                cmd.BlitFullscreenTriangle(source, destination);
+                return;
+            }
+
+            cmd.BlitFullscreenTriangle(source, destination);
         }
 
         #endregion

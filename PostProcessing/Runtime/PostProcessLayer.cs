@@ -30,6 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
         public AmbientOcclusion ambientOcclusion;
+        public ScreenSpaceReflections screenSpaceReflections;
         public Fog fog;
         public Dithering dithering;
 
@@ -141,6 +142,7 @@ namespace UnityEngine.Rendering.PostProcessing
             
             RuntimeUtilities.CreateIfNull(ref monitors);
             RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
+            RuntimeUtilities.CreateIfNull(ref screenSpaceReflections);
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
@@ -234,6 +236,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             temporalAntialiasing.Release();
             ambientOcclusion.Release();
+            screenSpaceReflections.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -293,6 +296,7 @@ namespace UnityEngine.Rendering.PostProcessing
             bool aoAmbientOnly = ambientOcclusion.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
+            bool isScreenSpaceReflectionsActive = screenSpaceReflections.IsEnabledAndSupported(context);
             bool isFogActive = fog.IsEnabledAndSupported(context);
 
             // Ambient-only AO is a special case and has to be done in separate command buffers
@@ -314,6 +318,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 ambientOcclusion.Get().RenderAfterOpaque(context);
             }
 
+            opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
@@ -341,7 +346,14 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
                 else context.destination = cameraTarget;
 
-                // TODO: Insert SSR here
+                if (isScreenSpaceReflectionsActive)
+                {
+                    screenSpaceReflections.Render(context);
+                    opaqueOnlyEffects--;
+                    var prevSource = context.source;
+                    context.source = context.destination;
+                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                }
 
                 if (isFogActive)
                 {

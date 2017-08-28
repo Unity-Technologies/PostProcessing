@@ -37,6 +37,14 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_MSVOColor;
         SerializedProperty m_AOAmbientOnly;
 
+        SerializedProperty m_SSREnabled;
+        SerializedProperty m_SSRMaximumIterationCount;
+        SerializedProperty m_SSRBandwidth;
+        SerializedProperty m_SSRDownsampling;
+        SerializedProperty m_SSRMaximumMarchDistance;
+        SerializedProperty m_SSRDistanceFade;
+        SerializedProperty m_SSRAttenuation;
+
         SerializedProperty m_FogEnabled;
         SerializedProperty m_FogExcludeSkybox;
 
@@ -92,6 +100,14 @@ namespace UnityEditor.Rendering.PostProcessing
             m_MSVOIntensity = FindProperty(x => x.ambientOcclusion.multiScaleVO.intensity);
             m_MSVOThicknessModifier = FindProperty(x => x.ambientOcclusion.multiScaleVO.thicknessModifier);
             m_MSVOColor = FindProperty(x => x.ambientOcclusion.multiScaleVO.color);
+
+            m_SSREnabled = FindProperty(x => x.screenSpaceReflections.enabled);
+            m_SSRMaximumIterationCount = FindProperty(x => x.screenSpaceReflections.maximumIterationCount);
+            m_SSRBandwidth = FindProperty(x => x.screenSpaceReflections.bandwidth);
+            m_SSRDownsampling = FindProperty(x => x.screenSpaceReflections.downsampling);
+            m_SSRMaximumMarchDistance = FindProperty(x => x.screenSpaceReflections.maximumMarchDistance);
+            m_SSRDistanceFade = FindProperty(x => x.screenSpaceReflections.distanceFade);
+            m_SSRAttenuation = FindProperty(x => x.screenSpaceReflections.attenuation);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
@@ -242,6 +258,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 GUILayout.Space(2);
 
                 DoAmbientOcclusion(camera);
+                DoScreenSpaceReflections(camera);
                 DoFog(camera);
             }
         }
@@ -277,6 +294,36 @@ namespace UnityEditor.Rendering.PostProcessing
 
                     if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)
                         EditorGUILayout.PropertyField(m_AOAmbientOnly);
+                }
+            }
+            EditorGUI.indentLevel--;
+
+            EditorGUILayout.Space();
+        }
+
+        void DoScreenSpaceReflections(Camera camera)
+        {
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Screen-space Reflections"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            {
+                EditorGUILayout.PropertyField(m_SSREnabled);
+
+                if (m_SSREnabled.boolValue)
+                {
+                    EditorGUILayout.HelpBox("Unoptimized and not finished yet. Don't use.", MessageType.Info);
+
+                    if (camera != null && camera.actualRenderingPath != RenderingPath.DeferredShading)
+                        EditorGUILayout.HelpBox("This effect only works with the deferred rendering path.", MessageType.Warning);
+
+                    if (!SystemInfo.supportsComputeShaders)
+                        EditorGUILayout.HelpBox("This effect requires compute shader support.", MessageType.Warning);
+
+                    EditorGUILayout.PropertyField(m_SSRMaximumIterationCount);
+                    EditorGUILayout.PropertyField(m_SSRBandwidth);
+                    EditorGUILayout.PropertyField(m_SSRDownsampling);
+                    EditorGUILayout.PropertyField(m_SSRMaximumMarchDistance);
+                    EditorGUILayout.PropertyField(m_SSRDistanceFade);
+                    EditorGUILayout.PropertyField(m_SSRAttenuation);
                 }
             }
             EditorGUI.indentLevel--;
