@@ -76,7 +76,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
 
             // Material setup
-            // Always use a quater-res AO buffer unless High/Ultra quality is set.
+            // Always use a quarter-res AO buffer unless High/Ultra quality is set.
             bool downsampling = (int)quality < (int)Quality.High;
             float px = intensity;
             float py = radius;
@@ -109,16 +109,17 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Texture setup
-            int tw = context.width;
-            int th = context.height;
             int ts = downsampling ? 2 : 1;
-            const RenderTextureFormat kFormat = RenderTextureFormat.ARGB32;
-            const RenderTextureReadWrite kRWMode = RenderTextureReadWrite.Linear;
             const FilterMode kFilter = FilterMode.Bilinear;
+
+            var tempAORTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            tempAORTDesc.width /= ts;
+            tempAORTDesc.height /= ts;
+            var tempBlurRTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 
             // AO buffer
             var rtMask = ShaderIDs.OcclusionTexture1;
-            cmd.GetTemporaryRT(rtMask, tw / ts, th / ts, 0, kFilter, kFormat, kRWMode);
+            cmd.GetTemporaryRT(rtMask, tempAORTDesc, kFilter);
 
             // AO estimation
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, rtMask, sheet, (int)Pass.OcclusionEstimationForward + occlusionSource);
@@ -127,13 +128,13 @@ namespace UnityEngine.Rendering.PostProcessing
             var rtBlur = ShaderIDs.OcclusionTexture2;
 
             // Separable blur (horizontal pass)
-            cmd.GetTemporaryRT(rtBlur, tw, th, 0, kFilter, kFormat, kRWMode);
+            cmd.GetTemporaryRT(rtBlur, tempBlurRTDesc, kFilter);
             cmd.BlitFullscreenTriangle(rtMask, rtBlur, sheet, (int)Pass.HorizontalBlurForward + occlusionSource);
             cmd.ReleaseTemporaryRT(rtMask);
 
             // Separable blur (vertical pass)
             rtMask = ShaderIDs.OcclusionTexture;
-            cmd.GetTemporaryRT(rtMask, tw, th, 0, kFilter, kFormat, kRWMode);
+            cmd.GetTemporaryRT(rtMask, tempBlurRTDesc, kFilter);
             cmd.BlitFullscreenTriangle(rtBlur, rtMask, sheet, (int)Pass.VerticalBlur);
             cmd.ReleaseTemporaryRT(rtBlur);
 
