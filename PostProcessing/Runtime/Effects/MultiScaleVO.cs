@@ -339,8 +339,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (useDepthCopy)
             {
                 m_DepthCopy.PushAllocationCommand(cmd);
-                cmd.SetRenderTarget(m_DepthCopy.id);
-                cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, (int)Pass.DepthCopy, MeshTopology.Triangles, 3);
+                cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_DepthCopy.id, m_PropertySheet, (int)Pass.DepthCopy);
             }
 
             // Temporary buffer allocations.
