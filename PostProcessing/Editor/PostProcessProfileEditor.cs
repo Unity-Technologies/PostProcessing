@@ -2,7 +2,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    [CustomEditor(typeof(PostProcessProfile))]
+    [CanEditMultipleObjects, CustomEditor(typeof(PostProcessProfile))]
     sealed class PostProcessProfileEditor : Editor
     {
         EffectListEditor m_EffectList;
