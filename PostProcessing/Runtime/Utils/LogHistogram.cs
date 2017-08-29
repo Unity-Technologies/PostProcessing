@@ -16,9 +16,9 @@ namespace UnityEngine.Rendering.PostProcessing
         {
 			if (data == null)
 			{
-				bool isMobilePlatform = Application.isMobilePlatform;
-				threadX = isMobilePlatform ? 16 : 16;
-				threadY = isMobilePlatform ? 8 : 16;
+                bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
+                threadX = isAndroidOpenGL ? 16 : 16;
+                threadY = isAndroidOpenGL ? 8 : 16;
 				data = new ComputeBuffer (k_Bins, sizeof(uint));
 			}
             

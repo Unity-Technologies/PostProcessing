@@ -2,6 +2,7 @@ Shader "Hidden/PostProcessing/Debug/LightMeter"
 {
     HLSLINCLUDE
 
+        #pragma exclude_renderers gles gles3
         #pragma target 4.5
         #include "../StdLib.hlsl"
         #include "../Builtins/ExposureHistogram.hlsl"
@@ -32,13 +33,9 @@ Shader "Hidden/PostProcessing/Debug/LightMeter"
         #if UNITY_UV_STARTS_AT_TOP
             o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
         #endif
-        #if SHADER_API_GLES3
-        	o.maxValue = 1.0;
-            o.avgLuminance = 1.0;
-        #else
+
             o.maxValue = 1.0 / FindMaxHistogramValue(_HistogramBuffer);
             o.avgLuminance = GetAverageLuminance(_HistogramBuffer, _Params, o.maxValue, _ScaleOffsetRes.xy);
-        #endif
 
             return o;
         }

@@ -26,11 +26,11 @@ namespace UnityEngine.Rendering.PostProcessing
 		{
 			base.OnEnable();
 
-			bool isMobilePlatform = Application.isMobilePlatform;
+            bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
 
-			numBins = isMobilePlatform ? 128 : 256;
-			threadGroupSizeX = isMobilePlatform ? 16 : 16;
-			threadGroupSizeY = isMobilePlatform ? 8 : 16;
+            numBins = isAndroidOpenGL ? 128 : 256;
+            threadGroupSizeX = isAndroidOpenGL ? 16 : 16;
+            threadGroupSizeY = isAndroidOpenGL ? 8 : 16;
 		}
 
         internal override void OnDisable()

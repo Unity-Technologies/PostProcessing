@@ -31,11 +31,11 @@ namespace UnityEngine.Rendering.PostProcessing
 		{
 			base.OnEnable();
 
-			bool isMobilePlatform = Application.platform == RuntimePlatform.Android;
+            bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
 
-			threadGroupSize = isMobilePlatform ? 128 : 256;
-			threadGroupSizeX = isMobilePlatform ? 16 : 16;
-			threadGroupSizeY = isMobilePlatform ? 8 : 16;
+            threadGroupSize = isAndroidOpenGL ? 128 : 256;
+            threadGroupSizeX = isAndroidOpenGL ? 16 : 16;
+            threadGroupSizeY = isAndroidOpenGL ? 8 : 16;
 		}
 
         internal override bool NeedsHalfRes()
