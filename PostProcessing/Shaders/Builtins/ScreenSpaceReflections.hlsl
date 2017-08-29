@@ -203,8 +203,8 @@ Result march(Ray ray, VaryingsDefault input)
         tracker += derivatives;
 
         z.x = z.y;
-        z.y = tracker.w + derivatives.w * .5;
-        z.y /= tracker.z + derivatives.z * .5;
+        z.y = tracker.w + derivatives.w * 0.5;
+        z.y /= tracker.z + derivatives.z * 0.5;
 
         UNITY_FLATTEN
         if (z.y > z.x)
@@ -348,13 +348,12 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     float3 normal = 2.0 * gbuffer2.rgb - 1.0;
     float3 position = GetViewSpacePosition(i.texcoord);
 
-    float3 eye = mul((float3x3) _InverseViewMatrix, normalize(position));
+    float3 eye = mul((float3x3)_InverseViewMatrix, normalize(position));
     position = mul(_InverseViewMatrix, float4(position, 1.0)).xyz;
 
-    float4 test = _Test.SampleLevel(sampler_Test, i.texcoord, 0);
+    //float4 test = _Test.SampleLevel(sampler_Test, i.texcoord, 0);
 
-    // _BlurPyramidLODCount needs to be clamped after nudge
-    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 2.0) * test.z + 1.0);
+    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) /* * test.z */ + 1.0);
     float confidence = saturate(2.0 * dot(-eye, normalize(reflect(-eye, normal))));
 
     UnityLight light;

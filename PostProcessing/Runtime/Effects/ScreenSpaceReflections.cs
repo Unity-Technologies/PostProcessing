@@ -13,7 +13,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public float maximumMarchDistance = 100f;
 
         [Range(0f, 1f)]
-        public float distanceFade = 0f; // TODO: Currently broken
+        public float distanceFade = 0.25f;
 
         [Range(0f, 1f)]
         public float attenuation = 0.25f;
@@ -96,8 +96,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
             sheet.properties.SetTexture(ShaderIDs.Noise, context.resources.blueNoise256[0]);
-            sheet.properties.SetTexture(ShaderIDs.Test, m_Test);
-            sheet.properties.SetTexture(ShaderIDs.History, m_History);
 
             var screenSpaceProjectionMatrix = new Matrix4x4();
             screenSpaceProjectionMatrix.SetRow(0, new Vector4(size * 0.5f, 0f, 0f, size * 0.5f));
@@ -121,6 +119,10 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, m_Test, sheet, (int)Pass.Test);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SSRResolveTemp, sheet, (int)Pass.Resolve);
+
+            sheet.properties.SetTexture(ShaderIDs.Test, m_Test);
+            sheet.properties.SetTexture(ShaderIDs.History, m_History);
+
             cmd.BlitFullscreenTriangle(ShaderIDs.SSRResolveTemp, m_Resolve, sheet, (int)Pass.Reproject);
             cmd.ReleaseTemporaryRT(ShaderIDs.SSRResolveTemp);
 
