@@ -31,6 +31,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int InverseViewMatrix               = Shader.PropertyToID("_InverseViewMatrix");
         internal static readonly int InverseProjectionMatrix         = Shader.PropertyToID("_InverseProjectionMatrix");
         internal static readonly int ScreenSpaceProjectionMatrix     = Shader.PropertyToID("_ScreenSpaceProjectionMatrix");
+        internal static readonly int Params2                         = Shader.PropertyToID("_Params2");
         
         internal static readonly int FogColor                        = Shader.PropertyToID("_FogColor");
         internal static readonly int FogParams                       = Shader.PropertyToID("_FogParams");

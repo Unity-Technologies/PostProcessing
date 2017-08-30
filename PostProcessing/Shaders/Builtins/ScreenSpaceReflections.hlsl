@@ -17,6 +17,8 @@
 #define SSR_FINAL_BLEND_STATIC_FACTOR 0.95
 #define SSR_FINAL_BLEND_DYNAMIC_FACTOR 0.7
 
+#define SSR_ENABLE_CONTACTS 0
+
 //
 // Helper structs
 //
@@ -72,10 +74,13 @@ float4x4 _InverseProjectionMatrix;
 float4x4 _ScreenSpaceProjectionMatrix;
 
 float4 _Params; // x: attenuation, y: distance fade, z: maximum march distance, w: blur pyramid lod count
+float2 _Params2; // x: aspect ratio, y: noise tiling
 #define _Attenuation _Params.x
 #define _DistanceFade _Params.y
 #define _MaximumMarchDistance _Params.z
 #define _BlurPyramidLODCount _Params.w
+#define _AspectRatio _Params2.x
+#define _NoiseTiling _Params2.y
 
 // TODO: hardcode these
 int _MaximumIterationCount;
@@ -179,8 +184,8 @@ Result march(Ray ray, VaryingsDefault input)
 
     float stride = 1.0 - min(1.0, -ray.origin.z * 0.01);
 
-    float2 uv = input.texcoord * 10.0;
-    uv.y *= 0.5625;
+    float2 uv = input.texcoord * _NoiseTiling;
+    uv.y *= _AspectRatio;
 
     float jitter = _Noise.SampleLevel(sampler_Noise, uv + _WorldSpaceCameraPos.xz, 0).a;
     stride *= _Bandwidth;
@@ -351,9 +356,13 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     float3 eye = mul((float3x3)_InverseViewMatrix, normalize(position));
     position = mul(_InverseViewMatrix, float4(position, 1.0)).xyz;
 
-    //float4 test = _Test.SampleLevel(sampler_Test, i.texcoord, 0);
+#if SSR_ENABLE_CONTACTS
+    float4 test = _Test.SampleLevel(sampler_Test, i.texcoord, 0);
+    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) * test.z + 1.0);
+#else
+    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) + 1.0);
+#endif
 
-    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) /* * test.z */ + 1.0);
     float confidence = saturate(2.0 * dot(-eye, normalize(reflect(-eye, normal))));
 
     UnityLight light;

@@ -94,8 +94,9 @@ namespace UnityEngine.Rendering.PostProcessing
             CheckRT(ref m_Resolve, size, size, context.sourceFormat, FilterMode.Trilinear, true);
             CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
 
+            var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
-            sheet.properties.SetTexture(ShaderIDs.Noise, context.resources.blueNoise256[0]);
+            sheet.properties.SetTexture(ShaderIDs.Noise, noiseTex);
 
             var screenSpaceProjectionMatrix = new Matrix4x4();
             screenSpaceProjectionMatrix.SetRow(0, new Vector4(size * 0.5f, 0f, 0f, size * 0.5f));
@@ -111,6 +112,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetMatrix(ShaderIDs.InverseProjectionMatrix, projectionMatrix.inverse);
             sheet.properties.SetMatrix(ShaderIDs.ScreenSpaceProjectionMatrix, screenSpaceProjectionMatrix);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(attenuation, distanceFade, maximumMarchDistance, lodCount));
+            sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, 0f, 0f));
 
             // TOOD: Hardcode these in shader variants (quality levels) for much improved performances
             sheet.properties.SetFloat("_Bandwidth", bandwidth);
