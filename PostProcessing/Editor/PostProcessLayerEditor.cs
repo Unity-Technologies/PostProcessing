@@ -11,7 +11,7 @@ namespace UnityEditor.Rendering.PostProcessing
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
 
-    [CustomEditor(typeof(PostProcessLayer))]
+    [CanEditMultipleObjects, CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
         SerializedProperty m_StopNaNPropagation;

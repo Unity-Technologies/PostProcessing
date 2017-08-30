@@ -247,7 +247,7 @@ float4 FragAO(VaryingsDefault i) : SV_Target
     ao = PositivePow(ao * INTENSITY / SAMPLE_COUNT, kContrast);
 
     // Apply fog when enabled (forward-only)
-#if (FOG_LINEAR || FOG_EXP || FOG_EXP2)
+#if (APPLY_FORWARD_FOG)
     float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv)));
     d = ComputeFogDistance(d);
     ao *= ComputeFog(d);
@@ -383,9 +383,10 @@ half BlurSmall(TEXTURE2D_ARGS(tex, samp), float2 uv, float2 delta)
 // Final composition shader
 float4 FragComposition(VaryingsDefault i) : SV_Target
 {
-    float2 delta = _MainTex_TexelSize.xy / DOWNSAMPLE;
+    float2 delta = _SAOcclusionTexture_TexelSize.xy / DOWNSAMPLE;
     half ao = BlurSmall(TEXTURE2D_PARAM(_SAOcclusionTexture, sampler_SAOcclusionTexture), i.texcoord, delta);
-    return float4(EncodeAO(ao) * _AOColor, 0.0);
+    ao = EncodeAO(ao);
+    return float4(ao * _AOColor, ao);
 }
 
 #if !SHADER_API_GLES // Excluding the MRT pass under GLES2

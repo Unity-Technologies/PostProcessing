@@ -339,8 +339,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (useDepthCopy)
             {
                 m_DepthCopy.PushAllocationCommand(cmd);
-                cmd.SetRenderTarget(m_DepthCopy.id);
-                cmd.DrawProcedural(Matrix4x4.identity, m_PropertySheet.material, (int)Pass.DepthCopy, MeshTopology.Triangles, 3);
+                cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_DepthCopy.id, m_PropertySheet, (int)Pass.DepthCopy);
             }
 
             // Temporary buffer allocations.
@@ -532,23 +531,11 @@ namespace UnityEngine.Rendering.PostProcessing
             // Not needed in Deferred.
             if (context.camera.actualRenderingPath == RenderingPath.Forward && RenderSettings.fog)
             {
+                sheet.EnableKeyword("APPLY_FORWARD_FOG");
                 sheet.properties.SetVector(
                     ShaderIDs.FogParams,
                     new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance)
                 );
-
-                switch (RenderSettings.fogMode)
-                {
-                    case FogMode.Linear:
-                        sheet.EnableKeyword("FOG_LINEAR");
-                        break;
-                    case FogMode.Exponential:
-                        sheet.EnableKeyword("FOG_EXP");
-                        break;
-                    case FogMode.ExponentialSquared:
-                        sheet.EnableKeyword("FOG_EXP2");
-                        break;
-                }
             }
 
             RebuildCommandBuffers(context);

@@ -114,23 +114,11 @@ namespace UnityEngine.Rendering.PostProcessing
             // Not needed in Deferred.
             if (context.camera.actualRenderingPath == RenderingPath.Forward && RenderSettings.fog)
             {
+                sheet.EnableKeyword("APPLY_FORWARD_FOG");
                 sheet.properties.SetVector(
                     ShaderIDs.FogParams,
                     new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance)
                 );
-
-                switch (RenderSettings.fogMode)
-                {
-                    case FogMode.Linear:
-                        sheet.EnableKeyword("FOG_LINEAR");
-                        break;
-                    case FogMode.Exponential:
-                        sheet.EnableKeyword("FOG_EXP");
-                        break;
-                    case FogMode.ExponentialSquared:
-                        sheet.EnableKeyword("FOG_EXP2");
-                        break;
-                }
             }
 
             // Texture setup

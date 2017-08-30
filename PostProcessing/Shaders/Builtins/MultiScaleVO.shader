@@ -80,6 +80,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
             HLSLPROGRAM
 
+                #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #pragma vertex Vert
                 #pragma fragment Frag
@@ -90,7 +91,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
                     half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, texcoord).r;
 
                     // Apply fog when enabled (forward-only)
-                #if (FOG_LINEAR || FOG_EXP || FOG_EXP2)
+                #if (APPLY_FORWARD_FOG)
                     float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, texcoord));
                     d = ComputeFogDistance(d);
                     ao *= ComputeFog(d);
