@@ -247,7 +247,7 @@ float4 FragAO(VaryingsDefault i) : SV_Target
     ao = PositivePow(ao * INTENSITY / SAMPLE_COUNT, kContrast);
 
     // Apply fog when enabled (forward-only)
-#if (FOG_LINEAR || FOG_EXP || FOG_EXP2)
+#if (APPLY_FORWARD_FOG)
     float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv)));
     d = ComputeFogDistance(d);
     ao *= ComputeFog(d);

@@ -18,6 +18,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragAO
+                #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_DEPTH
                 #include "ScalableAO.hlsl"
@@ -32,6 +33,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragAO
+                #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_GBUFFER
                 #include "ScalableAO.hlsl"
@@ -54,7 +56,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
             ENDHLSL
         }
 
-        // 4 - Separable blur (horizontal pass) with G-Buffer
+        // 3 - Separable blur (horizontal pass) with G-Buffer
         Pass
         {
             HLSLPROGRAM
@@ -69,7 +71,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
             ENDHLSL
         }
 
-        // 5 - Separable blur (vertical pass)
+        // 4 - Separable blur (vertical pass)
         Pass
         {
             HLSLPROGRAM
@@ -82,7 +84,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
             ENDHLSL
         }
 
-        // 6 - Final composition
+        // 5 - Final composition
         Pass
         {
             Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
@@ -96,7 +98,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
             ENDHLSL
         }
 
-        // 7 - Final composition (ambient only mode)
+        // 6 - Final composition (ambient only mode)
         Pass
         {
             Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
