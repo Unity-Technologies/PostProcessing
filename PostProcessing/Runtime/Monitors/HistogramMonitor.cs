@@ -20,18 +20,18 @@ namespace UnityEngine.Rendering.PostProcessing
         ComputeBuffer m_Data;
         private int numBins;
         private int threadGroupSizeX;
-		private int threadGroupSizeY;
+        private int threadGroupSizeY;
 
-		internal override void OnEnable()
-		{
-			base.OnEnable();
+        internal override void OnEnable()
+        {
+            base.OnEnable();
 
             bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
 
             numBins = isAndroidOpenGL ? 128 : 256;
             threadGroupSizeX = isAndroidOpenGL ? 16 : 16;
             threadGroupSizeY = isAndroidOpenGL ? 8 : 16;
-		}
+        }
 
         internal override void OnDisable()
         {

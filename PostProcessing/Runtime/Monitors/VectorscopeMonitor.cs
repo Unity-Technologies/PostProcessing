@@ -10,7 +10,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         ComputeBuffer m_Data;
         private int threadGroupSizeX;
-		private int threadGroupSizeY;
+        private int threadGroupSizeY;
 
         internal override void OnDisable()
         {
@@ -21,16 +21,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Data = null;
         }
-
-		internal override void OnEnable()
-		{
-			base.OnEnable();
+            
+        internal override void OnEnable()
+        {
+            base.OnEnable();
 
             bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
 
             threadGroupSizeX = isAndroidOpenGL ? 16 : 16;
             threadGroupSizeY = isAndroidOpenGL ? 8 : 16;
-		}
+        }
 
         internal override bool NeedsHalfRes()
         {

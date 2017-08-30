@@ -14,13 +14,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Generate(PostProcessRenderContext context)
         {
-			if (data == null)
-			{
+            if (data == null)
+            {
                 bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
                 threadX = isAndroidOpenGL ? 16 : 16;
                 threadY = isAndroidOpenGL ? 8 : 16;
-				data = new ComputeBuffer (k_Bins, sizeof(uint));
-			}
+                data = new ComputeBuffer (k_Bins, sizeof(uint));
+            }
             
             var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
             var compute = context.resources.computeShaders.exposureHistogram;

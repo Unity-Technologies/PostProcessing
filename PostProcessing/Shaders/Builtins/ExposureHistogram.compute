@@ -9,7 +9,7 @@ RWStructuredBuffer<uint> _HistogramBuffer;
 Texture2D<float4> _Source;
 
 CBUFFER_START(Params)
-	float4 _ScaleOffsetRes; // x: scale, y: offset, z: width, w: height
+    float4 _ScaleOffsetRes; // x: scale, y: offset, z: width, w: height
 CBUFFER_END
 
 groupshared uint gs_histogram[HISTOGRAM_BINS];
