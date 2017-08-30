@@ -5,11 +5,13 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEditorInternal;
 using System.IO;
+using ScreenSpaceReflections = UnityEngine.Rendering.PostProcessing.ScreenSpaceReflections;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
+    using SSRPreset = UnityEngine.Rendering.PostProcessing.ScreenSpaceReflections.Preset;
 
     [CanEditMultipleObjects, CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
@@ -36,11 +38,12 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_MSVOThicknessModifier;
         SerializedProperty m_MSVOColor;
         SerializedProperty m_AOAmbientOnly;
-
+        
         SerializedProperty m_SSREnabled;
+        SerializedProperty m_SSRPreset;
         SerializedProperty m_SSRMaximumIterationCount;
-        SerializedProperty m_SSRBandwidth;
         SerializedProperty m_SSRDownsampling;
+        SerializedProperty m_SSRThickness;
         SerializedProperty m_SSRMaximumMarchDistance;
         SerializedProperty m_SSRDistanceFade;
         SerializedProperty m_SSRAttenuation;
@@ -102,9 +105,10 @@ namespace UnityEditor.Rendering.PostProcessing
             m_MSVOColor = FindProperty(x => x.ambientOcclusion.multiScaleVO.color);
 
             m_SSREnabled = FindProperty(x => x.screenSpaceReflections.enabled);
+            m_SSRPreset = FindProperty(x => x.screenSpaceReflections.preset);
             m_SSRMaximumIterationCount = FindProperty(x => x.screenSpaceReflections.maximumIterationCount);
-            m_SSRBandwidth = FindProperty(x => x.screenSpaceReflections.bandwidth);
             m_SSRDownsampling = FindProperty(x => x.screenSpaceReflections.downsampling);
+            m_SSRThickness = FindProperty(x => x.screenSpaceReflections.thickness);
             m_SSRMaximumMarchDistance = FindProperty(x => x.screenSpaceReflections.maximumMarchDistance);
             m_SSRDistanceFade = FindProperty(x => x.screenSpaceReflections.distanceFade);
             m_SSRAttenuation = FindProperty(x => x.screenSpaceReflections.attenuation);
@@ -310,17 +314,23 @@ namespace UnityEditor.Rendering.PostProcessing
 
                 if (m_SSREnabled.boolValue)
                 {
-                    EditorGUILayout.HelpBox("Unoptimized and not finished yet. Don't use.", MessageType.Info);
-
                     if (camera != null && camera.actualRenderingPath != RenderingPath.DeferredShading)
                         EditorGUILayout.HelpBox("This effect only works with the deferred rendering path.", MessageType.Warning);
 
                     if (!SystemInfo.supportsComputeShaders)
                         EditorGUILayout.HelpBox("This effect requires compute shader support.", MessageType.Warning);
 
-                    EditorGUILayout.PropertyField(m_SSRMaximumIterationCount);
-                    EditorGUILayout.PropertyField(m_SSRBandwidth);
-                    EditorGUILayout.PropertyField(m_SSRDownsampling);
+                    EditorGUILayout.PropertyField(m_SSRPreset);
+
+                    using (new EditorGUI.DisabledScope(m_SSRPreset.intValue != (int)SSRPreset.Custom))
+                    {
+                        EditorGUI.indentLevel++;
+                        EditorGUILayout.PropertyField(m_SSRMaximumIterationCount);
+                        EditorGUILayout.PropertyField(m_SSRThickness);
+                        EditorGUILayout.PropertyField(m_SSRDownsampling);
+                        EditorGUI.indentLevel--;
+                    }
+
                     EditorGUILayout.PropertyField(m_SSRMaximumMarchDistance);
                     EditorGUILayout.PropertyField(m_SSRDistanceFade);
                     EditorGUILayout.PropertyField(m_SSRAttenuation);

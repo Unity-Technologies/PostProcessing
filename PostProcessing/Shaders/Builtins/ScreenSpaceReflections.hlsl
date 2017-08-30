@@ -74,17 +74,15 @@ float4x4 _InverseProjectionMatrix;
 float4x4 _ScreenSpaceProjectionMatrix;
 
 float4 _Params; // x: attenuation, y: distance fade, z: maximum march distance, w: blur pyramid lod count
-float2 _Params2; // x: aspect ratio, y: noise tiling
+float4 _Params2; // x: aspect ratio, y: noise tiling, z: thickness, w: maximum iteration count
 #define _Attenuation _Params.x
 #define _DistanceFade _Params.y
 #define _MaximumMarchDistance _Params.z
 #define _BlurPyramidLODCount _Params.w
 #define _AspectRatio _Params2.x
 #define _NoiseTiling _Params2.y
-
-// TODO: hardcode these
-int _MaximumIterationCount;
-float _Bandwidth;
+#define _Bandwidth _Params2.z
+#define _MaximumIterationCount _Params2.w
 
 //
 // Helper functions
@@ -130,7 +128,7 @@ float4 ProjectToScreenSpace(float3 position)
 
 // Heavily adapted from McGuire and Mara's original implementation
 // http://casual-effects.blogspot.com/2014/08/screen-space-ray-tracing.html
-Result march(Ray ray, VaryingsDefault input)
+Result March(Ray ray, VaryingsDefault input)
 {
     Result result;
 
@@ -196,7 +194,6 @@ Result march(Ray ray, VaryingsDefault input)
     float2 z = 0.0;
     float4 tracker = float4(endPoints.xy, homogenizers.x, segment.start.z) + derivatives * jitter;
 
-    // UNITY_UNROLL
     for (int i = 0; i < _MaximumIterationCount; ++i)
     {
         if (any(result.uv < 0.0) || any(result.uv > 1.0))
@@ -265,7 +262,7 @@ float4 FragTest(VaryingsDefault i) : SV_Target
 
     ray.direction = normalize(reflect(normalize(ray.origin), normal));
 
-    Result result = march(ray, i);
+    Result result = March(ray, i);
 
     float confidence = (float)result.iterationCount / (float)_MaximumIterationCount;
     return float4(result.uv, confidence, (float)result.isHit);

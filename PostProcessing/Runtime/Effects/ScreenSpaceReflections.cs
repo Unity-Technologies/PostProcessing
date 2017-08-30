@@ -4,30 +4,61 @@ using UnityEngine.Assertions;
 namespace UnityEngine.Rendering.PostProcessing
 {
     [Serializable]
-    // TODO: Tooltips
     public sealed class ScreenSpaceReflections
     {
-        [Tooltip("Enables screens-space reflections.")]
+        public enum Preset
+        {
+            Lower,
+            Low,
+            Medium,
+            High,
+            Higher,
+            Ultra,
+            Overkill,
+            Custom
+        }
+
+        [Tooltip("Enables screen-space reflections.")]
         public bool enabled;
 
+        [Tooltip("Choose a quality preset, or use \"Custom\" to fine tune it. Don't use a preset higher than \"Medium\" if you care about performances on consoles.")]
+        public Preset preset = Preset.Medium;
+        
+        [Range(0, 128), Tooltip("Maximum iteration count.")]
+        public int maximumIterationCount;
+
+        [Tooltip("Downsamples the SSR buffer to maximize performances at the cost of a blurrier result.")]
+        public bool downsampling = true;
+
+        [Range(1f, 64f), Tooltip("Ray thickness. Lower values are more expensive but allow the effect to detect smaller details.")]
+        public float thickness = 8f;
+
+        [Tooltip("Maximum distance to traverse after which it will stop drawing reflections.")]
         public float maximumMarchDistance = 100f;
 
-        [Range(0f, 1f)]
-        public float distanceFade = 0.25f;
+        [Range(0f, 1f), Tooltip("Fades reflections close to the near planes.")]
+        public float distanceFade = 0.5f;
 
-        [Range(0f, 1f)]
+        [Range(0f, 1f), Tooltip("Fades reflections close to the screen borders.")]
         public float attenuation = 0.25f;
 
-        //>>> Hardcode these settings
-        [Range(1, 128)]
-        public int maximumIterationCount = 128;
+        class QualityPreset
+        {
+            public int maximumIterationCount;
+            public float thickness;
+            public bool downsampling;
+        }
 
-        [Range(1f, 100f)]
-        public float bandwidth = 8f;
-
-        [Range(0, 4)]
-        public int downsampling = 0;
-        //<<<
+        QualityPreset[] m_Presets =
+        {
+            new QualityPreset { maximumIterationCount = 10, thickness = 32, downsampling = true  }, // Lower
+            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = true  }, // Low
+            new QualityPreset { maximumIterationCount = 32, thickness = 16, downsampling = true  }, // Medium
+            new QualityPreset { maximumIterationCount = 48, thickness =  8, downsampling = true  }, // High
+            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = false }, // Higher
+            new QualityPreset { maximumIterationCount = 48, thickness = 16, downsampling = false }, // Ultra
+            new QualityPreset { maximumIterationCount = 64, thickness = 12, downsampling = false }, // Overkill
+        };
 
         RenderTexture m_Test;
         RenderTexture m_Resolve;
@@ -80,9 +111,20 @@ namespace UnityEngine.Rendering.PostProcessing
             var cmd = context.command;
             cmd.BeginSample("Screen-space Reflections");
 
+            // Get quality settings
+            if (preset != Preset.Custom)
+            {
+                int id = (int)preset;
+                maximumIterationCount = m_Presets[id].maximumIterationCount;
+                thickness = m_Presets[id].thickness;
+                downsampling = m_Presets[id].downsampling;
+            }
+
             // Square POT target
             int size = Mathf.ClosestPowerOfTwo(Mathf.Min(context.width, context.height));
-            size >>= downsampling;
+
+            if (downsampling)
+                size >>= 1;
 
             // The gaussian pyramid compute works in blocks of 8x8 so make sure the last lod has a
             // minimum size of 8x8
@@ -112,11 +154,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetMatrix(ShaderIDs.InverseProjectionMatrix, projectionMatrix.inverse);
             sheet.properties.SetMatrix(ShaderIDs.ScreenSpaceProjectionMatrix, screenSpaceProjectionMatrix);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(attenuation, distanceFade, maximumMarchDistance, lodCount));
-            sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, 0f, 0f));
-
-            // TOOD: Hardcode these in shader variants (quality levels) for much improved performances
-            sheet.properties.SetFloat("_Bandwidth", bandwidth);
-            sheet.properties.SetFloat("_MaximumIterationCount", maximumIterationCount);
+            sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, thickness, maximumIterationCount));
 
             cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, m_Test, sheet, (int)Pass.Test);
