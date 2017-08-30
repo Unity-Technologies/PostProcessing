@@ -22,6 +22,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(1f, 10f), Tooltip("Changes the extent of veiling effects. For maximum quality stick to integer values. Because this value changes the internal iteration count, animating it isn't recommended as it may introduce small hiccups in the perceived radius.")]
         public FloatParameter diffusion = new FloatParameter { value = 7f };
 
+        [Range(-1f, 1f), Tooltip("Distorts the bloom to give an anamorphic look. Negative values distort vertically, positive values distort horizontally.")]
+        public FloatParameter anamorphicRatio = new FloatParameter { value = 0f };
+
         [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
         public ColorParameter color = new ColorParameter { value = Color.white };
 
@@ -87,10 +90,15 @@ namespace UnityEngine.Rendering.PostProcessing
             // Apply auto exposure adjustment in the prefiltering pass
             sheet.properties.SetTexture(ShaderIDs.AutoExposureTex, context.autoExposureTexture);
 
+            // Negative anamorphic ratio values distort vertically - positive is horizontal
+            float ratio = Mathf.Clamp(settings.anamorphicRatio, -1, 1);
+            float rw = ratio < 0 ? -ratio : 0f;
+            float rh = ratio > 0 ?  ratio : 0f;
+
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = context.width / 2;
-            int th = context.height / 2;
+            int tw = Mathf.FloorToInt(context.width / (2f - rw));
+            int th = Mathf.FloorToInt(context.height / (2f - rh));
 
             // Determine the iteration count
             int s = Mathf.Max(tw, th);

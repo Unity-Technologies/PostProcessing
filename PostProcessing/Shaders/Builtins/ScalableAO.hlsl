@@ -53,6 +53,7 @@ TEXTURE2D_SAMPLER2D(_CameraDepthNormalsTexture, sampler_CameraDepthNormalsTextur
 float4 _MainTex_TexelSize;
 
 float4 _AOParams;
+float3 _AOColor;
 
 // Sample count
 #if !defined(SHADER_API_GLES)
@@ -63,8 +64,8 @@ float4 _AOParams;
 #endif
 
 // Source texture properties
-TEXTURE2D_SAMPLER2D(_OcclusionTexture, sampler_OcclusionTexture);
-float4 _OcclusionTexture_TexelSize;
+TEXTURE2D_SAMPLER2D(_SAOcclusionTexture, sampler_SAOcclusionTexture);
+float4 _SAOcclusionTexture_TexelSize;
 
 // Other parameters
 #define INTENSITY _AOParams.x
@@ -383,10 +384,8 @@ half BlurSmall(TEXTURE2D_ARGS(tex, samp), float2 uv, float2 delta)
 float4 FragComposition(VaryingsDefault i) : SV_Target
 {
     float2 delta = _MainTex_TexelSize.xy / DOWNSAMPLE;
-    half ao = BlurSmall(TEXTURE2D_PARAM(_OcclusionTexture, sampler_OcclusionTexture), i.texcoord, delta);
-    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
-    color.rgb *= 1.0 - EncodeAO(ao);
-    return color;
+    half ao = BlurSmall(TEXTURE2D_PARAM(_SAOcclusionTexture, sampler_SAOcclusionTexture), i.texcoord, delta);
+    return float4(EncodeAO(ao) * _AOColor, 0.0);
 }
 
 #if !SHADER_API_GLES // Excluding the MRT pass under GLES2
@@ -399,14 +398,14 @@ struct CompositionOutput
 
 CompositionOutput FragCompositionGBuffer(VaryingsDefault i)
 {
-    // Workaround: _OcclusionTexture_Texelsize hasn't been set properly
+    // Workaround: _SAOcclusionTexture_Texelsize hasn't been set properly
     // for some reasons. Use _ScreenParams instead.
     float2 delta = (_ScreenParams.zw - 1.0) / DOWNSAMPLE;
-    half ao = BlurSmall(TEXTURE2D_PARAM(_OcclusionTexture, sampler_OcclusionTexture), i.texcoord, delta);
+    half ao = BlurSmall(TEXTURE2D_PARAM(_SAOcclusionTexture, sampler_SAOcclusionTexture), i.texcoord, delta);
 
     CompositionOutput o;
     o.gbuffer0 = half4(0.0, 0.0, 0.0, ao);
-    o.gbuffer3 = half4((half3)EncodeAO(ao), 0.0);
+    o.gbuffer3 = half4((half3)EncodeAO(ao) * _AOColor, 0.0);
     return o;
 }
 
