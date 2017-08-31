@@ -19,7 +19,7 @@
 // Author:  Bob Brown
 //
 
-#include "UnityCG.cginc"
+#include "../StdLib.hlsl"
 
 Texture2D<float4> _Source;
 RWTexture2D<float4> _Result;
