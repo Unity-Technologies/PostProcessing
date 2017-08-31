@@ -5,6 +5,7 @@ Shader "Hidden/PostProcessing/ScreenSpaceReflections"
 
     CGINCLUDE
 
+        #include "UnityCG.cginc"
         #pragma target 5.0
 
         // Ported from StdLib, we can't include it as it'll conflict with internal Unity includes
@@ -17,6 +18,7 @@ Shader "Hidden/PostProcessing/ScreenSpaceReflections"
         {
             float4 vertex : SV_POSITION;
             float2 texcoord : TEXCOORD0;
+            float2 texcoordStereo : TEXCOORD1;
         };
 
         VaryingsDefault VertDefault(AttributesDefault v)
@@ -28,6 +30,8 @@ Shader "Hidden/PostProcessing/ScreenSpaceReflections"
         #if UNITY_UV_STARTS_AT_TOP
             o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
         #endif
+
+            o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
 
             return o;
         }

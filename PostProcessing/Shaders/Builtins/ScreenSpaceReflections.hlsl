@@ -56,8 +56,8 @@ Texture2D _CameraDepthTexture; SamplerState sampler_CameraDepthTexture;
 Texture2D _CameraMotionVectorsTexture; SamplerState sampler_CameraMotionVectorsTexture;
 Texture2D _CameraReflectionsTexture; SamplerState sampler_CameraReflectionsTexture;
 
-Texture2D _CameraGBufferTexture0; SamplerState sampler_CameraGBufferTexture0; // albedo = g[0].rgb
-Texture2D _CameraGBufferTexture1; SamplerState sampler_CameraGBufferTexture1; // roughness = g[1].a
+Texture2D _CameraGBufferTexture0; // albedo = g[0].rgb
+Texture2D _CameraGBufferTexture1; // roughness = g[1].a
 Texture2D _CameraGBufferTexture2; SamplerState sampler_CameraGBufferTexture2; // normal.xyz 2. * g[2].rgb - 1.
 
 Texture2D _Noise; SamplerState sampler_Noise;
@@ -105,7 +105,7 @@ float Vignette(float2 uv)
 
 float3 GetViewSpacePosition(float2 uv)
 {
-    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, uv, 0).r;
+    float depth = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv), 0).r;
     float4 result = mul(_InverseProjectionMatrix, float4(2.0 * uv - 1.0, depth, 1.0));
     return result.xyz / result.w;
 }
@@ -224,7 +224,7 @@ Result March(Ray ray, VaryingsDefault input)
 
         uv *= _Test_TexelSize.xy;
 
-        float d = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, uv, 0);
+        float d = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv), 0);
         float depth = -LinearEyeDepth(d);
 
         UNITY_FLATTEN
@@ -245,7 +245,7 @@ Result March(Ray ray, VaryingsDefault input)
 //
 float4 FragTest(VaryingsDefault i) : SV_Target
 {
-    float4 gbuffer2 = _CameraGBufferTexture2.Sample(sampler_CameraGBufferTexture2, i.texcoord.xy);
+    float4 gbuffer2 = _CameraGBufferTexture2.Sample(sampler_CameraGBufferTexture2, i.texcoordStereo);
 
     if (dot(gbuffer2, 1.0) == 0.0)
         return 0.0;
@@ -273,9 +273,9 @@ float4 FragResolve(VaryingsDefault i) : SV_Target
     float4 test = _Test.Load(int3(i.vertex.xy, 0));
 
     if (test.w == 0.0)
-        return _MainTex.Sample(sampler_MainTex, i.texcoord);
+        return _MainTex.Sample(sampler_MainTex, i.texcoordStereo);
 
-    float4 color = _MainTex.SampleLevel(sampler_MainTex, test.xy, 0);
+    float4 color = _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(test.xy), 0);
 
     float confidence = test.w * Attenuate(test.xy) * Vignette(test.xy);
 
@@ -287,29 +287,29 @@ float4 FragResolve(VaryingsDefault i) : SV_Target
 
 float4 FragReproject(VaryingsDefault i) : SV_Target
 {
-    float2 motion = _CameraMotionVectorsTexture.SampleLevel(sampler_CameraMotionVectorsTexture, i.texcoord, 0).xy;
+    float2 motion = _CameraMotionVectorsTexture.SampleLevel(sampler_CameraMotionVectorsTexture, i.texcoordStereo, 0).xy;
     float2 uv = i.texcoord - motion;
 
     const float2 k = SSR_COLOR_NEIGHBORHOOD_SAMPLE_SPREAD * _MainTex_TexelSize.xy;
 
-    float4 color = _MainTex.SampleLevel(sampler_MainTex, i.texcoord, 0);
+    float4 color = _MainTex.SampleLevel(sampler_MainTex, i.texcoordStereo, 0);
 
     // 0 1 2
     // 3
     float4x4 top = float4x4(
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2(-k.x, -k.y), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2( 0.0, -k.y), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2( k.x, -k.y), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2(-k.x,  0.0), 0)
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2(-k.x, -k.y)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( 0.0, -k.y)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( k.x, -k.y)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2(-k.x,  0.0)), 0)
     );
 
     //     0
     // 1 2 3
     float4x4 bottom = float4x4(
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2( k.x, 0.0), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2(-k.x, k.y), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2( 0.0, k.y), 0),
-        _MainTex.SampleLevel(sampler_MainTex, i.texcoord + float2( k.x, k.y), 0)
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( k.x, 0.0)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2(-k.x, k.y)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( 0.0, k.y)), 0),
+        _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( k.x, k.y)), 0)
     );
 
     // PS4 INTRINSIC_MINMAX3
@@ -321,7 +321,7 @@ float4 FragReproject(VaryingsDefault i) : SV_Target
         float4 maximum = max(max(max(max(max(max(max(max(top[0], top[1]), top[2]), top[3]), bottom[0]), bottom[1]), bottom[2]), bottom[3]), color);
     #endif
 
-    float4 history = _History.SampleLevel(sampler_History, uv, 0);
+    float4 history = _History.SampleLevel(sampler_History, UnityStereoTransformScreenSpaceTex(uv), 0);
     history = clamp(history, minimum, maximum);
 
     color.a = saturate(smoothstep(0.002 * _MainTex_TexelSize.z, 0.0035 * _MainTex_TexelSize.z, length(motion)));
@@ -335,10 +335,10 @@ float4 FragReproject(VaryingsDefault i) : SV_Target
 
 float4 FragComposite(VaryingsDefault i) : SV_Target
 {
-    float z = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, i.texcoord, 0).r;
+    float z = _CameraDepthTexture.SampleLevel(sampler_CameraDepthTexture, i.texcoordStereo, 0).r;
 
     if (Linear01Depth(z) > 0.999)
-        return _MainTex.Sample(sampler_MainTex, i.texcoord);
+        return _MainTex.Sample(sampler_MainTex, i.texcoordStereo);
 
     float4 gbuffer0 = _CameraGBufferTexture0.Load(int3(i.vertex.xy, 0));
     float4 gbuffer1 = _CameraGBufferTexture1.Load(int3(i.vertex.xy, 0));
@@ -354,10 +354,10 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     position = mul(_InverseViewMatrix, float4(position, 1.0)).xyz;
 
 #if SSR_ENABLE_CONTACTS
-    float4 test = _Test.SampleLevel(sampler_Test, i.texcoord, 0);
-    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) * test.z + 1.0);
+    float4 test = _Test.SampleLevel(sampler_Test, i.texcoordStereo, 0);
+    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoordStereo, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) * test.z + 1.0);
 #else
-    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoord, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) + 1.0);
+    float4 resolve = _Resolve.SampleLevel(sampler_Resolve, i.texcoordStereo, SmoothnessToRoughness(gbuffer1.a) * (_BlurPyramidLODCount - 1.0) + 1.0);
 #endif
 
     float confidence = saturate(2.0 * dot(-eye, normalize(reflect(-eye, normal))));
@@ -373,9 +373,9 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
 
     resolve.rgb = UNITY_BRDF_PBS(gbuffer0.rgb, gbuffer1.rgb, oneMinusReflectivity, gbuffer1.a, normal, -eye, light, indirect).rgb;
 
-    float4 reflectionProbes = _CameraReflectionsTexture.Sample(sampler_CameraReflectionsTexture, i.texcoord);
+    float4 reflectionProbes = _CameraReflectionsTexture.Sample(sampler_CameraReflectionsTexture, i.texcoordStereo);
 
-    float4 color = _MainTex.Sample(sampler_MainTex, i.texcoord);
+    float4 color = _MainTex.Sample(sampler_MainTex, i.texcoordStereo);
     color.rgb = max(0.0, color.rgb - reflectionProbes.rgb);
 
     float fade = 1.0 - resolve.a * _DistanceFade;
