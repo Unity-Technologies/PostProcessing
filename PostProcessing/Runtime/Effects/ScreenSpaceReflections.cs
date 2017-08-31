@@ -132,7 +132,6 @@ namespace UnityEngine.Rendering.PostProcessing
             int lodCount = Mathf.FloorToInt(Mathf.Log(size, 2f) - 3f);
             lodCount = Mathf.Min(lodCount, kMaxLods);
 
-            CheckRT(ref m_Test, size, size, context.sourceFormat, FilterMode.Point, false);
             CheckRT(ref m_Resolve, size, size, context.sourceFormat, FilterMode.Trilinear, true);
             CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
 
@@ -156,14 +155,15 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(attenuation, distanceFade, maximumMarchDistance, lodCount));
             sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, thickness, maximumIterationCount));
 
+            cmd.GetTemporaryRT(ShaderIDs.Test, size, size, 0, FilterMode.Point, context.sourceFormat);
+            cmd.BlitFullscreenTriangle(context.source, ShaderIDs.Test, sheet, (int)Pass.Test);
             cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
-            cmd.BlitFullscreenTriangle(context.source, m_Test, sheet, (int)Pass.Test);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SSRResolveTemp, sheet, (int)Pass.Resolve);
 
-            sheet.properties.SetTexture(ShaderIDs.Test, m_Test);
             sheet.properties.SetTexture(ShaderIDs.History, m_History);
-
             cmd.BlitFullscreenTriangle(ShaderIDs.SSRResolveTemp, m_Resolve, sheet, (int)Pass.Reproject);
+
+            cmd.ReleaseTemporaryRT(ShaderIDs.Test);
             cmd.ReleaseTemporaryRT(ShaderIDs.SSRResolveTemp);
 
             cmd.CopyTexture(m_Resolve, 0, 0, m_History, 0, 0);
