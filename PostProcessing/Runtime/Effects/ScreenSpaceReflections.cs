@@ -120,6 +120,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 downsampling = m_Presets[id].downsampling;
             }
 
+            maximumMarchDistance = Mathf.Max(0f, maximumMarchDistance);
+
             // Square POT target
             int size = Mathf.ClosestPowerOfTwo(Mathf.Min(context.width, context.height));
 
@@ -157,6 +159,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.GetTemporaryRT(ShaderIDs.Test, size, size, 0, FilterMode.Point, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.Test, sheet, (int)Pass.Test);
+
             cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SSRResolveTemp, sheet, (int)Pass.Resolve);
 
