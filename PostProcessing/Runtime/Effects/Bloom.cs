@@ -89,11 +89,12 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = context.width / 2;
-            int th = context.height / 2;
+            RenderTextureDescriptor pyramidDesc = context.GetDescriptor(0, context.sourceFormat);
+            pyramidDesc.width /= 2;
+            pyramidDesc.height /= 2;
 
             // Determine the iteration count
-            int s = Mathf.Max(tw, th);
+            int s = Mathf.Max((context.singleEyeWidth / 2), (context.height / 2));
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logs_i = Mathf.FloorToInt(logs);
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
@@ -118,13 +119,13 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? (int)Pass.Prefilter13 + qualityOffset
                     : (int)Pass.Downsample13 + qualityOffset;
 
-                cmd.GetTemporaryRT(mipDown, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
-                cmd.GetTemporaryRT(mipUp, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
+                cmd.GetTemporaryRT(mipDown, pyramidDesc, FilterMode.Bilinear);
+                cmd.GetTemporaryRT(mipUp, pyramidDesc, FilterMode.Bilinear);
                 cmd.BlitFullscreenTriangle(last, mipDown, sheet, pass);
 
                 last = mipDown;
-                tw = Mathf.Max(tw / 2, 1);
-                th = Mathf.Max(th / 2, 1);
+                pyramidDesc.width = Mathf.Max(pyramidDesc.width / 2, 1);
+                pyramidDesc.height = Mathf.Max(pyramidDesc.height / 2, 1);
             }
 
             // Upsample
@@ -153,7 +154,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 : settings.lensTexture.value;
 
             var dirtRatio = (float)dirtTexture.width / (float)dirtTexture.height;
-            var screenRatio = (float)context.width / (float)context.height;
+            var screenRatio = (float)context.singleEyeWidth / (float)context.height;
             var dirtTileOffset = new Vector4(1f, 1f, 0f, 0f);
 
             if (dirtRatio > screenRatio)
