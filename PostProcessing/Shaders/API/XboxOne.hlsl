@@ -1,4 +1,4 @@
-#define UNITY_UV_STARTS_AT_TOP 0 // Probably wrong?
+#define UNITY_UV_STARTS_AT_TOP 1
 #define UNITY_REVERSED_Z 1
 #define UNITY_GATHER_SUPPORTED (SHADER_TARGET >= 50)
 
