@@ -42,7 +42,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_SSREnabled;
         SerializedProperty m_SSRPreset;
         SerializedProperty m_SSRMaximumIterationCount;
-        SerializedProperty m_SSRDownsampling;
+        SerializedProperty m_SSRResolution;
         SerializedProperty m_SSRThickness;
         SerializedProperty m_SSRMaximumMarchDistance;
         SerializedProperty m_SSRDistanceFade;
@@ -107,7 +107,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_SSREnabled = FindProperty(x => x.screenSpaceReflections.enabled);
             m_SSRPreset = FindProperty(x => x.screenSpaceReflections.preset);
             m_SSRMaximumIterationCount = FindProperty(x => x.screenSpaceReflections.maximumIterationCount);
-            m_SSRDownsampling = FindProperty(x => x.screenSpaceReflections.downsampling);
+            m_SSRResolution = FindProperty(x => x.screenSpaceReflections.resolution);
             m_SSRThickness = FindProperty(x => x.screenSpaceReflections.thickness);
             m_SSRMaximumMarchDistance = FindProperty(x => x.screenSpaceReflections.maximumMarchDistance);
             m_SSRDistanceFade = FindProperty(x => x.screenSpaceReflections.distanceFade);
@@ -327,7 +327,7 @@ namespace UnityEditor.Rendering.PostProcessing
                         EditorGUI.indentLevel++;
                         EditorGUILayout.PropertyField(m_SSRMaximumIterationCount);
                         EditorGUILayout.PropertyField(m_SSRThickness);
-                        EditorGUILayout.PropertyField(m_SSRDownsampling);
+                        EditorGUILayout.PropertyField(m_SSRResolution);
                         EditorGUI.indentLevel--;
                     }
 

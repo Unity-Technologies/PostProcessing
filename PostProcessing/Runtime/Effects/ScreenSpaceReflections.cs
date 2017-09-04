@@ -18,17 +18,24 @@ namespace UnityEngine.Rendering.PostProcessing
             Custom
         }
 
+        public enum Resolution
+        {
+            Downsampled,
+            FullSize,
+            Supersampled
+        }
+
         [Tooltip("Enables screen-space reflections.")]
         public bool enabled;
 
         [Tooltip("Choose a quality preset, or use \"Custom\" to fine tune it. Don't use a preset higher than \"Medium\" if you care about performances on consoles.")]
         public Preset preset = Preset.Medium;
         
-        [Range(0, 128), Tooltip("Maximum iteration count.")]
+        [Range(0, 256), Tooltip("Maximum iteration count.")]
         public int maximumIterationCount;
 
-        [Tooltip("Downsamples the SSR buffer to maximize performances at the cost of a blurrier result.")]
-        public bool downsampling = true;
+        [Tooltip("Changes the size of the SSR buffer. Downsample it to maximize performances or supersample it to get slow but higher quality results.")]
+        public Resolution resolution = Resolution.Downsampled;
 
         [Range(1f, 64f), Tooltip("Ray thickness. Lower values are more expensive but allow the effect to detect smaller details.")]
         public float thickness = 8f;
@@ -46,18 +53,18 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             public int maximumIterationCount;
             public float thickness;
-            public bool downsampling;
+            public Resolution downsampling;
         }
 
         QualityPreset[] m_Presets =
         {
-            new QualityPreset { maximumIterationCount = 10, thickness = 32, downsampling = true  }, // Lower
-            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = true  }, // Low
-            new QualityPreset { maximumIterationCount = 32, thickness = 16, downsampling = true  }, // Medium
-            new QualityPreset { maximumIterationCount = 48, thickness =  8, downsampling = true  }, // High
-            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = false }, // Higher
-            new QualityPreset { maximumIterationCount = 48, thickness = 16, downsampling = false }, // Ultra
-            new QualityPreset { maximumIterationCount = 64, thickness = 12, downsampling = false }, // Overkill
+            new QualityPreset { maximumIterationCount = 10, thickness = 32, downsampling = Resolution.Downsampled  }, // Lower
+            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = Resolution.Downsampled  }, // Low
+            new QualityPreset { maximumIterationCount = 32, thickness = 16, downsampling = Resolution.Downsampled  }, // Medium
+            new QualityPreset { maximumIterationCount = 48, thickness =  8, downsampling = Resolution.Downsampled  }, // High
+            new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = Resolution.FullSize }, // Higher
+            new QualityPreset { maximumIterationCount = 48, thickness = 16, downsampling = Resolution.FullSize }, // Ultra
+            new QualityPreset { maximumIterationCount = 128, thickness = 12, downsampling = Resolution.Supersampled }, // Overkill
         };
 
         RenderTexture m_Test;
@@ -117,7 +124,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 int id = (int)preset;
                 maximumIterationCount = m_Presets[id].maximumIterationCount;
                 thickness = m_Presets[id].thickness;
-                downsampling = m_Presets[id].downsampling;
+                resolution = m_Presets[id].downsampling;
             }
 
             maximumMarchDistance = Mathf.Max(0f, maximumMarchDistance);
@@ -125,8 +132,10 @@ namespace UnityEngine.Rendering.PostProcessing
             // Square POT target
             int size = Mathf.ClosestPowerOfTwo(Mathf.Min(context.width, context.height));
 
-            if (downsampling)
+            if (resolution == Resolution.Downsampled)
                 size >>= 1;
+            else if (resolution == Resolution.Supersampled)
+                size <<= 1;
 
             // The gaussian pyramid compute works in blocks of 8x8 so make sure the last lod has a
             // minimum size of 8x8
