@@ -49,12 +49,23 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
-        readonly RenderTexture[] m_CoCHistoryTextures = new RenderTexture[2];
-        int m_HistoryPingPong;
+        const int k_NumEyes = 2;
+        const int k_NumCoCHistoryTextures = 2;
+        readonly RenderTexture[][] m_CoCHistoryTextures = new RenderTexture[k_NumEyes][];
+        int[] m_HistoryPingPong = new int[k_NumEyes];
 
         // Height of the 35mm full-frame format (36mm x 24mm)
         // TODO: Should be set by a physical camera
         const float k_FilmHeight = 0.024f;
+
+        public DepthOfFieldRenderer()
+        {
+            for (int eye = 0; eye < k_NumEyes; eye++)
+            {
+                m_CoCHistoryTextures[eye] = new RenderTexture[k_NumCoCHistoryTextures];
+                m_HistoryPingPong[eye] = 0;
+            }
+        }
 
         public override DepthTextureMode GetCameraFlags()
         {
@@ -83,19 +94,19 @@ namespace UnityEngine.Rendering.PostProcessing
             return Mathf.Min(0.05f, radiusInPixels / screenHeight);
         }
 
-        RenderTexture CheckHistory(int id, int width, int height, RenderTextureFormat format)
+        RenderTexture CheckHistory(int eye, int id, RenderTextureDescriptor requestedDesc)
         {
-            var rt = m_CoCHistoryTextures[id];
+            var rt = m_CoCHistoryTextures[eye][id];
 
-            if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != width || rt.height != height)
+            if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != requestedDesc.width || rt.height != requestedDesc.height)
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                rt = RenderTexture.GetTemporary(width, height, 0, format);
-                rt.name = "CoC History";
+                rt = RenderTexture.GetTemporary(requestedDesc);
+                rt.name = "CoC History, Eye: " + eye + ", ID: " + id;
                 rt.filterMode = FilterMode.Bilinear;
                 rt.Create();
-                m_CoCHistoryTextures[id] = rt;
+                m_CoCHistoryTextures[eye][id] = rt;
             }
 
             return rt;
@@ -112,10 +123,15 @@ namespace UnityEngine.Rendering.PostProcessing
                 cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
             #endif
 
+            RenderTextureDescriptor colorDesc = context.GetDescriptor(0, colorFormat);
+            colorDesc.width /= 2;
+            colorDesc.height /= 2;
+            RenderTextureDescriptor cocDesc = context.GetDescriptor(0, cocFormat, RenderTextureReadWrite.Linear);
+
             // Material setup
             var f = settings.focalLength.value / 1000f;
             var s1 = Mathf.Max(settings.focusDistance.value, f);
-            var aspect = (float)context.width / (float)context.height;
+            var aspect = (float)context.singleEyeWidth / (float)context.height; // TODO: this might change if we get rid of singleEyeWidth
             var coeff = f * f / (settings.aperture.value * (s1 - f) * k_FilmHeight * 2);
             var maxCoC = CalculateMaxCoCRadius(context.height);
 
@@ -131,7 +147,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("DepthOfField");
 
             // CoC calculation pass
-            cmd.GetTemporaryRT(ShaderIDs.CoCTex, context.width, context.height, 0, FilterMode.Bilinear, cocFormat, RenderTextureReadWrite.Linear);
+            cmd.GetTemporaryRT(ShaderIDs.CoCTex, cocDesc, FilterMode.Bilinear);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, ShaderIDs.CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled
@@ -143,10 +159,12 @@ namespace UnityEngine.Rendering.PostProcessing
                 
                 sheet.properties.SetVector(ShaderIDs.TaaParams, new Vector3(jitter.x, jitter.y, blend));
 
-                int pp = m_HistoryPingPong;
-                var historyRead = CheckHistory(++pp % 2, context.width, context.height, cocFormat);
-                var historyWrite = CheckHistory(++pp % 2, context.width, context.height, cocFormat);
-                m_HistoryPingPong = ++pp % 2;
+                int pp = m_HistoryPingPong[context.xrActiveEye];
+                // Original CoCTex spec uses RenderTextureReadWrite.Linear, but these CoCHistoryTextures
+                // were using Default, which is inconsistent.
+                var historyRead = CheckHistory(context.xrActiveEye, ++pp % 2, cocDesc);
+                var historyWrite = CheckHistory(context.xrActiveEye, ++pp % 2, cocDesc);
+                m_HistoryPingPong[context.xrActiveEye] = ++pp % 2;
 
                 cmd.BlitFullscreenTriangle(historyRead, historyWrite, sheet, (int)Pass.CoCTemporalFilter);
                 cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
@@ -154,11 +172,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Downsampling and prefiltering pass
-            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTex, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
+            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTex, colorDesc, FilterMode.Bilinear);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.DepthOfFieldTex, sheet, (int)Pass.DownsampleAndPrefilter);
 
             // Bokeh simulation pass
-            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTemp, context.width / 2, context.height / 2, 0, FilterMode.Bilinear, colorFormat);
+            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTemp, colorDesc, FilterMode.Bilinear);
             cmd.BlitFullscreenTriangle(ShaderIDs.DepthOfFieldTex, ShaderIDs.DepthOfFieldTemp, sheet, (int)Pass.BokehSmallKernel + (int)settings.kernelSize.value);
 
             // Postfilter pass
@@ -179,13 +197,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override void Release()
         {
-            for (int i = 0; i < m_CoCHistoryTextures.Length; i++)
+            for (int eye = 0; eye < k_NumEyes; eye++)
             {
-                RenderTexture.ReleaseTemporary(m_CoCHistoryTextures[i]);
-                m_CoCHistoryTextures[i] = null;
+                for (int i = 0; i < m_CoCHistoryTextures[eye].Length; i++)
+                {
+                    RenderTexture.ReleaseTemporary(m_CoCHistoryTextures[eye][i]);
+                    m_CoCHistoryTextures[eye][i] = null;
+                }
+                m_HistoryPingPong[eye] = 0;
             }
 
-            m_HistoryPingPong = 0;
             ResetHistory();
         }
     }
