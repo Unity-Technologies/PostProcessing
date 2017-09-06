@@ -64,12 +64,14 @@ Shader "Hidden/PostProcessing/GrainBaker"
 
         float4 FragGrain(VaryingsDefault i) : SV_Target
         {
+            i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
             float grain = Step3BW(i.texcoord * float2(128.0, 128.0));
             return float4(grain.xxx, 1.0);
         }
 
         float4 FragGrainColored(VaryingsDefault i) : SV_Target
         {
+            i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
             float3 grain = Step3(i.texcoord * float2(128.0, 128.0));
             return float4(grain, 1.0);
         }
