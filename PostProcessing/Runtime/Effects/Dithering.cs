@@ -30,7 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             uberSheet.properties.SetTexture(ShaderIDs.DitheringTex, noiseTex);
             uberSheet.properties.SetVector(ShaderIDs.Dithering_Coords, new Vector4(
-                (float)context.width / (float)noiseTex.width,
+                (float)context.singleEyeWidth / (float)noiseTex.width,
                 (float)context.height / (float)noiseTex.height,
                 rndOffsetX,
                 rndOffsetY
