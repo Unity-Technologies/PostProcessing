@@ -33,7 +33,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public Fog fog;
         public Dithering dithering;
 
-        public PostProcessMonitors monitors;
+        public PostProcessDebugLayer debugLayer;
 
         [SerializeField]
         PostProcessResources m_Resources;
@@ -113,7 +113,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_PropertySheetFactory = new PropertySheetFactory();
             m_TargetPool = new TargetPool();
 
-            monitors.OnEnable();
+            debugLayer.OnEnable();
 
             // Scriptable render pipelines handle their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
@@ -139,7 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (resources != null) m_Resources = resources;
             
-            RuntimeUtilities.CreateIfNull(ref monitors);
+            RuntimeUtilities.CreateIfNull(ref debugLayer);
             RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
@@ -151,14 +151,9 @@ namespace UnityEngine.Rendering.PostProcessing
         public void InitBundles()
         {
             // Create these lists only once, the serialization system will take over after that
-            if (m_BeforeTransparentBundles == null)
-                m_BeforeTransparentBundles = new List<SerializedBundleRef>();
-
-            if (m_BeforeStackBundles == null)
-                m_BeforeStackBundles = new List<SerializedBundleRef>();
-
-            if (m_AfterStackBundles == null)
-                m_AfterStackBundles = new List<SerializedBundleRef>();
+            RuntimeUtilities.CreateIfNull(ref m_BeforeTransparentBundles);
+            RuntimeUtilities.CreateIfNull(ref m_BeforeStackBundles);
+            RuntimeUtilities.CreateIfNull(ref m_AfterStackBundles);
 
             // Create a bundle for each effect type
             m_Bundles = new Dictionary<Type, PostProcessBundle>();
@@ -242,8 +237,8 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Bundles.Clear();
             m_PropertySheetFactory.Release();
 
-            if (monitors != null)
-                monitors.OnDisable();
+            if (debugLayer != null)
+                debugLayer.OnDisable();
 
             // Might be an issue if several layers are blending in the same frame...
             TextureLerper.instance.Clear();
@@ -444,6 +439,9 @@ namespace UnityEngine.Rendering.PostProcessing
             if (fog.IsEnabledAndSupported(context))
                 flags |= fog.GetCameraFlags();
 
+            if (debugLayer.debugOverlay != DebugOverlay.None)
+                flags |= debugLayer.GetCameraFlags();
+
             context.camera.depthTextureMode = flags;
         }
 
@@ -481,10 +479,14 @@ namespace UnityEngine.Rendering.PostProcessing
             context.isSceneView = m_IsRenderingInSceneView;
             context.resources = m_Resources;
             context.propertySheets = m_PropertySheetFactory;
+            context.debugLayer = debugLayer;
             context.antialiasing = antialiasingMode;
             context.temporalAntialiasing = temporalAntialiasing;
             context.logHistogram = m_LogHistogram;
             SetLegacyCameraFlags(context);
+
+            // Prepare debug overlay
+            debugLayer.SetFrameSize(context.width, context.height);
 
             // Unsafe to keep this around but we need it for OnGUI events for debug views
             // Will be removed eventually
@@ -599,10 +601,13 @@ namespace UnityEngine.Rendering.PostProcessing
             if (needsFinalPass)
                 RenderFinalPass(context, lastTarget);
 
-            // Render debug monitors if needed
-            monitors.Render(context);
+            // Render debug monitors & overlay if requested
+            debugLayer.RenderSpecialOverlays(context);
+            debugLayer.RenderMonitors(context);
 
+            // End frame cleanup
             TextureLerper.instance.EndFrame();
+            debugLayer.EndFrame();
             m_SettingsUpdateNeeded = true;
             m_NaNKilled = false;
         }
@@ -843,7 +848,7 @@ namespace UnityEngine.Rendering.PostProcessing
         bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
             bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
-            bool lightMeter = monitors.lightMeter.IsRequestedAndSupported();
+            bool lightMeter = debugLayer.lightMeter.IsRequestedAndSupported();
             return autoExpo || lightMeter;
         }
     }

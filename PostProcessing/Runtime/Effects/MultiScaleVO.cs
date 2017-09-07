@@ -38,7 +38,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             DepthCopy,
             CompositionDeferred,
-            CompositionForward
+            CompositionForward,
+            DebugOverlay
         }
 
         PropertySheet m_PropertySheet;
@@ -311,6 +312,9 @@ namespace UnityEngine.Rendering.PostProcessing
             PushUpsampleCommands(context, cmd, m_LowDepth3, m_Combined3, m_LowDepth2, m_Occlusion2, m_Combined2);
             PushUpsampleCommands(context, cmd, m_LowDepth2, m_Combined2, m_LowDepth1, m_Occlusion1, m_Combined1);
             PushUpsampleCommands(context, cmd, m_LowDepth1, m_Combined1, m_LinearDepth, null, m_Result);
+
+            if (context.IsDebugOverlayEnabled(DebugOverlay.AmbientOcclusion))
+                context.PushDebugOverlay(cmd, m_Result.id, m_PropertySheet, (int)Pass.DebugOverlay);
         }
 
         // Calculate values in _ZBuferParams (built-in shader variable)

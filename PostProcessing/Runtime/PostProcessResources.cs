@@ -28,6 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader gammaHistogram;
             public Shader waveform;
             public Shader vectorscope;
+            public Shader debugOverlays;
             public Shader deferredFog;
             public Shader scalableAO;
             public Shader multiScaleAO;

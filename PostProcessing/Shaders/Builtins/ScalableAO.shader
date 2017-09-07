@@ -111,5 +111,17 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
             ENDHLSL
         }
+
+        // 7 - Debug overlay
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDebugOverlay
+                #include "ScalableAO.hlsl"
+
+            ENDHLSL
+        }
     }
 }

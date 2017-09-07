@@ -53,7 +53,10 @@ namespace UnityEngine.Rendering.PostProcessing
             Downsample13,
             Downsample4,
             UpsampleTent,
-            UpsampleBox
+            UpsampleBox,
+            DebugOverlayThreshold,
+            DebugOverlayTent,
+            DebugOverlayBox
         }
 
         // [down,up]
@@ -146,12 +149,20 @@ namespace UnityEngine.Rendering.PostProcessing
                 last = mipUp;
             }
 
-            var shaderSettings = new Vector4(
-                sampleScale,
-                RuntimeUtilities.Exp2(settings.intensity.value / 10f) - 1f,
-                settings.lensIntensity.value,
-                iterations
-            );
+            var linearColor = settings.color.value.linear;
+            float intensity = RuntimeUtilities.Exp2(settings.intensity.value / 10f) - 1f;
+            var shaderSettings = new Vector4(sampleScale, intensity, settings.lensIntensity.value, iterations);
+
+            // Debug overlays
+            if (context.IsDebugOverlayEnabled(DebugOverlay.BloomThreshold))
+            {
+                context.PushDebugOverlay(cmd, context.source, sheet, (int)Pass.DebugOverlayThreshold);
+            }
+            else if (context.IsDebugOverlayEnabled(DebugOverlay.BloomBuffer))
+            {
+                sheet.properties.SetVector(ShaderIDs.ColorIntensity, new Vector4(linearColor.r, linearColor.g, linearColor.b, intensity));
+                context.PushDebugOverlay(cmd, m_Pyramid[0].up, sheet, (int)Pass.DebugOverlayTent + qualityOffset);
+            }
 
             // Lens dirtiness
             // Keep the aspect ratio correct & center the dirt texture, we don't want it to be
@@ -180,7 +191,7 @@ namespace UnityEngine.Rendering.PostProcessing
             uberSheet.EnableKeyword("BLOOM");
             uberSheet.properties.SetVector(ShaderIDs.Bloom_DirtTileOffset, dirtTileOffset);
             uberSheet.properties.SetVector(ShaderIDs.Bloom_Settings, shaderSettings);
-            uberSheet.properties.SetColor(ShaderIDs.Bloom_Color, settings.color.value.linear);
+            uberSheet.properties.SetColor(ShaderIDs.Bloom_Color, linearColor);
             uberSheet.properties.SetTexture(ShaderIDs.Bloom_DirtTex, dirtTexture);
             cmd.SetGlobalTexture(ShaderIDs.BloomTex, m_Pyramid[0].up);
 

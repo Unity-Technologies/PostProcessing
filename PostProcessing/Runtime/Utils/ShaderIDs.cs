@@ -58,6 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int BloomTex                        = Shader.PropertyToID("_BloomTex");
         internal static readonly int SampleScale                     = Shader.PropertyToID("_SampleScale");
         internal static readonly int Threshold                       = Shader.PropertyToID("_Threshold");
+        internal static readonly int ColorIntensity                  = Shader.PropertyToID("_ColorIntensity");
         internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");

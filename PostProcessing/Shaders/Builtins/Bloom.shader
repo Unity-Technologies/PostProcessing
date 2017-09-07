@@ -12,6 +12,7 @@ Shader "Hidden/PostProcessing/Bloom"
 
         float4 _MainTex_TexelSize;
         float _SampleScale;
+        float4 _ColorIntensity;
         float4 _Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
 
         // ----------------------------------------------------------------------------------------
@@ -71,6 +72,27 @@ Shader "Hidden/PostProcessing/Bloom"
         {
             half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
             return Combine(bloom, UnityStereoTransformScreenSpaceTex(i.texcoord));
+        }
+
+        // ----------------------------------------------------------------------------------------
+        // Debug overlays
+
+        half4 FragDebugOverlayThreshold(VaryingsDefault i) : SV_Target
+        {
+            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
+            return half4(Prefilter(SafeHDR(color), i.texcoord).rgb, 1.0);
+        }
+
+        half4 FragDebugOverlayTent(VaryingsDefault i) : SV_Target
+        {
+            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
+            return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
+        }
+
+        half4 FragDebugOverlayBox(VaryingsDefault i) : SV_Target
+        {
+            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
+            return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 
     ENDHLSL
@@ -141,6 +163,39 @@ Shader "Hidden/PostProcessing/Bloom"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragUpsampleBox
+
+            ENDHLSL
+        }
+
+        // 6: Debug overlay (threshold)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDebugOverlayThreshold
+
+            ENDHLSL
+        }
+
+        // 7: Debug overlay (tent filter)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDebugOverlayTent
+
+            ENDHLSL
+        }
+
+        // 8: Debug overlay (box filter)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDebugOverlayBox
 
             ENDHLSL
         }

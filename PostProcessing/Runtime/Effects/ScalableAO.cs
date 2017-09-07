@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -48,7 +48,8 @@ namespace UnityEngine.Rendering.PostProcessing
             HorizontalBlurDeferred,
             VerticalBlur,
             CompositionForward,
-            CompositionDeferred
+            CompositionDeferred,
+            DebugOverlay
         }
 
         public DepthTextureMode GetCameraFlags()
@@ -147,6 +148,9 @@ namespace UnityEngine.Rendering.PostProcessing
             // Separable blur (vertical pass)
             cmd.BlitFullscreenTriangle(rtBlur, m_Result, sheet, (int)Pass.VerticalBlur);
             cmd.ReleaseTemporaryRT(rtBlur);
+
+            if (context.IsDebugOverlayEnabled(DebugOverlay.AmbientOcclusion))
+                context.PushDebugOverlay(cmd, m_Result, sheet, (int)Pass.DebugOverlay);
         }
 
         public void RenderAfterOpaque(PostProcessRenderContext context)

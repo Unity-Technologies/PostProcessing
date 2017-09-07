@@ -419,4 +419,12 @@ float4 FragCompositionGBuffer(VaryingsDefault i) : SV_Target
 
 #endif
 
+float4 FragDebugOverlay(VaryingsDefault i) : SV_Target
+{
+    float2 delta = _SAOcclusionTexture_TexelSize.xy / DOWNSAMPLE;
+    half ao = BlurSmall(TEXTURE2D_PARAM(_SAOcclusionTexture, sampler_SAOcclusionTexture), i.texcoord, delta);
+    ao = EncodeAO(ao);
+    return float4(1.0 - ao.xxx, 1.0);
+}
+
 #endif // UNITY_POSTFX_AMBIENT_OCCLUSION
