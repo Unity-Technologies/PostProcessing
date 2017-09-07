@@ -30,7 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         [Tooltip("Choose a quality preset, or use \"Custom\" to fine tune it. Don't use a preset higher than \"Medium\" if you care about performances on consoles.")]
         public Preset preset = Preset.Medium;
-        
+
         [Range(0, 256), Tooltip("Maximum iteration count.")]
         public int maximumIterationCount;
 
@@ -71,6 +71,8 @@ namespace UnityEngine.Rendering.PostProcessing
         RenderTexture m_Resolve;
         RenderTexture m_History;
         int[] m_MipIDs;
+
+        bool m_ResetHistory = true;
 
         enum Pass
         {
@@ -146,6 +148,12 @@ namespace UnityEngine.Rendering.PostProcessing
             CheckRT(ref m_Resolve, size, size, context.sourceFormat, FilterMode.Trilinear, true);
             CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
 
+            if (m_ResetHistory)
+            {
+                context.command.BlitFullscreenTriangle(context.source, m_History);
+                m_ResetHistory = false;
+            }
+
             var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
             sheet.properties.SetTexture(ShaderIDs.Noise, noiseTex);
@@ -211,7 +219,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             for (int i = 0; i < lodCount; i++)
                 cmd.ReleaseTemporaryRT(m_MipIDs[i]);
-            
+
             sheet.properties.SetTexture(ShaderIDs.Resolve, m_Resolve);
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Composite);
             cmd.EndSample("Screen-space Reflections");
@@ -225,6 +233,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Test = null;
             m_Resolve = null;
             m_History = null;
+        }
+
+        internal void ResetHistory()
+        {
+            m_ResetHistory = true;
         }
     }
 }
