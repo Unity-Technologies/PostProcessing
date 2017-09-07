@@ -139,7 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public void Init(PostProcessResources resources)
         {
             if (resources != null) m_Resources = resources;
-            
+
             RuntimeUtilities.CreateIfNull(ref monitors);
             RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
             RuntimeUtilities.CreateIfNull(ref screenSpaceReflections);
@@ -281,7 +281,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-            
+
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
@@ -389,14 +389,14 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         void OnPostRender()
-         {
-             // Unused in scriptable render pipelines
-             if (RuntimeUtilities.scriptableRenderPipelineActive)
-                 return;
- 
-             if (m_CurrentContext.IsTemporalAntialiasingActive())
-                 m_Camera.ResetProjectionMatrix();
-         }
+        {
+            // Unused in scriptable render pipelines
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                return;
+
+            if (m_CurrentContext.IsTemporalAntialiasingActive())
+                m_Camera.ResetProjectionMatrix();
+        }
 
         PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
@@ -467,6 +467,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 bundle.Value.ResetHistory();
 
             temporalAntialiasing.ResetHistory();
+            screenSpaceReflections.ResetHistory();
         }
 
         public bool HasOpaqueOnlyEffects(PostProcessRenderContext context)
