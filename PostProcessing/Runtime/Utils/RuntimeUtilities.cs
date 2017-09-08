@@ -216,13 +216,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #endregion
 
-        #region Unity specifics
+        #region Unity specifics & misc methods
 
         public static bool scriptableRenderPipelineActive
         {
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+        // TODO: Check for SPSR support at runtime
         public static bool isSinglePassStereoEnabled
         {
             get
@@ -231,7 +232,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 return UnityEditor.PlayerSettings.virtualRealitySupported
                     && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
 #else
-                return false; // TODO: Check for SPSR support at runtime
+                return false;
 #endif
             }
         }
@@ -242,6 +243,8 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_EDITOR
                 return UnityEditor.PlayerSettings.virtualRealitySupported;
+#elif UNITY_XBOXONE
+                return false;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.enabled;
 #elif UNITY_5_6_OR_NEWER
@@ -268,6 +271,15 @@ namespace UnityEngine.Rendering.PostProcessing
         public static bool isLinearColorSpace
         {
             get { return QualitySettings.activeColorSpace == ColorSpace.Linear; }
+        }
+
+        public static bool IsResolvedDepthAvailable(Camera camera)
+        {
+            // AFAIK resolved depth is only available on D3D11/12 via BuiltinRenderTextureType.ResolvedDepth
+            // TODO: Is there more proper way to determine this? What about SRPs?
+            var gtype = SystemInfo.graphicsDeviceType;
+            return camera.actualRenderingPath == RenderingPath.DeferredShading &&
+                (gtype == GraphicsDeviceType.Direct3D11 || gtype == GraphicsDeviceType.Direct3D12 || gtype == GraphicsDeviceType.XboxOne);
         }
 
         public static void DestroyProfile(PostProcessProfile profile, bool destroyEffects)
@@ -317,6 +329,13 @@ namespace UnityEngine.Rendering.PostProcessing
                         yield return comp;
                 }
             }
+        }
+
+        public static void CreateIfNull<T>(ref T obj)
+            where T : class, new()
+        {
+            if (obj == null)
+                obj = new T();
         }
 
         #endregion

@@ -16,9 +16,11 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int SMAA_Flop                       = Shader.PropertyToID("_SMAA_Flop");
 
         internal static readonly int AOParams                        = Shader.PropertyToID("_AOParams");
+        internal static readonly int AOColor                         = Shader.PropertyToID("_AOColor");
         internal static readonly int OcclusionTexture1               = Shader.PropertyToID("_OcclusionTexture1");
         internal static readonly int OcclusionTexture2               = Shader.PropertyToID("_OcclusionTexture2");
-        internal static readonly int OcclusionTexture                = Shader.PropertyToID("_OcclusionTexture");
+        internal static readonly int SAOcclusionTexture              = Shader.PropertyToID("_SAOcclusionTexture");
+        internal static readonly int MSVOcclusionTexture             = Shader.PropertyToID("_MSVOcclusionTexture");
         
         internal static readonly int FogColor                        = Shader.PropertyToID("_FogColor");
         internal static readonly int FogParams                       = Shader.PropertyToID("_FogParams");
@@ -56,6 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int BloomTex                        = Shader.PropertyToID("_BloomTex");
         internal static readonly int SampleScale                     = Shader.PropertyToID("_SampleScale");
         internal static readonly int Threshold                       = Shader.PropertyToID("_Threshold");
+        internal static readonly int ColorIntensity                  = Shader.PropertyToID("_ColorIntensity");
         internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");

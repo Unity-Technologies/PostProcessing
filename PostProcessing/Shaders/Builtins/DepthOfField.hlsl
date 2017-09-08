@@ -244,4 +244,31 @@ half4 FragCombine(VaryingsDefault i) : SV_Target
     return color;
 }
 
+// Debug overlay
+half4 FragDebugOverlay(VaryingsDefault i) : SV_Target
+{
+    i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
+    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
+
+    // Calculate the radiuses of CoC.
+    half4 src = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord));
+    float coc = (depth - _Distance) * _LensCoeff / depth;
+    coc *= 80;
+
+    // Visualize CoC (white -> red -> gray)
+    half3 rgb = lerp(half3(1.0, 0.0, 0.0), half3(1.0, 1.0, 1.0), saturate(-coc));
+    rgb = lerp(rgb, half3(0.4, 0.4, 0.4), saturate(coc));
+
+    // Black and white image overlay
+    rgb *= Luminance(color) + 0.5;
+
+    // Gamma correction
+#if !UNITY_COLORSPACE_GAMMA
+    rgb = SRGBToLinear(rgb);
+#endif
+
+    return half4(rgb, 1.0);
+}
+
 #endif // UNITY_POSTFX_DEPTH_OF_FIELD

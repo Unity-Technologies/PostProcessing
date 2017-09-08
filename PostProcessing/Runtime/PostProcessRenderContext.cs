@@ -71,7 +71,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Custom user data object (unused by builtin effects, feel free to store whatever you want
         // in this object)
+        // TODO: Make this more useful
         public object userData { get; set; }
+
+        // Reference to the internal debug layer
+        public PostProcessDebugLayer debugLayer { get; internal set; }
 
         // Current camera width in pixels
         private int m_width;
@@ -137,6 +141,7 @@ namespace UnityEngine.Rendering.PostProcessing
             resources = null;
             propertySheets = null;
             userData = null;
+            debugLayer = null;
             isSceneView = false;
             antialiasing = PostProcessLayer.Antialiasing.None;
             temporalAntialiasing = null;
@@ -153,6 +158,18 @@ namespace UnityEngine.Rendering.PostProcessing
             return antialiasing == PostProcessLayer.Antialiasing.TemporalAntialiasing
                 && !isSceneView
                 && temporalAntialiasing.IsSupported();
+        }
+
+        // Checks if a specific debug overlay is enabled
+        public bool IsDebugOverlayEnabled(DebugOverlay overlay)
+        {
+            return debugLayer.debugOverlay == overlay;
+        }
+
+        // Shortcut function
+        public void PushDebugOverlay(CommandBuffer cmd, RenderTargetIdentifier source, PropertySheet sheet, int pass)
+        {
+            debugLayer.PushDebugOverlay(cmd, source, sheet, pass);
         }
 
         // Internal values used for builtin effects

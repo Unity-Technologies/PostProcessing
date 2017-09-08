@@ -12,6 +12,16 @@ namespace UnityEngine.Rendering.PostProcessing
         [NonSerialized]
         public bool isDirty = true;
 
+        void OnEnable()
+        {
+            // Make sure every setting is valid. If a profile holds a script that doesn't exist
+            // anymore, nuke it to keep the profile clean. Note that if you delete a script that is
+            // currently in use in a profile you'll still get a one-time error in the console, it's
+            // harmless and happens because Unity does a redraw of the editor (and thus the current
+            // frame) before the recompilation step.
+            settings.RemoveAll(x => x == null);
+        }
+
         public void Reset()
         {
             isDirty = true;

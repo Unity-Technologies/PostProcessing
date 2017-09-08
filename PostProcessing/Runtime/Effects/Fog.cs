@@ -28,22 +28,10 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             var sheet = context.propertySheets.Get(context.resources.shaders.deferredFog);
             sheet.ClearKeywords();
+
             var fogColor = RuntimeUtilities.isLinearColorSpace ? RenderSettings.fogColor.linear : RenderSettings.fogColor;
             sheet.properties.SetVector(ShaderIDs.FogColor, fogColor);
             sheet.properties.SetVector(ShaderIDs.FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
-
-            switch (RenderSettings.fogMode)
-            {
-                case FogMode.Linear:
-                    sheet.EnableKeyword("FOG_LINEAR");
-                    break;
-                case FogMode.Exponential:
-                    sheet.EnableKeyword("FOG_EXP");
-                    break;
-                case FogMode.ExponentialSquared:
-                    sheet.EnableKeyword("FOG_EXP2");
-                    break;
-            }
 
             var cmd = context.command;
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, excludeSkybox ? 1 : 0);
