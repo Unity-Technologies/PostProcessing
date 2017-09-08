@@ -1,26 +1,100 @@
-﻿namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     [ExecuteInEditMode]
     public sealed class PostProcessDebug : MonoBehaviour
     {
         public PostProcessLayer postProcessLayer;
+        PostProcessLayer m_PreviousPostProcessLayer;
 
         public bool lightMeter;
         public bool histogram;
         public bool waveform;
         public bool vectorscope;
 
+        public DebugOverlay debugOverlay = DebugOverlay.None;
+
+        Camera m_CurrentCamera;
+        CommandBuffer m_CmdAfterEverything;
+        
+        void OnEnable()
+        {
+            m_CmdAfterEverything = new CommandBuffer { name = "Post-processing Debug Overlay" };
+
+#if UNITY_EDITOR
+            // Update is only called on object change when ExecuteInEditMode is set, but we need it
+            // to execute on every frame no matter what when not in play mode, so we'll use the
+            // editor update loop instead...
+            UnityEditor.EditorApplication.update += UpdateStates;
+#endif
+        }
+
+        void OnDisable()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.update -= UpdateStates;
+#endif
+
+            if (m_CurrentCamera != null)
+                m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
+
+            m_CurrentCamera = null;
+            m_PreviousPostProcessLayer = null;
+        }
+        
+#if !UNITY_EDITOR
+        void Update()
+        {
+            UpdateStates();
+        }
+#endif
+
         void Reset()
         {
             postProcessLayer = GetComponent<PostProcessLayer>();
         }
 
-        void Update()
+        void UpdateStates()
         {
-            if (lightMeter) postProcessLayer.monitors.RequestMonitorPass(MonitorType.LightMeter);
-            if (histogram) postProcessLayer.monitors.RequestMonitorPass(MonitorType.Histogram);
-            if (waveform) postProcessLayer.monitors.RequestMonitorPass(MonitorType.Waveform);
-            if (vectorscope) postProcessLayer.monitors.RequestMonitorPass(MonitorType.Vectorscope);
+            if (m_PreviousPostProcessLayer != postProcessLayer)
+            {
+                // Remove cmdbuffer from previously set camera
+                if (m_CurrentCamera != null)
+                {
+                    m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
+                    m_CurrentCamera = null;
+                }
+
+                m_PreviousPostProcessLayer = postProcessLayer;
+
+                // Add cmdbuffer to the currently set camera
+                if (postProcessLayer != null)
+                {
+                    m_CurrentCamera = postProcessLayer.GetComponent<Camera>();
+                    m_CurrentCamera.AddCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
+                }
+            }
+
+            if (postProcessLayer == null || !postProcessLayer.enabled)
+                return;
+
+            // Monitors
+            if (lightMeter) postProcessLayer.debugLayer.RequestMonitorPass(MonitorType.LightMeter);
+            if (histogram) postProcessLayer.debugLayer.RequestMonitorPass(MonitorType.Histogram);
+            if (waveform) postProcessLayer.debugLayer.RequestMonitorPass(MonitorType.Waveform);
+            if (vectorscope) postProcessLayer.debugLayer.RequestMonitorPass(MonitorType.Vectorscope);
+
+            // Overlay
+            postProcessLayer.debugLayer.RequestDebugOverlay(debugOverlay);
+        }
+
+        void OnPostRender()
+        {
+            m_CmdAfterEverything.Clear();
+
+            if (postProcessLayer == null || !postProcessLayer.enabled || !postProcessLayer.debugLayer.debugOverlayActive)
+                return;
+
+            m_CmdAfterEverything.Blit(postProcessLayer.debugLayer.debugOverlayTarget, BuiltinRenderTextureType.CameraTarget);
         }
 
         void OnGUI()
@@ -28,13 +102,12 @@
             if (postProcessLayer == null || !postProcessLayer.enabled)
                 return;
 
-            var monitors = postProcessLayer.monitors;
             var rect = new Rect(5, 5, 0, 0);
-
-            DrawMonitor(ref rect, monitors.lightMeter, lightMeter);
-            DrawMonitor(ref rect, monitors.histogram, histogram);
-            DrawMonitor(ref rect, monitors.waveform, waveform);
-            DrawMonitor(ref rect, monitors.vectorscope, vectorscope);
+            var debugLayer = postProcessLayer.debugLayer;
+            DrawMonitor(ref rect, debugLayer.lightMeter, lightMeter);
+            DrawMonitor(ref rect, debugLayer.histogram, histogram);
+            DrawMonitor(ref rect, debugLayer.waveform, waveform);
+            DrawMonitor(ref rect, debugLayer.vectorscope, vectorscope);
         }
 
         void DrawMonitor(ref Rect rect, Monitor monitor, bool enabled)
@@ -49,4 +122,3 @@
         }
     }
 }
-

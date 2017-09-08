@@ -1,10 +1,9 @@
-using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    [CustomEditor(typeof(PostProcessVolume))]
+    [CanEditMultipleObjects, CustomEditor(typeof(PostProcessVolume))]
     public sealed class PostProcessVolumeEditor : BaseEditor<PostProcessVolume>
     {
         SerializedProperty m_Profile;

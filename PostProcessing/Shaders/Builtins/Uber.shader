@@ -71,7 +71,6 @@ Shader "Hidden/PostProcessing/Uber"
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
             float2 uv = i.texcoord;
-            float2 uvSPR = UnityStereoTransformScreenSpaceTex(i.texcoord);
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             half4 color = (0.0).xxxx;
 
@@ -127,7 +126,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvSPR);
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
             }
             #endif
 
@@ -142,7 +141,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if BLOOM
             {
-                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvSPR, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoordStereo, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
                 half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
 
                 // Additive bloom (artist friendly)
@@ -183,7 +182,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if GRAIN
             {
-                half3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, uvSPR * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+                half3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoordStereo * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
                 float lum = 1.0 - sqrt(Luminance(saturate(color)));

@@ -24,7 +24,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         float2 _Jitter;
         float4 _FinalBlendParameters; // x: static, y: dynamic, z: motion amplification
-        float _SharpenParameters;
+        float _Sharpness;
 
         float2 GetClosestFragment(float2 uv)
         {
@@ -86,7 +86,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
             // Sharpen output
-            color += (color - (corners * 0.166667)) * 2.718282 * _SharpenParameters;
+            color += (color - (corners * 0.166667)) * 2.718282 * _Sharpness;
             color = max(0.0, color);
 
             // Tonemap color and history samples
@@ -128,20 +128,16 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         OutputSolver FragSolverDilate(VaryingsDefault i)
         {
-            float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-
-            float2 closest = GetClosestFragment(adjustedTexCoord);
+            float2 closest = GetClosestFragment(i.texcoordStereo);
             float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
-            return Solve(motion, adjustedTexCoord);
+            return Solve(motion, i.texcoordStereo);
         }
 
         OutputSolver FragSolverNoDilate(VaryingsDefault i)
         {
-            float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-
             // Don't dilate in ortho !
-            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, adjustedTexCoord).xy;
-            return Solve(motion, adjustedTexCoord);
+            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoordStereo).xy;
+            return Solve(motion, i.texcoordStereo);
         }
 
     ENDHLSL

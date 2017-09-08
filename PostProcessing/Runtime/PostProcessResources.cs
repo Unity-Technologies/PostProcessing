@@ -28,8 +28,10 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader gammaHistogram;
             public Shader waveform;
             public Shader vectorscope;
+            public Shader debugOverlays;
             public Shader deferredFog;
-            public Shader ambientOcclusion;
+            public Shader scalableAO;
+            public Shader multiScaleAO;
         }
 
         [Serializable]
@@ -41,6 +43,10 @@ namespace UnityEngine.Rendering.PostProcessing
             public ComputeShader gammaHistogram;
             public ComputeShader waveform;
             public ComputeShader vectorscope;
+            public ComputeShader multiScaleAODownsample1;
+            public ComputeShader multiScaleAODownsample2;
+            public ComputeShader multiScaleAORender;
+            public ComputeShader multiScaleAOUpsample;
         }
 
         [Serializable]

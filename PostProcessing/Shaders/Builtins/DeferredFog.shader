@@ -13,10 +13,9 @@ Shader "Hidden/PostProcessing/DeferredFog"
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
-            float2 uv = UnityStereoTransformScreenSpaceTex(i.texcoord);
-            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
-            float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv);
+            float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo);
             depth = Linear01Depth(depth);
             float dist = ComputeFogDistance(depth);
             half fog = 1.0 - ComputeFog(dist);
@@ -26,10 +25,9 @@ Shader "Hidden/PostProcessing/DeferredFog"
 
         float4 FragExcludeSkybox(VaryingsDefault i) : SV_Target
         {
-            float2 uv = UnityStereoTransformScreenSpaceTex(i.texcoord);
-            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
-            float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv);
+            float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo);
             depth = Linear01Depth(depth);
             float skybox = depth < SKYBOX_THREASHOLD_VALUE;
             float dist = ComputeFogDistance(depth);

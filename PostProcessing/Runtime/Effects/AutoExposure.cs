@@ -53,11 +53,8 @@ namespace UnityEngine.Rendering.PostProcessing
         int[] m_AutoExposurePingPong = new int[k_NumEyes];
         RenderTexture m_CurrentAutoExposure;
 
-        bool m_FirstFrame = true;
-
         public AutoExposureRenderer()
         {
-            m_FirstFrame = true;
             for (int eye = 0; eye < k_NumEyes; eye++)
             {
                 m_AutoExposurePool[eye] = new RenderTexture[k_NumAutoExposureTextures];
@@ -65,7 +62,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
-        //void CheckTexture(int id)
         void CheckTexture(int eye, int id)
         {
             if (m_AutoExposurePool[eye][id] == null || !m_AutoExposurePool[eye][id].IsCreated())
@@ -107,7 +103,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetVector(ShaderIDs.ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context)); // get per-eye adjusted values
             sheet.properties.SetFloat(ShaderIDs.ExposureCompensation, settings.keyValue.value);
 
-            if (m_FirstFrame || !Application.isPlaying)
+            if (m_ResetHistory || !Application.isPlaying)
             {
                 // We don't want eye adaptation when not in play mode because the GameView isn't
                 // animated, thus making it harder to tweak. Just use the final audo exposure value.
@@ -116,6 +112,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 //// Copy current exposure to the other pingpong target to avoid adapting from black
                 RuntimeUtilities.CopyTexture(cmd, m_AutoExposurePool[context.xrActiveEye][0], m_AutoExposurePool[context.xrActiveEye][1]);
+
+                m_ResetHistory = false;
             }
             else
             {
@@ -131,7 +129,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             context.autoExposureTexture = m_CurrentAutoExposure;
             context.autoExposure = settings;
-            m_FirstFrame = false;
         }
 
         public override void Release()

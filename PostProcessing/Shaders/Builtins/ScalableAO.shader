@@ -1,4 +1,4 @@
-Shader "Hidden/PostProcessing/AmbientOcclusion"
+Shader "Hidden/PostProcessing/ScalableAO"
 {
     HLSLINCLUDE
 
@@ -18,9 +18,10 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragAO
+                #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_DEPTH
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -32,9 +33,10 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragAO
+                #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_GBUFFER
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -49,12 +51,12 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
                 #define SOURCE_DEPTHNORMALS
                 #define BLUR_HORIZONTAL
                 #define BLUR_SAMPLE_CENTER_NORMAL
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
 
-        // 4 - Separable blur (horizontal pass) with G-Buffer
+        // 3 - Separable blur (horizontal pass) with G-Buffer
         Pass
         {
             HLSLPROGRAM
@@ -64,12 +66,12 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
                 #define SOURCE_GBUFFER
                 #define BLUR_HORIZONTAL
                 #define BLUR_SAMPLE_CENTER_NORMAL
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
 
-        // 5 - Separable blur (vertical pass)
+        // 4 - Separable blur (vertical pass)
         Pass
         {
             HLSLPROGRAM
@@ -77,24 +79,26 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define BLUR_VERTICAL
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
 
-        // 6 - Final composition
+        // 5 - Final composition
         Pass
         {
+            Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
+
             HLSLPROGRAM
 
                 #pragma vertex VertDefault
                 #pragma fragment FragComposition
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }
 
-        // 7: Final composition (ambient only mode)
+        // 6 - Final composition (ambient only mode)
         Pass
         {
             Blend Zero OneMinusSrcColor, Zero OneMinusSrcAlpha
@@ -103,7 +107,19 @@ Shader "Hidden/PostProcessing/AmbientOcclusion"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragCompositionGBuffer
-                #include "AmbientOcclusion.hlsl"
+                #include "ScalableAO.hlsl"
+
+            ENDHLSL
+        }
+
+        // 7 - Debug overlay
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDebugOverlay
+                #include "ScalableAO.hlsl"
 
             ENDHLSL
         }

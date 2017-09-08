@@ -10,9 +10,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0.1f, 1f)]
         public float jitterSpread = 0.75f;
 
-        [Tooltip("Controls the amount of sharpening applied to the color buffer.")]
+        [Tooltip("Controls the amount of sharpening applied to the color buffer. High values may introduce dark-border artifacts.")]
         [Range(0f, 3f)]
-        public float sharpen = 0.25f;
+        public float sharpness = 0.25f;
 
         [Tooltip("The blend coefficient for a stationary fragment. Controls the percentage of history sample blended into the final color.")]
         [Range(0f, 0.99f)]
@@ -57,6 +57,9 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return SystemInfo.supportedRenderTargetCount >= 2
                 && SystemInfo.supportsMotionVectors
+#if !UNITY_2017_3_OR_NEWER
+                && !RuntimeUtilities.isVREnabled
+#endif
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
         }
 
@@ -104,7 +107,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return cameraProj;
         }
 
-        public void ConfiguredJitteredProjectionMatrix(PostProcessRenderContext context)
+        public void ConfigureJitteredProjectionMatrix(PostProcessRenderContext context)
         {
             var camera = context.camera;
             camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
@@ -112,8 +115,9 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
-        public void ConfiguredStereoJitteredProjectionMatrices(PostProcessRenderContext context)
+        public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
         {
+#if  UNITY_2017_3_OR_NEWER
             var camera = context.camera;
             jitter = GenerateRandomOffset();
             jitter *= jitterSpread;
@@ -134,6 +138,14 @@ namespace UnityEngine.Rendering.PostProcessing
             // which could be double-wide in certain stereo rendering scenarios
             jitter = new Vector2(jitter.x / context.singleEyeWidth, jitter.y / context.height);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
+#endif
+        }
+
+        private void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
+        {
+            rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
+            if (XR.XRSettings.isDeviceActive)
+                rt.name += " for eye " + context.xrActiveEye.ToString();
         }
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)
@@ -145,10 +157,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 RenderTexture.ReleaseTemporary(rt);
 
                 rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                if (XR.XRSettings.isDeviceActive)
-                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
-                else
-                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
+                GenerateHistoryName(rt, id, context);
 
                 rt.filterMode = FilterMode.Bilinear;
                 m_HistoryTextures[context.xrActiveEye][id] = rt;
@@ -160,10 +169,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
                 var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                if (XR.XRSettings.isDeviceActive)
-                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
-                else
-                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString();
+                GenerateHistoryName(rt2, id, context);
 
                 rt2.filterMode = FilterMode.Bilinear;
                 m_HistoryTextures[context.xrActiveEye][id] = rt2;
@@ -189,7 +195,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             const float kMotionAmplification = 100f * 60f;
             sheet.properties.SetVector(ShaderIDs.Jitter, jitter);
-            sheet.properties.SetFloat(ShaderIDs.SharpenParameters, sharpen);
+            sheet.properties.SetFloat(ShaderIDs.Sharpness, sharpness);
             sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
 

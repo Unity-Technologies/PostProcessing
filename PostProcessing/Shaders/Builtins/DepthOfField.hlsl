@@ -27,7 +27,7 @@ half3 _TaaParams; // Jitter.x, Jitter.y, Blending
 // CoC calculation
 half4 FragCoC(VaryingsDefault i) : SV_Target
 {
-    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(i.texcoord)));
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
     half coc = (depth - _Distance) * _LensCoeff / max(depth, 1e-5);
     return saturate(coc * 0.5 * _RcpMaxCoC + 0.5);
 }
@@ -71,7 +71,7 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 
     // Neighborhood clamping
     half cocMin = closest.z;
-    half cocMax = max(max(max(max(coc0, coc1), coc2), coc3), coc4); // TODO: Switch to Max3
+    half cocMax = Max3(Max3(coc0, coc1, coc2), coc3, coc4);
     cocHis = clamp(cocHis, cocMin, cocMax);
 
     // Blend with the history
@@ -84,10 +84,9 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 #if UNITY_GATHER_SUPPORTED
 
     // Sample source colors
-    i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-    half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
-    half4 c_g = GATHER_GREEN_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
-    half4 c_b = GATHER_BLUE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 c_g = GATHER_GREEN_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 c_b = GATHER_BLUE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
     half3 c0 = half3(c_r.x, c_g.x, c_b.x);
     half3 c1 = half3(c_r.y, c_g.y, c_b.y);
@@ -95,7 +94,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
     half3 c3 = half3(c_r.w, c_g.w, c_b.w);
 
     // Sample CoCs
-    half4 cocs = GATHER_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord) * 2.0 - 1.0;
+    half4 cocs = GATHER_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoordStereo) * 2.0 - 1.0;
     half coc0 = cocs.x;
     half coc1 = cocs.y;
     half coc2 = cocs.z;
@@ -151,7 +150,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 // Bokeh filter with disk-shaped kernels
 half4 FragBlur(VaryingsDefault i) : SV_Target
 {
-    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
+    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
     half4 bgAcc = 0.0; // Background: far field bokeh
     half4 fgAcc = 0.0; // Foreground: near field bokeh
@@ -218,15 +217,14 @@ half4 FragPostBlur(VaryingsDefault i) : SV_Target
 // Combine with source
 half4 FragCombine(VaryingsDefault i) : SV_Target
 {
-    i.texcoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-    half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
-    half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord).r;
+    half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoordStereo);
+    half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoordStereo).r;
     coc = (coc - 0.5) * 2.0 * _MaxCoC;
 
     // Convert CoC to far field alpha value.
     float ffa = smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, coc);
 
-    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
 #if defined(UNITY_COLORSPACE_GAMMA)
     color = SRGBToLinear(color);
@@ -242,6 +240,32 @@ half4 FragCombine(VaryingsDefault i) : SV_Target
 #endif
 
     return color;
+}
+
+// Debug overlay
+half4 FragDebugOverlay(VaryingsDefault i) : SV_Target
+{
+    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+
+    // Calculate the radiuses of CoC.
+    half4 src = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoordStereo);
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
+    float coc = (depth - _Distance) * _LensCoeff / depth;
+    coc *= 80;
+
+    // Visualize CoC (white -> red -> gray)
+    half3 rgb = lerp(half3(1.0, 0.0, 0.0), half3(1.0, 1.0, 1.0), saturate(-coc));
+    rgb = lerp(rgb, half3(0.4, 0.4, 0.4), saturate(coc));
+
+    // Black and white image overlay
+    rgb *= Luminance(color) + 0.5;
+
+    // Gamma correction
+#if !UNITY_COLORSPACE_GAMMA
+    rgb = SRGBToLinear(rgb);
+#endif
+
+    return half4(rgb, 1.0);
 }
 
 #endif // UNITY_POSTFX_DEPTH_OF_FIELD
