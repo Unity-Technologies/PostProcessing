@@ -20,7 +20,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
         SerializedProperty m_AntialiasingMode;
         SerializedProperty m_TaaJitterSpread;
-        SerializedProperty m_TaaSharpen;
+        SerializedProperty m_TaaSharpness;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_FxaaMobileOptimized;
@@ -76,7 +76,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             m_AntialiasingMode = FindProperty(x => x.antialiasingMode);
             m_TaaJitterSpread = FindProperty(x => x.temporalAntialiasing.jitterSpread);
-            m_TaaSharpen = FindProperty(x => x.temporalAntialiasing.sharpen);
+            m_TaaSharpness = FindProperty(x => x.temporalAntialiasing.sharpness);
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
@@ -211,7 +211,7 @@ namespace UnityEditor.Rendering.PostProcessing
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
                     EditorGUILayout.PropertyField(m_TaaMotionBlending);
-                    EditorGUILayout.PropertyField(m_TaaSharpen);
+                    EditorGUILayout.PropertyField(m_TaaSharpness);
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing)
                 {

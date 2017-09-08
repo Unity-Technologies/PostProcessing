@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 
             if (m_CurrentCamera != null)
-                m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterEverything, m_CmdAfterEverything);
+                m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
 
             m_CurrentCamera = null;
             m_PreviousPostProcessLayer = null;
@@ -60,7 +60,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // Remove cmdbuffer from previously set camera
                 if (m_CurrentCamera != null)
                 {
-                    m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterEverything, m_CmdAfterEverything);
+                    m_CurrentCamera.RemoveCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
                     m_CurrentCamera = null;
                 }
 
@@ -70,7 +70,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (postProcessLayer != null)
                 {
                     m_CurrentCamera = postProcessLayer.GetComponent<Camera>();
-                    m_CurrentCamera.AddCommandBuffer(CameraEvent.AfterEverything, m_CmdAfterEverything);
+                    m_CurrentCamera.AddCommandBuffer(CameraEvent.AfterImageEffects, m_CmdAfterEverything);
                 }
             }
 
