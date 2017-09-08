@@ -292,15 +292,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
             
-            // I don't think I need the big hammer of clearing out the command buffers totally for the right eye.
-            // Really, I just need to clear out any effect that relies on history frames (like TAA), since each
-            // eye will have their own retained state.  The command buffers might be re-usable, assuming
-            // they start out being sourced from camera targets.
-            // Also, clearing of these buffers is dependent on their use being completed on the left eye first.
-            // Materials and render textures are what I am curious about, as far as re-use.  
-            // There is also the possibility of separating out the history-based effects into their own command
-            // buffers, and adding those per eye.  I don't think the bang-for-buck is there for that though,
-            // especially since single-pass is the path moving forward.
+            // TODO: Investigate retaining command buffers on XR multi-pass right eye
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
