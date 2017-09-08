@@ -10,9 +10,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0.1f, 1f)]
         public float jitterSpread = 0.75f;
 
-        [Tooltip("Controls the amount of sharpening applied to the color buffer.")]
+        [Tooltip("Controls the amount of sharpening applied to the color buffer. High values may introduce dark-border artifacts.")]
         [Range(0f, 3f)]
-        public float sharpen = 0.25f;
+        public float sharpness = 0.25f;
 
         [Tooltip("The blend coefficient for a stationary fragment. Controls the percentage of history sample blended into the final color.")]
         [Range(0f, 0.99f)]
@@ -141,7 +141,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             const float kMotionAmplification = 100f * 60f;
             sheet.properties.SetVector(ShaderIDs.Jitter, jitter);
-            sheet.properties.SetFloat(ShaderIDs.SharpenParameters, sharpen);
+            sheet.properties.SetFloat(ShaderIDs.Sharpness, sharpness);
             sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
 

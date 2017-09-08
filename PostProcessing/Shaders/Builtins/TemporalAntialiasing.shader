@@ -24,7 +24,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         float2 _Jitter;
         float4 _FinalBlendParameters; // x: static, y: dynamic, z: motion amplification
-        float _SharpenParameters;
+        float _Sharpness;
 
         float2 GetClosestFragment(float2 uv)
         {
@@ -85,7 +85,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
             // Sharpen output
-            color += (color - (corners * 0.166667)) * 2.718282 * _SharpenParameters;
+            color += (color - (corners * 0.166667)) * 2.718282 * _Sharpness;
             color = max(0.0, color);
 
             // Tonemap color and history samples

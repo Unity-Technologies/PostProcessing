@@ -8,7 +8,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int MainTex                         = Shader.PropertyToID("_MainTex");
 
         internal static readonly int Jitter                          = Shader.PropertyToID("_Jitter");
-        internal static readonly int SharpenParameters               = Shader.PropertyToID("_SharpenParameters");
+        internal static readonly int Sharpness                       = Shader.PropertyToID("_Sharpness");
         internal static readonly int FinalBlendParameters            = Shader.PropertyToID("_FinalBlendParameters");
         internal static readonly int HistoryTex                      = Shader.PropertyToID("_HistoryTex");
         
