@@ -23,7 +23,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragDepth(VaryingsDefault i) : SV_Target
         {
-            float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(i.texcoord), 0);
+            float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo, 0);
 
         //#if !UNITY_COLORSPACE_GAMMA
         //    d = SRGBToLinear(d);
@@ -37,13 +37,11 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragNormals(VaryingsDefault i) : SV_Target
         {
-            float2 uv = UnityStereoTransformScreenSpaceTex(i.texcoord);
-
         #if SOURCE_GBUFFER
-            float3 norm = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv).xyz * 2.0 - 1.0;
+            float3 norm = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, i.texcoordStereo).xyz * 2.0 - 1.0;
             float3 n = mul((float3x3)unity_WorldToCamera, norm);
         #else
-            float4 cdn = SAMPLE_TEXTURE2D(_CameraDepthNormalsTexture, sampler_CameraDepthNormalsTexture, uv);
+            float4 cdn = SAMPLE_TEXTURE2D(_CameraDepthNormalsTexture, sampler_CameraDepthNormalsTexture, i.texcoordStereo);
             float3 n = DecodeViewNormalStereo(cdn) * float3(1.0, 1.0, -1.0);
         #endif
 
@@ -99,14 +97,14 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float2 SampleMotionVectors(float2 coords)
         {
-            float2 mv = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, coords).xy;
+            float2 mv = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, UnityStereoTransformScreenSpaceTex(coords)).xy;
             mv.y *= -1.0;
             return mv;
         }
 
         float4 FragMotionVectors(VaryingsDefault i) : SV_Target
         {
-            float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
+            float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
             float2 mv = SampleMotionVectors(i.texcoord);
 
             // Background color intensity - keep this low unless you want to make your eyes bleed
@@ -169,7 +167,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragNANTracker(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
             if (any(isnan(color)) || any(isinf(color)))
             {

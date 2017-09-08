@@ -113,8 +113,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
-                    float2 texcoord = TransformStereoScreenSpaceTex(i.texcoord, 1);
-                    half ao = SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, texcoord).r;
+                    half ao = SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoord).r;
                     return float4(ao.rrr, 1.0);
                 }
 
