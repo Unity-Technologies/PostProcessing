@@ -71,7 +71,7 @@ half4 FragTempFilter(VaryingsDefault i) : SV_Target
 
     // Neighborhood clamping
     half cocMin = closest.z;
-    half cocMax = max(max(max(max(coc0, coc1), coc2), coc3), coc4); // TODO: Switch to Max3
+    half cocMax = Max3(Max3(coc0, coc1, coc2), coc3, coc4);
     cocHis = clamp(cocHis, cocMin, cocMax);
 
     // Blend with the history
