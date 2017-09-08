@@ -30,10 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         m_xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
-                    if (m_xrSinglePass && (xrDesc.dimension != TextureDimension.Tex2DArray))
-                        m_xrSingleEyeWidth = m_width / 2;
-                    else
-                        m_xrSingleEyeWidth = m_width;
+                    m_xrSingleEyeWidth = XR.XRSettings.eyeTextureWidth;
                 }
                 else
                 {

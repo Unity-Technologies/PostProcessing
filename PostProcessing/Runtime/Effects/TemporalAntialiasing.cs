@@ -136,6 +136,13 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
+        private void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
+        {
+            rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
+            if (XR.XRSettings.isDeviceActive)
+                rt.name += " for eye " + context.xrActiveEye.ToString();
+        }
+
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)
         {
             var rt = m_HistoryTextures[context.xrActiveEye][id];
@@ -145,10 +152,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 RenderTexture.ReleaseTemporary(rt);
 
                 rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                if (XR.XRSettings.isDeviceActive)
-                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
-                else
-                    rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
+                GenerateHistoryName(rt, id, context);
 
                 rt.filterMode = FilterMode.Bilinear;
                 m_HistoryTextures[context.xrActiveEye][id] = rt;
@@ -160,10 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
                 var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
-                if (XR.XRSettings.isDeviceActive)
-                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString() + " for eye " + context.xrActiveEye.ToString();
-                else
-                    rt2.name = "Temporal Anti-aliasing History id #" + id.ToString();
+                GenerateHistoryName(rt2, id, context);
 
                 rt2.filterMode = FilterMode.Bilinear;
                 m_HistoryTextures[context.xrActiveEye][id] = rt2;

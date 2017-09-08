@@ -386,71 +386,22 @@ namespace UnityEngine.Rendering.PostProcessing
             return Matrix4x4.Ortho(left, right, bottom, top, camera.nearClipPlane, camera.farClipPlane);
         }
 
-        // We can represent a projection matrix by using the tangents of the frustum half angles.
-        // The 'traditional' representation of the values in a projection matrix for
-        // left, right, top and bottom are that they represent values on the near clip plane.
-        // If we take the matrix element (0,0) as an example, it would be equal to
-        // (2 * clipNearPlane) / (right - left).  We can divide the term by clipNearPlane to get
-        // 2 / ((right - left) / clipNearPlane), which gives us
-        // 2 / (right/clipNearPlane - left/clipNearPlane).  And we can substitue 
-        // tan(rightHalfAngle) = (right/clipNearPlane) and tan(leftHalfAngle) = (left/clipNearPlane).
-        // Our new term for (0,0) is 2/(rTan - lTan).
-        // 
-        // Since we have the calculated value for (0,0), we can use that to solve for (rTan - lTan).
-        // (rTan - lTan) = 2 / proj(0,0)
-        // We can also get the value for (rTan + lTan), as it is the numerator for term (0,2).
-        // We have the denominator, so (rTan + lTan) = (rTan - lTan) * proj(0,2) = 2 * proj(0,2) / proj (0,0)
-        // We can add (rTan + lTan) and (rTan - lTan) to get 2 * rTan, which can gives us rTan.
-        // rTan = ((2 / proj(0,0)) + (2 * proj(0,2) / proj(0,0))) / 2 =>
-        // rTan = (1 + proj(0,2)) / proj(0,0) 
-        //
-        // We can derive lTan via proj(0,0) = 2 / (rTan - lTan), which gives us
-        // lTan = rTan - 2/proj(0,0)
-        // If we substitute our derivation for rTan in here, we get the conveniently symmetric:
-        // lTan = ((1 + proj(0,2)) / proj(0,0)) - 2 / proj(0,0) => 
-        // lTan = (-1 + proj(0,2)) / proj(0,0)
-        //
-        // We can repeat these calculations for the top and bottom tangents as well.
         public static Matrix4x4 GenerateJitteredProjectionMatrixFromOriginal(PostProcessRenderContext context, Matrix4x4 origProj, Vector2 jitter)
         {
-            var rTan = (1.0f + origProj[0, 2]) / origProj[0, 0];
-            var lTan = (-1.0f + origProj[0, 2]) / origProj[0, 0];
+            FrustumPlanes planes = origProj.decomposeProjection;
 
-            var tTan = (1.0f + origProj[1, 2]) / origProj[1, 1];
-            var bTan = (-1.0f + origProj[1, 2]) / origProj[1, 1];
+            float vertFov = Math.Abs(planes.top) + Math.Abs(planes.bottom);
+            float horizFov = Math.Abs(planes.left) + Math.Abs(planes.right);
 
-            float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
-            float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
+            var planeJitter = new Vector2(jitter.x * horizFov / context.singleEyeWidth,
+                                            jitter.y * vertFov / context.height);
 
-            jitter.x *= tanHorizFov / context.singleEyeWidth;
-            jitter.y *= tanVertFov / context.height;
+            planes.left += planeJitter.x;
+            planes.right += planeJitter.x;
+            planes.top += planeJitter.y;
+            planes.bottom += planeJitter.y;
 
-            float left = jitter.x + lTan;
-            float right = jitter.x + rTan;
-            float top = jitter.y + tTan;
-            float bottom = jitter.y + bTan;
-
-            var jitteredMatrix = new Matrix4x4();
-
-            jitteredMatrix[0, 0] = 2f / (right - left);
-            jitteredMatrix[0, 1] = 0f;
-            jitteredMatrix[0, 2] = (right + left) / (right - left);
-            jitteredMatrix[0, 3] = 0f;
-
-            jitteredMatrix[1, 0] = 0f;
-            jitteredMatrix[1, 1] = 2f / (top - bottom);
-            jitteredMatrix[1, 2] = (top + bottom) / (top - bottom);
-            jitteredMatrix[1, 3] = 0f;
-
-            jitteredMatrix[2, 0] = 0f;
-            jitteredMatrix[2, 1] = 0f;
-            jitteredMatrix[2, 2] = origProj[2, 2];
-            jitteredMatrix[2, 3] = origProj[2, 3];
-
-            jitteredMatrix[3, 0] = 0f;
-            jitteredMatrix[3, 1] = 0f;
-            jitteredMatrix[3, 2] = -1f;
-            jitteredMatrix[3, 3] = 0f;
+            var jitteredMatrix = Matrix4x4.Frustum(planes);
 
             return jitteredMatrix;
         }
