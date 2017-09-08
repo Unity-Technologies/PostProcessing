@@ -128,20 +128,16 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         OutputSolver FragSolverDilate(VaryingsDefault i)
         {
-            float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-
-            float2 closest = GetClosestFragment(adjustedTexCoord);
+            float2 closest = GetClosestFragment(i.texcoordStereo);
             float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
-            return Solve(motion, adjustedTexCoord);
+            return Solve(motion, i.texcoordStereo);
         }
 
         OutputSolver FragSolverNoDilate(VaryingsDefault i)
         {
-            float2 adjustedTexCoord = UnityStereoTransformScreenSpaceTex(i.texcoord);
-
             // Don't dilate in ortho !
-            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, adjustedTexCoord).xy;
-            return Solve(motion, adjustedTexCoord);
+            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoordStereo).xy;
+            return Solve(motion, i.texcoordStereo);
         }
 
     ENDHLSL
