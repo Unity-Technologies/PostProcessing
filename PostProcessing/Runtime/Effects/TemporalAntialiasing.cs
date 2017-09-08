@@ -57,6 +57,9 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return SystemInfo.supportedRenderTargetCount >= 2
                 && SystemInfo.supportsMotionVectors
+#if !UNITY_2017_3_OR_NEWER
+                && !RuntimeUtilities.isVREnabled
+#endif
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
         }
 
@@ -104,7 +107,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return cameraProj;
         }
 
-        public void ConfiguredJitteredProjectionMatrix(PostProcessRenderContext context)
+        public void ConfigureJitteredProjectionMatrix(PostProcessRenderContext context)
         {
             var camera = context.camera;
             camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
@@ -112,8 +115,9 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
-        public void ConfiguredStereoJitteredProjectionMatrices(PostProcessRenderContext context)
+        public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
         {
+#if  UNITY_2017_3_OR_NEWER
             var camera = context.camera;
             jitter = GenerateRandomOffset();
             jitter *= jitterSpread;
@@ -134,6 +138,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // which could be double-wide in certain stereo rendering scenarios
             jitter = new Vector2(jitter.x / context.singleEyeWidth, jitter.y / context.height);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
+#endif
         }
 
         private void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
