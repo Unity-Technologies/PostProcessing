@@ -71,15 +71,17 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (m_Result == null || !m_Result.IsCreated())
             {
+                var tempAORTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+
                 // Initial allocation
-                m_Result = new RenderTexture(context.width, context.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
+                m_Result = new RenderTexture(tempAORTDesc)
                 {
                     hideFlags = HideFlags.DontSave,
                     filterMode = FilterMode.Bilinear
                 };
                 reset = true;
             }
-            else if (m_Result.width != context.width || m_Result.height != context.height)
+            else if (m_Result.width != context.width || m_Result.height != context.height) // TODO: convert this to RT width when I implement it
             {
                 // Release and reallocate
                 m_Result.Release();
@@ -123,23 +125,24 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Texture setup
-            int tw = context.width;
-            int th = context.height;
             int ts = downsampling ? 2 : 1;
-            const RenderTextureFormat kFormat = RenderTextureFormat.ARGB32;
-            const RenderTextureReadWrite kRWMode = RenderTextureReadWrite.Linear;
             const FilterMode kFilter = FilterMode.Bilinear;
+
+            var tempAORTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            tempAORTDesc.width /= ts;
+            tempAORTDesc.height /= ts;
+            var tempBlurRTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 
             // AO buffer
             var rtMask = ShaderIDs.OcclusionTexture1;
-            cmd.GetTemporaryRT(rtMask, tw / ts, th / ts, 0, kFilter, kFormat, kRWMode);
+            cmd.GetTemporaryRT(rtMask, tempAORTDesc, kFilter);
 
             // AO estimation
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, rtMask, sheet, (int)Pass.OcclusionEstimationForward + occlusionSource);
 
             // Blur buffer
             var rtBlur = ShaderIDs.OcclusionTexture2;
-            cmd.GetTemporaryRT(rtBlur, tw, th, 0, kFilter, kFormat, kRWMode);
+            cmd.GetTemporaryRT(rtBlur, tempBlurRTDesc, kFilter);
 
             // Separable blur (horizontal pass)
             cmd.BlitFullscreenTriangle(rtMask, rtBlur, sheet, (int)Pass.HorizontalBlurForward + occlusionSource);
