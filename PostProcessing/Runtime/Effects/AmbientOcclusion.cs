@@ -63,14 +63,6 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         public void Release()
-            var tempAORTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-            tempAORTDesc.width /= ts;
-            tempAORTDesc.height /= ts;
-            var tempBlurRTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-
-            cmd.GetTemporaryRT(rtMask, tw / ts, th / ts, 0, kFilter, kFormat, kRWMode);
-            cmd.GetTemporaryRT(rtBlur, tw, th, 0, kFilter, kFormat, kRWMode);
-            cmd.GetTemporaryRT(rtMask, tw, th, 0, kFilter, kFormat, kRWMode);
         {
             foreach (var m in m_Methods)
                 m.Release();
