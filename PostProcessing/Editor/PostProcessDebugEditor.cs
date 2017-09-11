@@ -52,7 +52,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             m_MotionColorIntensity = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionColorIntensity");
             m_MotionGridSize = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionGridSize");
-            m_ColorBlindness = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindness");
+            m_ColorBlindness = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindnessType");
             m_ColorBlindnessStrength = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindnessStrength");
         }
 
