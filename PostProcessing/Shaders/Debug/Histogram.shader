@@ -2,7 +2,6 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
 {
     HLSLINCLUDE
 
-        #pragma exclude_renderers gles gles3
         #pragma target 4.5
         #include "../StdLib.hlsl"
 
@@ -46,19 +45,29 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
             o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
         #endif
 
+        #if SHADER_API_GLES3 // No texture loopup in VS on GLES3/Android
+            o.maxValue = 0;
+        #else
             o.maxValue = _Params.y / FindMaxHistogramValue();
+        #endif
         
             return o;
         }
 
         float4 Frag(VaryingsHistogram i) : SV_Target
         {
+        #if SHADER_API_GLES3
+            float maxValue = _Params.y / FindMaxHistogramValue();
+        #else
+            float maxValue = i.maxValue;
+        #endif
+
             const float kBinsMinusOne = HISTOGRAM_BINS - 1.0;
             float remapI = i.texcoord.x * kBinsMinusOne;
             uint index = floor(remapI);
             float delta = frac(remapI);
-            float v1 = float(_HistogramBuffer[index]) * i.maxValue;
-            float v2 = float(_HistogramBuffer[min(index + 1, kBinsMinusOne)]) * i.maxValue;
+            float v1 = float(_HistogramBuffer[index]) * maxValue;
+            float v2 = float(_HistogramBuffer[min(index + 1, kBinsMinusOne)]) * maxValue;
             float h = v1 * (1.0 - delta) + v2 * delta;
             uint y = (uint)round(i.texcoord.y * _Params.y);
 
