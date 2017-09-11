@@ -23,7 +23,7 @@ namespace UnityEngine.PostProcessing
 
         static uint[] s_EmptyHistogramBuffer;
 
-        bool m_FirstFrame = true;
+        int m_FrameCount = 0;
 
         // Don't forget to update 'EyeAdaptation.cginc' if you change these values !
         const int k_HistogramBins = 64;
@@ -42,12 +42,12 @@ namespace UnityEngine.PostProcessing
 
         public void ResetHistory()
         {
-            m_FirstFrame = true;
+            m_FrameCount = 0;
         }
 
         public override void OnEnable()
         {
-            m_FirstFrame = true;
+            m_FrameCount = 0;
         }
 
         public override void OnDisable()
@@ -133,7 +133,7 @@ namespace UnityEngine.PostProcessing
             if (settings.dynamicKeyValue)
                 material.EnableKeyword("AUTO_KEY_VALUE");
 
-            if (m_FirstFrame || !Application.isPlaying)
+            if (m_FrameCount < 2 || !Application.isPlaying)
             {
                 // We don't want eye adaptation when not in play mode because the GameView isn't
                 // animated, thus making it harder to tweak. Just use the final audo exposure value.
@@ -169,7 +169,7 @@ namespace UnityEngine.PostProcessing
                 Graphics.Blit(null, m_DebugHistogram, material, 2);
             }
 
-            m_FirstFrame = false;
+            m_FrameCount++;
             return m_CurrentAutoExposure;
         }
 
