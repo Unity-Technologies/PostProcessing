@@ -467,8 +467,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeFloatParams(cs, "gInvThicknessTable", m_InvThicknessTable);
             cmd.SetComputeFloatParams(cs, "gSampleWeightTable", m_SampleWeightTable);
             cmd.SetComputeVectorParam(cs, "gInvSliceDimension", source.inverseDimensions);
-            cmd.SetComputeFloatParam(cs, "gRejectFadeoff", -1f / thicknessModifier);
-            cmd.SetComputeFloatParam(cs, "gIntensity", intensity);
+            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector2(-1f / thicknessModifier, intensity));
             cmd.SetComputeTextureParam(cs, kernel, "DepthTex", source.id);
             cmd.SetComputeTextureParam(cs, kernel, "Occlusion", dest.id);
 
@@ -503,10 +502,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.SetComputeVectorParam(cs, "InvLowResolution", lowResDepth.inverseDimensions);
             cmd.SetComputeVectorParam(cs, "InvHighResolution", highResDepth.inverseDimensions);
-            cmd.SetComputeFloatParam(cs, "NoiseFilterStrength", noiseFilterWeight);
-            cmd.SetComputeFloatParam(cs, "StepSize", stepSize);
-            cmd.SetComputeFloatParam(cs, "kBlurTolerance", bTolerance);
-            cmd.SetComputeFloatParam(cs, "kUpsampleTolerance", uTolerance);
+            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector4(noiseFilterWeight, stepSize, bTolerance, uTolerance));
 
             cmd.SetComputeTextureParam(cs, kernel, "LoResDB", lowResDepth.id);
             cmd.SetComputeTextureParam(cs, kernel, "HiResDB", highResDepth.id);

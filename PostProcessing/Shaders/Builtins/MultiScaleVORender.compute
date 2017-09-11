@@ -40,9 +40,11 @@ CBUFFER_START(CB1)
     float4 gInvThicknessTable[3];
     float4 gSampleWeightTable[3];
     float4 gInvSliceDimension;
-    float  gRejectFadeoff;
-    float  gIntensity;
+    float2 AdditionalParams;
 CBUFFER_END
+
+#define gRejectFadeoff AdditionalParams.x
+#define gIntensity AdditionalParams.y
 
 #if WIDE_SAMPLING
 // 32x32 cache size:  the 16x16 in the center forms the area of focus with the 8-pixel perimeter used for wide gathering.
