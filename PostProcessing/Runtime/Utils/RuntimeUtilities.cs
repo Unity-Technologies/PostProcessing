@@ -251,6 +251,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        public static bool isAndroidOpenGL
+        {
+            get { return Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan; }
+        }
+
         public static void Destroy(UnityObject obj)
         {
             if (obj != null)

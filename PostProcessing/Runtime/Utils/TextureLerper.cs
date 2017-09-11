@@ -107,8 +107,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             RenderTexture rt = null;
 
-            bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
-
             if (is3d)
             {
                 int size = to.width;
@@ -122,7 +120,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Command.SetComputeTextureParam(compute, kernel, "_To", to);
 
                 int groupSizeXY = Mathf.CeilToInt(size / 8f);
-                int groupSizeZ = Mathf.CeilToInt(size / (isAndroidOpenGL ? 2f : 8f));
+                int groupSizeZ = Mathf.CeilToInt(size / (RuntimeUtilities.isAndroidOpenGL ? 2f : 8f));
                 m_Command.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
             }
             else

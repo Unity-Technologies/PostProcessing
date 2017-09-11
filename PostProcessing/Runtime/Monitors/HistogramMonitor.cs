@@ -18,19 +18,24 @@ namespace UnityEngine.Rendering.PostProcessing
         public Channel channel = Channel.Master;
 
         ComputeBuffer m_Data;
-        private int numBins;
-        private int threadGroupSizeX;
-        private int threadGroupSizeY;
+        int m_NumBins;
+        int m_ThreadGroupSizeX;
+        int m_ThreadGroupSizeY;
 
         internal override void OnEnable()
         {
-            base.OnEnable();
+            m_ThreadGroupSizeX = 16;
 
-            bool isAndroidOpenGL = Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan;
-
-            numBins = isAndroidOpenGL ? 128 : 256;
-            threadGroupSizeX = isAndroidOpenGL ? 16 : 16;
-            threadGroupSizeY = isAndroidOpenGL ? 8 : 16;
+            if (RuntimeUtilities.isAndroidOpenGL)
+            {
+                m_NumBins = 128;
+                m_ThreadGroupSizeY = 8;
+            }
+            else
+            {
+                m_NumBins = 256;
+                m_ThreadGroupSizeY = 16;
+            }
         }
 
         internal override void OnDisable()
@@ -53,7 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
             CheckOutput(width, height);
 
             if (m_Data == null)
-                m_Data = new ComputeBuffer(numBins, sizeof(uint));
+                m_Data = new ComputeBuffer(m_NumBins, sizeof(uint));
 
             var compute = context.resources.computeShaders.gammaHistogram;
             var cmd = context.command;
@@ -62,7 +67,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Clear the buffer on every frame as we use it to accumulate values on every frame
             int kernel = compute.FindKernel("KHistogramClear");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_Data);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(numBins / (float)threadGroupSizeX), 1, 1);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(m_NumBins / (float)m_ThreadGroupSizeX), 1, 1);
 
             // Gather all pixels and fill in our histogram
             kernel = compute.FindKernel("KHistogramGather");
@@ -77,8 +82,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.HalfResFinalCopy);
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_Data);
             cmd.DispatchCompute(compute, kernel, 
-                Mathf.CeilToInt(parameters.x / threadGroupSizeX),
-                Mathf.CeilToInt(parameters.y / threadGroupSizeY),
+                Mathf.CeilToInt(parameters.x / m_ThreadGroupSizeX),
+                Mathf.CeilToInt(parameters.y / m_ThreadGroupSizeY),
                 1
             );
 
