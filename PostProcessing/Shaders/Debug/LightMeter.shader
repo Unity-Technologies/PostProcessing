@@ -2,6 +2,7 @@ Shader "Hidden/PostProcessing/Debug/LightMeter"
 {
     HLSLINCLUDE
 
+        #pragma exclude_renderers gles gles3
         #pragma target 4.5
         #include "../StdLib.hlsl"
         #include "../Builtins/ExposureHistogram.hlsl"

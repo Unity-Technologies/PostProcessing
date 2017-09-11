@@ -2,10 +2,15 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
 {
     HLSLINCLUDE
 
+        #pragma exclude_renderers gles gles3
         #pragma target 4.5
         #include "../StdLib.hlsl"
 
-        #define HISTOGRAM_BINS 256
+        #if SHADER_API_GLES3
+            #define HISTOGRAM_BINS 128
+        #else
+            #define HISTOGRAM_BINS 256
+        #endif
 
         struct VaryingsHistogram
         {
@@ -42,7 +47,7 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
         #endif
 
             o.maxValue = _Params.y / FindMaxHistogramValue();
-
+        
             return o;
         }
 
