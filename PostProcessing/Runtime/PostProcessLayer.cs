@@ -29,7 +29,6 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
-        public AmbientOcclusion ambientOcclusion;
         public Fog fog;
         public Dithering dithering;
 
@@ -140,7 +139,6 @@ namespace UnityEngine.Rendering.PostProcessing
             if (resources != null) m_Resources = resources;
             
             RuntimeUtilities.CreateIfNull(ref debugLayer);
-            RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
@@ -228,7 +226,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             temporalAntialiasing.Release();
-            ambientOcclusion.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -282,10 +279,14 @@ namespace UnityEngine.Rendering.PostProcessing
             SetupContext(context);
 
             // Lighting & opaque-only effects
+            var aoBundle = GetBundle<AmbientOcclusion>();
+            var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
+            var aoRenderer = aoBundle.CastRenderer<AmbientOcclusionRenderer>();
+
             int opaqueOnlyEffects = 0;
             bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            bool aoSupported = ambientOcclusion.IsEnabledAndSupported(context);
-            bool aoAmbientOnly = ambientOcclusion.IsAmbientOnly(context);
+            bool aoSupported = aoSettings.IsEnabledAndSupported(context);
+            bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
             bool isFogActive = fog.IsEnabledAndSupported(context);
@@ -293,7 +294,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
-                var ao = ambientOcclusion.Get();
+                var ao = aoRenderer.Get();
 
                 // Render as soon as possible - should be done async in SRPs when available
                 context.command = m_LegacyCmdBufferBeforeReflections;
@@ -306,7 +307,7 @@ namespace UnityEngine.Rendering.PostProcessing
             else if (isAmbientOcclusionOpaque)
             {
                 context.command = m_LegacyCmdBufferOpaque;
-                ambientOcclusion.Get().RenderAfterOpaque(context);
+                aoRenderer.Get().RenderAfterOpaque(context);
             }
 
             opaqueOnlyEffects += isFogActive ? 1 : 0;
@@ -432,9 +433,6 @@ namespace UnityEngine.Rendering.PostProcessing
             // Special case for AA & lighting effects
             if (context.IsTemporalAntialiasingActive())
                 flags |= temporalAntialiasing.GetCameraFlags();
-
-            if (ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context))
-                flags |= ambientOcclusion.Get().GetCameraFlags();
 
             if (fog.IsEnabledAndSupported(context))
                 flags |= fog.GetCameraFlags();
