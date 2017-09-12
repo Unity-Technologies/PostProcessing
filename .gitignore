@@ -24,6 +24,7 @@
 LICENSE.meta
 PostProcessing.meta
 README.md.meta
+package.json.meta
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
