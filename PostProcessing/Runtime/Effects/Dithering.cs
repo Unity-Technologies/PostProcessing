@@ -10,7 +10,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal void Render(PostProcessRenderContext context)
         {
-            var blueNoise = context.resources.blueNoise;
+            var blueNoise = context.resources.blueNoise64;
             Assert.IsTrue(blueNoise != null && blueNoise.Length > 0);
 
         #if POSTFX_DEBUG_STATIC_DITHERING // Used by QA for automated testing

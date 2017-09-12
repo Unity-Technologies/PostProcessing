@@ -29,6 +29,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
+        public ScreenSpaceReflections screenSpaceReflections;
         public Fog fog;
         public Dithering dithering;
 
@@ -137,8 +138,8 @@ namespace UnityEngine.Rendering.PostProcessing
         public void Init(PostProcessResources resources)
         {
             if (resources != null) m_Resources = resources;
-            
-            RuntimeUtilities.CreateIfNull(ref debugLayer);
+
+            RuntimeUtilities.CreateIfNull(ref screenSpaceReflections);
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
@@ -226,6 +227,7 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             temporalAntialiasing.Release();
+            screenSpaceReflections.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -270,7 +272,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-            
+
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
@@ -289,6 +291,7 @@ namespace UnityEngine.Rendering.PostProcessing
             bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
+            bool isScreenSpaceReflectionsActive = screenSpaceReflections.IsEnabledAndSupported(context);
             bool isFogActive = fog.IsEnabledAndSupported(context);
 
             // Ambient-only AO is a special case and has to be done in separate command buffers
@@ -310,6 +313,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 aoRenderer.Get().RenderAfterOpaque(context);
             }
 
+            opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
@@ -337,7 +341,14 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
                 else context.destination = cameraTarget;
 
-                // TODO: Insert SSR here
+                if (isScreenSpaceReflectionsActive)
+                {
+                    screenSpaceReflections.Render(context);
+                    opaqueOnlyEffects--;
+                    var prevSource = context.source;
+                    context.source = context.destination;
+                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                }
 
                 if (isFogActive)
                 {
@@ -373,14 +384,14 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         void OnPostRender()
-         {
-             // Unused in scriptable render pipelines
-             if (RuntimeUtilities.scriptableRenderPipelineActive)
-                 return;
- 
-             if (m_CurrentContext.IsTemporalAntialiasingActive())
-                 m_Camera.ResetProjectionMatrix();
-         }
+        {
+            // Unused in scriptable render pipelines
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                return;
+
+            if (m_CurrentContext.IsTemporalAntialiasingActive())
+                m_Camera.ResetProjectionMatrix();
+        }
 
         PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
@@ -451,6 +462,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 bundle.Value.ResetHistory();
 
             temporalAntialiasing.ResetHistory();
+            screenSpaceReflections.ResetHistory();
         }
 
         public bool HasOpaqueOnlyEffects(PostProcessRenderContext context)
