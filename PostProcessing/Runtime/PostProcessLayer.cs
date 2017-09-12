@@ -29,7 +29,6 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
-        public ScreenSpaceReflections screenSpaceReflections;
         public Fog fog;
         public Dithering dithering;
 
@@ -138,7 +137,6 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (resources != null) m_Resources = resources;
 
-            RuntimeUtilities.CreateIfNull(ref screenSpaceReflections);
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
@@ -226,7 +224,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             temporalAntialiasing.Release();
-            screenSpaceReflections.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -279,19 +276,23 @@ namespace UnityEngine.Rendering.PostProcessing
 
             SetupContext(context);
 
+            context.command = m_LegacyCmdBufferOpaque;
+            UpdateSettingsIfNeeded(context);
+
             // Lighting & opaque-only effects
             var aoBundle = GetBundle<AmbientOcclusion>();
             var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
             var aoRenderer = aoBundle.CastRenderer<AmbientOcclusionRenderer>();
 
-            int opaqueOnlyEffects = 0;
-            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
             bool aoSupported = aoSettings.IsEnabledAndSupported(context);
             bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
-            bool isScreenSpaceReflectionsActive = screenSpaceReflections.IsEnabledAndSupported(context);
-            bool isFogActive = fog.IsEnabledAndSupported(context);
+
+            var ssrBundle = GetBundle<ScreenSpaceReflections>();
+            var ssrSettings = ssrBundle.settings;
+            var ssrRenderer = ssrBundle.renderer;
+            bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
 
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
@@ -311,7 +312,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.command = m_LegacyCmdBufferOpaque;
                 aoRenderer.Get().RenderAfterOpaque(context);
             }
-
+            
+            bool isFogActive = fog.IsEnabledAndSupported(context);
+            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
+            int opaqueOnlyEffects = 0;
             opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
@@ -342,7 +346,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (isScreenSpaceReflectionsActive)
                 {
-                    screenSpaceReflections.Render(context);
+                    ssrRenderer.Render(context);
                     opaqueOnlyEffects--;
                     var prevSource = context.source;
                     context.source = context.destination;
@@ -461,7 +465,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 bundle.Value.ResetHistory();
 
             temporalAntialiasing.ResetHistory();
-            screenSpaceReflections.ResetHistory();
         }
 
         public bool HasOpaqueOnlyEffects(PostProcessRenderContext context)

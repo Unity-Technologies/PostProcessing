@@ -27,6 +27,12 @@ namespace UnityEditor.Rendering.PostProcessing
 
         public override void OnInspectorGUI()
         {
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+            {
+                EditorGUILayout.HelpBox("This effect doesn't work with scriptable render pipelines yet.", MessageType.Warning);
+                return;
+            }
+
             PropertyField(m_Mode);
             PropertyField(m_Intensity);
 
