@@ -39,7 +39,6 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
-        [SerializeField] bool m_ShowRenderingFeatures;
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
 

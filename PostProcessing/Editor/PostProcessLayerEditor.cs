@@ -5,13 +5,11 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEditorInternal;
 using System.IO;
-using ScreenSpaceReflections = UnityEngine.Rendering.PostProcessing.ScreenSpaceReflections;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
-    using SSRPreset = UnityEngine.Rendering.PostProcessing.ScreenSpaceReflections.Preset;
 
     [CanEditMultipleObjects, CustomEditor(typeof(PostProcessLayer))]
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
@@ -31,7 +29,6 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_FogEnabled;
         SerializedProperty m_FogExcludeSkybox;
 
-        SerializedProperty m_ShowRenderingFeatures;
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -67,19 +64,9 @@ namespace UnityEditor.Rendering.PostProcessing
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
-            m_SSREnabled = FindProperty(x => x.screenSpaceReflections.enabled);
-            m_SSRPreset = FindProperty(x => x.screenSpaceReflections.preset);
-            m_SSRMaximumIterationCount = FindProperty(x => x.screenSpaceReflections.maximumIterationCount);
-            m_SSRResolution = FindProperty(x => x.screenSpaceReflections.resolution);
-            m_SSRThickness = FindProperty(x => x.screenSpaceReflections.thickness);
-            m_SSRMaximumMarchDistance = FindProperty(x => x.screenSpaceReflections.maximumMarchDistance);
-            m_SSRDistanceFade = FindProperty(x => x.screenSpaceReflections.distanceFade);
-            m_SSRAttenuation = FindProperty(x => x.screenSpaceReflections.attenuation);
-
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
 
-            m_ShowRenderingFeatures = serializedObject.FindProperty("m_ShowRenderingFeatures");
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
