@@ -53,7 +53,7 @@ namespace UnityEditor.Rendering.PostProcessing
             
             PropertyField(m_Color);
 
-            if (Camera.main.actualRenderingPath == RenderingPath.DeferredShading && Camera.main.allowHDR)
+            if (Camera.main != null && Camera.main.actualRenderingPath == RenderingPath.DeferredShading && Camera.main.allowHDR)
                 PropertyField(m_AmbientOnly);
         }
     }

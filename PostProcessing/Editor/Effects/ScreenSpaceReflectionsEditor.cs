@@ -33,7 +33,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 return;
             }
 
-            if (Camera.main.actualRenderingPath != RenderingPath.DeferredShading)
+            if (Camera.main != null && Camera.main.actualRenderingPath != RenderingPath.DeferredShading)
                 EditorGUILayout.HelpBox("This effect only works with the deferred rendering path.", MessageType.Warning);
 
             if (!SystemInfo.supportsComputeShaders)
