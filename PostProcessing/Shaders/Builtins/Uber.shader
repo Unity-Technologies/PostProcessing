@@ -104,24 +104,18 @@ Shader "Hidden/PostProcessing/Uber"
             {
                 float2 coords = 2.0 * uv - 1.0;
                 float2 end = uv - coords * dot(coords, coords) * _ChromaticAberration_Amount;
+                float2 delta = (end - uv) / 3;
 
-                float2 diff = end - uv;
-                float2 delta = diff / 3;
-                float2 pos = uv;
-                half4 sum = (0.0).xxxx, filterSum = (0.0).xxxx;
+                half4 filterA = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(0.5 / 3, 0.0), 0).rgb, 1.0);
+                half4 filterB = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(1.5 / 3, 0.0), 0).rgb, 1.0);
+                half4 filterC = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(2.5 / 3, 0.0), 0).rgb, 1.0);
 
-                UNITY_UNROLL
-                for (int i = 0; i < 3; i++)
-                {
-                    half t = (i + 0.5) / 3;
-                    half4 s = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(pos));
-                    half4 filter = half4(SAMPLE_TEXTURE2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0)).rgb, 1.0);
+                half4 texelA = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(uv), 0);
+                half4 texelB = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(delta + uv), 0);
+                half4 texelC = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(delta * 2.0 + uv), 0);
 
-                    sum += s * filter;
-                    filterSum += filter;
-                    pos += delta;
-                }
-
+                half4 sum = texelA * filterA + texelB * filterB + texelC * filterC;
+                half4 filterSum = filterA + filterB + filterC;
                 color = sum / filterSum;
             }
             #else
