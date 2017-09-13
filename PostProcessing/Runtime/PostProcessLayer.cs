@@ -142,6 +142,7 @@ namespace UnityEngine.Rendering.PostProcessing
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
             RuntimeUtilities.CreateIfNull(ref dithering);
             RuntimeUtilities.CreateIfNull(ref fog);
+            RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
         public void InitBundles()
