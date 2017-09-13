@@ -30,7 +30,7 @@ Shader "Hidden/PostProcessing/Uber"
         TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
         float4 _Bloom_DirtTileOffset; // xy: tiling, zw: offset
-        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: lens dirt intensity
+        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: dirt intensity
         half3 _Bloom_Color;
 
         // Chromatic aberration
