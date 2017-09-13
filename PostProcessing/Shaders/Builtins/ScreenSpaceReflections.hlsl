@@ -262,6 +262,9 @@ float4 FragTest(VaryingsDefault i) : SV_Target
 
     ray.direction = normalize(reflect(normalize(ray.origin), normal));
 
+    if (ray.direction.z > 0.)
+        return 0.0;
+
     Result result = March(ray, i);
 
     float confidence = (float)result.iterationCount / (float)_MaximumIterationCount;
