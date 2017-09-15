@@ -338,7 +338,7 @@ namespace UnityEngine.PostProcessing
             }
         }
 
-        bool m_FirstFrame = true;
+        int m_FrameCount = 0;
 
         public override bool active
         {
@@ -363,6 +363,7 @@ namespace UnityEngine.PostProcessing
                 m_FrameBlendingFilter.Dispose();
 
             m_FrameBlendingFilter = null;
+            m_FrameCount = 0;
         }
 
         public override DepthTextureMode GetCameraFlags()
@@ -377,7 +378,7 @@ namespace UnityEngine.PostProcessing
 
         public override void OnEnable()
         {
-            m_FirstFrame = true;
+            m_FrameCount = 0;
         }
 
         public override void PopulateCommandBuffer(CommandBuffer cb)
@@ -389,11 +390,10 @@ namespace UnityEngine.PostProcessing
                 return;
 #endif
 
-            // Skip rendering in the first frame as motion vectors won't be abvailable until the
-            // next one
-            if (m_FirstFrame)
+            // Skip rendering in the first 2 frames - workaround for a weird repaint issue in editor
+            if (m_FrameCount < 2)
             {
-                m_FirstFrame = false;
+                m_FrameCount++;
                 return;
             }
 
