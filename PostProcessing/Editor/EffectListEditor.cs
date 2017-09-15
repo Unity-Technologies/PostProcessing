@@ -126,6 +126,9 @@ namespace UnityEditor.Rendering.PostProcessing
 
         public void OnGUI()
         {
+            if (m_Asset == null)
+                return;
+
             if (m_Asset.isDirty)
             {
                 RefreshEditors();
