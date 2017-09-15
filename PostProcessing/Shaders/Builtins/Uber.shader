@@ -135,7 +135,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if BLOOM
             {
-                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoordStereo, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
                 half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
 
                 // Additive bloom (artist friendly)

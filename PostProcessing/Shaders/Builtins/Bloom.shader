@@ -28,13 +28,13 @@ Shader "Hidden/PostProcessing/Bloom"
 
         half4 FragPrefilter13(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return Prefilter(SafeHDR(color), i.texcoord);
         }
 
@@ -43,13 +43,13 @@ Shader "Hidden/PostProcessing/Bloom"
 
         half4 FragDownsample13(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return color;
         }
 
         half4 FragDownsample4(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return color;
         }
 
@@ -64,14 +64,14 @@ Shader "Hidden/PostProcessing/Bloom"
 
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
-            return Combine(bloom, UnityStereoTransformScreenSpaceTex(i.texcoord));
+            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            return Combine(bloom, i.texcoordStereo);
         }
 
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
-            return Combine(bloom, UnityStereoTransformScreenSpaceTex(i.texcoord));
+            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            return Combine(bloom, i.texcoordStereo);
         }
 
         // ----------------------------------------------------------------------------------------
@@ -79,19 +79,19 @@ Shader "Hidden/PostProcessing/Bloom"
 
         half4 FragDebugOverlayThreshold(VaryingsDefault i) : SV_Target
         {
-            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord));
+            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
             return half4(Prefilter(SafeHDR(color), i.texcoord).rgb, 1.0);
         }
 
         half4 FragDebugOverlayTent(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 
         half4 FragDebugOverlayBox(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), UnityStereoTransformScreenSpaceTex(i.texcoord), _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 

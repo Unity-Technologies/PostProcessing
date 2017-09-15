@@ -73,7 +73,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
-        internal static readonly int Bloom_Threshold                 = Shader.PropertyToID("_Bloom_Threshold");
         internal static readonly int Bloom_DirtTileOffset            = Shader.PropertyToID("_Bloom_DirtTileOffset");
 
         internal static readonly int ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
