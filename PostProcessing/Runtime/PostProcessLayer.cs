@@ -74,7 +74,12 @@ namespace UnityEngine.Rendering.PostProcessing
         // assembly reload a MonoBehavior's Editor OnEnable will be called BEFORE the MonoBehavior's
         // own OnEnable... So we'll use it to pre-init bundles if the layer inspector is opened and
         // the component hasn't been enabled yet.
-        public bool haveBundlesBeenInited { get; private set; }
+        bool m_HaveBundlesBeenInited;
+        public bool haveBundlesBeenInited
+        {
+            get { return m_HaveBundlesBeenInited; }
+            private set { m_HaveBundlesBeenInited = value; }
+        }
 
         // Settings/Renderer bundles mapped to settings types
         Dictionary<Type, PostProcessBundle> m_Bundles;
