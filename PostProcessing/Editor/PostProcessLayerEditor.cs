@@ -74,7 +74,8 @@ namespace UnityEditor.Rendering.PostProcessing
             // component it won't go through its OnEnable() and thus will miss bundle initialization
             // so force it there - also for some reason, an editor's OnEnable() can be called before
             // the component's so this will fix that as well.
-            m_Target.InitBundles();
+            if (!m_Target.haveBundlesBeenInited)
+                m_Target.InitBundles();
 
             // Create a reorderable list for each injection event
             m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
