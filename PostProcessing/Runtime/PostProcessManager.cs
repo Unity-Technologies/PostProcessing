@@ -139,7 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     foreach (var collider in colliders)
                     {
-                        if (!collider.enabled)
+                        if (!collider.enabled || !collider.gameObject.activeInHierarchy)
                             continue;
 
                         var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
@@ -331,7 +331,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     foreach (var collider in colliders)
                     {
-                        if (!collider.enabled)
+                        if (!collider.enabled || !collider.gameObject.activeInHierarchy)
                             continue;
 
                         var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
