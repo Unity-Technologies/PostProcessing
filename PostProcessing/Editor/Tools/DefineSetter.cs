@@ -23,7 +23,7 @@ namespace UnityEditor.Rendering.PostProcessing
                     .ToList();
 
                 if (list.Contains(k_Define))
-                    return;
+                    continue;
 
                 list.Add(k_Define);
                 defines = list.Aggregate((a, b) => a + ";" + b);
