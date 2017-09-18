@@ -12,7 +12,8 @@ namespace UnityEditor.Rendering.PostProcessing
         {
             var targets = Enum.GetValues(typeof(BuildTargetGroup))
                 .Cast<BuildTargetGroup>()
-                .Where(x => x != BuildTargetGroup.Unknown);
+                .Where(x => x != BuildTargetGroup.Unknown)
+                .Where(x => !IsObsolete(x));
 
             foreach (var target in targets)
             {
@@ -30,6 +31,15 @@ namespace UnityEditor.Rendering.PostProcessing
 
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defines);
             }
+        }
+
+        static bool IsObsolete(BuildTargetGroup group)
+        {
+            var attrs = typeof(BuildTargetGroup)
+                .GetField(group.ToString())
+                .GetCustomAttributes(typeof(ObsoleteAttribute), false);
+
+            return attrs != null && attrs.Length > 0;
         }
     }
 }
