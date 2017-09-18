@@ -115,6 +115,7 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
+        // TODO: We'll probably need to isolate most of this for SRPs
         public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
         {
 #if  UNITY_2017_3_OR_NEWER
@@ -122,7 +123,7 @@ namespace UnityEngine.Rendering.PostProcessing
             jitter = GenerateRandomOffset();
             jitter *= jitterSpread;
 
-            for (Camera.StereoscopicEye eye = Camera.StereoscopicEye.Left; eye <= Camera.StereoscopicEye.Right; eye++)
+            for (var eye = Camera.StereoscopicEye.Left; eye <= Camera.StereoscopicEye.Right; eye++)
             {
                 // This saves off the device generated projection matrices as non-jittered
                 context.camera.CopyStereoDeviceProjectionMatrixToNonJittered(eye);
@@ -136,16 +137,25 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // jitter has to be scaled for the actual eye texture size, not just the intermediate texture size
             // which could be double-wide in certain stereo rendering scenarios
-            jitter = new Vector2(jitter.x / context.singleEyeWidth, jitter.y / context.height);
+            jitter = new Vector2(jitter.x / context.xrSingleEyeWidth, jitter.y / context.height);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
 #endif
         }
 
-        private void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
+        void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
         {
-            rt.name = "Temporal Anti-aliasing History id #" + id.ToString();
-            if (XR.XRSettings.isDeviceActive)
-                rt.name += " for eye " + context.xrActiveEye.ToString();
+            rt.name = "Temporal Anti-aliasing History id #" + id;
+
+            bool vrDeviceActive = false;
+
+#if UNITY_2017_2_OR_NEWER
+            vrDeviceActive = XR.XRSettings.isDeviceActive;
+#else
+            vrDeviceActive = VR.VRSettings.isDeviceActive;
+#endif
+
+            if (vrDeviceActive)
+                rt.name += " for eye " + context.xrActiveEye;
         }
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)

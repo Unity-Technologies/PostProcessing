@@ -232,6 +232,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 return UnityEditor.PlayerSettings.virtualRealitySupported
                     && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass
                     && Application.isPlaying;
+#elif UNITY_2017_2_OR_NEWER
+                return UnityEngine.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
                 return false;
 #endif
@@ -408,13 +410,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public static Matrix4x4 GenerateJitteredProjectionMatrixFromOriginal(PostProcessRenderContext context, Matrix4x4 origProj, Vector2 jitter)
         {
-            FrustumPlanes planes = origProj.decomposeProjection;
+#if UNITY_2017_2_OR_NEWER
+            var planes = origProj.decomposeProjection;
 
             float vertFov = Math.Abs(planes.top) + Math.Abs(planes.bottom);
             float horizFov = Math.Abs(planes.left) + Math.Abs(planes.right);
 
-            var planeJitter = new Vector2(jitter.x * horizFov / context.singleEyeWidth,
-                                            jitter.y * vertFov / context.height);
+            var planeJitter = new Vector2(jitter.x * horizFov / context.xrSingleEyeWidth,
+                                          jitter.y * vertFov / context.height);
 
             planes.left += planeJitter.x;
             planes.right += planeJitter.x;
@@ -424,6 +427,9 @@ namespace UnityEngine.Rendering.PostProcessing
             var jitteredMatrix = Matrix4x4.Frustum(planes);
 
             return jitteredMatrix;
+#endif
+
+            return origProj;
         }
 
         #endregion
