@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace UnityEditor.Rendering.PostProcessing
@@ -9,20 +10,26 @@ namespace UnityEditor.Rendering.PostProcessing
         
         static DefineSetter()
         {
-            var target = EditorUserBuildSettings.selectedBuildTargetGroup;
-            var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(target).Trim();
+            var targets = Enum.GetValues(typeof(BuildTargetGroup))
+                .Cast<BuildTargetGroup>()
+                .Where(x => x != BuildTargetGroup.Unknown);
 
-            var list = defines.Split(';', ' ')
-                .Where(x => !string.IsNullOrEmpty(x))
-                .ToList();
+            foreach (var target in targets)
+            {
+                var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(target).Trim();
 
-            if (list.Contains(k_Define))
-                return;
+                var list = defines.Split(';', ' ')
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .ToList();
 
-            list.Add(k_Define);
-            defines = list.Aggregate((a, b) => a + ";" + b);
+                if (list.Contains(k_Define))
+                    return;
 
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defines);
+                list.Add(k_Define);
+                defines = list.Aggregate((a, b) => a + ";" + b);
+
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defines);
+            }
         }
     }
 }
