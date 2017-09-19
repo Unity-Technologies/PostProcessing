@@ -5,6 +5,12 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2017_2_OR_NEWER
+    using XRSettings = UnityEngine.XR.XRSettings;
+#elif UNITY_5_6_OR_NEWER
+    using XRSettings = UnityEngine.VR.VRSettings;
+#endif
+
     // TODO: XMLDoc everything (?)
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", -1)]
@@ -256,9 +262,6 @@ namespace UnityEngine.Rendering.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            var context = m_CurrentContext;
-            var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
-
             // Resets the projection matrix from previous frame in case TAA was enabled.
             // We also need to force reset the non-jittered projection matrix here as it's not done
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
@@ -266,10 +269,33 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
+            if (XRSettings.isDeviceActive)
+                m_Camera.ResetStereoProjectionMatrices();
+
+            BuildCommandBuffers();
+        }
+
+        void OnPreRender()
+        {
+            // Unused in scriptable render pipelines
+            // Only needed for multi-pass stereo right eye
+            if (RuntimeUtilities.scriptableRenderPipelineActive ||
+                (m_Camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right))
+                return;
+
+            BuildCommandBuffers();
+        }
+
+        void BuildCommandBuffers()
+        {
+            var context = m_CurrentContext;
+            var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
+
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
 
+            // TODO: Investigate retaining command buffers on XR multi-pass right eye
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
@@ -321,6 +347,7 @@ namespace UnityEngine.Rendering.PostProcessing
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
+            // This works on right eye because it is resolved/populated at runtime
             var cameraTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
 
             if (opaqueOnlyEffects > 0)
@@ -394,7 +421,15 @@ namespace UnityEngine.Rendering.PostProcessing
                 return;
 
             if (m_CurrentContext.IsTemporalAntialiasingActive())
+            {
                 m_Camera.ResetProjectionMatrix();
+
+                if (XRSettings.isDeviceActive)
+                {
+                    if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                        m_Camera.ResetStereoProjectionMatrices();
+                }
+            }
         }
 
         PostProcessBundle GetBundle<T>()
@@ -573,10 +608,16 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (!RuntimeUtilities.scriptableRenderPipelineActive)
                 {
-                    var camera = context.camera;
-                    camera.nonJitteredProjectionMatrix = camera.projectionMatrix;
-                    camera.projectionMatrix = temporalAntialiasing.GetJitteredProjectionMatrix(camera);
-                    camera.useJitteredProjectionMatrixForTransparentRendering = false;
+                    if (XRSettings.isDeviceActive)
+                    {
+                        // We only need to configure all of this once for stereo, during OnPreCull
+                        if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
+                            temporalAntialiasing.ConfigureStereoJitteredProjectionMatrices(context);
+                    }
+                    else
+                    {
+                        temporalAntialiasing.ConfigureJitteredProjectionMatrix(context);
+                    }
                 }
 
                 var taaTarget = m_TargetPool.Get();

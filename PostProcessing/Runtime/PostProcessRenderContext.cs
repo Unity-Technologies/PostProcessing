@@ -1,5 +1,11 @@
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2017_2_OR_NEWER
+    using XRSettings = UnityEngine.XR.XRSettings;
+#elif UNITY_5_6_OR_NEWER
+    using XRSettings = UnityEngine.VR.VRSettings;
+#endif
+
     // Context object passed around all post-fx in a frame
     public sealed class PostProcessRenderContext
     {
@@ -7,7 +13,40 @@ namespace UnityEngine.Rendering.PostProcessing
         // The following should be filled by the render pipeline
 
         // Camera currently rendering
-        public Camera camera { get; set; }
+        Camera m_Camera;
+        public Camera camera
+        {
+            get { return m_Camera; }
+            set
+            {
+                m_Camera = value;
+
+                if (XRSettings.isDeviceActive)
+                {
+#if UNITY_2017_2_OR_NEWER
+                    RenderTextureDescriptor xrDesc = XRSettings.eyeTextureDesc;
+                    width = xrDesc.width;
+                    height = xrDesc.height;
+#else
+                    width = XRSettings.eyeTextureWidth; // double this for single-pass when we can't query eyeTextureDesc
+                    height = XRSettings.eyeTextureHeight;
+#endif
+
+                    if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                        xrActiveEye = (int)Camera.StereoscopicEye.Right;
+
+                    xrSingleEyeWidth = XRSettings.eyeTextureWidth;
+                    xrSingleEyeHeight = XRSettings.eyeTextureHeight;
+                }
+                else
+                {
+                    width = m_Camera.pixelWidth;
+                    height = m_Camera.pixelHeight;
+                    xrSingleEyeWidth = width;
+                }
+            }
+        }
+
 
         // The command buffer to fill in
         public CommandBuffer command { get; set; }
@@ -45,16 +84,19 @@ namespace UnityEngine.Rendering.PostProcessing
         public PostProcessDebugLayer debugLayer { get; internal set; }
 
         // Current camera width in pixels
-        public int width
-        {
-            get { return camera.pixelWidth; }
-        }
+        public int width { get; private set; }
 
         // Current camera height in pixels
-        public int height
-        {
-            get { return camera.pixelHeight; }
-        }
+        public int height { get; private set; }
+
+        // Current active rendering eye (for XR)
+        public int xrActiveEye { get; private set; }
+
+        // Current single eye width in pixels (for XR)
+        public int xrSingleEyeWidth { get; private set; }
+
+        // Current single eye height in pixels (for XR)
+        public int xrSingleEyeHeight { get; private set; }
 
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
@@ -68,7 +110,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Reset()
         {
-            camera = null;
+            m_Camera = null;
+            width = 0;
+            height = 0;
+
+            xrActiveEye = (int)Camera.StereoscopicEye.Left;
+            xrSingleEyeWidth = 0;
+            xrSingleEyeHeight = 0;
+
             command = null;
             source = 0;
             destination = 0;

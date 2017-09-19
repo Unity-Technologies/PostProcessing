@@ -29,11 +29,12 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         float2 GetClosestFragment(float2 uv)
         {
             const float2 k = _CameraDepthTexture_TexelSize.xy;
+
             const float4 neighborhood = float4(
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv - k),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(k.x, -k.y)),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + float2(-k.x, k.y)),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv + k)
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv - k)),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(k.x, -k.y))),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(-k.x, k.y))),
+                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + k))
             );
 
         #if defined(UNITY_REVERSED_Z)
@@ -75,12 +76,12 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         OutputSolver Solve(float2 motion, float2 texcoord)
         {
             const float2 k = _MainTex_TexelSize.xy;
-            float2 uv = texcoord - _Jitter;
+            float2 uv = UnityStereoClamp(texcoord - _Jitter);
 
             float4 color = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv);
 
-            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv - k * 0.5);
-            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv + k * 0.5);
+            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv - k * 0.5));
+            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv + k * 0.5));
 
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
@@ -96,7 +97,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             color = FastTonemap(color);
 
-            float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, texcoord - motion);
+            float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(texcoord - motion));
 
             float motionLength = length(motion);
             float2 luma = float2(Luminance(average), Luminance(color));
@@ -127,16 +128,16 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         OutputSolver FragSolverDilate(VaryingsDefault i)
         {
-            float2 closest = GetClosestFragment(i.texcoord);
+            float2 closest = GetClosestFragment(i.texcoordStereo);
             float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
-            return Solve(motion, i.texcoord);
+            return Solve(motion, i.texcoordStereo);
         }
 
         OutputSolver FragSolverNoDilate(VaryingsDefault i)
         {
             // Don't dilate in ortho !
-            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoord).xy;
-            return Solve(motion, i.texcoord);
+            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoordStereo).xy;
+            return Solve(motion, i.texcoordStereo);
         }
 
     ENDHLSL
