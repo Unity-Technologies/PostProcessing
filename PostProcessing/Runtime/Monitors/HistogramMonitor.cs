@@ -18,8 +18,25 @@ namespace UnityEngine.Rendering.PostProcessing
         public Channel channel = Channel.Master;
 
         ComputeBuffer m_Data;
-        const int k_Bins = 256;
-        const int k_ThreadGroupSize = 16;
+        int m_NumBins;
+        int m_ThreadGroupSizeX;
+        int m_ThreadGroupSizeY;
+
+        internal override void OnEnable()
+        {
+            m_ThreadGroupSizeX = 16;
+
+            if (RuntimeUtilities.isAndroidOpenGL)
+            {
+                m_NumBins = 128;
+                m_ThreadGroupSizeY = 8;
+            }
+            else
+            {
+                m_NumBins = 256;
+                m_ThreadGroupSizeY = 16;
+            }
+        }
 
         internal override void OnDisable()
         {
@@ -41,7 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
             CheckOutput(width, height);
 
             if (m_Data == null)
-                m_Data = new ComputeBuffer(k_Bins, sizeof(uint));
+                m_Data = new ComputeBuffer(m_NumBins, sizeof(uint));
 
             var compute = context.resources.computeShaders.gammaHistogram;
             var cmd = context.command;
@@ -50,7 +67,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Clear the buffer on every frame as we use it to accumulate values on every frame
             int kernel = compute.FindKernel("KHistogramClear");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_Data);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_Bins / (float)k_ThreadGroupSize), 1, 1);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(m_NumBins / (float)m_ThreadGroupSizeX), 1, 1);
 
             // Gather all pixels and fill in our histogram
             kernel = compute.FindKernel("KHistogramGather");
@@ -65,8 +82,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.HalfResFinalCopy);
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", m_Data);
             cmd.DispatchCompute(compute, kernel, 
-                Mathf.CeilToInt(parameters.x / k_ThreadGroupSize),
-                Mathf.CeilToInt(parameters.y / k_ThreadGroupSize),
+                Mathf.CeilToInt(parameters.x / m_ThreadGroupSizeX),
+                Mathf.CeilToInt(parameters.y / m_ThreadGroupSizeY),
                 1
             );
 

@@ -10,6 +10,26 @@ namespace UnityEngine.Rendering.PostProcessing
 
         ComputeBuffer m_Data;
 
+        int m_ThreadGroupSize;
+        int m_ThreadGroupSizeX;
+        int m_ThreadGroupSizeY;
+
+        internal override void OnEnable()
+        {
+            m_ThreadGroupSizeX = 16;
+
+            if (RuntimeUtilities.isAndroidOpenGL)
+            {
+                m_ThreadGroupSize = 128;
+                m_ThreadGroupSizeY = 8;
+            }
+            else
+            {
+                m_ThreadGroupSize = 256;
+                m_ThreadGroupSizeY = 16;
+            }
+        }
+
         internal override void OnDisable()
         {
             base.OnDisable();
@@ -60,7 +80,7 @@ namespace UnityEngine.Rendering.PostProcessing
             int kernel = compute.FindKernel("KWaveformClear");
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / 16f), Mathf.CeilToInt(height / 16f), 1);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / (float)m_ThreadGroupSizeX), Mathf.CeilToInt(height / (float)m_ThreadGroupSizeY), 1);
 
             // For performance reasons, especially on consoles, we'll just downscale the source
             // again to reduce VMEM stalls. Eventually the whole algorithm needs to be rewritten as
@@ -73,7 +93,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.WaveformSource);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.DispatchCompute(compute, kernel, width, Mathf.CeilToInt(height / 256f), 1);
+            cmd.DispatchCompute(compute, kernel, width, Mathf.CeilToInt(height / (float)m_ThreadGroupSize), 1);
             cmd.ReleaseTemporaryRT(ShaderIDs.WaveformSource);
 
             // Generate the waveform texture

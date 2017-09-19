@@ -9,8 +9,18 @@ CBUFFER_START(Params)
     float4 _Params; // x: source width, y: source height, z: linear, w: unused
 CBUFFER_END
 
+#if defined SHADER_API_GLES3
+    #define GROUP_SIZE 128
+    #define GROUP_SIZE_X 16
+    #define GROUP_SIZE_Y 8
+#else
+    #define GROUP_SIZE 256
+    #define GROUP_SIZE_X 16
+    #define GROUP_SIZE_Y 16
+#endif
+
 #pragma kernel KWaveformGather
-[numthreads(1, 256, 1)]
+[numthreads(1, GROUP_SIZE, 1)]
 void KWaveformGather(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     // Gather local group histogram
@@ -34,7 +44,7 @@ void KWaveformGather(uint2 dispatchThreadId : SV_DispatchThreadID)
 }
 
 #pragma kernel KWaveformClear
-[numthreads(16, 16, 1)]
+[numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
 void KWaveformClear(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     if (dispatchThreadId.x < uint(_Params.x) && dispatchThreadId.y < uint(_Params.y))

@@ -10,11 +10,19 @@ namespace UnityEngine.Rendering.PostProcessing
         Normals,
         MotionVectors,
         NANTracker,
+        ColorBlindnessSimulation,
         _,
         AmbientOcclusion,
         BloomBuffer,
         BloomThreshold,
         DepthOfField
+    }
+
+    public enum ColorBlindnessType
+    {
+        Deuteranopia,
+        Protanopia,
+        Tritanopia
     }
 
     [Serializable]
@@ -49,6 +57,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             [Range(4, 128)]
             public int motionGridSize = 64;
+
+            public ColorBlindnessType colorBlindnessType = ColorBlindnessType.Deuteranopia;
+
+            [Range(0f, 1f)]
+            public float colorBlindnessStrength = 1f;
         }
 
         public OverlaySettings overlaySettings;
@@ -209,6 +222,12 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 var sheet = context.propertySheets.Get(context.resources.shaders.debugOverlays);
                 PushDebugOverlay(context.command, context.source, sheet, 3);
+            }
+            else if (debugOverlay == DebugOverlay.ColorBlindnessSimulation)
+            {
+                var sheet = context.propertySheets.Get(context.resources.shaders.debugOverlays);
+                sheet.properties.SetVector(ShaderIDs.Params, new Vector4(overlaySettings.colorBlindnessStrength, 0f, 0f, 0f));
+                PushDebugOverlay(context.command, context.source, sheet, 4 + (int)overlaySettings.colorBlindnessType);
             }
         }
 

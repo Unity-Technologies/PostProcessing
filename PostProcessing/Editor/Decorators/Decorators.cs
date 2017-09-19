@@ -27,7 +27,7 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
     
-    [Decorator(typeof(MinAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinAttribute))]
     public sealed class MinDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
@@ -52,7 +52,7 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
     
-    [Decorator(typeof(MaxAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MaxAttribute))]
     public sealed class MaxDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
@@ -77,7 +77,7 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
     
-    [Decorator(typeof(MinMaxAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinMaxAttribute))]
     public sealed class MinMaxDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)

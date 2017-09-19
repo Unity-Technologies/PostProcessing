@@ -26,21 +26,9 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_FxaaMobileOptimized;
         SerializedProperty m_FxaaKeepAlpha;
 
-        SerializedProperty m_AOEnabled;
-        SerializedProperty m_AOMode;
-        SerializedProperty m_SAOIntensity;
-        SerializedProperty m_SAORadius;
-        SerializedProperty m_SAOQuality;
-        SerializedProperty m_SAOColor;
-        SerializedProperty m_MSVOIntensity;
-        SerializedProperty m_MSVOThicknessModifier;
-        SerializedProperty m_MSVOColor;
-        SerializedProperty m_AOAmbientOnly;
-
         SerializedProperty m_FogEnabled;
         SerializedProperty m_FogExcludeSkybox;
 
-        SerializedProperty m_ShowRenderingFeatures;
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -52,12 +40,6 @@ namespace UnityEditor.Rendering.PostProcessing
             new GUIContent("Fast Approximate Anti-aliasing (FXAA)"),
             new GUIContent("Subpixel Morphological Anti-aliasing (SMAA)"),
             new GUIContent("Temporal Anti-aliasing (TAA)")
-        };
-
-        static GUIContent[] s_AmbientOcclusionMethodNames =
-        {
-            new GUIContent("Scalable Ambient Obscurance (Classic)"),
-            new GUIContent("Multi-scale Volumetric Obscurance (Modern)") 
         };
 
         enum ExportMode
@@ -81,22 +63,10 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.mobileOptimized);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
-            
-            m_AOEnabled = FindProperty(x => x.ambientOcclusion.enabled);
-            m_AOMode = FindProperty(x => x.ambientOcclusion.mode);
-            m_AOAmbientOnly = FindProperty(x => x.ambientOcclusion.ambientOnly);
-            m_SAOIntensity = FindProperty(x => x.ambientOcclusion.scalableAO.intensity);
-            m_SAORadius = FindProperty(x => x.ambientOcclusion.scalableAO.radius);
-            m_SAOQuality = FindProperty(x => x.ambientOcclusion.scalableAO.quality);
-            m_SAOColor = FindProperty(x => x.ambientOcclusion.scalableAO.color);
-            m_MSVOIntensity = FindProperty(x => x.ambientOcclusion.multiScaleVO.intensity);
-            m_MSVOThicknessModifier = FindProperty(x => x.ambientOcclusion.multiScaleVO.thicknessModifier);
-            m_MSVOColor = FindProperty(x => x.ambientOcclusion.multiScaleVO.color);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
             m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
 
-            m_ShowRenderingFeatures = serializedObject.FindProperty("m_ShowRenderingFeatures");
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
@@ -148,11 +118,11 @@ namespace UnityEditor.Rendering.PostProcessing
 
             DoVolumeBlending();
             DoAntialiasing();
+            DoFog(camera);
 
             EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms."));
             EditorGUILayout.Space();
 
-            DoRenderingFeatures(camera);
             DoToolkit();
             DoCustomEffectSorter();
 
@@ -229,61 +199,6 @@ namespace UnityEditor.Rendering.PostProcessing
             EditorGUILayout.Space();
         }
 
-        void DoRenderingFeatures(Camera camera)
-        {
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
-                return;
-
-            EditorUtilities.DrawSplitter();
-            m_ShowRenderingFeatures.boolValue = EditorUtilities.DrawHeader("Rendering Features", m_ShowRenderingFeatures.boolValue);
-
-            if (m_ShowRenderingFeatures.boolValue)
-            {
-                GUILayout.Space(2);
-
-                DoAmbientOcclusion(camera);
-                DoFog(camera);
-            }
-        }
-
-        void DoAmbientOcclusion(Camera camera)
-        {
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Ambient Occlusion"), EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-            {
-                EditorGUILayout.PropertyField(m_AOEnabled);
-
-                if (m_AOEnabled.boolValue)
-                {
-                    int aoMode = m_AOMode.intValue;
-                    m_AOMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The ambient occlusion method to use. \"Modern\" is higher quality and faster on desktop & console platforms but requires compute shader support."), aoMode, s_AmbientOcclusionMethodNames);
-
-                    if (aoMode == (int)AmbientOcclusion.Mode.SAO)
-                    {
-                        EditorGUILayout.PropertyField(m_SAOIntensity);
-                        EditorGUILayout.PropertyField(m_SAORadius);
-                        EditorGUILayout.PropertyField(m_SAOQuality);
-                        EditorGUILayout.PropertyField(m_SAOColor);
-                    }
-                    else if (aoMode == (int)AmbientOcclusion.Mode.MSVO)
-                    {
-                        if (!SystemInfo.supportsComputeShaders)
-                            EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires compute shader support.", MessageType.Warning);
-
-                        EditorGUILayout.PropertyField(m_MSVOIntensity);
-                        EditorGUILayout.PropertyField(m_MSVOThicknessModifier);
-                        EditorGUILayout.PropertyField(m_MSVOColor);
-                    }
-
-                    if (camera != null && camera.actualRenderingPath == RenderingPath.DeferredShading && camera.allowHDR)
-                        EditorGUILayout.PropertyField(m_AOAmbientOnly);
-                }
-            }
-            EditorGUI.indentLevel--;
-
-            EditorGUILayout.Space();
-        }
-
         void DoFog(Camera camera)
         {
             if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
@@ -297,7 +212,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 if (m_FogEnabled.boolValue)
                 {
                     EditorGUILayout.PropertyField(m_FogExcludeSkybox);
-                    EditorGUILayout.HelpBox("This effect adds fog compatibility to the deferred rendering path; actual fog settings should be set in the Lighting panel.", MessageType.Info);
+                    EditorGUILayout.HelpBox("This adds fog compatibility to the deferred rendering path; actual fog settings should be set in the Lighting panel.", MessageType.Info);
                 }
             }
             EditorGUI.indentLevel--;

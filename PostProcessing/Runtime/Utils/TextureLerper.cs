@@ -119,8 +119,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Command.SetComputeTextureParam(compute, kernel, "_From", from);
                 m_Command.SetComputeTextureParam(compute, kernel, "_To", to);
 
-                int groupSize = Mathf.CeilToInt(size / 8f);
-                m_Command.DispatchCompute(compute, kernel, groupSize, groupSize, groupSize);
+                int groupSizeXY = Mathf.CeilToInt(size / 8f);
+                int groupSizeZ = Mathf.CeilToInt(size / (RuntimeUtilities.isAndroidOpenGL ? 2f : 8f));
+                m_Command.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
             }
             else
             {

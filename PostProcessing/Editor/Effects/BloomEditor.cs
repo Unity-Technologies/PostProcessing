@@ -13,8 +13,8 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_Color;
         SerializedParameterOverride m_MobileOptimized;
 
-        SerializedParameterOverride m_LensTexture;
-        SerializedParameterOverride m_LensIntensity;
+        SerializedParameterOverride m_DirtTexture;
+        SerializedParameterOverride m_DirtIntensity;
 
         public override void OnEnable()
         {
@@ -26,8 +26,8 @@ namespace UnityEditor.Rendering.PostProcessing
             m_Color = FindParameterOverride(x => x.color);
             m_MobileOptimized = FindParameterOverride(x => x.mobileOptimized);
             
-            m_LensTexture = FindParameterOverride(x => x.lensTexture);
-            m_LensIntensity = FindParameterOverride(x => x.lensIntensity);
+            m_DirtTexture = FindParameterOverride(x => x.dirtTexture);
+            m_DirtIntensity = FindParameterOverride(x => x.dirtIntensity);
         }
 
         public override void OnInspectorGUI()
@@ -43,16 +43,16 @@ namespace UnityEditor.Rendering.PostProcessing
             PropertyField(m_MobileOptimized);
 
             EditorGUILayout.Space();
-            EditorUtilities.DrawHeaderLabel("Lens Dirtiness");
+            EditorUtilities.DrawHeaderLabel("Dirtiness");
 
-            PropertyField(m_LensTexture);
-            PropertyField(m_LensIntensity);
+            PropertyField(m_DirtTexture);
+            PropertyField(m_DirtIntensity);
 
             if (RuntimeUtilities.isVREnabled)
             {
-                if ((m_LensIntensity.overrideState.boolValue && m_LensIntensity.value.floatValue > 0f)
-                 || (m_LensTexture.overrideState.boolValue && m_LensTexture.value.objectReferenceValue != null))
-                    EditorGUILayout.HelpBox("Using lens dirt in VR is not recommended.", MessageType.Warning);
+                if ((m_DirtIntensity.overrideState.boolValue && m_DirtIntensity.value.floatValue > 0f)
+                 || (m_DirtTexture.overrideState.boolValue && m_DirtTexture.value.objectReferenceValue != null))
+                    EditorGUILayout.HelpBox("Using a dirt texture in VR is not recommended.", MessageType.Warning);
             }
         }
     }

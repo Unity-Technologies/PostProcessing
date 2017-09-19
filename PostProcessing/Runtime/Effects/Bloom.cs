@@ -31,11 +31,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
         public BoolParameter mobileOptimized = new BoolParameter { value = false };
 
-        [Tooltip("Dirtiness texture to add smudges or dust to the lens."), DisplayName("Texture")]
-        public TextureParameter lensTexture = new TextureParameter { value = null };
+        [Tooltip("Dirtiness texture to add smudges or dust to the bloom effect."), DisplayName("Texture")]
+        public TextureParameter dirtTexture = new TextureParameter { value = null };
 
-        [Min(0f), Tooltip("Amount of lens dirtiness."), DisplayName("Intensity")]
-        public FloatParameter lensIntensity = new FloatParameter { value = 0f };
+        [Min(0f), Tooltip("Amount of dirtiness."), DisplayName("Intensity")]
+        public FloatParameter dirtIntensity = new FloatParameter { value = 0f };
 
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
@@ -151,7 +151,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var linearColor = settings.color.value.linear;
             float intensity = RuntimeUtilities.Exp2(settings.intensity.value / 10f) - 1f;
-            var shaderSettings = new Vector4(sampleScale, intensity, settings.lensIntensity.value, iterations);
+            var shaderSettings = new Vector4(sampleScale, intensity, settings.dirtIntensity.value, iterations);
 
             // Debug overlays
             if (context.IsDebugOverlayEnabled(DebugOverlay.BloomThreshold))
@@ -167,9 +167,9 @@ namespace UnityEngine.Rendering.PostProcessing
             // Lens dirtiness
             // Keep the aspect ratio correct & center the dirt texture, we don't want it to be
             // stretched or squashed
-            var dirtTexture = settings.lensTexture.value == null
+            var dirtTexture = settings.dirtTexture.value == null
                 ? RuntimeUtilities.blackTexture
-                : settings.lensTexture.value;
+                : settings.dirtTexture.value;
 
             var dirtRatio = (float)dirtTexture.width / (float)dirtTexture.height;
             var screenRatio = (float)context.width / (float)context.height;

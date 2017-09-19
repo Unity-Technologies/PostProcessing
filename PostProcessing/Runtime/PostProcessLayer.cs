@@ -35,7 +35,6 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
-        public AmbientOcclusion ambientOcclusion;
         public Fog fog;
         public Dithering dithering;
 
@@ -45,7 +44,6 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
-        [SerializeField] bool m_ShowRenderingFeatures;
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
 
@@ -144,14 +142,13 @@ namespace UnityEngine.Rendering.PostProcessing
         public void Init(PostProcessResources resources)
         {
             if (resources != null) m_Resources = resources;
-            
-            RuntimeUtilities.CreateIfNull(ref debugLayer);
-            RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
+
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
             RuntimeUtilities.CreateIfNull(ref dithering);
             RuntimeUtilities.CreateIfNull(ref fog);
+            RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
         public void InitBundles()
@@ -234,7 +231,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             temporalAntialiasing.Release();
-            ambientOcclusion.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -298,7 +294,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-            
+
             // TODO: Investigate retaining command buffers on XR multi-pass right eye
             m_LegacyCmdBufferBeforeReflections.Clear();
             m_LegacyCmdBufferBeforeLighting.Clear();
@@ -307,19 +303,28 @@ namespace UnityEngine.Rendering.PostProcessing
 
             SetupContext(context);
 
+            context.command = m_LegacyCmdBufferOpaque;
+            UpdateSettingsIfNeeded(context);
+
             // Lighting & opaque-only effects
-            int opaqueOnlyEffects = 0;
-            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            bool aoSupported = ambientOcclusion.IsEnabledAndSupported(context);
-            bool aoAmbientOnly = ambientOcclusion.IsAmbientOnly(context);
+            var aoBundle = GetBundle<AmbientOcclusion>();
+            var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
+            var aoRenderer = aoBundle.CastRenderer<AmbientOcclusionRenderer>();
+
+            bool aoSupported = aoSettings.IsEnabledAndSupported(context);
+            bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
-            bool isFogActive = fog.IsEnabledAndSupported(context);
+
+            var ssrBundle = GetBundle<ScreenSpaceReflections>();
+            var ssrSettings = ssrBundle.settings;
+            var ssrRenderer = ssrBundle.renderer;
+            bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
 
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
-                var ao = ambientOcclusion.Get();
+                var ao = aoRenderer.Get();
 
                 // Render as soon as possible - should be done async in SRPs when available
                 context.command = m_LegacyCmdBufferBeforeReflections;
@@ -332,9 +337,13 @@ namespace UnityEngine.Rendering.PostProcessing
             else if (isAmbientOcclusionOpaque)
             {
                 context.command = m_LegacyCmdBufferOpaque;
-                ambientOcclusion.Get().RenderAfterOpaque(context);
+                aoRenderer.Get().RenderAfterOpaque(context);
             }
-
+            
+            bool isFogActive = fog.IsEnabledAndSupported(context);
+            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
+            int opaqueOnlyEffects = 0;
+            opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
@@ -363,7 +372,14 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
                 else context.destination = cameraTarget;
 
-                // TODO: Insert SSR here
+                if (isScreenSpaceReflectionsActive)
+                {
+                    ssrRenderer.Render(context);
+                    opaqueOnlyEffects--;
+                    var prevSource = context.source;
+                    context.source = context.destination;
+                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                }
 
                 if (isFogActive)
                 {
@@ -467,9 +483,6 @@ namespace UnityEngine.Rendering.PostProcessing
             // Special case for AA & lighting effects
             if (context.IsTemporalAntialiasingActive())
                 flags |= temporalAntialiasing.GetCameraFlags();
-
-            if (ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context))
-                flags |= ambientOcclusion.Get().GetCameraFlags();
 
             if (fog.IsEnabledAndSupported(context))
                 flags |= fog.GetCameraFlags();

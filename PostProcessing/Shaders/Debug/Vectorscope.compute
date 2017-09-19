@@ -8,10 +8,16 @@ CBUFFER_START (Params)
     float4 _Params; // x: source width, y: source height, z: buffer size, w: linear?
 CBUFFER_END
 
-#define GROUP_SIZE 16
+#if SHADER_API_GLES3
+    #define GROUP_SIZE_X 16
+    #define GROUP_SIZE_Y 8
+#else
+    #define GROUP_SIZE_X 16
+    #define GROUP_SIZE_Y 16
+#endif
 
 #pragma kernel KVectorscopeGather
-[numthreads(GROUP_SIZE,GROUP_SIZE,1)]
+[numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
 void KVectorscopeGather(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     if (dispatchThreadId.x < uint(_Params.x) && dispatchThreadId.y < uint(_Params.y))
@@ -30,7 +36,7 @@ void KVectorscopeGather(uint2 dispatchThreadId : SV_DispatchThreadID)
 }
 
 #pragma kernel KVectorscopeClear
-[numthreads(GROUP_SIZE,GROUP_SIZE,1)]
+[numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
 void KVectorscopeClear(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     if (dispatchThreadId.x < uint(_Params.z) && dispatchThreadId.y < uint(_Params.z))

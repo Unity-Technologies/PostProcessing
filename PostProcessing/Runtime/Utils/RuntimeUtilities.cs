@@ -206,9 +206,12 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void CopyTexture(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
         {
             if (SystemInfo.copyTextureSupport > CopyTextureSupport.None)
+            {
                 cmd.CopyTexture(source, destination);
-            else
-                cmd.BlitFullscreenTriangle(source, destination);
+                return;
+            }
+
+            cmd.BlitFullscreenTriangle(source, destination);
         }
 
         // TODO: Generalize the GetTemporaryRT and Blit commands in order to support
@@ -254,6 +257,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 return UnityEngine.VR.VRSettings.enabled;
 #endif
             }
+        }
+
+        public static bool isAndroidOpenGL
+        {
+            get { return Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan; }
         }
 
         public static void Destroy(UnityObject obj)

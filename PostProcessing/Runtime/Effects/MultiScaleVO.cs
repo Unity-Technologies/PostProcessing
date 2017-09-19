@@ -7,24 +7,6 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class MultiScaleVO : IAmbientOcclusionMethod
     {
-        [Range(-8, 0)]
-        public float noiseFilterTolerance = 0f;
-
-        [Range(-8, -1)]
-        public float blurTolerance = -4.6f;
-
-        [Range(-12, -1)]
-        public float upsampleTolerance = -12;
-
-        [Range(1, 10), Tooltip("Modifies thickness of occluders. This increases dark areas but also introduces dark halo around objects.")]
-        public float thicknessModifier = 1;
-
-        [Range(0, 2), Tooltip("Degree of darkness added by ambient occlusion.")]
-        public float intensity = 1;
-
-        [ColorUsage(false), Tooltip("Custom color to use for the ambient occlusion.")]
-        public Color color = Color.black;
-
         internal enum MipLevel { Original, L1, L2, L3, L4, L5, L6 }
 
         internal enum TextureType
@@ -42,6 +24,7 @@ namespace UnityEngine.Rendering.PostProcessing
             DebugOverlay
         }
 
+        AmbientOcclusion m_Settings;
         PropertySheet m_PropertySheet;
         RTHandle m_DepthCopy;
         RTHandle m_LinearDepth;
@@ -222,17 +205,14 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        public MultiScaleVO(AmbientOcclusion settings)
+        {
+            m_Settings = settings;
+        }
+
         public DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth;
-        }
-
-        public bool IsSupported(PostProcessRenderContext context)
-        {
-            return intensity > 0f
-                && SystemInfo.supportsComputeShaders
-                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
-                && !RuntimeUtilities.scriptableRenderPipelineActive;
         }
 
         void DoLazyInitialization(PostProcessRenderContext context)
@@ -280,7 +260,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.height
             );
 
-            m_PropertySheet.properties.SetVector(ShaderIDs.AOColor, Color.white - color);
+            m_PropertySheet.properties.SetVector(ShaderIDs.AOColor, Color.white - m_Settings.color.value);
 
 #if !UNITY_2017_1_OR_NEWER
              m_TiledDepth1.AllocateNow();
@@ -467,8 +447,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeFloatParams(cs, "gInvThicknessTable", m_InvThicknessTable);
             cmd.SetComputeFloatParams(cs, "gSampleWeightTable", m_SampleWeightTable);
             cmd.SetComputeVectorParam(cs, "gInvSliceDimension", source.inverseDimensions);
-            cmd.SetComputeFloatParam(cs, "gRejectFadeoff", -1f / thicknessModifier);
-            cmd.SetComputeFloatParam(cs, "gIntensity", intensity);
+            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector2(-1f / m_Settings.thicknessModifier.value, m_Settings.intensity.value));
             cmd.SetComputeTextureParam(cs, kernel, "DepthTex", source.id);
             cmd.SetComputeTextureParam(cs, kernel, "Occlusion", dest.id);
 
@@ -496,17 +475,14 @@ namespace UnityEngine.Rendering.PostProcessing
             int kernel = cs.FindKernel((highResAO == null) ? "main" : "main_blendout");
 
             float stepSize = 1920f / lowResDepth.width;
-            float bTolerance = 1f - Mathf.Pow(10f, blurTolerance) * stepSize;
+            float bTolerance = 1f - Mathf.Pow(10f, m_Settings.blurTolerance.value) * stepSize;
             bTolerance *= bTolerance;
-            float uTolerance = Mathf.Pow(10f, upsampleTolerance);
-            float noiseFilterWeight = 1f / (Mathf.Pow(10f, noiseFilterTolerance) + uTolerance);
+            float uTolerance = Mathf.Pow(10f, m_Settings.upsampleTolerance.value);
+            float noiseFilterWeight = 1f / (Mathf.Pow(10f, m_Settings.noiseFilterTolerance.value) + uTolerance);
 
             cmd.SetComputeVectorParam(cs, "InvLowResolution", lowResDepth.inverseDimensions);
             cmd.SetComputeVectorParam(cs, "InvHighResolution", highResDepth.inverseDimensions);
-            cmd.SetComputeFloatParam(cs, "NoiseFilterStrength", noiseFilterWeight);
-            cmd.SetComputeFloatParam(cs, "StepSize", stepSize);
-            cmd.SetComputeFloatParam(cs, "kBlurTolerance", bTolerance);
-            cmd.SetComputeFloatParam(cs, "kUpsampleTolerance", uTolerance);
+            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector4(noiseFilterWeight, stepSize, bTolerance, uTolerance));
 
             cmd.SetComputeTextureParam(cs, kernel, "LoResDB", lowResDepth.id);
             cmd.SetComputeTextureParam(cs, kernel, "HiResDB", highResDepth.id);
