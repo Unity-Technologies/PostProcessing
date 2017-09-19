@@ -124,13 +124,15 @@ namespace UnityEditor.Rendering.PostProcessing
                 if (attr is PropertyAttribute)
                 {
                     if (attr is SpaceAttribute)
+                    {
                         EditorGUILayout.GetControlRect(false, (attr as SpaceAttribute).height);
+                    }
                     else if (attr is HeaderAttribute)
                     {
                         var rect = EditorGUILayout.GetControlRect(false, 24f);
                         rect.y += 8f;
                         rect = EditorGUI.IndentedRect(rect);
-                        EditorGUI.LabelField(rect, (attr as HeaderAttribute).header, EditorStyles.miniBoldLabel);
+                        EditorGUI.LabelField(rect, (attr as HeaderAttribute).header, Styling.labelHeader);
                     }
                 }
             }
