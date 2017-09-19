@@ -153,6 +153,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void InitBundles()
         {
+            if (haveBundlesBeenInited)
+                return;
+
             // Create these lists only once, the serialization system will take over after that
             RuntimeUtilities.CreateIfNull(ref m_BeforeTransparentBundles);
             RuntimeUtilities.CreateIfNull(ref m_BeforeStackBundles);
