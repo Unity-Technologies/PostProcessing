@@ -47,12 +47,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
         int[] m_HistoryPingPong = new int [k_NumEyes];
 
-        public TemporalAntialiasing()
-        {
-            m_HistoryTextures[(int)Camera.StereoscopicEye.Left] = new RenderTexture[k_NumHistoryTextures];
-            m_HistoryTextures[(int)Camera.StereoscopicEye.Right] = new RenderTexture[k_NumHistoryTextures];
-        }
-
         public bool IsSupported()
         {
             return SystemInfo.supportedRenderTargetCount >= 2
@@ -160,7 +154,12 @@ namespace UnityEngine.Rendering.PostProcessing
 
         RenderTexture CheckHistory(int id, PostProcessRenderContext context)
         {
-            var rt = m_HistoryTextures[context.xrActiveEye][id];
+            int activeEye = context.xrActiveEye;
+
+            if (m_HistoryTextures[activeEye] == null)
+                m_HistoryTextures[activeEye] = new RenderTexture[k_NumHistoryTextures];
+
+            var rt = m_HistoryTextures[activeEye][id];
 
             if (m_ResetHistory || rt == null || !rt.IsCreated())
             {
@@ -170,7 +169,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 GenerateHistoryName(rt, id, context);
 
                 rt.filterMode = FilterMode.Bilinear;
-                m_HistoryTextures[context.xrActiveEye][id] = rt;
+                m_HistoryTextures[activeEye][id] = rt;
 
                 context.command.BlitFullscreenTriangle(context.source, rt);
             }
@@ -182,13 +181,13 @@ namespace UnityEngine.Rendering.PostProcessing
                 GenerateHistoryName(rt2, id, context);
 
                 rt2.filterMode = FilterMode.Bilinear;
-                m_HistoryTextures[context.xrActiveEye][id] = rt2;
+                m_HistoryTextures[activeEye][id] = rt2;
 
                 context.command.BlitFullscreenTriangle(rt, rt2);
                 RenderTexture.ReleaseTemporary(rt);
             }
 
-            return m_HistoryTextures[context.xrActiveEye][id];
+            return m_HistoryTextures[activeEye][id];
         }
 
         internal void Render(PostProcessRenderContext context)
@@ -221,14 +220,21 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal void Release()
         {
-            for (int i = 0; i < m_HistoryTextures.Length; i++)
+            if (m_HistoryTextures != null)
             {
-                for (int j = 0; j < m_HistoryTextures[i].Length; j++)
+                for (int i = 0; i < m_HistoryTextures.Length; i++)
                 {
-                    RenderTexture.ReleaseTemporary(m_HistoryTextures[i][j]);
-                    m_HistoryTextures[i][j] = null;
+                    if (m_HistoryTextures[i] == null)
+                        continue;
+                    
+                    for (int j = 0; j < m_HistoryTextures[i].Length; j++)
+                    {
+                        RenderTexture.ReleaseTemporary(m_HistoryTextures[i][j]);
+                        m_HistoryTextures[i][j] = null;
+                    }
+
+                    m_HistoryTextures[i] = null;
                 }
-                m_HistoryTextures[i] = null;
             }
 
             m_SampleIndex = 0;
