@@ -28,8 +28,8 @@ namespace UnityEngine.Rendering.PostProcessing
                     width = xrDesc.width;
                     height = xrDesc.height;
 #else
-                    width = m_Camera.pixelWidth * 2;
-                    height = m_Camera.pixelHeight;
+                    width = XRSettings.eyeTextureWidth; // double this for single-pass when we can't query eyeTextureDesc
+                    height = XRSettings.eyeTextureHeight;
 #endif
 
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)

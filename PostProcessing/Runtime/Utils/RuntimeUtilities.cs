@@ -427,9 +427,48 @@ namespace UnityEngine.Rendering.PostProcessing
             var jitteredMatrix = Matrix4x4.Frustum(planes);
 
             return jitteredMatrix;
-#endif
+#else
+            var rTan = (1.0f + origProj[0, 2]) / origProj[0, 0];
+            var lTan = (-1.0f + origProj[0, 2]) / origProj[0, 0];
 
-            return origProj;
+            var tTan = (1.0f + origProj[1, 2]) / origProj[1, 1];
+            var bTan = (-1.0f + origProj[1, 2]) / origProj[1, 1];
+
+            float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
+            float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
+
+            jitter.x *= tanHorizFov / context.xrSingleEyeWidth;
+            jitter.y *= tanVertFov / context.height;
+
+            float left = jitter.x + lTan;
+            float right = jitter.x + rTan;
+            float top = jitter.y + tTan;
+            float bottom = jitter.y + bTan;
+
+            var jitteredMatrix = new Matrix4x4();
+
+            jitteredMatrix[0, 0] = 2f / (right - left);
+            jitteredMatrix[0, 1] = 0f;
+            jitteredMatrix[0, 2] = (right + left) / (right - left);
+            jitteredMatrix[0, 3] = 0f;
+
+            jitteredMatrix[1, 0] = 0f;
+            jitteredMatrix[1, 1] = 2f / (top - bottom);
+            jitteredMatrix[1, 2] = (top + bottom) / (top - bottom);
+            jitteredMatrix[1, 3] = 0f;
+
+            jitteredMatrix[2, 0] = 0f;
+            jitteredMatrix[2, 1] = 0f;
+            jitteredMatrix[2, 2] = origProj[2, 2];
+            jitteredMatrix[2, 3] = origProj[2, 3];
+
+            jitteredMatrix[3, 0] = 0f;
+            jitteredMatrix[3, 1] = 0f;
+            jitteredMatrix[3, 2] = -1f;
+            jitteredMatrix[3, 3] = 0f;
+
+            return jitteredMatrix;
+#endif
         }
 
         #endregion
@@ -506,6 +545,6 @@ namespace UnityEngine.Rendering.PostProcessing
             return GetParentObject(string.Join(".", fields, 1, fields.Length - 1), obj);
         }
 
-        #endregion
+#endregion
     }
 }
