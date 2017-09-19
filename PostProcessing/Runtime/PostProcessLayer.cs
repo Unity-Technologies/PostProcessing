@@ -5,6 +5,12 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2017_2_OR_NEWER
+    using XRSettings = UnityEngine.XR.XRSettings;
+#elif UNITY_5_6_OR_NEWER
+    using XRSettings = UnityEngine.VR.VRSettings;
+#endif
+
     // TODO: XMLDoc everything (?)
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", -1)]
@@ -266,7 +272,8 @@ namespace UnityEngine.Rendering.PostProcessing
             // is switched off and the FOV or any other camera property changes.
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
-            if (XR.XRSettings.isDeviceActive)
+
+            if (XRSettings.isDeviceActive)
                 m_Camera.ResetStereoProjectionMatrices();
 
             BuildCommandBuffers();
@@ -401,10 +408,9 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera.ResetProjectionMatrix();
 
-                if (XR.XRSettings.isDeviceActive)
+                if (XRSettings.isDeviceActive)
                 {
-                    if (m_CurrentContext.xrSinglePass ||
-                        (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right))
+                    if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         m_Camera.ResetStereoProjectionMatrices();
                 }
             }
@@ -589,14 +595,16 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (!RuntimeUtilities.scriptableRenderPipelineActive)
                 {
-                    if (XR.XRSettings.isDeviceActive)
+                    if (XRSettings.isDeviceActive)
                     {
                         // We only need to configure all of this once for stereo, during OnPreCull
                         if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
                             temporalAntialiasing.ConfigureStereoJitteredProjectionMatrices(context);
                     }
                     else
+                    {
                         temporalAntialiasing.ConfigureJitteredProjectionMatrix(context);
+                    }
                 }
 
                 var taaTarget = m_TargetPool.Get();
