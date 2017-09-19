@@ -208,6 +208,9 @@ namespace UnityEngine.PostProcessing
             if (m_HistoryTexture != null)
                 RenderTexture.ReleaseTemporary(m_HistoryTexture);
 
+#if UNITY_5_5_OR_NEWER
+            context.camera.useJitteredProjectionMatrixForTransparentRendering = true;
+#endif
             m_HistoryTexture = null;
             m_SampleIndex = 0;
             ResetHistory();
