@@ -107,17 +107,34 @@ namespace UnityEditor.Rendering.PostProcessing
                     title.tooltip = tooltipAttr.tooltip;
             }
 
-            // Look for a compatible attribute decorator and break as soon as we find one
+            // Look for a compatible attribute decorator
             AttributeDecorator decorator = null;
             Attribute attribute = null;
 
             foreach (var attr in property.attributes)
             {
-                decorator = EditorUtilities.GetDecorator(attr.GetType());
-                attribute = attr;
+                // Use the first decorator we found
+                if (decorator == null)
+                {
+                    decorator = EditorUtilities.GetDecorator(attr.GetType());
+                    attribute = attr;
+                }
 
-                if (decorator != null)
-                    break;
+                // Draw unity built-in Decorators (Space, Header)
+                if (attr is PropertyAttribute)
+                {
+                    if (attr is SpaceAttribute)
+                    {
+                        EditorGUILayout.GetControlRect(false, (attr as SpaceAttribute).height);
+                    }
+                    else if (attr is HeaderAttribute)
+                    {
+                        var rect = EditorGUILayout.GetControlRect(false, 24f);
+                        rect.y += 8f;
+                        rect = EditorGUI.IndentedRect(rect);
+                        EditorGUI.LabelField(rect, (attr as HeaderAttribute).header, Styling.labelHeader);
+                    }
+                }
             }
 
             bool invalidProp = false;

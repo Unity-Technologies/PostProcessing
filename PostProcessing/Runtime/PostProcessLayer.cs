@@ -5,6 +5,12 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2017_2_OR_NEWER
+    using XRSettings = UnityEngine.XR.XRSettings;
+#elif UNITY_5_6_OR_NEWER
+    using XRSettings = UnityEngine.VR.VRSettings;
+#endif
+
     // TODO: XMLDoc everything (?)
     [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", -1)]
@@ -29,7 +35,6 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
-        public AmbientOcclusion ambientOcclusion;
         public Fog fog;
         public Dithering dithering;
 
@@ -39,7 +44,6 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
-        [SerializeField] bool m_ShowRenderingFeatures;
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
 
@@ -138,18 +142,20 @@ namespace UnityEngine.Rendering.PostProcessing
         public void Init(PostProcessResources resources)
         {
             if (resources != null) m_Resources = resources;
-            
-            RuntimeUtilities.CreateIfNull(ref debugLayer);
-            RuntimeUtilities.CreateIfNull(ref ambientOcclusion);
+
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
             RuntimeUtilities.CreateIfNull(ref dithering);
             RuntimeUtilities.CreateIfNull(ref fog);
+            RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
         public void InitBundles()
         {
+            if (haveBundlesBeenInited)
+                return;
+
             // Create these lists only once, the serialization system will take over after that
             RuntimeUtilities.CreateIfNull(ref m_BeforeTransparentBundles);
             RuntimeUtilities.CreateIfNull(ref m_BeforeStackBundles);
@@ -228,7 +234,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             temporalAntialiasing.Release();
-            ambientOcclusion.Release();
             m_LogHistogram.Release();
 
             foreach (var bundle in m_Bundles.Values)
@@ -266,7 +271,8 @@ namespace UnityEngine.Rendering.PostProcessing
             // is switched off and the FOV or any other camera property changes.
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
-            if (XR.XRSettings.isDeviceActive)
+
+            if (XRSettings.isDeviceActive)
                 m_Camera.ResetStereoProjectionMatrices();
 
             BuildCommandBuffers();
@@ -291,7 +297,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.Reset();
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
-            
+
             var tempDescriptor = context.GetDescriptor(24, sourceFormat);
 
             // TODO: Investigate retaining command buffers on XR multi-pass right eye
@@ -302,19 +308,28 @@ namespace UnityEngine.Rendering.PostProcessing
 
             SetupContext(context);
 
+            context.command = m_LegacyCmdBufferOpaque;
+            UpdateSettingsIfNeeded(context);
+
             // Lighting & opaque-only effects
-            int opaqueOnlyEffects = 0;
-            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            bool aoSupported = ambientOcclusion.IsEnabledAndSupported(context);
-            bool aoAmbientOnly = ambientOcclusion.IsAmbientOnly(context);
+            var aoBundle = GetBundle<AmbientOcclusion>();
+            var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
+            var aoRenderer = aoBundle.CastRenderer<AmbientOcclusionRenderer>();
+
+            bool aoSupported = aoSettings.IsEnabledAndSupported(context);
+            bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
             bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
             bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
-            bool isFogActive = fog.IsEnabledAndSupported(context);
+
+            var ssrBundle = GetBundle<ScreenSpaceReflections>();
+            var ssrSettings = ssrBundle.settings;
+            var ssrRenderer = ssrBundle.renderer;
+            bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
 
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
-                var ao = ambientOcclusion.Get();
+                var ao = aoRenderer.Get();
 
                 // Render as soon as possible - should be done async in SRPs when available
                 context.command = m_LegacyCmdBufferBeforeReflections;
@@ -327,9 +342,13 @@ namespace UnityEngine.Rendering.PostProcessing
             else if (isAmbientOcclusionOpaque)
             {
                 context.command = m_LegacyCmdBufferOpaque;
-                ambientOcclusion.Get().RenderAfterOpaque(context);
+                aoRenderer.Get().RenderAfterOpaque(context);
             }
-
+            
+            bool isFogActive = fog.IsEnabledAndSupported(context);
+            bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
+            int opaqueOnlyEffects = 0;
+            opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
             opaqueOnlyEffects += isFogActive ? 1 : 0;
             opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
 
@@ -358,7 +377,14 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
                 else context.destination = cameraTarget;
 
-                // TODO: Insert SSR here
+                if (isScreenSpaceReflectionsActive)
+                {
+                    ssrRenderer.Render(context);
+                    opaqueOnlyEffects--;
+                    var prevSource = context.source;
+                    context.source = context.destination;
+                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                }
 
                 if (isFogActive)
                 {
@@ -403,10 +429,9 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera.ResetProjectionMatrix();
 
-                if (XR.XRSettings.isDeviceActive)
+                if (XRSettings.isDeviceActive)
                 {
-                    if (m_CurrentContext.xrSinglePass ||
-                        (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right))
+                    if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         m_Camera.ResetStereoProjectionMatrices();
                 }
             }
@@ -463,9 +488,6 @@ namespace UnityEngine.Rendering.PostProcessing
             // Special case for AA & lighting effects
             if (context.IsTemporalAntialiasingActive())
                 flags |= temporalAntialiasing.GetCameraFlags();
-
-            if (ambientOcclusion.IsEnabledAndSupported(context) && !ambientOcclusion.IsAmbientOnly(context))
-                flags |= ambientOcclusion.Get().GetCameraFlags();
 
             if (fog.IsEnabledAndSupported(context))
                 flags |= fog.GetCameraFlags();
@@ -593,14 +615,16 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (!RuntimeUtilities.scriptableRenderPipelineActive)
                 {
-                    if (XR.XRSettings.isDeviceActive)
+                    if (XRSettings.isDeviceActive)
                     {
                         // We only need to configure all of this once for stereo, during OnPreCull
                         if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
                             temporalAntialiasing.ConfigureStereoJitteredProjectionMatrices(context);
                     }
                     else
+                    {
                         temporalAntialiasing.ConfigureJitteredProjectionMatrix(context);
+                    }
                 }
 
                 var taaTarget = m_TargetPool.Get();

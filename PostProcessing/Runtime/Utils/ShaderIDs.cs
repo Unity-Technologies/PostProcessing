@@ -22,6 +22,17 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int SAOcclusionTexture              = Shader.PropertyToID("_SAOcclusionTexture");
         internal static readonly int MSVOcclusionTexture             = Shader.PropertyToID("_MSVOcclusionTexture");
         
+        internal static readonly int SSRResolveTemp                  = Shader.PropertyToID("_SSRResolveTemp");
+        internal static readonly int Noise                           = Shader.PropertyToID("_Noise");
+        internal static readonly int Test                            = Shader.PropertyToID("_Test");
+        internal static readonly int Resolve                         = Shader.PropertyToID("_Resolve");
+        internal static readonly int History                         = Shader.PropertyToID("_History");
+        internal static readonly int ViewMatrix                      = Shader.PropertyToID("_ViewMatrix");
+        internal static readonly int InverseViewMatrix               = Shader.PropertyToID("_InverseViewMatrix");
+        internal static readonly int InverseProjectionMatrix         = Shader.PropertyToID("_InverseProjectionMatrix");
+        internal static readonly int ScreenSpaceProjectionMatrix     = Shader.PropertyToID("_ScreenSpaceProjectionMatrix");
+        internal static readonly int Params2                         = Shader.PropertyToID("_Params2");
+        
         internal static readonly int FogColor                        = Shader.PropertyToID("_FogColor");
         internal static readonly int FogParams                       = Shader.PropertyToID("_FogParams");
 
@@ -62,7 +73,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
-        internal static readonly int Bloom_Threshold                 = Shader.PropertyToID("_Bloom_Threshold");
         internal static readonly int Bloom_DirtTileOffset            = Shader.PropertyToID("_Bloom_DirtTileOffset");
 
         internal static readonly int ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");

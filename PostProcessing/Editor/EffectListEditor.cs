@@ -7,7 +7,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    sealed class EffectListEditor
+    public sealed class EffectListEditor
     {
         Editor m_BaseEditor;
 
@@ -126,6 +126,9 @@ namespace UnityEditor.Rendering.PostProcessing
 
         public void OnGUI()
         {
+            if (m_Asset == null)
+                return;
+
             if (m_Asset.isDirty)
             {
                 RefreshEditors();

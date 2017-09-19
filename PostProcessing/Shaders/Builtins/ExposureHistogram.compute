@@ -15,7 +15,7 @@ CBUFFER_END
 groupshared uint gs_histogram[HISTOGRAM_BINS];
 
 #pragma kernel KEyeHistogram
-[numthreads(HISTOGRAM_THREAD_X,HISTOGRAM_THREAD_Y,1)]
+[numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_THREAD_Y, 1)]
 void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThreadId : SV_GroupThreadID)
 {
     // Pretty straightforward implementation of histogram gathering using atomic ops.

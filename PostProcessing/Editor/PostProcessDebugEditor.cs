@@ -22,6 +22,8 @@ namespace UnityEditor.Rendering.PostProcessing
         
         SerializedProperty m_MotionColorIntensity;
         SerializedProperty m_MotionGridSize;
+        SerializedProperty m_ColorBlindness;
+        SerializedProperty m_ColorBlindnessStrength;
 
         void OnEnable()
         {
@@ -50,6 +52,8 @@ namespace UnityEditor.Rendering.PostProcessing
 
             m_MotionColorIntensity = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionColorIntensity");
             m_MotionGridSize = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionGridSize");
+            m_ColorBlindness = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindnessType");
+            m_ColorBlindnessStrength = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindnessStrength");
         }
 
         public override void OnInspectorGUI()
@@ -76,6 +80,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(m_Overlay);
                 DoOverlayGUI(DebugOverlay.MotionVectors, m_MotionColorIntensity, m_MotionGridSize);
+                DoOverlayGUI(DebugOverlay.ColorBlindnessSimulation, m_ColorBlindness, m_ColorBlindnessStrength);
 
                 // Special cases
                 if (m_Overlay.intValue == (int)DebugOverlay.NANTracker && m_Target.postProcessLayer.stopNaNPropagation)

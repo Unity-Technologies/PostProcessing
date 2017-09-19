@@ -41,11 +41,13 @@ RWTexture2D<float> AoResult;
 CBUFFER_START(CB1)
     float4 InvLowResolution;
     float4 InvHighResolution;
-    float NoiseFilterStrength;
-    float StepSize;
-    float kBlurTolerance;
-    float kUpsampleTolerance;
+    float4 AdditionalParams;
 CBUFFER_END
+
+#define NoiseFilterStrength AdditionalParams.x
+#define StepSize AdditionalParams.y
+#define kBlurTolerance AdditionalParams.z
+#define kUpsampleTolerance AdditionalParams.w
 
 groupshared float DepthCache[256];
 groupshared float AOCache1[256];

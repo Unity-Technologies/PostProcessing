@@ -17,6 +17,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
     #endif
 
         float4 _MainTex_TexelSize;
+        float4 _Params;
 
         // -----------------------------------------------------------------------------
         // Depth
@@ -54,8 +55,6 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         // -----------------------------------------------------------------------------
         // Motion vectors
-
-        float2 _Params;
 
         float DistanceToLine(float2 p, float2 p1, float2 p2)
         {
@@ -182,6 +181,102 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
             return color;
         }
 
+        // -----------------------------------------------------------------------------
+        // Color blindness simulation
+
+        float3 RGFilter(float3 color, float k1, float k2, float k3)
+        {
+            float3 c_lin = color * 128.498039;
+
+            float r_blind = (k1 * c_lin.r + k2 * c_lin.g) / 16448.25098;
+            float b_blind = (k3 * c_lin.r - k3 * c_lin.g + 128.498039 * c_lin.b) / 16448.25098;
+            r_blind = saturate(r_blind);
+            b_blind = saturate(b_blind);
+
+            return lerp(color, float3(r_blind, r_blind, b_blind), _Params.x);
+        }
+
+        float4 FragDeuteranopia(VaryingsDefault i) : SV_Target
+        {
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            color = saturate(color);
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = SRGBToLinear(color);
+        #endif
+
+            color = RGFilter(color, 37.611765, 90.87451, -2.862745);
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = LinearToSRGB(color);
+        #endif
+
+            return float4(color, 1.0);
+        }
+
+        float4 FragProtanopia(VaryingsDefault i) : SV_Target
+        {
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            color = saturate(color);
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = SRGBToLinear(color);
+        #endif
+
+            color = RGFilter(color, 14.443137, 114.054902, 0.513725);
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = LinearToSRGB(color);
+        #endif
+
+            return float4(color, 1.0);
+        }
+
+        float4 FragTritanopia(VaryingsDefault i) : SV_Target
+        {
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            color = saturate(color);
+
+            float anchor_e0 = 0.05059983 + 0.08585369 + 0.00952420;
+            float anchor_e1 = 0.01893033 + 0.08925308 + 0.01370054;
+            float anchor_e2 = 0.00292202 + 0.00975732 + 0.07145979;
+            float inflection = anchor_e1 / anchor_e0;
+
+            float a1 = -anchor_e2 * 0.007009;
+            float b1 = anchor_e2 * 0.0914;
+            float c1 = anchor_e0 * 0.007009 - anchor_e1 * 0.0914;
+            float a2 = anchor_e1 * 0.3636 - anchor_e2 * 0.2237;
+            float b2 = anchor_e2 * 0.1284 - anchor_e0 * 0.3636;
+            float c2 = anchor_e0 * 0.2237 - anchor_e1 * 0.1284;
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = SRGBToLinear(color);
+        #endif
+
+            float3 c_lin = color * 128.498039;
+
+            float L = (c_lin.r * 0.05059983 + c_lin.g * 0.08585369 + c_lin.b * 0.00952420) / 128.498039;
+            float M = (c_lin.r * 0.01893033 + c_lin.g * 0.08925308 + c_lin.b * 0.01370054) / 128.498039;
+            float S = (c_lin.r * 0.00292202 + c_lin.g * 0.00975732 + c_lin.b * 0.07145979) / 128.498039;
+
+            float tmp = M / L;
+
+            if (tmp < inflection) S = -(a1 * L + b1 * M) / c1;
+            else S = -(a2 * L + b2 * M) / c2;
+
+            float r = L * 30.830854 - M * 29.832659 + S * 1.610474;
+            float g = -L * 6.481468 + M * 17.715578 - S * 2.532642;
+            float b = -L * 0.375690 - M * 1.199062 + S * 14.273846;
+
+            color = lerp(color, saturate(float3(r, g, b)), _Params.x);
+
+        #if UNITY_COLORSPACE_GAMMA
+            color = LinearToSRGB(color);
+        #endif
+
+            return float4(color, 1.0);
+        }
+
     ENDHLSL
 
     SubShader
@@ -229,6 +324,39 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragNANTracker
+
+            ENDHLSL
+        }
+
+        // 4 - Color blindness (deuteranopia)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragDeuteranopia
+
+            ENDHLSL
+        }
+
+        // 5 - Color blindness (protanopia)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragProtanopia
+
+            ENDHLSL
+        }
+
+        // 6 - Color blindness (tritanopia)
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragTritanopia
 
             ENDHLSL
         }

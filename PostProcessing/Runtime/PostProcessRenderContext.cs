@@ -1,5 +1,11 @@
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2017_2_OR_NEWER
+    using XRSettings = UnityEngine.XR.XRSettings;
+#elif UNITY_5_6_OR_NEWER
+    using XRSettings = UnityEngine.VR.VRSettings;
+#endif
+
     // Context object passed around all post-fx in a frame
     public sealed class PostProcessRenderContext
     {
@@ -7,41 +13,43 @@ namespace UnityEngine.Rendering.PostProcessing
         // The following should be filled by the render pipeline
 
         // Camera currently rendering
-        private Camera m_camera;
+        Camera m_Camera;
         public Camera camera
         {
-            get
-            {
-                return this.m_camera;
-            }
-
+            get { return m_Camera; }
             set
             {
-                this.m_camera = value;
+                m_Camera = value;
 
-                if (XR.XRSettings.isDeviceActive)
+                if (XRSettings.isDeviceActive)
                 {
-                    RenderTextureDescriptor xrDesc = XR.XRSettings.eyeTextureDesc;
-                    m_width = xrDesc.width;
-                    m_height = xrDesc.height;
+#if UNITY_2017_2_OR_NEWER
+                    RenderTextureDescriptor xrDesc = XRSettings.eyeTextureDesc;
+                    width = xrDesc.width;
+                    height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
-
-                    m_xrSinglePass = (xrDesc.vrUsage == VRTextureUsage.TwoEyes);
+#else
+                    width = XRSettings.eyeTextureWidth; // double this for single-pass when we can't query eyeTextureDesc
+                    height = XRSettings.eyeTextureHeight;
+                    // TODO: fill in m_sourceDescriptor
+#endif
 
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
-                        m_xrActiveEye = (int)Camera.StereoscopicEye.Right;
+                        xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
-                    m_xrSingleEyeWidth = XR.XRSettings.eyeTextureWidth;
+                    xrSingleEyeWidth = XRSettings.eyeTextureWidth;
+                    xrSingleEyeHeight = XRSettings.eyeTextureHeight;
                 }
                 else
                 {
-                    m_width = m_camera.pixelWidth;
-                    m_height = m_camera.pixelHeight;
+                    width = m_Camera.pixelWidth;
+                    height = m_Camera.pixelHeight;
 
-                    m_sourceDescriptor.width = m_width;
-                    m_sourceDescriptor.height = m_height;
+                    m_sourceDescriptor.width = width;
+                    m_sourceDescriptor.height = height;
 
-                    m_xrSingleEyeWidth = m_width;
+                    xrSingleEyeWidth = width;
+                    // TODO: fill in single eye height
                 }
             }
         }
@@ -83,18 +91,10 @@ namespace UnityEngine.Rendering.PostProcessing
         public PostProcessDebugLayer debugLayer { get; internal set; }
 
         // Current camera width in pixels
-        private int m_width;
-        public int width
-        {
-            get { return m_width; }
-        }
+        public int width { get; private set; }
 
         // Current camera height in pixels
-        private int m_height;
-        public int height
-        {
-            get { return m_height; }
-        }
+        public int height { get; private set; }
 
         private RenderTextureDescriptor m_sourceDescriptor;
         public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
@@ -120,26 +120,14 @@ namespace UnityEngine.Rendering.PostProcessing
             return modifiedDesc;
         }
 
-        // Is XR running in single-pass stereo mode?
-        private bool m_xrSinglePass;
-        public bool xrSinglePass
-        {
-            get { return m_xrSinglePass; }
-        }
-
         // Current active rendering eye (for XR)
-        private int m_xrActiveEye;
-        public int xrActiveEye
-        {
-            get { return m_xrActiveEye; }
-        }
+        public int xrActiveEye { get; private set; }
 
         // Current single eye width in pixels (for XR)
-        private int m_xrSingleEyeWidth;
-        public int singleEyeWidth
-        {
-            get { return m_xrSingleEyeWidth; }
-        }
+        public int xrSingleEyeWidth { get; private set; }
+
+        // Current single eye height in pixels (for XR)
+        public int xrSingleEyeHeight { get; private set; }
 
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
@@ -153,15 +141,15 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Reset()
         {
-            m_camera = null;
-            m_width = 0;
-            m_height = 0;
+            m_Camera = null;
+            width = 0;
+            height = 0;
 
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
 
-            m_xrSinglePass = false;
-            m_xrActiveEye = (int)Camera.StereoscopicEye.Left;
-            m_xrSingleEyeWidth = 0;
+            xrActiveEye = (int)Camera.StereoscopicEye.Left;
+            xrSingleEyeWidth = 0;
+            xrSingleEyeHeight = 0;
 
             command = null;
             source = 0;
