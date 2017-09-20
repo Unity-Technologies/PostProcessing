@@ -58,7 +58,7 @@ float2 UnityStereoClampScaleOffset(float2 uv, float4 scaleAndOffset)
 
 float2 UnityStereoClamp(float2 uv)
 {
-    return UnityStereoClamp(uv, unity_StereoScaleOffset[unity_StereoEyeIndex]);
+    return UnityStereoClampScaleOffset(uv, unity_StereoScaleOffset[unity_StereoEyeIndex]);
 }
 #else
 #define TransformStereoScreenSpaceTex(uv, w) uv
