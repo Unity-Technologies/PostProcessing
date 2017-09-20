@@ -105,7 +105,7 @@ namespace UnityEngine.Rendering.PostProcessing
             pyramidDesc.height = Mathf.FloorToInt(pyramidDesc.height / (2f - rh));
 
             // Determine the iteration count
-            int s = Mathf.Max((Mathf.FloorToInt(context.singleEyeWidth / (2f - rw))), (Mathf.FloorToInt(context.height / (2f - rh))));
+            int s = Mathf.Max((Mathf.FloorToInt(context.xrSingleEyeWidth / (2f - rw))), (Mathf.FloorToInt(context.height / (2f - rh))));
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logs_i = Mathf.FloorToInt(logs);
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
@@ -173,7 +173,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 : settings.dirtTexture.value;
 
             var dirtRatio = (float)dirtTexture.width / (float)dirtTexture.height;
-            var screenRatio = (float)context.singleEyeWidth / (float)context.height;
+            var screenRatio = (float)context.xrSingleEyeWidth / (float)context.height;
             var dirtTileOffset = new Vector4(1f, 1f, 0f, 0f);
 
             if (dirtRatio > screenRatio)

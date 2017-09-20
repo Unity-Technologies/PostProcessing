@@ -49,7 +49,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     m_sourceDescriptor.height = height;
 
                     xrSingleEyeWidth = width;
-                    // TODO: fill in single eye height
+                    xrSingleEyeHeight = height;
                 }
             }
         }
