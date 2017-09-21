@@ -9,20 +9,6 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);
         float3 _AOColor;
 
-        VaryingsDefault Vert(AttributesDefault v)
-        {
-            VaryingsDefault o;
-            o.vertex = float4(v.vertex.xy, 0.0, 1.0);
-            o.texcoord = TransformTriangleVertexToUV(v.vertex.xy);
-
-        #if UNITY_UV_STARTS_AT_TOP
-            o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
-        #endif
-
-            o.texcoord = TransformStereoScreenSpaceTex(o.texcoord, 1);
-            return o;
-        }
-
     ENDHLSL
 
     SubShader
@@ -34,12 +20,12 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         {
             HLSLPROGRAM
 
-                #pragma vertex Vert
+                #pragma vertex VertDefault
                 #pragma fragment Frag
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
-                    return SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord);
+                    return SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo);
                 }
 
             ENDHLSL
@@ -52,7 +38,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
             HLSLPROGRAM
 
-                #pragma vertex Vert
+                #pragma vertex VertDefault
                 #pragma fragment Frag
 
                 struct Output
@@ -63,7 +49,7 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
                 Output Frag(VaryingsDefault i)
                 {
-                    float ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoord).r;
+                    float ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoordStereo).r;
                     Output o;
                     o.gbuffer0 = float4(0.0, 0.0, 0.0, ao);
                     o.gbuffer3 = float4(ao * _AOColor, 0.0);
@@ -82,17 +68,16 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
                 #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
-                #pragma vertex Vert
+                #pragma vertex VertDefault
                 #pragma fragment Frag
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
-                    float2 texcoord = TransformStereoScreenSpaceTex(i.texcoord, 1);
-                    half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, texcoord).r;
+                    half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoordStereo).r;
 
                     // Apply fog when enabled (forward-only)
                 #if (APPLY_FORWARD_FOG)
-                    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, texcoord));
+                    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
                     d = ComputeFogDistance(d);
                     ao *= ComputeFog(d);
                 #endif
@@ -108,12 +93,12 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         {
             HLSLPROGRAM
 
-                #pragma vertex Vert
+                #pragma vertex VertDefault
                 #pragma fragment Frag
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
-                    half ao = SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoord).r;
+                    half ao = SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoordStereo).r;
                     return float4(ao.rrr, 1.0);
                 }
 
