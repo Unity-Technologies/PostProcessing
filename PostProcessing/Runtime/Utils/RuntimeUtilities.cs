@@ -237,7 +237,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass
                     && Application.isPlaying;
 #elif UNITY_2017_2_OR_NEWER
-                return UnityEngine.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
+                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
                 return false;
 #endif

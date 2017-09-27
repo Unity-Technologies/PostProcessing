@@ -69,7 +69,7 @@ namespace UnityEngine.Rendering.PostProcessing
             public ScreenSpaceReflectionResolution downsampling;
         }
 
-        QualityPreset[] m_Presets =
+        readonly QualityPreset[] m_Presets =
         {
             new QualityPreset { maximumIterationCount = 10, thickness = 32, downsampling = ScreenSpaceReflectionResolution.Downsampled  }, // Lower
             new QualityPreset { maximumIterationCount = 16, thickness = 32, downsampling = ScreenSpaceReflectionResolution.Downsampled  }, // Low
@@ -143,13 +143,6 @@ namespace UnityEngine.Rendering.PostProcessing
             lodCount = Mathf.Min(lodCount, kMaxLods);
 
             CheckRT(ref m_Resolve, size, size, context.sourceFormat, FilterMode.Trilinear, true);
-            CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
-
-            if (m_ResetHistory)
-            {
-                context.command.BlitFullscreenTriangle(context.source, m_History);
-                m_ResetHistory = false;
-            }
 
             var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
@@ -174,16 +167,32 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.GetTemporaryRT(ShaderIDs.Test, size, size, 0, FilterMode.Point, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.Test, sheet, (int)Pass.Test);
 
-            cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
-            cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SSRResolveTemp, sheet, (int)Pass.Resolve);
+            if (context.isSceneView)
+            {
+                cmd.BlitFullscreenTriangle(context.source, m_Resolve, sheet, (int)Pass.Resolve);
+            }
+            else
+            {
+                CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
 
-            sheet.properties.SetTexture(ShaderIDs.History, m_History);
-            cmd.BlitFullscreenTriangle(ShaderIDs.SSRResolveTemp, m_Resolve, sheet, (int)Pass.Reproject);
+                if (m_ResetHistory)
+                {
+                    context.command.BlitFullscreenTriangle(context.source, m_History);
+                    m_ResetHistory = false;
+                }
+
+                cmd.GetTemporaryRT(ShaderIDs.SSRResolveTemp, size, size, 0, FilterMode.Bilinear, context.sourceFormat);
+                cmd.BlitFullscreenTriangle(context.source, ShaderIDs.SSRResolveTemp, sheet, (int)Pass.Resolve);
+
+                sheet.properties.SetTexture(ShaderIDs.History, m_History);
+                cmd.BlitFullscreenTriangle(ShaderIDs.SSRResolveTemp, m_Resolve, sheet, (int)Pass.Reproject);
+
+                cmd.CopyTexture(m_Resolve, 0, 0, m_History, 0, 0);
+
+                cmd.ReleaseTemporaryRT(ShaderIDs.SSRResolveTemp);
+            }
 
             cmd.ReleaseTemporaryRT(ShaderIDs.Test);
-            cmd.ReleaseTemporaryRT(ShaderIDs.SSRResolveTemp);
-
-            cmd.CopyTexture(m_Resolve, 0, 0, m_History, 0, 0);
 
             // Pre-cache mipmaps ids
             if (m_MipIDs == null || m_MipIDs.Length == 0)

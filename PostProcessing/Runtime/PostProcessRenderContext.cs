@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace UnityEngine.Rendering.PostProcessing
 {
 #if UNITY_2017_2_OR_NEWER
@@ -82,10 +84,9 @@ namespace UnityEngine.Rendering.PostProcessing
         // Property sheet factory handled by the currently active PostProcessLayer
         public PropertySheetFactory propertySheets { get; internal set; }
 
-        // Custom user data object (unused by builtin effects, feel free to store whatever you want
-        // in this object)
-        // TODO: Make this more useful
-        public object userData { get; set; }
+        // Custom user data objects (unused by builtin effects, feel free to store whatever you want
+        // in this dictionary)
+        public Dictionary<string, object> userData { get; private set; }
 
         // Reference to the internal debug layer
         public PostProcessDebugLayer debugLayer { get; internal set; }
@@ -169,6 +170,11 @@ namespace UnityEngine.Rendering.PostProcessing
             autoExposureTexture = null;
             logLut = null;
             autoExposure = null;
+
+            if (userData == null)
+                userData = new Dictionary<string, object>();
+
+            userData.Clear();
         }
 
         // Checks if TAA is enabled & supported
