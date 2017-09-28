@@ -69,7 +69,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         float4 FragLDRFromScratch(VaryingsDefault i) : SV_Target
         {
             // 2D strip lut
-            float3 colorLinear = GetLutStripValue(UnityStereoTransformScreenSpaceTex(i.texcoord), _Lut2D_Params);
+            float3 colorLinear = GetLutStripValue(i.texcoordStereo, _Lut2D_Params);
             float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }
