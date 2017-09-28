@@ -273,7 +273,14 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
             if (XRSettings.isDeviceActive)
+            {
                 m_Camera.ResetStereoProjectionMatrices();
+                Shader.SetGlobalFloat("rvsGlobal", XRSettings.renderViewportScale);
+            }
+            else
+            {
+                Shader.SetGlobalFloat("rvsGlobal", 1.0f);
+            }
 
             BuildCommandBuffers();
         }

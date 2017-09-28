@@ -24,6 +24,8 @@ CBUFFER_START(UnityStereoEyeIndex)
 CBUFFER_END
 #endif
 
+float rvsGlobal;
+
 float2 UnityStereoScreenSpaceUVAdjust(float2 uv, float4 scaleAndOffset)
 {
     return uv.xy * scaleAndOffset.xy + scaleAndOffset.zw;
@@ -38,6 +40,7 @@ float4 UnityStereoScreenSpaceUVAdjust(float4 uv, float4 scaleAndOffset)
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
 {
     float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
+    scaleOffset.xy *= rvsGlobal;
     return uv.xy * scaleOffset.xy + scaleOffset.zw * w;
 }
 
@@ -58,11 +61,20 @@ float2 UnityStereoClampScaleOffset(float2 uv, float4 scaleAndOffset)
 
 float2 UnityStereoClamp(float2 uv)
 {
+    // TODO: Factor in RVS?
     return UnityStereoClampScaleOffset(uv, unity_StereoScaleOffset[unity_StereoEyeIndex]);
 }
 #else
-#define TransformStereoScreenSpaceTex(uv, w) uv
-#define UnityStereoTransformScreenSpaceTex(uv) uv
+float2 TransformStereoScreenSpaceTex(float2 uv, float w)
+{
+    return uv * rvsGlobal;
+}
+
+float2 UnityStereoTransformScreenSpaceTex(float2 uv)
+{
+    return TransformStereoScreenSpaceTex(saturate(uv), 1.0);
+}
+
 #define UnityStereoClampScaleOffset(uv, scaleAndOffset) uv
 #define UnityStereoClamp(uv) uv
 #endif
