@@ -124,10 +124,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
             #endif
 
-            RenderTextureDescriptor colorDesc = context.GetDescriptor(0, colorFormat);
+            var colorDesc = context.GetDescriptor(0, colorFormat);
             colorDesc.width /= 2;
             colorDesc.height /= 2;
-            RenderTextureDescriptor cocDesc = context.GetDescriptor(0, cocFormat, RenderTextureReadWrite.Linear);
+            var cocDesc = context.GetDescriptor(0, cocFormat, RenderTextureReadWrite.Linear);
 
             // Material setup
             var f = settings.focalLength.value / 1000f;

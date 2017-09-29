@@ -26,14 +26,18 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (XRSettings.isDeviceActive)
                 {
 #if UNITY_2017_2_OR_NEWER
-                    RenderTextureDescriptor xrDesc = XRSettings.eyeTextureDesc;
+                    var xrDesc = XRSettings.eyeTextureDesc;
                     width = xrDesc.width;
                     height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
 #else
-                    width = XRSettings.eyeTextureWidth; // double this for single-pass when we can't query eyeTextureDesc
+                    // Single-pass is only supported with 2017.2+ because
+                    // that is when XRSettings.eyeTextureDesc is available.
+                    // Without it, we don't have a robust method of determining
+                    // if we are in single-pass.  Users can just double the width
+                    // here if they KNOW they are using single-pass.
+                    width = XRSettings.eyeTextureWidth;
                     height = XRSettings.eyeTextureHeight;
-                    // TODO: fill in m_sourceDescriptor
 #endif
 
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
@@ -47,9 +51,10 @@ namespace UnityEngine.Rendering.PostProcessing
                     width = m_Camera.pixelWidth;
                     height = m_Camera.pixelHeight;
 
+#if UNITY_2017_2_OR_NEWER
                     m_sourceDescriptor.width = width;
                     m_sourceDescriptor.height = height;
-
+#endif
                     xrSingleEyeWidth = width;
                     xrSingleEyeHeight = height;
                 }
@@ -97,10 +102,11 @@ namespace UnityEngine.Rendering.PostProcessing
         // Current camera height in pixels
         public int height { get; private set; }
 
+#if UNITY_2017_2_OR_NEWER
         private RenderTextureDescriptor m_sourceDescriptor;
         public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
-            RenderTextureDescriptor modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
+            var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
                                                                                 m_sourceDescriptor.colorFormat, depthBufferBits);
             modifiedDesc.dimension = m_sourceDescriptor.dimension;
             modifiedDesc.volumeDepth = m_sourceDescriptor.volumeDepth;
@@ -119,6 +125,24 @@ namespace UnityEngine.Rendering.PostProcessing
                 modifiedDesc.sRGB = (readWrite != RenderTextureReadWrite.Linear);
 
             return modifiedDesc;
+        }
+#endif
+
+        public void GetScreenSpaceTemporaryRT(CommandBuffer cmd, int nameID, 
+                                            int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default,
+                                            FilterMode filter = FilterMode.Bilinear, int dimScaler = 1)
+        {
+#if UNITY_2017_2_OR_NEWER
+            var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
+            desc.width /= dimScaler;
+            desc.height /= dimScaler;
+            cmd.GetTemporaryRT(nameID, desc, filter);
+#else
+            int actualWidth = width / dimScaler;
+            int actualHeight = height / dimScaler;
+            cmd.GetTemporaryRT(nameID, width, height, depthBufferBits, filter, colorFormat, readWrite);
+            // TODO: How to handle MSAA for XR in older versions?  Query cam?      
+#endif
         }
 
         // Current active rendering eye (for XR)
@@ -146,7 +170,9 @@ namespace UnityEngine.Rendering.PostProcessing
             width = 0;
             height = 0;
 
+#if UNITY_2017_2_OR_NEWER
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
+#endif
 
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
             xrSingleEyeWidth = 0;

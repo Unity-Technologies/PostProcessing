@@ -100,7 +100,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            RenderTextureDescriptor pyramidDesc = context.GetDescriptor(0, context.sourceFormat);
+            var pyramidDesc = context.GetDescriptor(0, context.sourceFormat);
             pyramidDesc.width = Mathf.FloorToInt(pyramidDesc.width / (2f - rw));
             pyramidDesc.height = Mathf.FloorToInt(pyramidDesc.height / (2f - rh));
 
