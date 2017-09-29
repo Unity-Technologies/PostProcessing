@@ -134,12 +134,18 @@ namespace UnityEngine.Rendering.PostProcessing
         {
 #if UNITY_2017_2_OR_NEWER
             var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
-            desc.width /= dimScaler;
-            desc.height /= dimScaler;
+            if (dimScaler > 1)
+            {
+                desc.width /= dimScaler;
+                desc.height /= dimScaler;
+            }
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
-            int actualWidth = width / dimScaler;
-            int actualHeight = height / dimScaler;
+            if (dimScaler > 1)
+            {
+                int actualWidth = width / dimScaler;
+                int actualHeight = height / dimScaler;
+            }
             cmd.GetTemporaryRT(nameID, width, height, depthBufferBits, filter, colorFormat, readWrite);
             // TODO: How to handle MSAA for XR in older versions?  Query cam?      
 #endif
