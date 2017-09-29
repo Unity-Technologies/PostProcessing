@@ -13,7 +13,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         float3 _ColorBalance;
         float3 _ColorFilter;
         float3 _HueSatCon;
-        float _Brightness;
+        float _Brightness; // LDR only
 
         float3 _ChannelMixerRed;
         float3 _ChannelMixerGreen;
@@ -24,20 +24,24 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         float3 _Gain;
 
         TEXTURE2D_SAMPLER2D(_Curves, sampler_Curves);
+        
+        float4 _CustomToneCurve;
+        float4 _ToeSegmentA;
+        float4 _ToeSegmentB;
+        float4 _MidSegmentA;
+        float4 _MidSegmentB;
+        float4 _ShoSegmentA;
+        float4 _ShoSegmentB;
 
-        // -----------------------------------------------------------------------------------------
-        // LDR Grading - no starting lut
-
-        float3 ColorGradeLDR(float3 colorLinear)
+        float3 ApplyCommonGradingSteps(float3 colorLinear)
         {
-            const float kMidGrey = pow(0.5, 2.2);
-
-            colorLinear *= _Brightness;
-            colorLinear = Contrast(colorLinear, kMidGrey, _HueSatCon.z);
             colorLinear = WhiteBalance(colorLinear, _ColorBalance);
             colorLinear *= _ColorFilter;
             colorLinear = ChannelMixer(colorLinear, _ChannelMixerRed, _ChannelMixerGreen, _ChannelMixerBlue);
-            colorLinear = LiftGammaGainLDR(colorLinear, _Lift, _InvGamma, _Gain);
+            colorLinear = LiftGammaGainHDR(colorLinear, _Lift, _InvGamma, _Gain);
+
+            // Do NOT feed negative values to RgbToHsv or they'll wrap around
+            colorLinear = max(0.0, colorLinear);
 
             float3 hsv = RgbToHsv(colorLinear);
 
@@ -58,29 +62,119 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
             hsv.x = RotateHue(hue, 0.0, 1.0);
 
             colorLinear = HsvToRgb(hsv);
-
             colorLinear = Saturation(colorLinear, _HueSatCon.y * satMult);
-            colorLinear = saturate(colorLinear);
-            colorLinear = YrgbCurve(colorLinear, TEXTURE2D_PARAM(_Curves, sampler_Curves));
+
+            return colorLinear;
+        }
+
+        //
+        // LDR Grading process
+        //
+        float3 ColorGradeLDR(float3 colorLinear)
+        {
+            // Brightness is a simple linear multiplier. Works better in LDR than using e.v.
+            colorLinear *= _Brightness;
+
+            // Contrast is done in linear, switching to log for that in LDR is pointless and doesn't
+            // feel as good to tweak
+            const float kMidGrey = pow(0.5, 2.2);
+            colorLinear = Contrast(colorLinear, kMidGrey, _HueSatCon.z);
+
+            colorLinear = ApplyCommonGradingSteps(colorLinear);
+
+            // YRGB only works in LDR for now as we don't do any curve range remapping
+            colorLinear = YrgbCurve(saturate(colorLinear), TEXTURE2D_PARAM(_Curves, sampler_Curves));
 
             return saturate(colorLinear);
         }
 
         float4 FragLDRFromScratch(VaryingsDefault i) : SV_Target
         {
-            // 2D strip lut
             float3 colorLinear = GetLutStripValue(i.texcoord, _Lut2D_Params);
             float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }
 
-        // -----------------------------------------------------------------------------------------
-        // LDR Grading - with starting lut
-
         float4 FragLDR(VaryingsDefault i) : SV_Target
         {
             float3 colorLinear = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
             float3 graded = ColorGradeLDR(colorLinear);
+            return float4(graded, 1.0);
+        }
+
+        //
+        // HDR Grading process
+        //
+        float3 LogGradeHDR(float3 colorLog)
+        {
+            // HDR contrast feels a lot more natural when done in log rather than doing it in linear
+            colorLog = Contrast(colorLog, ACEScc_MIDGRAY, _HueSatCon.z);
+            return colorLog;
+        }
+
+        float3 LinearGradeHDR(float3 colorLinear)
+        {
+            colorLinear = ApplyCommonGradingSteps(colorLinear);
+            return colorLinear;
+        }
+
+        float3 ColorGradeHDR(float3 colorLutSpace)
+        {
+            #if TONEMAPPING_ACES
+            {
+                float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
+                float3 aces = unity_to_ACES(colorLinear);
+
+                // ACEScc (log) space
+                float3 acescc = ACES_to_ACEScc(aces);
+                acescc = LogGradeHDR(acescc);
+                aces = ACEScc_to_ACES(acescc);
+
+                // ACEScg (linear) space
+                float3 acescg = ACES_to_ACEScg(aces);
+                acescg = LinearGradeHDR(acescg);
+
+                // Tonemap ODT(RRT(aces))
+                aces = ACEScg_to_ACES(acescg);
+                colorLinear = AcesTonemap(aces);
+
+                return colorLinear;
+            }
+            #else
+            {
+                // colorLutSpace is already in log space
+                colorLutSpace = LogGradeHDR(colorLutSpace);
+
+                // Switch back to linear
+                float3 colorLinear = LUT_SPACE_DECODE(colorLutSpace);
+                colorLinear = LinearGradeHDR(colorLinear);
+                colorLinear = max(0.0, colorLinear);
+
+                // Tonemap
+                #if TONEMAPPING_NEUTRAL
+                {
+                    colorLinear = NeutralTonemap(colorLinear);
+                }
+                #elif TONEMAPPING_CUSTOM
+                {
+                    colorLinear = CustomTonemap(
+                        colorLinear, _CustomToneCurve.xyz,
+                        _ToeSegmentA, _ToeSegmentB.xy,
+                        _MidSegmentA, _MidSegmentB.xy,
+                        _ShoSegmentA, _ShoSegmentB.xy
+                    );
+                }
+                #endif
+
+                return colorLinear;
+            }
+            #endif
+        }
+
+        float4 FragHDR(VaryingsDefault i) : SV_Target
+        {
+            float3 colorLutSpace = GetLutStripValue(i.texcoord, _Lut2D_Params);
+            float3 graded = ColorGradeHDR(colorLutSpace);
             return float4(graded, 1.0);
         }
 
@@ -106,6 +200,17 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragLDR
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            HLSLPROGRAM
+
+                #pragma vertex VertDefault
+                #pragma fragment FragHDR
+                #pragma multi_compile __ TONEMAPPING_ACES TONEMAPPING_NEUTRAL TONEMAPPING_CUSTOM
 
             ENDHLSL
         }

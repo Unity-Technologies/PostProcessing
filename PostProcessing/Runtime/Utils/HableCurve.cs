@@ -25,7 +25,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 return y0 * scaleY + offsetY;
             }
-        };
+        }
 
         struct DirectParams
         {
@@ -39,7 +39,7 @@ namespace UnityEngine.Rendering.PostProcessing
             internal float overshootY;
 
             internal float gamma;
-        };
+        }
 
         public float whitePoint { get; private set; }
         public float inverseWhitePoint { get; private set; }
@@ -52,6 +52,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             for (int i = 0; i < 3; i++)
                 segments[i] = new Segment();
+
+            uniforms = new Uniforms(this);
         }
 
         public float Eval(float x)
@@ -256,5 +258,79 @@ namespace UnityEngine.Rendering.PostProcessing
             float ret = g * m * Mathf.Pow(m * x + b, g - 1f);
             return ret;
         }
+
+        //
+        // Uniform building for ease of use
+        //
+        public class Uniforms
+        {
+            HableCurve parent;
+
+            internal Uniforms(HableCurve parent)
+            {
+                this.parent = parent;
+            }
+
+            public Vector4 curve
+            {
+                get { return new Vector4(parent.inverseWhitePoint, parent.x0, parent.x1, 0f); }
+            }
+
+            public Vector4 toeSegmentA
+            {
+                get
+                {
+                    var toe = parent.segments[0];
+                    return new Vector4(toe.offsetX, toe.offsetY, toe.scaleX, toe.scaleY);
+                }
+            }
+
+            public Vector4 toeSegmentB
+            {
+                get
+                {
+                    var toe = parent.segments[0];
+                    return new Vector4(toe.lnA, toe.B, 0f, 0f);
+                }
+            }
+
+            public Vector4 midSegmentA
+            {
+                get
+                {
+                    var mid = parent.segments[1];
+                    return new Vector4(mid.offsetX, mid.offsetY, mid.scaleX, mid.scaleY);
+                }
+            }
+
+            public Vector4 midSegmentB
+            {
+                get
+                {
+                    var mid = parent.segments[1];
+                    return new Vector4(mid.lnA, mid.B, 0f, 0f);
+                }
+            }
+
+            public Vector4 shoSegmentA
+            {
+                get
+                {
+                    var sho = parent.segments[2];
+                    return new Vector4(sho.offsetX, sho.offsetY, sho.scaleX, sho.scaleY);
+                }
+            }
+
+            public Vector4 shoSegmentB
+            {
+                get
+                {
+                    var sho = parent.segments[2];
+                    return new Vector4(sho.lnA, sho.B, 0f, 0f);
+                }
+            }
+        }
+
+        public readonly Uniforms uniforms;
     }
 }

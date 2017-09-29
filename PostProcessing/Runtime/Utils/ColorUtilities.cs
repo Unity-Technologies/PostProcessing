@@ -84,34 +84,26 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Alexa LogC converters (El 1000)
         // See http://www.vocas.nl/webfm_send/964
+        const float logC_cut = 0.011361f;
+        const float logC_a = 5.555556f;
+        const float logC_b = 0.047996f;
+        const float logC_c = 0.244161f;
+        const float logC_d = 0.386036f;
+        const float logC_e = 5.301883f;
+        const float logC_f = 0.092819f;
+
         public static float LogCToLinear(float x)
         {
-            const float cut = 0.011361f;
-            const float a = 5.555556f;
-            const float b = 0.047996f;
-            const float c = 0.244161f;
-            const float d = 0.386036f;
-            const float e = 5.301883f;
-            const float f = 0.092819f;
-
-            return (x > e * cut + f)
-                ? (Mathf.Pow(10f, (x - d) / c) - b) / a
-                : (x - f) / e;
+            return x > logC_e * logC_cut + logC_f
+                ? (Mathf.Pow(10f, (x - logC_d) / logC_c) - logC_b) / logC_a
+                : (x - logC_f) / logC_e;
         }
 
         public static float LinearToLogC(float x)
         {
-            const float cut = 0.011361f;
-            const float a = 5.555556f;
-            const float b = 0.047996f;
-            const float c = 0.244161f;
-            const float d = 0.386036f;
-            const float e = 5.301883f;
-            const float f = 0.092819f;
-
-            return (x > cut)
-                ? c * Mathf.Log10(a * x + b) + d
-                : e * x + f;
+            return x > logC_cut
+                ? logC_c * Mathf.Log10(logC_a * x + logC_b) + logC_d
+                : logC_e * x + logC_f;
         }
 
         public static uint ToHex(Color c)

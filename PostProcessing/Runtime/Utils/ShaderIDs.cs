@@ -94,6 +94,13 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int InvGamma                        = Shader.PropertyToID("_InvGamma");
         internal static readonly int Gain                            = Shader.PropertyToID("_Gain");
         internal static readonly int Curves                          = Shader.PropertyToID("_Curves");
+        internal static readonly int CustomToneCurve                 = Shader.PropertyToID("_CustomToneCurve");
+        internal static readonly int ToeSegmentA                     = Shader.PropertyToID("_ToeSegmentA");
+        internal static readonly int ToeSegmentB                     = Shader.PropertyToID("_ToeSegmentB");
+        internal static readonly int MidSegmentA                     = Shader.PropertyToID("_MidSegmentA");
+        internal static readonly int MidSegmentB                     = Shader.PropertyToID("_MidSegmentB");
+        internal static readonly int ShoSegmentA                     = Shader.PropertyToID("_ShoSegmentA");
+        internal static readonly int ShoSegmentB                     = Shader.PropertyToID("_ShoSegmentB");
 
         internal static readonly int Vignette_Color                  = Shader.PropertyToID("_Vignette_Color");
         internal static readonly int Vignette_Center                 = Shader.PropertyToID("_Vignette_Center");
