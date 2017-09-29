@@ -7,7 +7,7 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
         #pragma multi_compile __ BLOOM
-        #pragma multi_compile __ COLOR_GRADING_LDR COLOR_GRADING_HDR
+        #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ FINALPASS
@@ -38,12 +38,12 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
-    #if COLOR_GRADING_HDR
+    #if COLOR_GRADING_HDR_3D
 
         TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
         float2 _Lut3D_Params;
 
-    #elif COLOR_GRADING_LDR
+    #else
 
         TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
         float3 _Lut2D_Params;
@@ -186,13 +186,19 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            #if COLOR_GRADING_HDR
+            #if COLOR_GRADING_HDR_3D
             {
-                color *= _PostExposure; // Exposure is in ev units (or 'stops')
+                color *= _PostExposure;
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
                 color.rgb = ApplyLut3D(TEXTURE3D_PARAM(_Lut3D, sampler_Lut3D), colorLutSpace, _Lut3D_Params);
             }
-            #elif COLOR_GRADING_LDR
+            #elif COLOR_GRADING_HDR_2D
+            {
+                color *= _PostExposure;
+                float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
+                color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), colorLutSpace, _Lut2D_Params);
+            }
+            #elif COLOR_GRADING_LDR_2D
             {
                 color = saturate(color);
                 color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color.rgb, _Lut2D_Params);
