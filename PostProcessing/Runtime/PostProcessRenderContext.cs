@@ -141,13 +141,38 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
+            int actualWidth = width;
+            int actualHeight = height 
             if (dimScaler > 1)
             {
-                int actualWidth = width / dimScaler;
-                int actualHeight = height / dimScaler;
+                actualWidth /= dimScaler;
+                actualHeight /= dimScaler;
             }
             cmd.GetTemporaryRT(nameID, width, height, depthBufferBits, filter, colorFormat, readWrite);
             // TODO: How to handle MSAA for XR in older versions?  Query cam?      
+#endif
+        }
+
+        public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, 
+                                                        RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int dimScaler = 1)
+        {
+#if UNITY_2017_2_OR_NEWER
+            var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
+            if (dimScaler > 1)
+            {
+                desc.width /= dimScaler;
+                desc.height /= dimScaler;
+            }
+            return RenderTexture.GetTemporary(desc);
+#else
+            int actualWidth = width;
+            int actualHeight = height 
+            if (dimScaler > 1)
+            {
+                actualWidth /= dimScaler;
+                actualHeight /= dimScaler;
+            }
+            return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
 #endif
         }
 

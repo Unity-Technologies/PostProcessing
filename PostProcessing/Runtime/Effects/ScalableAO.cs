@@ -48,14 +48,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (m_Result == null || !m_Result.IsCreated())
             {
-                var tempAORTDesc = context.GetDescriptor(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-
                 // Initial allocation
-                m_Result = new RenderTexture(tempAORTDesc)
-                {
-                    hideFlags = HideFlags.DontSave,
-                    filterMode = FilterMode.Bilinear
-                };
+                m_Result = context.GetScreenSpaceTemporaryRT(0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                m_Result.hideFlags = HideFlags.DontSave;
+                m_Result.filterMode = FilterMode.Bilinear;
+
                 reset = true;
             }
             else if (m_Result.width != context.width || m_Result.height != context.height) // TODO: convert this to RT width when I implement it
