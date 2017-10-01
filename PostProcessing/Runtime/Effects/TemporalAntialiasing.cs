@@ -2,7 +2,6 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-    // TODO: VR support
     [Serializable]
     public sealed class TemporalAntialiasing
     {
