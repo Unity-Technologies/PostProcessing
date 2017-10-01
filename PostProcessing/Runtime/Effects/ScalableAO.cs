@@ -104,7 +104,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // AO buffer
             var rtMask = ShaderIDs.OcclusionTexture1;
-            context.GetScreenSpaceTemporaryRT(cmd, rtMask, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear, kFilter, ts);
+            int scaledWidth = context.width / ts;
+            int scaledHeight = context.height / ts;
+            context.GetScreenSpaceTemporaryRT(cmd, rtMask, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear, kFilter, scaledWidth, scaledHeight);
 
             // AO estimation
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, rtMask, sheet, (int)Pass.OcclusionEstimationForward + occlusionSource);

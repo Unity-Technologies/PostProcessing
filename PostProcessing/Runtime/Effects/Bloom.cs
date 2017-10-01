@@ -100,9 +100,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            var pyramidDesc = context.GetDescriptor(0, context.sourceFormat);
-            pyramidDesc.width = Mathf.FloorToInt(pyramidDesc.width / (2f - rw));
-            pyramidDesc.height = Mathf.FloorToInt(pyramidDesc.height / (2f - rh));
+            int tw = context.width / 2;
+            int th = context.height / 2;
 
             // Determine the iteration count
             int s = Mathf.Max((Mathf.FloorToInt(context.xrSingleEyeWidth / (2f - rw))), (Mathf.FloorToInt(context.height / (2f - rh))));
@@ -130,13 +129,14 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? (int)Pass.Prefilter13 + qualityOffset
                     : (int)Pass.Downsample13 + qualityOffset;
 
-                cmd.GetTemporaryRT(mipDown, pyramidDesc, FilterMode.Bilinear);
-                cmd.GetTemporaryRT(mipUp, pyramidDesc, FilterMode.Bilinear);
+                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+
                 cmd.BlitFullscreenTriangle(last, mipDown, sheet, pass);
 
                 last = mipDown;
-                pyramidDesc.width = Mathf.Max(pyramidDesc.width / 2, 1);
-                pyramidDesc.height = Mathf.Max(pyramidDesc.height / 2, 1);
+                tw = Mathf.Max(tw / 2, 1);
+                th = Mathf.Max(th / 2, 1);
             }
 
             // Upsample

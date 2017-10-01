@@ -95,15 +95,16 @@ namespace UnityEngine.Rendering.PostProcessing
             return Mathf.Min(0.05f, radiusInPixels / screenHeight);
         }
 
-        RenderTexture CheckHistory(int eye, int id, RenderTextureDescriptor requestedDesc)
+        RenderTexture CheckHistory(int eye, int id, PostProcessRenderContext context, RenderTextureFormat format)
         {
             var rt = m_CoCHistoryTextures[eye][id];
 
-            if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != requestedDesc.width || rt.height != requestedDesc.height)
+            if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != context.width || rt.height != context.height)
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                rt = RenderTexture.GetTemporary(requestedDesc);
+                // TODO: The CoCCalculation CoCTex uses RenderTextureReadWrite.Linear, why isn't this?
+                rt = context.GetScreenSpaceTemporaryRT(0, format);
                 rt.name = "CoC History, Eye: " + eye + ", ID: " + id;
                 rt.filterMode = FilterMode.Bilinear;
                 rt.Create();
@@ -124,11 +125,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 cocFormat = SelectFormat(RenderTextureFormat.RHalf, RenderTextureFormat.Default);
             #endif
 
-            var colorDesc = context.GetDescriptor(0, colorFormat);
-            colorDesc.width /= 2;
-            colorDesc.height /= 2;
-            var cocDesc = context.GetDescriptor(0, cocFormat, RenderTextureReadWrite.Linear);
-
             // Material setup
             var f = settings.focalLength.value / 1000f;
             var s1 = Mathf.Max(settings.focusDistance.value, f);
@@ -148,7 +144,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BeginSample("DepthOfField");
 
             // CoC calculation pass
-            cmd.GetTemporaryRT(ShaderIDs.CoCTex, cocDesc, FilterMode.Bilinear);
+            context.GetScreenSpaceTemporaryRT(cmd, ShaderIDs.CoCTex, 0, cocFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, ShaderIDs.CoCTex, sheet, (int)Pass.CoCCalculation);
 
             // CoC temporal filter pass when TAA is enabled
@@ -161,10 +157,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 sheet.properties.SetVector(ShaderIDs.TaaParams, new Vector3(jitter.x, jitter.y, blend));
 
                 int pp = m_HistoryPingPong[context.xrActiveEye];
-                // Original CoCTex spec uses RenderTextureReadWrite.Linear, but these CoCHistoryTextures
-                // were using Default, which is inconsistent.
-                var historyRead = CheckHistory(context.xrActiveEye, ++pp % 2, cocDesc);
-                var historyWrite = CheckHistory(context.xrActiveEye, ++pp % 2, cocDesc);
+                var historyRead = CheckHistory(context.xrActiveEye, ++pp % 2, context, cocFormat);
+                var historyWrite = CheckHistory(context.xrActiveEye, ++pp % 2, context, cocFormat);
                 m_HistoryPingPong[context.xrActiveEye] = ++pp % 2;
 
                 cmd.BlitFullscreenTriangle(historyRead, historyWrite, sheet, (int)Pass.CoCTemporalFilter);
@@ -173,11 +167,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Downsampling and prefiltering pass
-            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTex, colorDesc, FilterMode.Bilinear);
+            context.GetScreenSpaceTemporaryRT(cmd, ShaderIDs.DepthOfFieldTex, 0, colorFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, context.width / 2, context.height / 2);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.DepthOfFieldTex, sheet, (int)Pass.DownsampleAndPrefilter);
 
             // Bokeh simulation pass
-            cmd.GetTemporaryRT(ShaderIDs.DepthOfFieldTemp, colorDesc, FilterMode.Bilinear);
+            context.GetScreenSpaceTemporaryRT(cmd, ShaderIDs.DepthOfFieldTemp, 0, colorFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, context.width / 2, context.height / 2);
             cmd.BlitFullscreenTriangle(ShaderIDs.DepthOfFieldTex, ShaderIDs.DepthOfFieldTemp, sheet, (int)Pass.BokehSmallKernel + (int)settings.kernelSize.value);
 
             // Postfilter pass

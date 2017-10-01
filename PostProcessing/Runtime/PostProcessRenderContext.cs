@@ -104,7 +104,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
 #if UNITY_2017_2_OR_NEWER
         private RenderTextureDescriptor m_sourceDescriptor;
-        public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        private RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
             var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
                                                                                 m_sourceDescriptor.colorFormat, depthBufferBits);
@@ -130,48 +130,48 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void GetScreenSpaceTemporaryRT(CommandBuffer cmd, int nameID, 
                                             int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default,
-                                            FilterMode filter = FilterMode.Bilinear, int dimScaler = 1)
+                                            FilterMode filter = FilterMode.Bilinear, int widthOverride = 0, int heightOverride = 0)
         {
 #if UNITY_2017_2_OR_NEWER
             var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
-            if (dimScaler > 1)
-            {
-                desc.width /= dimScaler;
-                desc.height /= dimScaler;
-            }
+            if (widthOverride > 0)
+                desc.width = widthOverride;
+            if (heightOverride > 0)
+                desc.height = heightOverride;
+
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
             int actualWidth = width;
-            int actualHeight = height 
-            if (dimScaler > 1)
-            {
-                actualWidth /= dimScaler;
-                actualHeight /= dimScaler;
-            }
-            cmd.GetTemporaryRT(nameID, width, height, depthBufferBits, filter, colorFormat, readWrite);
+            int actualHeight = height;
+            if (widthOverride > 0)
+                actualWidth = widthOverride;
+            if (heightOverride > 0)
+                actualHeight = heightOverride;
+
+            cmd.GetTemporaryRT(nameID, actualWidth, actualHeight, depthBufferBits, filter, colorFormat, readWrite);
             // TODO: How to handle MSAA for XR in older versions?  Query cam?      
 #endif
         }
 
         public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, 
-                                                        RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int dimScaler = 1)
+                                                        RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int widthOverride = 0, int heightOverride = 0)
         {
 #if UNITY_2017_2_OR_NEWER
             var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
-            if (dimScaler > 1)
-            {
-                desc.width /= dimScaler;
-                desc.height /= dimScaler;
-            }
+            if (widthOverride > 0)
+                desc.width = widthOverride;
+            if (heightOverride > 0)
+                desc.height = heightOverride;
+
             return RenderTexture.GetTemporary(desc);
 #else
             int actualWidth = width;
             int actualHeight = height 
-            if (dimScaler > 1)
-            {
-                actualWidth /= dimScaler;
-                actualHeight /= dimScaler;
-            }
+            if (widthOverride > 0)
+                actualWidth = widthOverride;
+            if (heightOverride > 0)
+                actualHeight = heightOverride;
+
             return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
 #endif
         }
