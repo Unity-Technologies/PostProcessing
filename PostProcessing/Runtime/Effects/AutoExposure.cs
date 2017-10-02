@@ -97,10 +97,10 @@ namespace UnityEngine.Rendering.PostProcessing
             settings.maxLuminance.value = Mathf.Max(minLum, maxLum);
 
             // Compute auto exposure
-            sheet.properties.SetBuffer(ShaderIDs.HistogramBuffer, context.logHistogram.data); // bind stereo buffer
+            sheet.properties.SetBuffer(ShaderIDs.HistogramBuffer, context.logHistogram.data);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(lowPercent * 0.01f, highPercent * 0.01f, RuntimeUtilities.Exp2(settings.minLuminance.value), RuntimeUtilities.Exp2(settings.maxLuminance.value)));
             sheet.properties.SetVector(ShaderIDs.Speed, new Vector2(settings.speedDown.value, settings.speedUp.value));
-            sheet.properties.SetVector(ShaderIDs.ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context)); // get per-eye adjusted values
+            sheet.properties.SetVector(ShaderIDs.ScaleOffsetRes, context.logHistogram.GetHistogramScaleOffsetRes(context));
             sheet.properties.SetFloat(ShaderIDs.ExposureCompensation, settings.keyValue.value);
 
             if (m_ResetHistory || !Application.isPlaying)
@@ -110,7 +110,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_CurrentAutoExposure = m_AutoExposurePool[context.xrActiveEye][0];
                 cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_CurrentAutoExposure, sheet, (int)EyeAdaptation.Fixed);
 
-                //// Copy current exposure to the other pingpong target to avoid adapting from black
+                // Copy current exposure to the other pingpong target to avoid adapting from black
                 RuntimeUtilities.CopyTexture(cmd, m_AutoExposurePool[context.xrActiveEye][0], m_AutoExposurePool[context.xrActiveEye][1]);
 
                 m_ResetHistory = false;

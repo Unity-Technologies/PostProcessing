@@ -55,7 +55,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 reset = true;
             }
-            else if (m_Result.width != context.width || m_Result.height != context.height) // TODO: convert this to RT width when I implement it
+            else if (m_Result.width != context.width || m_Result.height != context.height)
             {
                 // Release and reallocate
                 m_Result.Release();
