@@ -43,8 +43,8 @@ namespace UnityEngine.Rendering.PostProcessing
                     if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
-                    xrSingleEyeWidth = XRSettings.eyeTextureWidth;
-                    xrSingleEyeHeight = XRSettings.eyeTextureHeight;
+                    screenWidth = XRSettings.eyeTextureWidth;
+                    screenHeight = XRSettings.eyeTextureHeight;
                 }
                 else
                 {
@@ -55,8 +55,8 @@ namespace UnityEngine.Rendering.PostProcessing
                     m_sourceDescriptor.width = width;
                     m_sourceDescriptor.height = height;
 #endif
-                    xrSingleEyeWidth = width;
-                    xrSingleEyeHeight = height;
+                    screenWidth = width;
+                    screenHeight = height;
                 }
             }
         }
@@ -101,6 +101,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Current camera height in pixels
         public int height { get; private set; }
+
+        // TODO: Change w/h name to texture w/h in order to make
+        // size usages explicit
 
 #if UNITY_2017_2_OR_NEWER
         private RenderTextureDescriptor m_sourceDescriptor;
@@ -179,11 +182,10 @@ namespace UnityEngine.Rendering.PostProcessing
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
 
-        // Current single eye width in pixels (for XR)
-        public int xrSingleEyeWidth { get; private set; }
+        // Pixel dimensions of logical screen size
+        public int screenWidth { get; private set; }
 
-        // Current single eye height in pixels (for XR)
-        public int xrSingleEyeHeight { get; private set; }
+        public int screenHeight { get; private set; }
 
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
@@ -206,8 +208,8 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
-            xrSingleEyeWidth = 0;
-            xrSingleEyeHeight = 0;
+            screenWidth = 0;
+            screenHeight = 0;
 
             command = null;
             source = 0;

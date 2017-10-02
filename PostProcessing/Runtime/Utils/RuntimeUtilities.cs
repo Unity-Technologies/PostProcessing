@@ -425,8 +425,8 @@ namespace UnityEngine.Rendering.PostProcessing
             float vertFov = Math.Abs(planes.top) + Math.Abs(planes.bottom);
             float horizFov = Math.Abs(planes.left) + Math.Abs(planes.right);
 
-            var planeJitter = new Vector2(jitter.x * horizFov / context.xrSingleEyeWidth,
-                                          jitter.y * vertFov / context.height);
+            var planeJitter = new Vector2(jitter.x * horizFov / context.screenWidth,
+                                          jitter.y * vertFov / context.screenHeight);
 
             planes.left += planeJitter.x;
             planes.right += planeJitter.x;

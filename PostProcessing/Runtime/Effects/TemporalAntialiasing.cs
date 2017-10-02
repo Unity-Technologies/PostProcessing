@@ -130,7 +130,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // jitter has to be scaled for the actual eye texture size, not just the intermediate texture size
             // which could be double-wide in certain stereo rendering scenarios
-            jitter = new Vector2(jitter.x / context.xrSingleEyeWidth, jitter.y / context.height);
+            jitter = new Vector2(jitter.x / context.screenWidth, jitter.y / context.screenHeight);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
 #endif
         }
