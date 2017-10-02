@@ -100,20 +100,22 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Texture setup
             int ts = downsampling ? 2 : 1;
+            const RenderTextureFormat kFormat = RenderTextureFormat.ARGB32;
+            const RenderTextureReadWrite kRWMode = RenderTextureReadWrite.Linear;
             const FilterMode kFilter = FilterMode.Bilinear;
 
             // AO buffer
             var rtMask = ShaderIDs.OcclusionTexture1;
             int scaledWidth = context.width / ts;
             int scaledHeight = context.height / ts;
-            context.GetScreenSpaceTemporaryRT(cmd, rtMask, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear, kFilter, scaledWidth, scaledHeight);
+            context.GetScreenSpaceTemporaryRT(cmd, rtMask, 0, kFormat, kRWMode, kFilter, scaledWidth, scaledHeight);
 
             // AO estimation
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, rtMask, sheet, (int)Pass.OcclusionEstimationForward + occlusionSource);
 
             // Blur buffer
             var rtBlur = ShaderIDs.OcclusionTexture2;
-            context.GetScreenSpaceTemporaryRT(cmd, rtBlur, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear, kFilter);
+            context.GetScreenSpaceTemporaryRT(cmd, rtBlur, 0, kFormat, kRWMode, kFilter);
 
             // Separable blur (horizontal pass)
             cmd.BlitFullscreenTriangle(rtMask, rtBlur, sheet, (int)Pass.HorizontalBlurForward + occlusionSource);
