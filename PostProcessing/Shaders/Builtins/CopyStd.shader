@@ -41,7 +41,6 @@ Shader "Hidden/PostProcessing/CopyStd"
 
             o.texcoord = o.texcoord * _MainTex_ST.xy + _MainTex_ST.zw; // We need this for VR
 
-
             return o;
         }
 

@@ -164,7 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
+                rt = context.GetScreenSpaceTemporaryRT(0, context.sourceFormat);
                 GenerateHistoryName(rt, id, context);
 
                 rt.filterMode = FilterMode.Bilinear;
@@ -176,7 +176,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
-                var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
+                var rt2 = context.GetScreenSpaceTemporaryRT(0, context.sourceFormat);
                 GenerateHistoryName(rt2, id, context);
 
                 rt2.filterMode = FilterMode.Bilinear;
