@@ -405,7 +405,7 @@ half4 FragBlur(VaryingsMultitex i) : SV_Target
 // Gamma encoding (only needed in gamma lighting mode)
 half EncodeAO(half x)
 {
-    half x_g = 1.0 - max(1.055 * pow(1.0 - x, 0.416666667) - 0.055, 0.0);
+    half x_g = 1.0 - max(1.055 * pow(1.0 - saturate(x), 0.416666667) - 0.055, 0.0);
     // ColorSpaceLuminance.w == 0 (gamma) or 1 (linear)
     return lerp(x_g, x, unity_ColorSpaceLuminance.w);
 }
