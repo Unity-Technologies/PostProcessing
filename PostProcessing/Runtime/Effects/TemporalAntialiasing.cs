@@ -139,15 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             rt.name = "Temporal Anti-aliasing History id #" + id;
 
-            bool vrDeviceActive = false;
-
-#if UNITY_2017_2_OR_NEWER
-            vrDeviceActive = XR.XRSettings.isDeviceActive;
-#else
-            vrDeviceActive = VR.VRSettings.isDeviceActive;
-#endif
-
-            if (vrDeviceActive)
+            if (context.stereoActive)
                 rt.name += " for eye " + context.xrActiveEye;
         }
 

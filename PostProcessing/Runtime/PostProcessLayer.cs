@@ -272,7 +272,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
-            if (XRSettings.isDeviceActive)
+            if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
                 Shader.SetGlobalFloat("rvsGlobal", XRSettings.renderViewportScale);
@@ -434,7 +434,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera.ResetProjectionMatrix();
 
-                if (XRSettings.isDeviceActive)
+                if (m_CurrentContext.stereoActive)
                 {
                     if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         m_Camera.ResetStereoProjectionMatrices();
@@ -618,7 +618,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (!RuntimeUtilities.scriptableRenderPipelineActive)
                 {
-                    if (XRSettings.isDeviceActive)
+                    if (context.stereoActive)
                     {
                         // We only need to configure all of this once for stereo, during OnPreCull
                         if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)

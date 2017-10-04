@@ -23,7 +23,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
-                if (XRSettings.isDeviceActive)
+                if (m_Camera.stereoEnabled)
                 {
 #if UNITY_2017_2_OR_NEWER
                     var xrDesc = XRSettings.eyeTextureDesc;
@@ -40,11 +40,12 @@ namespace UnityEngine.Rendering.PostProcessing
                     height = XRSettings.eyeTextureHeight;
 #endif
 
-                    if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                    if (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
+                    stereoActive = true;
                 }
                 else
                 {
@@ -57,6 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
                     screenWidth = width;
                     screenHeight = height;
+                    stereoActive = false;
                 }
             }
         }
@@ -152,7 +154,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 actualHeight = heightOverride;
 
             cmd.GetTemporaryRT(nameID, actualWidth, actualHeight, depthBufferBits, filter, colorFormat, readWrite);
-            // TODO: How to handle MSAA for XR in older versions?  Query cam?      
+            // TODO: How to handle MSAA for XR in older versions?  Query cam?
+            // TODO: Pass in vrUsage into the args 
 #endif
         }
 
@@ -178,6 +181,8 @@ namespace UnityEngine.Rendering.PostProcessing
             return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
 #endif
         }
+
+        public bool stereoActive { get; private set; }
 
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
@@ -207,6 +212,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
 #endif
 
+            stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
             screenWidth = 0;
             screenHeight = 0;
