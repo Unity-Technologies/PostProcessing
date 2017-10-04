@@ -199,6 +199,8 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
 
+            // TODO: Account for different possible RenderViewportScale value from previous frame...
+
             int pass = context.camera.orthographic ? (int)Pass.SolverNoDilate : (int)Pass.SolverDilate;
             m_Mrt[0] = context.destination;
             m_Mrt[1] = historyWrite;

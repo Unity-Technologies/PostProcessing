@@ -36,6 +36,11 @@ float4 UnityStereoScreenSpaceUVAdjust(float4 uv, float4 scaleAndOffset)
     return float4(UnityStereoScreenSpaceUVAdjust(uv.xy, scaleAndOffset), UnityStereoScreenSpaceUVAdjust(uv.zw, scaleAndOffset));
 }
 
+float2 UnityStereoClampScaleOffset(float2 uv, float4 scaleAndOffset)
+{
+    return clamp(uv, scaleAndOffset.zw, scaleAndOffset.zw + scaleAndOffset.xy);
+}
+
 #if defined(UNITY_SINGLE_PASS_STEREO)
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
 {
@@ -54,15 +59,11 @@ float4 UnityStereoTransformScreenSpaceTex(float4 uv)
     return float4(UnityStereoTransformScreenSpaceTex(uv.xy), UnityStereoTransformScreenSpaceTex(uv.zw));
 }
 
-float2 UnityStereoClampScaleOffset(float2 uv, float4 scaleAndOffset)
-{
-    return float2(clamp(uv.x, scaleAndOffset.z, scaleAndOffset.z + scaleAndOffset.x), uv.y);
-}
-
 float2 UnityStereoClamp(float2 uv)
 {
-    // TODO: Factor in RVS?
-    return UnityStereoClampScaleOffset(uv, unity_StereoScaleOffset[unity_StereoEyeIndex]);
+    float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
+    scaleOffset.xy *= rvsGlobal;
+    return UnityStereoClampScaleOffset(uv, scaleOffset);
 }
 #else
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
@@ -75,8 +76,11 @@ float2 UnityStereoTransformScreenSpaceTex(float2 uv)
     return TransformStereoScreenSpaceTex(saturate(uv), 1.0);
 }
 
-#define UnityStereoClampScaleOffset(uv, scaleAndOffset) uv
-#define UnityStereoClamp(uv) uv
+float2 UnityStereoClamp(float2 uv)
+{
+    float4 scaleOffset = float4(rvsGlobal, rvsGlobal, 0.f, 0.f);
+    return UnityStereoClampScaleOffset(uv, scaleOffset);
+}
 #endif
 
 #endif // UNITY_POSTFX_XRLIB
