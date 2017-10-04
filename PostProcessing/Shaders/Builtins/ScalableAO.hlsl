@@ -345,7 +345,7 @@ float4 FragBlur(VaryingsDefault i) : SV_Target
 half EncodeAO(half x)
 {
     #if UNITY_COLORSPACE_GAMMA
-        return 1.0 - max(LinearToSRGB(1.0 - x), 0.0);
+        return 1.0 - max(LinearToSRGB(1.0 - saturate(x)), 0.0);
     #else
         return x;
     #endif
