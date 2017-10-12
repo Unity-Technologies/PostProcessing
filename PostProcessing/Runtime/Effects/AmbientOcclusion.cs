@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
     public sealed class AmbientOcclusion : PostProcessEffectSettings
     {
         // Shared parameters
-        [Tooltip("The ambient occlusion method to use. \"Modern\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
+        [Tooltip("The ambient occlusion method to use. \"MSVO\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
         public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.MultiScaleVolumetricObscurance };
 
         [Range(0f, 4f), Tooltip("Degree of darkness added by ambient occlusion.")]
@@ -63,11 +63,23 @@ namespace UnityEngine.Rendering.PostProcessing
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             bool state = enabled.value
-                && intensity.value > 0f
-                && !RuntimeUtilities.scriptableRenderPipelineActive;
+                && intensity.value > 0f;
 
-            if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-                state &= SystemInfo.supportsComputeShaders && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat);
+            if (mode.value == AmbientOcclusionMode.ScalableAmbientObscurance)
+            {
+                state &= !RuntimeUtilities.scriptableRenderPipelineActive;
+            }
+            else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
+            {
+#if UNITY_2017_1_OR_NEWER
+                state &= SystemInfo.supportsComputeShaders
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf)
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.R8);
+#else
+                state = false;
+#endif
+            }
 
             return state;
         }
@@ -104,6 +116,13 @@ namespace UnityEngine.Rendering.PostProcessing
             return settings.ambientOnly.value
                 && camera.actualRenderingPath == RenderingPath.DeferredShading
                 && camera.allowHDR;
+        }
+
+        // This is a special case we need for SRP support on MSVO as we won't be able to rely on
+        // the context object passed around (it won't be defined by the time AO is rendered)
+        internal void SetResources(PostProcessResources resources)
+        {
+            ((MultiScaleVO)m_Methods[1]).SetResources(resources);
         }
 
         public IAmbientOcclusionMethod Get()

@@ -119,6 +119,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             debugLayer.OnEnable();
 
+            // Special case to enable AO usage in SRPs
+            GetBundle<AmbientOcclusion>()
+                .CastRenderer<AmbientOcclusionRenderer>()
+                .SetResources(m_Resources);
+
             // Scriptable render pipelines handle their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
