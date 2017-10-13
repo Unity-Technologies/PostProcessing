@@ -119,11 +119,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             debugLayer.OnEnable();
 
-            // Special case to enable AO usage in SRPs
-            GetBundle<AmbientOcclusion>()
-                .CastRenderer<AmbientOcclusionRenderer>()
-                .SetResources(m_Resources);
-
             // Scriptable render pipelines handle their own command buffers
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
@@ -347,7 +342,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.command = m_LegacyCmdBufferOpaque;
                 aoRenderer.Get().RenderAfterOpaque(context);
             }
-            
+
             bool isFogActive = fog.IsEnabledAndSupported(context);
             bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
             int opaqueOnlyEffects = 0;
@@ -440,16 +435,30 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
-        PostProcessBundle GetBundle<T>()
+        public PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
         {
             return GetBundle(typeof(T));
         }
 
-        PostProcessBundle GetBundle(Type settingsType)
+        public PostProcessBundle GetBundle(Type settingsType)
         {
             Assert.IsTrue(m_Bundles.ContainsKey(settingsType), "Invalid type");
             return m_Bundles[settingsType];
+        }
+
+        public T GetSettings<T>()
+            where T : PostProcessEffectSettings
+        {
+            return GetBundle<T>().CastSettings<T>();
+        }
+
+        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        {
+            var bundle = GetBundle<AmbientOcclusion>();
+            var renderer = bundle.CastRenderer<AmbientOcclusionRenderer>().GetMultiScaleVO();
+            renderer.SetResources(m_Resources);
+            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert);
         }
 
         internal void OverrideSettings(List<PostProcessEffectSettings> baseSettings, float interpFactor)

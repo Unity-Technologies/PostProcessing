@@ -20,6 +20,7 @@
 //
 
 #pragma kernel main MAIN=main
+#pragma kernel main_invert MAIN=main_invert INVERT
 #pragma kernel main_premin MAIN=main_premin COMBINE_LOWER_RESOLUTIONS
 #pragma kernel main_blendout MAIN=main_blendout BLEND_WITH_HIGHER_RESOLUTION
 #pragma kernel main_premin_blendout MAIN=main_premin_blendout COMBINE_LOWER_RESOLUTIONS BLEND_WITH_HIGHER_RESOLUTION
@@ -228,8 +229,16 @@ void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
     float4 HiDepths = HiResDB.Gather(samplerHiResDB, UV1);
 
     int2 OutST = DTid.xy << 1;
+
+#ifdef INVERT
+    AoResult[OutST + int2(-1,  0)] = 1.0 - BilateralUpsample(HiDepths.x, HiSSAOs.x, LoDepths.xyzw, LoSSAOs.xyzw);
+    AoResult[OutST + int2( 0,  0)] = 1.0 - BilateralUpsample(HiDepths.y, HiSSAOs.y, LoDepths.yzwx, LoSSAOs.yzwx);
+    AoResult[OutST + int2( 0, -1)] = 1.0 - BilateralUpsample(HiDepths.z, HiSSAOs.z, LoDepths.zwxy, LoSSAOs.zwxy);
+    AoResult[OutST + int2(-1, -1)] = 1.0 - BilateralUpsample(HiDepths.w, HiSSAOs.w, LoDepths.wxyz, LoSSAOs.wxyz);
+#else
     AoResult[OutST + int2(-1,  0)] = BilateralUpsample(HiDepths.x, HiSSAOs.x, LoDepths.xyzw, LoSSAOs.xyzw);
     AoResult[OutST + int2( 0,  0)] = BilateralUpsample(HiDepths.y, HiSSAOs.y, LoDepths.yzwx, LoSSAOs.yzwx);
     AoResult[OutST + int2( 0, -1)] = BilateralUpsample(HiDepths.z, HiSSAOs.z, LoDepths.zwxy, LoSSAOs.zwxy);
     AoResult[OutST + int2(-1, -1)] = BilateralUpsample(HiDepths.w, HiSSAOs.w, LoDepths.wxyz, LoSSAOs.wxyz);
+#endif
 }

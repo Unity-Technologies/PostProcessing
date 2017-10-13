@@ -42,7 +42,7 @@ namespace UnityEngine.Rendering.PostProcessing
         readonly int[] m_Widths = new int[7];
         readonly int[] m_Heights = new int[7];
 
-        readonly AmbientOcclusion m_Settings;
+        AmbientOcclusion m_Settings;
         PropertySheet m_PropertySheet;
         PostProcessResources m_Resources;
 
@@ -68,7 +68,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Special case for AO [because SRPs], please don't do this in other effects, it's bad
         // practice in this framework
-        internal void SetResources(PostProcessResources resources)
+        public void SetResources(PostProcessResources resources)
         {
             m_Resources = resources;
         }
@@ -141,7 +141,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return new Vector3(m_Widths[(int)mip], m_Heights[(int)mip], 16);
         }
 
-        void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap)
+        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
         {
             // Base size
             m_Widths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
@@ -170,7 +170,7 @@ namespace UnityEngine.Rendering.PostProcessing
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth4, ShaderIDs.Occlusion4, ShaderIDs.LowDepth3,   ShaderIDs.Occlusion3, ShaderIDs.Combined3, GetSize(MipLevel.L4), GetSize(MipLevel.L3));
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth3, ShaderIDs.Combined3,  ShaderIDs.LowDepth2,   ShaderIDs.Occlusion2, ShaderIDs.Combined2, GetSize(MipLevel.L3), GetSize(MipLevel.L2));
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth2, ShaderIDs.Combined2,  ShaderIDs.LowDepth1,   ShaderIDs.Occlusion1, ShaderIDs.Combined1, GetSize(MipLevel.L2), GetSize(MipLevel.L1));
-            PushUpsampleCommands(cmd, ShaderIDs.LowDepth1, ShaderIDs.Combined1,  ShaderIDs.LinearDepth, null,                 destination,         GetSize(MipLevel.L1), GetSize(MipLevel.Original));
+            PushUpsampleCommands(cmd, ShaderIDs.LowDepth1, ShaderIDs.Combined1,  ShaderIDs.LinearDepth, null,                 destination,         GetSize(MipLevel.L1), GetSize(MipLevel.Original), invert);
 
             // Cleanup
             PushReleaseCommands(cmd);
@@ -189,12 +189,12 @@ namespace UnityEngine.Rendering.PostProcessing
             AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RHalf, true);
             AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RHalf, true);
             AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RHalf, true);
-            
+
             Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.R8, true);
             Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.R8, true);
             Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.R8, true);
             Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.R8, true);
-            
+
             Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.R8, true);
             Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.R8, true);
             Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.R8, true);
@@ -345,10 +345,14 @@ namespace UnityEngine.Rendering.PostProcessing
             );
         }
 
-        void PushUpsampleCommands(CommandBuffer cmd, int lowResDepth, int interleavedAO, int highResDepth, int? highResAO, RenderTargetIdentifier dest, Vector3 lowResDepthSize, Vector2 highResDepthSize)
+        void PushUpsampleCommands(CommandBuffer cmd, int lowResDepth, int interleavedAO, int highResDepth, int? highResAO, RenderTargetIdentifier dest, Vector3 lowResDepthSize, Vector2 highResDepthSize, bool invert = false)
         {
             var cs = m_Resources.computeShaders.multiScaleAOUpsample;
-            int kernel = cs.FindKernel(highResAO == null ? "main" : "main_blendout");
+            int kernel = cs.FindKernel(highResAO == null
+                ? invert
+                    ? "main_invert"
+                    : "main"
+                : "main_blendout");
 
             float stepSize = 1920f / lowResDepthSize.x;
             float bTolerance = 1f - Mathf.Pow(10f, m_Settings.blurTolerance.value) * stepSize;
@@ -377,22 +381,22 @@ namespace UnityEngine.Rendering.PostProcessing
         void PushReleaseCommands(CommandBuffer cmd)
         {
             Release(cmd, ShaderIDs.LinearDepth);
-            
+
             Release(cmd, ShaderIDs.LowDepth1);
             Release(cmd, ShaderIDs.LowDepth1);
             Release(cmd, ShaderIDs.LowDepth1);
             Release(cmd, ShaderIDs.LowDepth1);
-            
+
             Release(cmd, ShaderIDs.TiledDepth1);
             Release(cmd, ShaderIDs.TiledDepth2);
             Release(cmd, ShaderIDs.TiledDepth3);
             Release(cmd, ShaderIDs.TiledDepth4);
-            
+
             Release(cmd, ShaderIDs.Occlusion1);
             Release(cmd, ShaderIDs.Occlusion2);
             Release(cmd, ShaderIDs.Occlusion3);
             Release(cmd, ShaderIDs.Occlusion4);
-            
+
             Release(cmd, ShaderIDs.Combined1);
             Release(cmd, ShaderIDs.Combined2);
             Release(cmd, ShaderIDs.Combined3);
@@ -432,6 +436,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion");
+            SetResources(context.resources);
             PreparePropertySheet(context);
             CheckAOTexture(context);
 
@@ -446,7 +451,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 );
             }
 
-            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null);
+            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false);
             PushDebug(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_AmbientOnlyAO);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward);
@@ -457,9 +462,10 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             var cmd = context.command;
             cmd.BeginSample("Ambient Occlusion Render");
+            SetResources(context.resources);
             PreparePropertySheet(context);
             CheckAOTexture(context);
-            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null);
+            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false);
             PushDebug(context);
             cmd.EndSample("Ambient Occlusion Render");
         }
@@ -494,6 +500,10 @@ namespace UnityEngine.Rendering.PostProcessing
         public DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.None;
+        }
+
+        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        {
         }
 
         public void RenderAfterOpaque(PostProcessRenderContext context)

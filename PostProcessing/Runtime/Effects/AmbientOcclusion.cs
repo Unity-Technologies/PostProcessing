@@ -118,13 +118,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 && camera.allowHDR;
         }
 
-        // This is a special case we need for SRP support on MSVO as we won't be able to rely on
-        // the context object passed around (it won't be defined by the time AO is rendered)
-        internal void SetResources(PostProcessResources resources)
-        {
-            ((MultiScaleVO)m_Methods[1]).SetResources(resources);
-        }
-
         public IAmbientOcclusionMethod Get()
         {
             return m_Methods[(int)settings.mode.value];
@@ -139,6 +132,16 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             foreach (var m in m_Methods)
                 m.Release();
+        }
+
+        public ScalableAO GetScalableAO()
+        {
+            return (ScalableAO)m_Methods[(int)AmbientOcclusionMode.ScalableAmbientObscurance];
+        }
+
+        public MultiScaleVO GetMultiScaleVO()
+        {
+            return (MultiScaleVO)m_Methods[(int)AmbientOcclusionMode.MultiScaleVolumetricObscurance];
         }
 
         // Unused
