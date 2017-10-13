@@ -53,6 +53,10 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(1f, 10f), Tooltip("Modifies thickness of occluders. This increases dark areas but also introduces dark halo around objects.")]
         public FloatParameter thicknessModifier = new FloatParameter { value = 1f };
 
+        // HDRP-only parameters
+        [Range(0f, 1f), Tooltip("")]
+        public FloatParameter directLightingStrength = new FloatParameter { value = 0f };
+
         // SAO-only parameters
         [Tooltip("Radius of sample points, which affects extent of darkened areas.")]
         public FloatParameter radius = new FloatParameter { value = 0.25f };
