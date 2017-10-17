@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
     public sealed class AmbientOcclusion : PostProcessEffectSettings
     {
         // Shared parameters
-        [Tooltip("The ambient occlusion method to use. \"Modern\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
+        [Tooltip("The ambient occlusion method to use. \"MSVO\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
         public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.MultiScaleVolumetricObscurance };
 
         [Range(0f, 4f), Tooltip("Degree of darkness added by ambient occlusion.")]
@@ -53,6 +53,10 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(1f, 10f), Tooltip("Modifies thickness of occluders. This increases dark areas but also introduces dark halo around objects.")]
         public FloatParameter thicknessModifier = new FloatParameter { value = 1f };
 
+        // HDRP-only parameters
+        [Range(0f, 1f), Tooltip("")]
+        public FloatParameter directLightingStrength = new FloatParameter { value = 0f };
+
         // SAO-only parameters
         [Tooltip("Radius of sample points, which affects extent of darkened areas.")]
         public FloatParameter radius = new FloatParameter { value = 0.25f };
@@ -63,11 +67,23 @@ namespace UnityEngine.Rendering.PostProcessing
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             bool state = enabled.value
-                && intensity.value > 0f
-                && !RuntimeUtilities.scriptableRenderPipelineActive;
+                && intensity.value > 0f;
 
-            if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-                state &= SystemInfo.supportsComputeShaders && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat);
+            if (mode.value == AmbientOcclusionMode.ScalableAmbientObscurance)
+            {
+                state &= !RuntimeUtilities.scriptableRenderPipelineActive;
+            }
+            else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
+            {
+#if UNITY_2017_1_OR_NEWER
+                state &= SystemInfo.supportsComputeShaders
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf)
+                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.R8);
+#else
+                state = false;
+#endif
+            }
 
             return state;
         }
@@ -120,6 +136,16 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             foreach (var m in m_Methods)
                 m.Release();
+        }
+
+        public ScalableAO GetScalableAO()
+        {
+            return (ScalableAO)m_Methods[(int)AmbientOcclusionMode.ScalableAmbientObscurance];
+        }
+
+        public MultiScaleVO GetMultiScaleVO()
+        {
+            return (MultiScaleVO)m_Methods[(int)AmbientOcclusionMode.MultiScaleVolumetricObscurance];
         }
 
         // Unused

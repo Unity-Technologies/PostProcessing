@@ -11,8 +11,8 @@ namespace UnityEditor.Rendering.PostProcessing
         [MenuItem("Assets/Create/Post-processing Profile", priority = 201)]
         static void CreatePostProcessProfile()
         {
-            var icon = EditorGUIUtility.FindTexture("ScriptableObject Icon");
-            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, ScriptableObject.CreateInstance<DoCreatePostProcessProfile>(), "New Post-processing Profile.asset", icon, null);
+            //var icon = EditorGUIUtility.FindTexture("ScriptableObject Icon");
+            ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, ScriptableObject.CreateInstance<DoCreatePostProcessProfile>(), "New Post-processing Profile.asset", null, null);
         }
 
         internal static PostProcessProfile CreatePostProcessProfileAtPath(string path)

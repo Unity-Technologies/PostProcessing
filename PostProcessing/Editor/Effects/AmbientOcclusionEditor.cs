@@ -11,6 +11,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_Color;
         SerializedParameterOverride m_AmbientOnly;
         SerializedParameterOverride m_ThicknessModifier;
+        SerializedParameterOverride m_DirectLightingStrength;
         SerializedParameterOverride m_Quality;
         SerializedParameterOverride m_Radius;
 
@@ -21,22 +22,31 @@ namespace UnityEditor.Rendering.PostProcessing
             m_Color = FindParameterOverride(x => x.color);
             m_AmbientOnly = FindParameterOverride(x => x.ambientOnly);
             m_ThicknessModifier = FindParameterOverride(x => x.thicknessModifier);
+            m_DirectLightingStrength = FindParameterOverride(x => x.directLightingStrength);
             m_Quality = FindParameterOverride(x => x.quality);
             m_Radius = FindParameterOverride(x => x.radius);
         }
 
         public override void OnInspectorGUI()
         {
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
+            int aoMode = m_Mode.value.intValue;
+
+            if (RuntimeUtilities.scriptableRenderPipelineActive && aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
             {
-                EditorGUILayout.HelpBox("This effect doesn't work with scriptable render pipelines yet.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Scalable ambient obscurance doesn't work with scriptable render pipelines.", MessageType.Warning);
                 return;
             }
 
+#if !UNITY_2017_1_OR_NEWER
+            if (aoMode == (int)AmbientOcclusionMode.MultiScaleVolumetricObscurance)
+            {
+                EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires Unity 2017.1 or more.", MessageType.Warning);
+                return;
+            }
+#endif
+
             PropertyField(m_Mode);
             PropertyField(m_Intensity);
-
-            int aoMode = m_Mode.value.intValue;
 
             if (aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
             {
@@ -49,8 +59,11 @@ namespace UnityEditor.Rendering.PostProcessing
                     EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires compute shader support.", MessageType.Warning);
 
                 PropertyField(m_ThicknessModifier);
+
+                if (RuntimeUtilities.scriptableRenderPipelineActive)
+                    PropertyField(m_DirectLightingStrength);
             }
-            
+
             PropertyField(m_Color);
 
             if (Camera.main != null && Camera.main.actualRenderingPath == RenderingPath.DeferredShading && Camera.main.allowHDR)

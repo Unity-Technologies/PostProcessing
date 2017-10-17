@@ -7,13 +7,24 @@ namespace UnityEditor.Rendering.PostProcessing
 {
     sealed class CubeLutAssetImporter : AssetPostprocessor
     {
+        static List<string> s_Excluded = new List<string>()
+        {
+            "Linear to sRGB r1",
+            "Linear to Unity Log r1",
+            "sRGB to Linear r1",
+            "sRGB to Unity Log r1",
+            "Unity Log to Linear r1",
+            "Unity Log to sRGB r1"
+        };
+
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
             foreach (string path in imported)
             {
                 string ext = Path.GetExtension(path);
-                
-                if (string.IsNullOrEmpty(ext))
+                string filename = Path.GetFileNameWithoutExtension(path);
+
+                if (string.IsNullOrEmpty(ext) || s_Excluded.Contains(filename))
                     continue;
 
                 ext = ext.ToLowerInvariant();
