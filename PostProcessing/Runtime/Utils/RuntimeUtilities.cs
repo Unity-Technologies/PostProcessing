@@ -446,8 +446,8 @@ namespace UnityEngine.Rendering.PostProcessing
             float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
             float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
 
-            jitter.x *= tanHorizFov / context.xrSingleEyeWidth;
-            jitter.y *= tanVertFov / context.height;
+            jitter.x *= tanHorizFov / context.screenWidth;
+            jitter.y *= tanVertFov / context.screenHeight;
 
             float left = jitter.x + lTan;
             float right = jitter.x + rTan;

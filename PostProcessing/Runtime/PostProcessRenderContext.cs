@@ -172,7 +172,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return RenderTexture.GetTemporary(desc);
 #else
             int actualWidth = width;
-            int actualHeight = height 
+            int actualHeight = height;
             if (widthOverride > 0)
                 actualWidth = widthOverride;
             if (heightOverride > 0)
