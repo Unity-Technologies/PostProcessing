@@ -175,8 +175,10 @@ namespace UnityEditor.Rendering.PostProcessing
 
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
                 {
+                    #if !UNITY_2017_3_OR_NEWER
                     if (RuntimeUtilities.isSinglePassStereoEnabled)
                         EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
+                    #endif 
 
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
