@@ -116,6 +116,11 @@ namespace UnityEditor.Rendering.PostProcessing
 
             var camera = m_Target.GetComponent<Camera>();
 
+            #if !UNITY_2017_2_OR_NEWER
+            if (RuntimeUtilities.isSinglePassStereoEnabled)
+                EditorGUILayout.HelpBox("Unity 2017.2+ required for full Single-pass stereo rendering support.", MessageType.Warning);
+            #endif
+
             DoVolumeBlending();
             DoAntialiasing();
             DoFog(camera);
