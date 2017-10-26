@@ -227,15 +227,24 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+#if UNITY_EDITOR
+        public static bool isSinglePassStereoSelected
+        {
+            get
+            {
+                return UnityEditor.PlayerSettings.virtualRealitySupported
+                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+            }
+        }
+#endif
+
         // TODO: Check for SPSR support at runtime
         public static bool isSinglePassStereoEnabled
         {
             get
             {
 #if UNITY_EDITOR
-                return UnityEditor.PlayerSettings.virtualRealitySupported
-                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass
-                    && Application.isPlaying;
+                return isSinglePassStereoSelected && Application.isPlaying;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
