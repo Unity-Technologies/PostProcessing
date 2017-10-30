@@ -13,6 +13,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_MaximumMarchDistance;
         SerializedParameterOverride m_DistanceFade;
         SerializedParameterOverride m_Attenuation;
+        SerializedParameterOverride m_Vignette;
 
         public override void OnEnable()
         {
@@ -23,6 +24,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_MaximumMarchDistance = FindParameterOverride(x => x.maximumMarchDistance);
             m_DistanceFade = FindParameterOverride(x => x.distanceFade);
             m_Attenuation = FindParameterOverride(x => x.attenuation);
+            m_Vignette = FindParameterOverride(x => x.vignette);
         }
 
         public override void OnInspectorGUI()
@@ -53,6 +55,7 @@ namespace UnityEditor.Rendering.PostProcessing
             PropertyField(m_MaximumMarchDistance);
             PropertyField(m_DistanceFade);
             PropertyField(m_Attenuation);
+            PropertyField(m_Vignette);
         }
     }
 }

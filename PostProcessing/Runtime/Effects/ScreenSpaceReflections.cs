@@ -16,10 +16,10 @@ namespace UnityEngine.Rendering.PostProcessing
     }
 
     [Serializable]
-    public sealed class ScreenSpaceReflectionPresetParameter : ParameterOverride<ScreenSpaceReflectionPreset> {}
+    public sealed class ScreenSpaceReflectionPresetParameter : ParameterOverride<ScreenSpaceReflectionPreset> { }
 
     [Serializable]
-    public sealed class ScreenSpaceReflectionResolutionParameter : ParameterOverride<ScreenSpaceReflectionResolution> {}
+    public sealed class ScreenSpaceReflectionResolutionParameter : ParameterOverride<ScreenSpaceReflectionResolution> { }
 
     [Serializable]
     [PostProcess(typeof(ScreenSpaceReflectionsRenderer), "Unity/Screen-space reflections")]
@@ -45,6 +45,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         [Range(0f, 1f), Tooltip("Fades reflections close to the screen borders.")]
         public FloatParameter attenuation = new FloatParameter { value = 0.25f };
+
+        [Range(0f, 1f), Tooltip("Fades reflections close to the screen-edges.")]
+        public FloatParameter vignette = new FloatParameter { value = 0.5f };
 
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
@@ -163,6 +166,7 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetMatrix(ShaderIDs.ScreenSpaceProjectionMatrix, screenSpaceProjectionMatrix);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4(settings.attenuation.value, settings.distanceFade.value, settings.maximumMarchDistance.value, lodCount));
             sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, settings.thickness.value, settings.maximumIterationCount.value));
+            sheet.properties.SetVector(ShaderIDs.Params3, new Vector4((float)settings.vignette.value, 0.25f, 0f, 0f));
 
             cmd.GetTemporaryRT(ShaderIDs.Test, size, size, 0, FilterMode.Point, context.sourceFormat);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.Test, sheet, (int)Pass.Test);
