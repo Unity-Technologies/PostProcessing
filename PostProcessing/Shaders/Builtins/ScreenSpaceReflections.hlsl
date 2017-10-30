@@ -101,6 +101,7 @@ float Attenuate(float2 uv)
 float Vignette(float2 uv)
 {
     float2 k = abs(uv - 0.5) * SSR_VIGNETTE_INTENSITY;
+    k.x *= _MainTex_TexelSize.y * _MainTex_TexelSize.z;
     return pow(saturate(1.0 - dot(k, k)), SSR_VIGNETTE_SMOOTHNESS);
 }
 
