@@ -383,7 +383,9 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     float4 color = _MainTex.Sample(sampler_MainTex, i.texcoordStereo);
     color.rgb = max(0.0, color.rgb - reflectionProbes.rgb);
 
-    float fade = 1.0 - resolve.a * _DistanceFade;
+    resolve.a *= 2. * resolve.a; // 2 and 1.5 are quite important for the correct ratio of 3:2 distribution
+    float fade = 1.0 - saturate(1.5 * resolve.a * smoothstep(0.5, 1.0, 1.5 * resolve.a) * _DistanceFade);
+
     resolve.rgb = lerp(reflectionProbes.rgb, resolve.rgb, confidence * fade);
     color.rgb += resolve.rgb * gbuffer0.a;
 
