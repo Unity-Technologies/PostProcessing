@@ -69,9 +69,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         Vector2 GenerateRandomOffset()
         {
+            // The variance between 0 and the actual halton sequence values reveals noticeable instability
+            // in Unity's shadow maps, so we avoid index 0.
             var offset = new Vector2(
-                    HaltonSeq.Get(m_SampleIndex & 1023, 2),
-                    HaltonSeq.Get(m_SampleIndex & 1023, 3)
+                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 2) - 0.5f,
+                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 3) - 0.5f
                 );
 
             if (++m_SampleIndex >= k_SampleCount)
