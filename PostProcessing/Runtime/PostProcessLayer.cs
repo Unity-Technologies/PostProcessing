@@ -275,11 +275,11 @@ namespace UnityEngine.Rendering.PostProcessing
             if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
-                Shader.SetGlobalFloat("rvsGlobal", XRSettings.renderViewportScale);
+                Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, XRSettings.renderViewportScale);
             }
             else
             {
-                Shader.SetGlobalFloat("rvsGlobal", 1.0f);
+                Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, 1.0f);
             }
 
             BuildCommandBuffers();

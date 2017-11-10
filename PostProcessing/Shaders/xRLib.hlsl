@@ -24,7 +24,7 @@ CBUFFER_START(UnityStereoEyeIndex)
 CBUFFER_END
 #endif
 
-float rvsGlobal;
+float _RenderViewportScaleFactor;
 
 float2 UnityStereoScreenSpaceUVAdjust(float2 uv, float4 scaleAndOffset)
 {
@@ -45,7 +45,7 @@ float2 UnityStereoClampScaleOffset(float2 uv, float4 scaleAndOffset)
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
 {
     float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
-    scaleOffset.xy *= rvsGlobal;
+    scaleOffset.xy *= _RenderViewportScaleFactor;
     return uv.xy * scaleOffset.xy + scaleOffset.zw * w;
 }
 
@@ -62,13 +62,13 @@ float4 UnityStereoTransformScreenSpaceTex(float4 uv)
 float2 UnityStereoClamp(float2 uv)
 {
     float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
-    scaleOffset.xy *= rvsGlobal;
+    scaleOffset.xy *= _RenderViewportScaleFactor;
     return UnityStereoClampScaleOffset(uv, scaleOffset);
 }
 #else
 float2 TransformStereoScreenSpaceTex(float2 uv, float w)
 {
-    return uv * rvsGlobal;
+    return uv * _RenderViewportScaleFactor;
 }
 
 float2 UnityStereoTransformScreenSpaceTex(float2 uv)
@@ -78,7 +78,7 @@ float2 UnityStereoTransformScreenSpaceTex(float2 uv)
 
 float2 UnityStereoClamp(float2 uv)
 {
-    float4 scaleOffset = float4(rvsGlobal, rvsGlobal, 0.f, 0.f);
+    float4 scaleOffset = float4(_RenderViewportScaleFactor, _RenderViewportScaleFactor, 0.f, 0.f);
     return UnityStereoClampScaleOffset(uv, scaleOffset);
 }
 #endif

@@ -144,5 +144,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int WaveformSource                  = Shader.PropertyToID("_WaveformSource");
         internal static readonly int WaveformBuffer                  = Shader.PropertyToID("_WaveformBuffer");
         internal static readonly int VectorscopeBuffer               = Shader.PropertyToID("_VectorscopeBuffer");
+
+        internal static readonly int RenderViewportScaleFactor       = Shader.PropertyToID("_RenderViewportScaleFactor");
     }
 }
