@@ -9,7 +9,7 @@
 #define SSR_MINIMUM_ATTENUATION 0.275
 #define SSR_ATTENUATION_SCALE (1.0 - SSR_MINIMUM_ATTENUATION)
 
-#define SSR_VIGNETTE_INTENSITY _Params3.x
+#define SSR_VIGNETTE_INTENSITY _VignetteIntensity
 #define SSR_VIGNETTE_SMOOTHNESS 5.
 
 #define SSR_COLOR_NEIGHBORHOOD_SAMPLE_SPREAD 1.0
@@ -73,10 +73,10 @@ float4x4 _InverseViewMatrix;
 float4x4 _InverseProjectionMatrix;
 float4x4 _ScreenSpaceProjectionMatrix;
 
-float4 _Params; // x: attenuation, y: distance fade, z: maximum march distance, w: blur pyramid lod count
+float4 _Params; // x: vignette intensity, y: distance fade, z: maximum march distance, w: blur pyramid lod count
 float4 _Params2; // x: aspect ratio, y: noise tiling, z: thickness, w: maximum iteration count
-float4 _Params3; // x: vignette intensity, y: vignette smoothness
-#define _Attenuation _Params.x
+#define _Attenuation .25
+#define _VignetteIntensity _Params.x
 #define _DistanceFade _Params.y
 #define _MaximumMarchDistance _Params.z
 #define _BlurPyramidLODCount _Params.w
