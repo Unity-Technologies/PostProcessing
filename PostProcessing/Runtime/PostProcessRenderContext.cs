@@ -127,7 +127,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             resources = null;
             propertySheets = null;
-            userData = null;
             debugLayer = null;
             isSceneView = false;
             antialiasing = PostProcessLayer.Antialiasing.None;
