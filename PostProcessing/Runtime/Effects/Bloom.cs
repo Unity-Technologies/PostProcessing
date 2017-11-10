@@ -100,11 +100,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = Mathf.FloorToInt(context.width / (2f - rw));
-            int th = Mathf.FloorToInt(context.height / (2f - rh));
+            int tw = context.width / 2;
+            int th = context.height / 2;
 
             // Determine the iteration count
-            int s = Mathf.Max(tw, th);
+            int s = Mathf.Max((Mathf.FloorToInt(context.screenWidth / (2f - rw))), (Mathf.FloorToInt(context.screenHeight / (2f - rh))));
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logs_i = Mathf.FloorToInt(logs);
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
@@ -129,8 +129,9 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? (int)Pass.Prefilter13 + qualityOffset
                     : (int)Pass.Downsample13 + qualityOffset;
 
-                cmd.GetTemporaryRT(mipDown, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
-                cmd.GetTemporaryRT(mipUp, tw, th, 0, FilterMode.Bilinear, context.sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+
                 cmd.BlitFullscreenTriangle(last, mipDown, sheet, pass);
 
                 last = mipDown;
@@ -172,7 +173,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 : settings.dirtTexture.value;
 
             var dirtRatio = (float)dirtTexture.width / (float)dirtTexture.height;
-            var screenRatio = (float)context.width / (float)context.height;
+            var screenRatio = (float)context.screenWidth / (float)context.screenHeight;
             var dirtTileOffset = new Vector4(1f, 1f, 0f, 0f);
 
             if (dirtRatio > screenRatio)

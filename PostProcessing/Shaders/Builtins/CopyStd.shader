@@ -33,11 +33,13 @@ Shader "Hidden/PostProcessing/CopyStd"
         {
             Varyings o;
             o.vertex = float4(v.vertex.xy * 2.0 - 1.0, 0.0, 1.0);
-            o.texcoord = v.texcoord * _MainTex_ST.xy + _MainTex_ST.zw; // We need this for VR
+            o.texcoord = v.texcoord;
 
             #if UNITY_UV_STARTS_AT_TOP
             o.texcoord = o.texcoord * float2(1.0, -1.0) + float2(0.0, 1.0);
             #endif
+
+            o.texcoord = o.texcoord * _MainTex_ST.xy + _MainTex_ST.zw; // We need this for VR
 
             return o;
         }

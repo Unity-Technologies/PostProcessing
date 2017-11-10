@@ -112,7 +112,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
     half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv0).rgb;
     half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv1).rgb;
     half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv2).rgb;
-    half3 c3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord + duv.xy).rgb;
+    half3 c3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv3).rgb;
 
     // Sample CoCs
     half coc0 = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, uv0).r * 2.0 - 1.0;

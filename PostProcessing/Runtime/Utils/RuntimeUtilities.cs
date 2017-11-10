@@ -226,15 +226,24 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+#if UNITY_EDITOR
+        public static bool isSinglePassStereoSelected
+        {
+            get
+            {
+                return UnityEditor.PlayerSettings.virtualRealitySupported
+                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+            }
+        }
+#endif
+
         // TODO: Check for SPSR support at runtime
         public static bool isSinglePassStereoEnabled
         {
             get
             {
 #if UNITY_EDITOR
-                return UnityEditor.PlayerSettings.virtualRealitySupported
-                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass
-                    && Application.isPlaying;
+                return isSinglePassStereoSelected && Application.isPlaying;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
@@ -424,8 +433,8 @@ namespace UnityEngine.Rendering.PostProcessing
             float vertFov = Math.Abs(planes.top) + Math.Abs(planes.bottom);
             float horizFov = Math.Abs(planes.left) + Math.Abs(planes.right);
 
-            var planeJitter = new Vector2(jitter.x * horizFov / context.xrSingleEyeWidth,
-                                          jitter.y * vertFov / context.height);
+            var planeJitter = new Vector2(jitter.x * horizFov / context.screenWidth,
+                                          jitter.y * vertFov / context.screenHeight);
 
             planes.left += planeJitter.x;
             planes.right += planeJitter.x;
@@ -445,8 +454,8 @@ namespace UnityEngine.Rendering.PostProcessing
             float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
             float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
 
-            jitter.x *= tanHorizFov / context.xrSingleEyeWidth;
-            jitter.y *= tanVertFov / context.height;
+            jitter.x *= tanHorizFov / context.screenWidth;
+            jitter.y *= tanVertFov / context.screenHeight;
 
             float left = jitter.x + lTan;
             float right = jitter.x + rTan;
