@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 { TextureFormat.BC5, RenderTextureFormat.RGHalf },
                 { TextureFormat.BC6H, RenderTextureFormat.ARGBHalf },
                 { TextureFormat.BC7, RenderTextureFormat.ARGB32 },
-            #if !UNITY_IOS
+            #if !UNITY_IOS && !UNITY_TVOS
                 { TextureFormat.DXT1Crunched, RenderTextureFormat.ARGB32 },
                 { TextureFormat.DXT5Crunched, RenderTextureFormat.ARGB32 },
             #endif
