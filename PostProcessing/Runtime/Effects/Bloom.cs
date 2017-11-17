@@ -120,7 +120,7 @@ namespace UnityEngine.Rendering.PostProcessing
             int qualityOffset = settings.mobileOptimized ? 1 : 0;
 
             // Downsample
-            var last = context.source;
+            var lastDown = context.source;
             for (int i = 0; i < iterations; i++)
             {
                 int mipDown = m_Pyramid[i].down;
@@ -131,23 +131,22 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
                 context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
 
-                cmd.BlitFullscreenTriangle(last, mipDown, sheet, pass);
-
-                last = mipDown;
+                lastDown = mipDown;
                 tw = Mathf.Max(tw / 2, 1);
                 th = Mathf.Max(th / 2, 1);
             }
 
             // Upsample
-            last = m_Pyramid[iterations - 1].down;
+            int lastUp = m_Pyramid[iterations - 1].down;
             for (int i = iterations - 2; i >= 0; i--)
             {
                 int mipDown = m_Pyramid[i].down;
                 int mipUp = m_Pyramid[i].up;
                 cmd.SetGlobalTexture(ShaderIDs.BloomTex, mipDown);
-                cmd.BlitFullscreenTriangle(last, mipUp, sheet, (int)Pass.UpsampleTent + qualityOffset);
-                last = mipUp;
+                cmd.BlitFullscreenTriangle(lastUp, mipUp, sheet, (int)Pass.UpsampleTent + qualityOffset);
+                lastUp = mipUp;
             }
 
             var linearColor = settings.color.value.linear;
@@ -194,16 +193,20 @@ namespace UnityEngine.Rendering.PostProcessing
             uberSheet.properties.SetVector(ShaderIDs.Bloom_Settings, shaderSettings);
             uberSheet.properties.SetColor(ShaderIDs.Bloom_Color, linearColor);
             uberSheet.properties.SetTexture(ShaderIDs.Bloom_DirtTex, dirtTexture);
-            cmd.SetGlobalTexture(ShaderIDs.BloomTex, m_Pyramid[0].up);
+            cmd.SetGlobalTexture(ShaderIDs.BloomTex, lastUp);
 
             // Cleanup
             for (int i = 0; i < iterations; i++)
             {
-                cmd.ReleaseTemporaryRT(m_Pyramid[i].down);
-                cmd.ReleaseTemporaryRT(m_Pyramid[i].up);
+                if (m_Pyramid[i].down != lastUp)
+                    cmd.ReleaseTemporaryRT(m_Pyramid[i].down);
+                if (m_Pyramid[i].up != lastUp)
+                    cmd.ReleaseTemporaryRT(m_Pyramid[i].up);
             }
 
             cmd.EndSample("BloomPyramid");
+
+            context.bloomTemporaryRT = lastUp;
         }
     }
 }

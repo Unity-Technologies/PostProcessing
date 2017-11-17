@@ -268,5 +268,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal LogHistogram logHistogram;
         internal Texture logLut;
         internal AutoExposure autoExposure;
+        internal int bloomTemporaryRT;
     }
 }
