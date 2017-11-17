@@ -313,7 +313,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     // Global volume always have influence
                     if (volume.isGlobal)
                     {
-                        postProcessLayer.OverrideSettings(settings, volume.weight);
+                        postProcessLayer.OverrideSettings(settings, Mathf.Clamp01(volume.weight));
                         continue;
                     }
 
@@ -358,7 +358,7 @@ namespace UnityEngine.Rendering.PostProcessing
                         interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
 
                     // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
-                    postProcessLayer.OverrideSettings(settings, interpFactor * volume.weight);
+                    postProcessLayer.OverrideSettings(settings, interpFactor * Mathf.Clamp01(volume.weight));
                 }
             }
         }

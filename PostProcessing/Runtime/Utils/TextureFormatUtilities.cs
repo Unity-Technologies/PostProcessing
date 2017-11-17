@@ -7,11 +7,11 @@ namespace UnityEngine.Rendering.PostProcessing
     // Temporary code dump until the texture format refactor goes into trunk...
     public static class TextureFormatUtilities
     {
-        static Dictionary<TextureFormat, RenderTextureFormat> m_FormatMap;
+        static Dictionary<TextureFormat, RenderTextureFormat> s_FormatMap;
 
         static TextureFormatUtilities()
         {
-            m_FormatMap = new Dictionary<TextureFormat, RenderTextureFormat>
+            s_FormatMap = new Dictionary<TextureFormat, RenderTextureFormat>
             {
                 { TextureFormat.Alpha8, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ARGB4444, RenderTextureFormat.ARGB4444 },
@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 { TextureFormat.BC5, RenderTextureFormat.RGHalf },
                 { TextureFormat.BC6H, RenderTextureFormat.ARGBHalf },
                 { TextureFormat.BC7, RenderTextureFormat.ARGB32 },
-            #if !UNITY_IOS
+            #if !UNITY_IOS && !UNITY_TVOS
                 { TextureFormat.DXT1Crunched, RenderTextureFormat.ARGB32 },
                 { TextureFormat.DXT5Crunched, RenderTextureFormat.ARGB32 },
             #endif
@@ -43,9 +43,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 { TextureFormat.PVRTC_RGBA2, RenderTextureFormat.ARGB32 },
                 { TextureFormat.PVRTC_RGB4, RenderTextureFormat.ARGB32 },
                 { TextureFormat.PVRTC_RGBA4, RenderTextureFormat.ARGB32 },
-                { TextureFormat.ETC_RGB4, RenderTextureFormat.ARGB32 },
+            #if !UNITY_2018_1_OR_NEWER
                 { TextureFormat.ATC_RGB4, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ATC_RGBA8, RenderTextureFormat.ARGB32 },
+            #endif
+                { TextureFormat.ETC_RGB4, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ETC2_RGB, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ETC2_RGBA1, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ETC2_RGBA8, RenderTextureFormat.ARGB32 },
@@ -78,7 +80,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 var inFormat = ((Texture2D)texture).format;
                 RenderTextureFormat outFormat;
 
-                if (!m_FormatMap.TryGetValue(inFormat, out outFormat))
+                if (!s_FormatMap.TryGetValue(inFormat, out outFormat))
                     throw new NotSupportedException("Texture format not supported");
 
                 return outFormat;

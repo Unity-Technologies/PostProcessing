@@ -116,6 +116,11 @@ namespace UnityEditor.Rendering.PostProcessing
 
             var camera = m_Target.GetComponent<Camera>();
 
+            #if !UNITY_2017_2_OR_NEWER
+            if (RuntimeUtilities.isSinglePassStereoSelected)
+                EditorGUILayout.HelpBox("Unity 2017.2+ required for full Single-pass stereo rendering support.", MessageType.Warning);
+            #endif
+
             DoVolumeBlending();
             DoAntialiasing();
             DoFog(camera);
@@ -175,8 +180,10 @@ namespace UnityEditor.Rendering.PostProcessing
 
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
                 {
-                    if (RuntimeUtilities.isSinglePassStereoEnabled)
+                    #if !UNITY_2017_3_OR_NEWER
+                    if (RuntimeUtilities.isSinglePassStereoSelected)
                         EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
+                    #endif
 
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
@@ -185,7 +192,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing)
                 {
-                    if (RuntimeUtilities.isSinglePassStereoEnabled)
+                    if (RuntimeUtilities.isSinglePassStereoSelected)
                         EditorGUILayout.HelpBox("SMAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)

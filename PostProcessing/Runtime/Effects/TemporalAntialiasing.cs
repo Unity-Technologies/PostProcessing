@@ -2,7 +2,6 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-    // TODO: VR support
     [Serializable]
     public sealed class TemporalAntialiasing
     {
@@ -69,9 +68,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         Vector2 GenerateRandomOffset()
         {
+            // The variance between 0 and the actual halton sequence values reveals noticeable instability
+            // in Unity's shadow maps, so we avoid index 0.
             var offset = new Vector2(
-                    HaltonSeq.Get(m_SampleIndex & 1023, 2),
-                    HaltonSeq.Get(m_SampleIndex & 1023, 3)
+                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 2) - 0.5f,
+                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 3) - 0.5f
                 );
 
             if (++m_SampleIndex >= k_SampleCount)
@@ -131,7 +132,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // jitter has to be scaled for the actual eye texture size, not just the intermediate texture size
             // which could be double-wide in certain stereo rendering scenarios
-            jitter = new Vector2(jitter.x / context.xrSingleEyeWidth, jitter.y / context.height);
+            jitter = new Vector2(jitter.x / context.screenWidth, jitter.y / context.screenHeight);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
 #endif
         }
@@ -140,15 +141,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             rt.name = "Temporal Anti-aliasing History id #" + id;
 
-            bool vrDeviceActive = false;
-
-#if UNITY_2017_2_OR_NEWER
-            vrDeviceActive = XR.XRSettings.isDeviceActive;
-#else
-            vrDeviceActive = VR.VRSettings.isDeviceActive;
-#endif
-
-            if (vrDeviceActive)
+            if (context.stereoActive)
                 rt.name += " for eye " + context.xrActiveEye;
         }
 
@@ -165,7 +158,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                rt = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
+                rt = context.GetScreenSpaceTemporaryRT(0, context.sourceFormat);
                 GenerateHistoryName(rt, id, context);
 
                 rt.filterMode = FilterMode.Bilinear;
@@ -177,7 +170,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 // On size change, simply copy the old history to the new one. This looks better
                 // than completely discarding the history and seeing a few aliased frames.
-                var rt2 = RenderTexture.GetTemporary(context.width, context.height, 0, context.sourceFormat);
+                var rt2 = context.GetScreenSpaceTemporaryRT(0, context.sourceFormat);
                 GenerateHistoryName(rt2, id, context);
 
                 rt2.filterMode = FilterMode.Bilinear;
@@ -207,6 +200,8 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.Sharpness, sharpness);
             sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
+
+            // TODO: Account for different possible RenderViewportScale value from previous frame...
 
             int pass = context.camera.orthographic ? (int)Pass.SolverNoDilate : (int)Pass.SolverDilate;
             m_Mrt[0] = context.destination;

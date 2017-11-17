@@ -37,7 +37,7 @@ Shader "Hidden/PostProcessing/AutoExposure"
             float maxValue = 1.0 / FindMaxHistogramValue(_HistogramBuffer);
             float avgLuminance = GetAverageLuminance(_HistogramBuffer, _Params, maxValue, _ScaleOffsetRes.xy);
             float exposure = GetExposureMultiplier(avgLuminance);
-            float prevExposure = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, (0.5).xx).r;
+            float prevExposure = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, (0.5).xx).r; // TODO: Might change for single-pass
             exposure = InterpolateExposure(exposure, prevExposure);
             return exposure.xxxx;
         }

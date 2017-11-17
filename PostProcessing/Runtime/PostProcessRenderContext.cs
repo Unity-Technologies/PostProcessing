@@ -23,28 +23,42 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
-                if (XRSettings.isDeviceActive)
+                if (m_Camera.stereoEnabled)
                 {
 #if UNITY_2017_2_OR_NEWER
-                    RenderTextureDescriptor xrDesc = XRSettings.eyeTextureDesc;
+                    var xrDesc = XRSettings.eyeTextureDesc;
                     width = xrDesc.width;
                     height = xrDesc.height;
+                    m_sourceDescriptor = xrDesc;
 #else
-                    width = XRSettings.eyeTextureWidth; // double this for single-pass when we can't query eyeTextureDesc
+                    // Single-pass is only supported with 2017.2+ because
+                    // that is when XRSettings.eyeTextureDesc is available.
+                    // Without it, we don't have a robust method of determining
+                    // if we are in single-pass.  Users can just double the width
+                    // here if they KNOW they are using single-pass.
+                    width = XRSettings.eyeTextureWidth;
                     height = XRSettings.eyeTextureHeight;
 #endif
 
-                    if (camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                    if (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         xrActiveEye = (int)Camera.StereoscopicEye.Right;
 
-                    xrSingleEyeWidth = XRSettings.eyeTextureWidth;
-                    xrSingleEyeHeight = XRSettings.eyeTextureHeight;
+                    screenWidth = XRSettings.eyeTextureWidth;
+                    screenHeight = XRSettings.eyeTextureHeight;
+                    stereoActive = true;
                 }
                 else
                 {
                     width = m_Camera.pixelWidth;
                     height = m_Camera.pixelHeight;
-                    xrSingleEyeWidth = width;
+
+#if UNITY_2017_2_OR_NEWER
+                    m_sourceDescriptor.width = width;
+                    m_sourceDescriptor.height = height;
+#endif
+                    screenWidth = width;
+                    screenHeight = height;
+                    stereoActive = false;
                 }
             }
         }
@@ -90,14 +104,93 @@ namespace UnityEngine.Rendering.PostProcessing
         // Current camera height in pixels
         public int height { get; private set; }
 
+        // TODO: Change w/h name to texture w/h in order to make
+        // size usages explicit
+
+#if UNITY_2017_2_OR_NEWER
+        private RenderTextureDescriptor m_sourceDescriptor;
+        private RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        {
+            var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
+                                                                                m_sourceDescriptor.colorFormat, depthBufferBits);
+            modifiedDesc.dimension = m_sourceDescriptor.dimension;
+            modifiedDesc.volumeDepth = m_sourceDescriptor.volumeDepth;
+            modifiedDesc.vrUsage = m_sourceDescriptor.vrUsage;
+            modifiedDesc.msaaSamples = m_sourceDescriptor.msaaSamples;
+            modifiedDesc.memoryless = m_sourceDescriptor.memoryless;
+
+            modifiedDesc.useMipMap = m_sourceDescriptor.useMipMap;
+            modifiedDesc.autoGenerateMips = m_sourceDescriptor.autoGenerateMips;
+            modifiedDesc.enableRandomWrite = m_sourceDescriptor.enableRandomWrite;
+            modifiedDesc.shadowSamplingMode = m_sourceDescriptor.shadowSamplingMode;
+
+            if (colorFormat != RenderTextureFormat.Default)
+                modifiedDesc.colorFormat = colorFormat;
+            if (readWrite != RenderTextureReadWrite.Default)
+                modifiedDesc.sRGB = (readWrite != RenderTextureReadWrite.Linear);
+
+            return modifiedDesc;
+        }
+#endif
+
+        public void GetScreenSpaceTemporaryRT(CommandBuffer cmd, int nameID, 
+                                            int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default,
+                                            FilterMode filter = FilterMode.Bilinear, int widthOverride = 0, int heightOverride = 0)
+        {
+#if UNITY_2017_2_OR_NEWER
+            var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
+            if (widthOverride > 0)
+                desc.width = widthOverride;
+            if (heightOverride > 0)
+                desc.height = heightOverride;
+
+            cmd.GetTemporaryRT(nameID, desc, filter);
+#else
+            int actualWidth = width;
+            int actualHeight = height;
+            if (widthOverride > 0)
+                actualWidth = widthOverride;
+            if (heightOverride > 0)
+                actualHeight = heightOverride;
+
+            cmd.GetTemporaryRT(nameID, actualWidth, actualHeight, depthBufferBits, filter, colorFormat, readWrite);
+            // TODO: How to handle MSAA for XR in older versions?  Query cam?
+            // TODO: Pass in vrUsage into the args 
+#endif
+        }
+
+        public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, 
+                                                        RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int widthOverride = 0, int heightOverride = 0)
+        {
+#if UNITY_2017_2_OR_NEWER
+            var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
+            if (widthOverride > 0)
+                desc.width = widthOverride;
+            if (heightOverride > 0)
+                desc.height = heightOverride;
+
+            return RenderTexture.GetTemporary(desc);
+#else
+            int actualWidth = width;
+            int actualHeight = height;
+            if (widthOverride > 0)
+                actualWidth = widthOverride;
+            if (heightOverride > 0)
+                actualHeight = heightOverride;
+
+            return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
+#endif
+        }
+
+        public bool stereoActive { get; private set; }
+
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
 
-        // Current single eye width in pixels (for XR)
-        public int xrSingleEyeWidth { get; private set; }
+        // Pixel dimensions of logical screen size
+        public int screenWidth { get; private set; }
 
-        // Current single eye height in pixels (for XR)
-        public int xrSingleEyeHeight { get; private set; }
+        public int screenHeight { get; private set; }
 
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
@@ -115,9 +208,14 @@ namespace UnityEngine.Rendering.PostProcessing
             width = 0;
             height = 0;
 
+#if UNITY_2017_2_OR_NEWER
+            m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
+#endif
+
+            stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
-            xrSingleEyeWidth = 0;
-            xrSingleEyeHeight = 0;
+            screenWidth = 0;
+            screenHeight = 0;
 
             command = null;
             source = 0;
@@ -127,7 +225,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             resources = null;
             propertySheets = null;
-            userData = null;
             debugLayer = null;
             isSceneView = false;
             antialiasing = PostProcessLayer.Antialiasing.None;

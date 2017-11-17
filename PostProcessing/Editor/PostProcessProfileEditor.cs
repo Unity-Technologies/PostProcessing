@@ -15,7 +15,8 @@ namespace UnityEditor.Rendering.PostProcessing
 
         void OnDisable()
         {
-            m_EffectList.Clear();
+            if (m_EffectList != null)
+                m_EffectList.Clear();
         }
 
         public override void OnInspectorGUI()
