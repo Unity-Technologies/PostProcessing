@@ -234,6 +234,7 @@ namespace UnityEngine.Rendering.PostProcessing
             autoExposureTexture = null;
             logLut = null;
             autoExposure = null;
+            bloomBufferNameID = -1;
 
             if (userData == null)
                 userData = new Dictionary<string, object>();
@@ -268,6 +269,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal LogHistogram logHistogram;
         internal Texture logLut;
         internal AutoExposure autoExposure;
-        internal int bloomTemporaryRT;
+        internal int bloomBufferNameID;
     }
 }

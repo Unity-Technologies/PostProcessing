@@ -773,7 +773,7 @@ namespace UnityEngine.Rendering.PostProcessing
             uberSheet.properties.Clear();
             context.uberSheet = uberSheet;
             context.autoExposureTexture = RuntimeUtilities.whiteTexture;
-            context.bloomTemporaryRT = -1;
+            context.bloomBufferNameID = -1;
 
             var cmd = context.command;
             cmd.BeginSample("BuiltinStack");
@@ -837,7 +837,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (releaseTargetAfterUse > -1) cmd.ReleaseTemporaryRT(releaseTargetAfterUse);
             if (motionBlurTarget > -1) cmd.ReleaseTemporaryRT(motionBlurTarget);
             if (depthOfFieldTarget > -1) cmd.ReleaseTemporaryRT(motionBlurTarget);
-            if (context.bloomTemporaryRT > -1) cmd.ReleaseTemporaryRT(context.bloomTemporaryRT);
+            if (context.bloomBufferNameID > -1) cmd.ReleaseTemporaryRT(context.bloomBufferNameID);
 
             cmd.EndSample("BuiltinStack");
 

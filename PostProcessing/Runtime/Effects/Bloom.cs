@@ -206,7 +206,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.EndSample("BloomPyramid");
 
-            context.bloomTemporaryRT = lastUp;
+            context.bloomBufferNameID = lastUp;
         }
     }
 }
