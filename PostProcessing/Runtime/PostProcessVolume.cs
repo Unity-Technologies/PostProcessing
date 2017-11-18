@@ -52,7 +52,7 @@ namespace UnityEngine.Rendering.PostProcessing
     //
 
     [ExecuteInEditMode]
-    [AddComponentMenu("Rendering/Post-process Volume", -1)]
+    [AddComponentMenu("Rendering/Post-process Volume", 1001)]
     public sealed class PostProcessVolume : MonoBehaviour
     {
         // Modifying sharedProfile will change the behavior of all volumes using this profile, and
