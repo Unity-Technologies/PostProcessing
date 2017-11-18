@@ -181,12 +181,12 @@ namespace UnityEditor.Rendering.PostProcessing
             {
                 if (QualitySettings.activeColorSpace == ColorSpace.Gamma)
                     EditorGUILayout.HelpBox("ColorSpace in project settings is set to Gamma, HDR color grading won't look correct. Switch to Linear or use LDR color grading mode instead.", MessageType.Warning);
+            }
 
-                if (m_GradingMode.overrideState.boolValue)
-                {
-                    if (!SystemInfo.supports3DRenderTextures || !SystemInfo.supportsComputeShaders)
-                        EditorGUILayout.HelpBox("HDR color grading requires compute shader & 3D render texture support.", MessageType.Warning);
-                }
+            if (m_GradingMode.overrideState.boolValue && gradingMode == GradingMode.External)
+            {
+                if (!SystemInfo.supports3DRenderTextures || !SystemInfo.supportsComputeShaders)
+                    EditorGUILayout.HelpBox("HDR color grading requires compute shader & 3D render texture support.", MessageType.Warning);
             }
 
             if (gradingMode == GradingMode.LowDefinitionRange)
