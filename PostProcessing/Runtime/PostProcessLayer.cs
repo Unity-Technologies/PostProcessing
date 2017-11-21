@@ -573,6 +573,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 PostProcessManager.instance.UpdateSettings(this);
                 context.command.EndSample("VolumeBlending");
                 m_TargetPool.Reset();
+
+                // TODO: fix me once VR support is in SRP
+                // Needed in SRP so that _RenderViewportScaleFactor isn't 0
+                if (RuntimeUtilities.scriptableRenderPipelineActive)
+                    Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, 1f);
             }
 
             m_SettingsUpdateNeeded = false;
