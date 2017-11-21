@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
@@ -32,7 +31,7 @@ namespace UnityEditor.Rendering.PostProcessing
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (MinAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PostProcessing.MinAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {
@@ -57,7 +56,7 @@ namespace UnityEditor.Rendering.PostProcessing
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (MaxAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PostProcessing.MaxAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {
@@ -82,7 +81,7 @@ namespace UnityEditor.Rendering.PostProcessing
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (MinMaxAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PostProcessing.MinMaxAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {
