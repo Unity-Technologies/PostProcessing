@@ -23,12 +23,17 @@ Shader "Hidden/Post FX/FXAA"
 
             // Shaves off 10ms from the shader's execution time
             #define FXAA_EARLY_EXIT 1
+        #elif defined(SHADER_API_SWITCH)    
+            #define FXAA_QUALITY__PRESET 10
+            #define FXAA_PC 1
         #else
             #define FXAA_PC 1
         #endif
 
         #define FXAA_HLSL_3 1
+        #ifndef FXAA_QUALITY__PRESET
         #define FXAA_QUALITY__PRESET 39
+        #endif
 
         #define FXAA_GREEN_AS_LUMA 1
 
