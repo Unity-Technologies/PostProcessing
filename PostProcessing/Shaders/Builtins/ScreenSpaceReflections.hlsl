@@ -18,7 +18,7 @@
 #define SSR_FINAL_BLEND_DYNAMIC_FACTOR 0.7
 
 #define SSR_ENABLE_CONTACTS 0
-#define SSR_KILL_FIREFLIES 1
+#define SSR_KILL_FIREFLIES 0
 
 //
 // Helper structs
