@@ -25,7 +25,7 @@ namespace UnityEditor.Rendering.PostProcessing
             return false;
         }
     }
-    
+
     [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinAttribute))]
     public sealed class MinDecorator : AttributeDecorator
     {
@@ -50,7 +50,7 @@ namespace UnityEditor.Rendering.PostProcessing
             return false;
         }
     }
-    
+
     [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MaxAttribute))]
     public sealed class MaxDecorator : AttributeDecorator
     {
@@ -75,7 +75,7 @@ namespace UnityEditor.Rendering.PostProcessing
             return false;
         }
     }
-    
+
     [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinMaxAttribute))]
     public sealed class MinMaxDecorator : AttributeDecorator
     {
@@ -119,6 +119,9 @@ namespace UnityEditor.Rendering.PostProcessing
             if (property.propertyType != SerializedPropertyType.Color)
                 return false;
 
+#if UNITY_2018_1_OR_NEWER
+            property.colorValue = EditorGUILayout.ColorField(title, property.colorValue, true, attr.showAlpha, attr.hdr);
+#else
             ColorPickerHDRConfig hdrConfig = null;
 
             if (attr.hdr)
@@ -132,6 +135,8 @@ namespace UnityEditor.Rendering.PostProcessing
             }
 
             property.colorValue = EditorGUILayout.ColorField(title, property.colorValue, true, attr.showAlpha, attr.hdr, hdrConfig);
+#endif
+
             return true;
         }
     }

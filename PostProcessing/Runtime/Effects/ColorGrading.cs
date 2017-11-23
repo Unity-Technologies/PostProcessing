@@ -73,7 +73,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [DisplayName("Tint"), Range(-100f, 100f), Tooltip("Sets the white balance to compensate for a green or magenta tint.")]
         public FloatParameter tint = new FloatParameter { value = 0f };
 
+#if UNITY_2018_1_OR_NEWER
+        [DisplayName("Color Filter"), ColorUsage(false, true), Tooltip("Tint the render by multiplying a color.")]
+#else
         [DisplayName("Color Filter"), ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Tint the render by multiplying a color.")]
+#endif
         public ColorParameter colorFilter = new ColorParameter { value = Color.white };
 
         [DisplayName("Hue Shift"), Range(-180f, 180f), Tooltip("Shift the hue of all colors.")]
@@ -117,13 +121,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
         [DisplayName("Blue"), Range(-200f, 200f), Tooltip("Modify influence of the blue channel in the overall mix.")]
         public FloatParameter mixerBlueOutBlueIn = new FloatParameter { value = 100f };
-        
+
         [DisplayName("Lift"), Tooltip("Controls the darkest portions of the render."), Trackball(TrackballAttribute.Mode.Lift)]
         public Vector4Parameter lift = new Vector4Parameter { value = new Vector4(1f, 1f, 1f, 0f) };
-        
+
         [DisplayName("Gamma"), Tooltip("Power function that controls midrange tones."), Trackball(TrackballAttribute.Mode.Gamma)]
         public Vector4Parameter gamma = new Vector4Parameter { value = new Vector4(1f, 1f, 1f, 0f) };
-        
+
         [DisplayName("Gain"), Tooltip("Controls the lightest portions of the render."), Trackball(TrackballAttribute.Mode.Gain)]
         public Vector4Parameter gain = new Vector4Parameter { value = new Vector4(1f, 1f, 1f, 0f) };
 
@@ -503,7 +507,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var redCurve = settings.redCurve.value;
             var greenCurve = settings.greenCurve.value;
             var blueCurve = settings.blueCurve.value;
-            
+
             var pixels = m_Pixels;
 
             for (int i = 0; i < Spline.k_Precision; i++)

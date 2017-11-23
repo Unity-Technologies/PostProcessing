@@ -25,7 +25,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(-1f, 1f), Tooltip("Distorts the bloom to give an anamorphic look. Negative values distort vertically, positive values distort horizontally.")]
         public FloatParameter anamorphicRatio = new FloatParameter { value = 0f };
 
+#if UNITY_2018_1_OR_NEWER
+        [ColorUsage(false, true), Tooltip("Global tint of the bloom filter.")]
+#else
         [ColorUsage(false, true, 0f, 8f, 0.125f, 3f), Tooltip("Global tint of the bloom filter.")]
+#endif
         public ColorParameter color = new ColorParameter { value = Color.white };
 
         [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
@@ -116,7 +120,7 @@ namespace UnityEngine.Rendering.PostProcessing
             float knee = lthresh * settings.softKnee.value + 1e-5f;
             var threshold = new Vector4(lthresh, lthresh - knee, knee * 2f, 0.25f / knee);
             sheet.properties.SetVector(ShaderIDs.Threshold, threshold);
-            
+
             int qualityOffset = settings.mobileOptimized ? 1 : 0;
 
             // Downsample
