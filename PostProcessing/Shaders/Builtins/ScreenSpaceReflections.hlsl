@@ -18,6 +18,7 @@
 #define SSR_FINAL_BLEND_DYNAMIC_FACTOR 0.7
 
 #define SSR_ENABLE_CONTACTS 0
+#define SSR_KILL_FIREFLIES 1
 
 //
 // Helper structs
@@ -210,6 +211,15 @@ Result March(Ray ray, VaryingsDefault input)
         z.y = tracker.w + derivatives.w * 0.5;
         z.y /= tracker.z + derivatives.z * 0.5;
 
+#if SSR_KILL_FIREFLIES
+        UNITY_FLATTEN
+        if (z.y < -_MaximumMarchDistance)
+        {
+            result.isHit = false;
+            return result;
+        }
+#endif
+
         UNITY_FLATTEN
         if (z.y > z.x)
         {
@@ -264,7 +274,7 @@ float4 FragTest(VaryingsDefault i) : SV_Target
 
     ray.direction = normalize(reflect(normalize(ray.origin), normal));
 
-    if (ray.direction.z > 0.)
+    if (ray.direction.z > 0.0)
         return 0.0;
 
     Result result = March(ray, i);
