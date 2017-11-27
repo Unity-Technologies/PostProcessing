@@ -29,6 +29,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
         public override void OnInspectorGUI()
         {
+            PropertyField(m_Mode);
             int aoMode = m_Mode.value.intValue;
 
             if (RuntimeUtilities.scriptableRenderPipelineActive && aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
@@ -45,7 +46,6 @@ namespace UnityEditor.Rendering.PostProcessing
             }
 #endif
 
-            PropertyField(m_Mode);
             PropertyField(m_Intensity);
 
             if (aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
