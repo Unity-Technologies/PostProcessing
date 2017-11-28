@@ -371,40 +371,19 @@ namespace UnityEngine.Rendering.PostProcessing
         // https://github.com/playdeadgames/temporal/blob/master/Assets/Scripts/Extensions.cs
         public static Matrix4x4 GetJitteredPerspectiveProjectionMatrix(Camera camera, Vector2 offset)
         {
-            float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView);
-            float horizontal = vertical * camera.aspect;
-            float near = camera.nearClipPlane;
-            float far = camera.farClipPlane;
+			float near = camera.nearClipPlane;
+			float far = camera.farClipPlane;
 
-            offset.x *= horizontal / (0.5f * camera.pixelWidth);
-            offset.y *= vertical / (0.5f * camera.pixelHeight);
+			float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView) * near;
+			float horizontal = vertical * camera.aspect;
 
-            float left = (offset.x - horizontal) * near;
-            float right = (offset.x + horizontal) * near;
-            float top = (offset.y + vertical) * near;
-            float bottom = (offset.y - vertical) * near;
+			offset.x *= horizontal / (0.5f * camera.pixelWidth);
+			offset.y *= vertical / (0.5f * camera.pixelHeight);
 
-            var matrix = new Matrix4x4();
+			var matrix = camera.projectionMatrix;
 
-            matrix[0, 0] = (2f * near) / (right - left);
-            matrix[0, 1] = 0f;
-            matrix[0, 2] = (right + left) / (right - left);
-            matrix[0, 3] = 0f;
-
-            matrix[1, 0] = 0f;
-            matrix[1, 1] = (2f * near) / (top - bottom);
-            matrix[1, 2] = (top + bottom) / (top - bottom);
-            matrix[1, 3] = 0f;
-
-            matrix[2, 0] = 0f;
-            matrix[2, 1] = 0f;
-            matrix[2, 2] = -(far + near) / (far - near);
-            matrix[2, 3] = -(2f * far * near) / (far - near);
-
-            matrix[3, 0] = 0f;
-            matrix[3, 1] = 0f;
-            matrix[3, 2] = -1f;
-            matrix[3, 3] = 0f;
+			matrix[0, 2] += offset.x / horizontal;
+			matrix[1, 2] += offset.y / vertical;
 
             return matrix;
         }
