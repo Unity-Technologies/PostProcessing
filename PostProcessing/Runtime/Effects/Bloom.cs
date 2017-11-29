@@ -104,11 +104,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = context.width / 2;
-            int th = context.height / 2;
+            int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
+            int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
 
             // Determine the iteration count
-            int s = Mathf.Max((Mathf.FloorToInt(context.screenWidth / (2f - rw))), (Mathf.FloorToInt(context.screenHeight / (2f - rh))));
+            int s = Mathf.Max(tw, th);
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logs_i = Mathf.FloorToInt(logs);
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
