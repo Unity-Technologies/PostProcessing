@@ -413,7 +413,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Same as before, first blit needs to use the builtin Blit command to properly handle
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
-            context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 24, sourceFormat);
+            context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 24, sourceFormat, RenderTextureReadWrite.sRGB);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
             m_NaNKilled = stopNaNPropagation;
 
