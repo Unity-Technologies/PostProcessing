@@ -56,6 +56,7 @@ namespace UnityEditor.Rendering.PostProcessing
             
             bool assetHasChanged = false;
             bool showCopy = m_Profile.objectReferenceValue != null;
+            bool multiEdit = m_Profile.hasMultipleDifferentValues;
 
             // The layout system sort of break alignement when mixing inspector fields with custom
             // layouted fields, do the layout manually instead
@@ -71,46 +72,58 @@ namespace UnityEditor.Rendering.PostProcessing
 
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
-                m_Profile.objectReferenceValue = (PostProcessProfile)EditorGUI.ObjectField(fieldRect, m_Profile.objectReferenceValue, typeof(PostProcessProfile), false);
-                assetHasChanged = scope.changed;
-            }
+                EditorGUI.BeginProperty(fieldRect, GUIContent.none, m_Profile);
 
-            if (GUI.Button(buttonNewRect, EditorUtilities.GetContent("New|Create a new profile."), showCopy ? EditorStyles.miniButtonLeft : EditorStyles.miniButton))
-            {
-                // By default, try to put assets in a folder next to the currently active
-                // scene file. If the user isn't a scene, put them in root instead.
-                var targetName = m_Target.name;
-                var scene = m_Target.gameObject.scene;
-                var asset = ProfileFactory.CreatePostProcessProfile(scene, targetName);
-                m_Profile.objectReferenceValue = asset;
-                assetHasChanged = true;
-            }
+                var profile = (PostProcessProfile)EditorGUI.ObjectField(fieldRect, m_Profile.objectReferenceValue, typeof(PostProcessProfile), false);
 
-            if (showCopy && GUI.Button(buttonCopyRect, EditorUtilities.GetContent("Clone|Create a new profile and copy the content of the currently assigned profile."), EditorStyles.miniButtonRight))
-            {
-                // Duplicate the currently assigned profile and save it as a new profile
-                var origin = (PostProcessProfile)m_Profile.objectReferenceValue;
-                var path = AssetDatabase.GetAssetPath(origin);
-                path = AssetDatabase.GenerateUniqueAssetPath(path);
-
-                var asset = Instantiate(origin);
-                asset.settings.Clear();
-                AssetDatabase.CreateAsset(asset, path);
-
-                foreach (var item in origin.settings)
+                if (scope.changed)
                 {
-                    var itemCopy = Instantiate(item);
-                    itemCopy.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
-                    itemCopy.name = item.name;
-                    asset.settings.Add(itemCopy);
-                    AssetDatabase.AddObjectToAsset(itemCopy, asset);
+                    assetHasChanged = true;
+                    m_Profile.objectReferenceValue = profile;
                 }
 
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-                
-                m_Profile.objectReferenceValue = asset;
-                assetHasChanged = true;
+                EditorGUI.EndProperty();
+            }
+
+            using (new EditorGUI.DisabledScope(multiEdit))
+            {
+                if (GUI.Button(buttonNewRect, EditorUtilities.GetContent("New|Create a new profile."), showCopy ? EditorStyles.miniButtonLeft : EditorStyles.miniButton))
+                {
+                    // By default, try to put assets in a folder next to the currently active
+                    // scene file. If the user isn't a scene, put them in root instead.
+                    var targetName = m_Target.name;
+                    var scene = m_Target.gameObject.scene;
+                    var asset = ProfileFactory.CreatePostProcessProfile(scene, targetName);
+                    m_Profile.objectReferenceValue = asset;
+                    assetHasChanged = true;
+                }
+
+                if (showCopy && GUI.Button(buttonCopyRect, EditorUtilities.GetContent("Clone|Create a new profile and copy the content of the currently assigned profile."), EditorStyles.miniButtonRight))
+                {
+                    // Duplicate the currently assigned profile and save it as a new profile
+                    var origin = (PostProcessProfile)m_Profile.objectReferenceValue;
+                    var path = AssetDatabase.GetAssetPath(origin);
+                    path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+                    var asset = Instantiate(origin);
+                    asset.settings.Clear();
+                    AssetDatabase.CreateAsset(asset, path);
+
+                    foreach (var item in origin.settings)
+                    {
+                        var itemCopy = Instantiate(item);
+                        itemCopy.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
+                        itemCopy.name = item.name;
+                        asset.settings.Add(itemCopy);
+                        AssetDatabase.AddObjectToAsset(itemCopy, asset);
+                    }
+
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+
+                    m_Profile.objectReferenceValue = asset;
+                    assetHasChanged = true;
+                }
             }
 
             EditorGUILayout.Space();
@@ -127,7 +140,8 @@ namespace UnityEditor.Rendering.PostProcessing
                 if (assetHasChanged)
                     RefreshEffectListEditor((PostProcessProfile)m_Profile.objectReferenceValue);
 
-                m_EffectList.OnGUI();
+                if (!multiEdit)
+                    m_EffectList.OnGUI();
             }
 
             serializedObject.ApplyModifiedProperties();
