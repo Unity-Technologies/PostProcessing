@@ -14,7 +14,7 @@ namespace UnityEngine.PostProcessing
 #if UNITY_WEBGL
             get { return false; }
 #else
-            get { return SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders; }
+            get { return SystemInfo.graphicsShaderLevel >= 45 && SystemInfo.supportsComputeShaders; }
 #endif
         }
 

@@ -9,9 +9,15 @@ CBUFFER_START (Params)
 CBUFFER_END
 
 #define COLUMNS 384
+// Limited thread group size on MacOS with Metal (monitors are Editor-only so don't affect ios/Android limits)
+#if defined SHADER_API_METAL
+    #define GROUP_SIZE COLUMNS / 2
+#else
+    #define GROUP_SIZE COLUMNS
+#endif
 
 #pragma kernel KWaveform
-[numthreads(1,COLUMNS,1)]
+[numthreads(1,GROUP_SIZE,1)]
 void KWaveform(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     // We want a gamma corrected colors
@@ -35,7 +41,7 @@ void KWaveform(uint2 dispatchThreadId : SV_DispatchThreadID)
 }
 
 #pragma kernel KWaveformClear
-[numthreads(1, COLUMNS, 1)]
+[numthreads(1, GROUP_SIZE, 1)]
 void KWaveformClear(uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     _Waveform[dispatchThreadId.x * COLUMNS + dispatchThreadId.y] = uint4(0u, 0u, 0u, 0u);

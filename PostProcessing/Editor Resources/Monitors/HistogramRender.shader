@@ -8,7 +8,7 @@ Shader "Hidden/Post FX/Monitors/Histogram Render"
         CGINCLUDE
 
             #pragma fragmentoption ARB_precision_hint_fastest
-            #pragma target 5.0
+            #pragma target 4.5
             #include "UnityCG.cginc"
 
             StructuredBuffer<uint4> _Histogram;
