@@ -29,8 +29,8 @@ half3 _TaaParams; // Jitter.x, Jitter.y, Blending
 struct VaryingsDOF
 {
     float4 pos : SV_POSITION;
-    half2 uv : TEXCOORD0;
-    half2 uvAlt : TEXCOORD1;
+    NOPERSPECTIVE half2 uv : TEXCOORD0;
+    NOPERSPECTIVE half2 uvAlt : TEXCOORD1;
 };
 
 // Common vertex shader with single pass stereo rendering support

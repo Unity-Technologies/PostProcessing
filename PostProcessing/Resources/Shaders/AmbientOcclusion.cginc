@@ -151,9 +151,9 @@ half CompareNormal(half3 d1, half3 d2)
 struct VaryingsMultitex
 {
     float4 pos : SV_POSITION;
-    half2 uv : TEXCOORD0;    // Original UV
-    half2 uv01 : TEXCOORD1;  // Alternative UV (supports v-flip case)
-    half2 uvSPR : TEXCOORD2; // Single pass stereo rendering UV
+    NOPERSPECTIVE half2 uv : TEXCOORD0;    // Original UV
+    NOPERSPECTIVE half2 uv01 : TEXCOORD1;  // Alternative UV (supports v-flip case)
+    NOPERSPECTIVE half2 uvSPR : TEXCOORD2; // Single pass stereo rendering UV
 };
 
 VaryingsMultitex VertMultitex(AttributesDefault v)

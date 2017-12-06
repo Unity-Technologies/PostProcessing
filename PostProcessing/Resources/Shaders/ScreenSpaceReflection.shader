@@ -89,8 +89,8 @@ Shader "Hidden/Post FX/Screen Space Reflection"
         struct v2f
         {
             float4 pos : SV_POSITION;
-            float2 uv : TEXCOORD0;
-            float2 uv2 : TEXCOORD1;
+            NOPERSPECTIVE float2 uv : TEXCOORD0;
+            NOPERSPECTIVE float2 uv2 : TEXCOORD1;
         };
 
         v2f vert( appdata_img v )

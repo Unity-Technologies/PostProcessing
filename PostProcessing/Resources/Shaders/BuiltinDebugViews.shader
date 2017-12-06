@@ -120,7 +120,7 @@ Shader "Hidden/Post FX/Builtin Debug Views"
         struct VaryingsArrows
         {
             float4 vertex : SV_POSITION;
-            float2 scoord : TEXCOORD;
+            NOPERSPECTIVE float2 scoord : TEXCOORD;
             float4 color : COLOR;
         };
 
