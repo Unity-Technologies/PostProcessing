@@ -1,0 +1,11 @@
+{
+    "name": "com.unity.postprocessing.Editor",
+    "references": [
+        "com.unity.postprocessing.Runtime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
