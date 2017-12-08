@@ -168,7 +168,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         {
             float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
 
-            if (any(isnan(color)) || any(isinf(color)))
+            if (AnyIsNan(color))
             {
                 color = float4(1.0, 0.0, 1.0, 1.0);
             }

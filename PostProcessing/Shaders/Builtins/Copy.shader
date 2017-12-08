@@ -16,12 +16,10 @@ Shader "Hidden/PostProcessing/Copy"
         {
             float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
-            #if !SHADER_API_GLES
-            if (any(isnan(color)) || any(isinf(color)))
+            if (AnyIsNan(color))
             {
                 color = (0.0).xxxx;
             }
-            #endif
 
             return color;
         }

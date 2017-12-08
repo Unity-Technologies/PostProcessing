@@ -55,10 +55,6 @@ float rcp(float value)
 }
 #endif
 
-#ifndef mad
-#define mad(a, b, c) (a * b + c)
-#endif
-
 #ifndef INTRINSIC_MINMAX3
 float Min3(float a, float b, float c)
 {
@@ -144,6 +140,43 @@ float3 PositivePow(float3 base, float3 power)
 float4 PositivePow(float4 base, float4 power)
 {
     return pow(max(abs(base), float4(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON, FLT_EPSILON)), power);
+}
+
+// NaN checker
+bool IsNan(float x)
+{
+#if !SHADER_API_GLES
+    return isnan(x) || isinf(x);
+#else
+    return (x <= 0.0 || 0.0 <= x) ? false : true;
+#endif
+}
+
+bool AnyIsNan(float2 x)
+{
+#if !SHADER_API_GLES
+    return any(isnan(x)) || any(isinf(x));
+#else
+    return IsNan(x.x) || IsNan(x.y);
+#endif
+}
+
+bool AnyIsNan(float3 x)
+{
+#if !SHADER_API_GLES
+    return any(isnan(x)) || any(isinf(x));
+#else
+    return IsNan(x.x) || IsNan(x.y) || IsNan(x.z);
+#endif
+}
+
+bool AnyIsNan(float4 x)
+{
+#if !SHADER_API_GLES
+    return any(isnan(x)) || any(isinf(x));
+#else
+    return IsNan(x.x) || IsNan(x.y) || IsNan(x.z) || IsNan(x.w);
+#endif
 }
 
 // -----------------------------------------------------------------------------

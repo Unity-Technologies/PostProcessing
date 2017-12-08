@@ -50,16 +50,34 @@ Shader "Hidden/PostProcessing/CopyStd"
             return color;
         }
 
+        //>>> We don't want to include StdLib.hlsl in this file so let's copy/paste what we need
+        bool IsNan(float x)
+        {
+        #if !SHADER_API_GLES
+            return isnan(x) || isinf(x);
+        #else
+            return (x <= 0.0 || 0.0 <= x) ? false : true;
+        #endif
+        }
+
+        bool AnyIsNan(float4 x)
+        {
+        #if !SHADER_API_GLES
+            return any(isnan(x)) || any(isinf(x));
+        #else
+            return IsNan(x.x) || IsNan(x.y) || IsNan(x.z) || IsNan(x.w);
+        #endif
+        }
+        //<<<
+
         float4 FragKillNaN(Varyings i) : SV_Target
         {
             float4 color = tex2D(_MainTex, i.texcoord);
 
-            #if !SHADER_API_GLES
-            if (any(isnan(color)) || any(isinf(color)))
+            if (AnyIsNan(color))
             {
                 color = (0.0).xxxx;
             }
-            #endif
 
             return color;
         }
