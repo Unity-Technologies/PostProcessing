@@ -492,6 +492,22 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Reflection
 
+        public static IEnumerable<Type> GetAllAssemblyTypes()
+        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(t =>
+                {
+                    // Ugly hack to handle mis-versioned dlls
+                    var innerTypes = new Type[0];
+                    try
+                    {
+                        innerTypes = t.GetTypes();
+                    }
+                    catch {}
+                    return innerTypes;
+                });
+        }
+
         // Quick extension method to get the first attribute of type T on a given Type
         public static T GetAttribute<T>(this Type type) where T : Attribute
         {

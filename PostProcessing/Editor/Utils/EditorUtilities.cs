@@ -32,14 +32,12 @@ namespace UnityEditor.Rendering.PostProcessing
             s_AttributeDecorators.Clear();
 
             // Look for all the valid attribute decorators
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(
-                    a => a.GetTypes()
-                    .Where(
-                        t => t.IsSubclassOf(typeof(AttributeDecorator))
-                        && t.IsDefined(typeof(DecoratorAttribute), false)
-                    )
-                );
+            var types = RuntimeUtilities.GetAllAssemblyTypes()
+                            .Where(
+                                t => t.IsSubclassOf(typeof(AttributeDecorator))
+                                  && t.IsDefined(typeof(DecoratorAttribute), false)
+                                  && !t.IsAbstract
+                            );
 
             // Store them
             foreach (var type in types)
