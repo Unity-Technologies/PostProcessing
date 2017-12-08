@@ -118,9 +118,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_TargetPool = new TargetPool();
 
             debugLayer.OnEnable();
+        }
 
-            // Scriptable render pipelines handle their own command buffers
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
+        void CheckInitLegacy()
+        {
+            if (m_Camera != null && m_CurrentContext != null)
                 return;
 
             m_LegacyCmdBufferBeforeReflections = new CommandBuffer { name = "Deferred Ambient Occlusion" };
@@ -264,6 +266,8 @@ namespace UnityEngine.Rendering.PostProcessing
             // Unused in scriptable render pipelines
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
+
+            CheckInitLegacy();
 
             // Resets the projection matrix from previous frame in case TAA was enabled.
             // We also need to force reset the non-jittered projection matrix here as it's not done
