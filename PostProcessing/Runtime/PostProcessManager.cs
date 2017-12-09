@@ -128,7 +128,12 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     // If volume isn't global and has no collider, skip it as it's useless
                     var colliders = m_TempColliders;
-                    volume.GetComponents(colliders);
+                    
+					if (volume.useChildColliders)
+						volume.GetComponentsInChildren (colliders);
+					else
+						volume.GetComponents(colliders);
+
                     if (colliders.Count == 0)
                         continue;
 
@@ -320,8 +325,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     // If volume isn't global and has no collider, skip it as it's useless
                     var colliders = m_TempColliders;
-                    volume.GetComponents(colliders);
-                    if (colliders.Count == 0)
+
+					if (volume.useChildColliders)
+						volume.GetComponentsInChildren (colliders);
+					else
+	                    volume.GetComponents(colliders);
+                    
+					if (colliders.Count == 0)
                         continue;
 
                     // Find closest distance to volume, 0 means it's inside it

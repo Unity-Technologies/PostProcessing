@@ -65,6 +65,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Min(0f), Tooltip("Outer distance to start blending from. A value of 0 means no blending and the volume overrides will be applied immediatly upon entry.")]
         public float blendDistance = 0f;
 
+		[Tooltip("Should volumes be calculated based on colliders from children objects as well?")]
+		public bool useChildColliders = false;
+
         [Range(0f, 1f), Tooltip("Total weight of this volume in the scene. 0 means it won't do anything, 1 means full effect.")]
         public float weight = 1f;
         
@@ -156,7 +159,11 @@ namespace UnityEngine.Rendering.PostProcessing
         void OnDrawGizmos()
         {
             var colliders = m_TempColliders;
-            GetComponents(colliders);
+
+			if (useChildColliders)
+				GetComponentsInChildren (colliders);
+			else
+            	GetComponents(colliders);
 
             if (isGlobal || colliders == null)
                 return;
@@ -171,15 +178,15 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 #endif
 
-            var scale = transform.localScale;
-            var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
-            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, scale);
-
             // Draw a separate gizmo for each collider
             foreach (var collider in colliders)
             {
                 if (!collider.enabled)
                     continue;
+
+				var scale = collider.transform.lossyScale;
+				var invScale = new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
+				Gizmos.matrix = Matrix4x4.TRS(collider.transform.position, collider.transform.rotation, scale);
 
                 // We'll just use scaling as an approximation for volume skin. It's far from being
                 // correct (and is completely wrong in some cases). Ultimately we'd use a distance
@@ -193,8 +200,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (type == typeof(BoxCollider))
                 {
                     var c = (BoxCollider)collider;
-                    Gizmos.DrawCube(c.center, c.size);
-                    Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
+
+					Gizmos.DrawCube(c.center, c.size);
+                	Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
                 }
                 else if (type == typeof(SphereCollider))
                 {
