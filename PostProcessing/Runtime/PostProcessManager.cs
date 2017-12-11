@@ -23,8 +23,9 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         const int k_MaxLayerCount = 32; // Max amount of layers available in Unity
-        readonly List<PostProcessVolume>[] m_Volumes;
-        readonly bool[] m_SortNeeded;
+        readonly Dictionary<LayerMask, List<PostProcessVolume>> m_SortedVolumes;
+        readonly List<PostProcessVolume> m_Volumes;
+        readonly Dictionary<LayerMask, bool> m_SortNeeded;
         readonly List<PostProcessEffectSettings> m_BaseSettings;
         readonly List<Collider> m_TempColliders;
 
@@ -32,8 +33,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         PostProcessManager()
         {
-            m_Volumes = new List<PostProcessVolume>[k_MaxLayerCount];
-            m_SortNeeded = new bool[k_MaxLayerCount];
+            m_SortedVolumes = new Dictionary<LayerMask, List<PostProcessVolume>>();
+            m_Volumes = new List<PostProcessVolume>();
+            m_SortNeeded = new Dictionary<LayerMask, bool>();
             m_BaseSettings = new List<PostProcessEffectSettings>();
             m_TempColliders = new List<Collider>(5);
 
@@ -97,63 +99,53 @@ namespace UnityEngine.Rendering.PostProcessing
             bool onlyGlobal = volumeTrigger == null;
             var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
 
-            for (int i = 0; i < k_MaxLayerCount; i++)
+            // Sort the cached volume list(s) for the given layer mask if needed and return it
+            var volumes = GrabVolumes(mask);
+
+            // Traverse all volumes
+            foreach (var volume in volumes)
             {
-                // Skip layers not in the mask
-                if ((mask & (1 << i)) == 0)
+                // Skip disabled volumes and volumes without any data or weight
+                if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                     continue;
 
-                // Skip empty layers
-                var volumes = m_Volumes[i];
-
-                if (volumes == null)
-                    continue;
-
-                // Traverse all volumes
-                foreach (var volume in volumes)
+                // Global volume always have influence
+                if (volume.isGlobal)
                 {
-                    // Skip disabled volumes and volumes without any data or weight
-                    if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
-                        continue;
-
-                    // Global volume always have influence
-                    if (volume.isGlobal)
-                    {
-                        results.Add(volume);
-                        continue;
-                    }
-
-                    if (onlyGlobal)
-                        continue;
-
-                    // If volume isn't global and has no collider, skip it as it's useless
-                    var colliders = m_TempColliders;
-                    volume.GetComponents(colliders);
-                    if (colliders.Count == 0)
-                        continue;
-
-                    // Find closest distance to volume, 0 means it's inside it
-                    float closestDistanceSqr = float.PositiveInfinity;
-
-                    foreach (var collider in colliders)
-                    {
-                        if (!collider.enabled)
-                            continue;
-
-                        var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
-                        var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
-
-                        if (d < closestDistanceSqr)
-                            closestDistanceSqr = d;
-                    }
-
-                    colliders.Clear();
-                    float blendDistSqr = volume.blendDistance * volume.blendDistance;
-
-                    // Check for influence
-                    if (closestDistanceSqr <= blendDistSqr)
-                        results.Add(volume);
+                    results.Add(volume);
+                    continue;
                 }
+
+                if (onlyGlobal)
+                    continue;
+
+                // If volume isn't global and has no collider, skip it as it's useless
+                var colliders = m_TempColliders;
+                volume.GetComponents(colliders);
+                if (colliders.Count == 0)
+                    continue;
+
+                // Find closest distance to volume, 0 means it's inside it
+                float closestDistanceSqr = float.PositiveInfinity;
+
+                foreach (var collider in colliders)
+                {
+                    if (!collider.enabled)
+                        continue;
+
+                    var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
+                    var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
+
+                    if (d < closestDistanceSqr)
+                        closestDistanceSqr = d;
+                }
+
+                colliders.Clear();
+                float blendDistSqr = volume.blendDistance * volume.blendDistance;
+
+                // Check for influence
+                if (closestDistanceSqr <= blendDistSqr)
+                    results.Add(volume);
             }
         }
 
@@ -170,18 +162,9 @@ namespace UnityEngine.Rendering.PostProcessing
             float highestPriority = float.NegativeInfinity;
             PostProcessVolume output = null;
 
-            for (int i = 0; i < k_MaxLayerCount; i++)
+            List<PostProcessVolume> volumes;
+            if (m_SortedVolumes.TryGetValue(mask, out volumes))
             {
-                // Skip layers not in the mask
-                if ((mask & (1 << i)) == 0)
-                    continue;
-
-                // Skip empty layers
-                var volumes = m_Volumes[i];
-
-                if (volumes == null)
-                    continue;
-
                 foreach (var volume in volumes)
                 {
                     if (volume.priority > highestPriority)
@@ -221,7 +204,14 @@ namespace UnityEngine.Rendering.PostProcessing
         internal void SetLayerDirty(int layer)
         {
             Assert.IsTrue(layer >= 0 && layer <= k_MaxLayerCount, "Invalid layer bit");
-            m_SortNeeded[layer] = true;
+
+            foreach (var kvp in m_SortedVolumes)
+            {
+                var mask = kvp.Key;
+
+                if ((mask & (1 << layer)) != 0)
+                    m_SortNeeded[mask] = true;
+            }
         }
 
         internal void UpdateVolumeLayer(PostProcessVolume volume, int prevLayer, int newLayer)
@@ -233,16 +223,17 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void Register(PostProcessVolume volume, int layer)
         {
-            var volumes = m_Volumes[layer];
+            m_Volumes.Add(volume);
 
-            if (volumes == null)
+            // Look for existing cached layer masks and add it there if needed
+            foreach (var kvp in m_SortedVolumes)
             {
-                volumes = new List<PostProcessVolume>();
-                m_Volumes[layer] = volumes;
+                var mask = kvp.Key;
+
+                if ((mask & (1 << layer)) != 0)
+                    kvp.Value.Add(volume);
             }
 
-            Assert.IsFalse(volumes.Contains(volume), "Volume has already been registered");
-            volumes.Add(volume);
             SetLayerDirty(layer);
         }
 
@@ -254,13 +245,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void Unregister(PostProcessVolume volume, int layer)
         {
-            var volumes = m_Volumes[layer];
+            m_Volumes.Remove(volume);
 
-            if (volumes == null)
-                return;
+            foreach (var kvp in m_SortedVolumes)
+            {
+                var mask = kvp.Key;
 
-            Assert.IsTrue(volumes.Contains(volume), "Trying to unregister a non-registered volume");
-            volumes.Remove(volume);
+                // Skip layer masks this volume doesn't belong to
+                if ((mask & (1 << layer)) == 0)
+                    continue;
+
+                kvp.Value.Remove(volume);
+            }
         }
 
         internal void Unregister(PostProcessVolume volume)
@@ -280,85 +276,101 @@ namespace UnityEngine.Rendering.PostProcessing
             bool onlyGlobal = volumeTrigger == null;
             var triggerPos = onlyGlobal ? Vector3.zero : volumeTrigger.position;
 
-            for (int i = 0; i < k_MaxLayerCount; i++)
+            // Sort the cached volume list(s) for the given layer mask if needed and return it
+            var volumes = GrabVolumes(mask);
+
+            // Traverse all volumes
+            foreach (var volume in volumes)
             {
-                // Skip layers not in the mask
-                if ((mask & (1 << i)) == 0)
+                // Skip disabled volumes and volumes without any data or weight
+                if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                     continue;
 
-                // Skip empty layers
-                var volumes = m_Volumes[i];
+                var settings = volume.profileRef.settings;
 
-                if (volumes == null)
+                // Global volume always have influence
+                if (volume.isGlobal)
+                {
+                    postProcessLayer.OverrideSettings(settings, Mathf.Clamp01(volume.weight));
+                    continue;
+                }
+
+                if (onlyGlobal)
                     continue;
 
-                // Sort the volume list if needed
-                if (m_SortNeeded[i])
+                // If volume isn't global and has no collider, skip it as it's useless
+                var colliders = m_TempColliders;
+                volume.GetComponents(colliders);
+                if (colliders.Count == 0)
+                    continue;
+
+                // Find closest distance to volume, 0 means it's inside it
+                float closestDistanceSqr = float.PositiveInfinity;
+
+                foreach (var collider in colliders)
                 {
-                    SortByPriority(volumes);
-                    m_SortNeeded[i] = false;
+                    if (!collider.enabled)
+                        continue;
+
+                    var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
+                    var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
+
+                    if (d < closestDistanceSqr)
+                        closestDistanceSqr = d;
                 }
 
-                // Traverse all volumes
-                foreach (var volume in volumes)
-                {
-                    // Skip disabled volumes and volumes without any data or weight
-                    if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
-                        continue;
+                colliders.Clear();
+                float blendDistSqr = volume.blendDistance * volume.blendDistance;
 
-                    var settings = volume.profileRef.settings;
+                // Volume has no influence, ignore it
+                // Note: Volume doesn't do anything when `closestDistanceSqr = blendDistSqr` but
+                //       we can't use a >= comparison as blendDistSqr could be set to 0 in which
+                //       case volume would have total influence
+                if (closestDistanceSqr > blendDistSqr)
+                    continue;
 
-                    // Global volume always have influence
-                    if (volume.isGlobal)
-                    {
-                        postProcessLayer.OverrideSettings(settings, Mathf.Clamp01(volume.weight));
-                        continue;
-                    }
+                // Volume has influence
+                float interpFactor = 1f;
 
-                    if (onlyGlobal)
-                        continue;
+                if (blendDistSqr > 0f)
+                    interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
 
-                    // If volume isn't global and has no collider, skip it as it's useless
-                    var colliders = m_TempColliders;
-                    volume.GetComponents(colliders);
-                    if (colliders.Count == 0)
-                        continue;
-
-                    // Find closest distance to volume, 0 means it's inside it
-                    float closestDistanceSqr = float.PositiveInfinity;
-
-                    foreach (var collider in colliders)
-                    {
-                        if (!collider.enabled)
-                            continue;
-
-                        var closestPoint = collider.ClosestPoint(triggerPos); // 5.6-only API
-                        var d = ((closestPoint - triggerPos) / 2f).sqrMagnitude;
-
-                        if (d < closestDistanceSqr)
-                            closestDistanceSqr = d;
-                    }
-
-                    colliders.Clear();
-                    float blendDistSqr = volume.blendDistance * volume.blendDistance;
-
-                    // Volume has no influence, ignore it
-                    // Note: Volume doesn't do anything when `closestDistanceSqr = blendDistSqr` but
-                    //       we can't use a >= comparison as blendDistSqr could be set to 0 in which
-                    //       case volume would have total influence
-                    if (closestDistanceSqr > blendDistSqr)
-                        continue;
-
-                    // Volume has influence
-                    float interpFactor = 1f;
-
-                    if (blendDistSqr > 0f)
-                        interpFactor = 1f - (closestDistanceSqr / blendDistSqr);
-
-                    // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
-                    postProcessLayer.OverrideSettings(settings, interpFactor * Mathf.Clamp01(volume.weight));
-                }
+                // No need to clamp01 the interpolation factor as it'll always be in [0;1[ range
+                postProcessLayer.OverrideSettings(settings, interpFactor * Mathf.Clamp01(volume.weight));
             }
+        }
+
+        List<PostProcessVolume> GrabVolumes(LayerMask mask)
+        {
+            List<PostProcessVolume> list;
+
+            if (!m_SortedVolumes.TryGetValue(mask, out list))
+            {
+                // New layer mask detected, create a new list and cache all the volumes that belong
+                // to this mask in it
+                list = new List<PostProcessVolume>();
+
+                foreach (var volume in m_Volumes)
+                {
+                    if ((mask & (1 << volume.gameObject.layer)) == 0)
+                        continue;
+
+                    list.Add(volume);
+                    m_SortNeeded[mask] = true;
+                }
+
+                m_SortedVolumes.Add(mask, list);
+            }
+
+            // Check sorting state
+            bool sortNeeded;
+            if (m_SortNeeded.TryGetValue(mask, out sortNeeded) && sortNeeded)
+            {
+                m_SortNeeded[mask] = false;
+                SortByPriority(list);
+            }
+
+            return list;
         }
 
         // Custom insertion sort. First sort will be slower but after that it'll be faster than
