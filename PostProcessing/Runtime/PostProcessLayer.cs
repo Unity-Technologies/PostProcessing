@@ -118,6 +118,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_TargetPool = new TargetPool();
 
             debugLayer.OnEnable();
+
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+                return;
+
+            CheckInitLegacy();
         }
 
         void CheckInitLegacy()
