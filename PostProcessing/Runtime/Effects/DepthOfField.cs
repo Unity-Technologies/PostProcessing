@@ -28,6 +28,12 @@ namespace UnityEngine.Rendering.PostProcessing
 
         [DisplayName("Max Blur Size"), Tooltip("Convolution kernel size of the bokeh filter, which determines the maximum radius of bokeh. It also affects performances (the larger the kernel is, the longer the GPU time is required).")]
         public KernelSizeParameter kernelSize = new KernelSizeParameter { value = KernelSize.Medium };
+
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
+        {
+            return enabled.value
+                && SystemInfo.graphicsShaderLevel >= 35;
+        }
     }
     
     // TODO: Look into minimum blur amount in the distance, right now it's lerped until a point
