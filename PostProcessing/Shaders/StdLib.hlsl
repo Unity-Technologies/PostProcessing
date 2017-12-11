@@ -19,7 +19,7 @@
     #include "API/D3D12.hlsl"
 #elif SHADER_API_D3D9 || SHADER_API_D3D11_9X
     #include "API/D3D9.hlsl"
-#elif SHADER_API_VULKAN
+#elif SHADER_API_VULKAN || SHADER_API_SWITCH
     #include "API/Vulkan.hlsl"
 #elif SHADER_API_METAL
     #include "API/Metal.hlsl"
