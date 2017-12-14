@@ -69,40 +69,6 @@ namespace UnityEditor.Rendering.PostProcessing
 
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
-
-            // In case of domain reload, if the inspector is opened on a disabled PostProcessLayer
-            // component it won't go through its OnEnable() and thus will miss bundle initialization
-            // so force it there - also for some reason, an editor's OnEnable() can be called before
-            // the component's so this will fix that as well.
-            m_Target.InitBundles();
-
-            // Create a reorderable list for each injection event
-            m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
-            foreach (var evt in Enum.GetValues(typeof(PostProcessEvent)).Cast<PostProcessEvent>())
-            {
-                var bundles = m_Target.sortedBundles[evt];
-                var listName = ObjectNames.NicifyVariableName(evt.ToString());
-
-                var list = new ReorderableList(bundles, typeof(SerializedBundleRef), true, true, false, false);
-
-                list.drawHeaderCallback = (rect) =>
-                {
-                    EditorGUI.LabelField(rect, listName);
-                };
-
-                list.drawElementCallback = (rect, index, isActive, isFocused) =>
-                {
-                    var sbr = (SerializedBundleRef)list.list[index];
-                    EditorGUI.LabelField(rect, sbr.bundle.attribute.menuItem);
-                };
-
-                list.onReorderCallback = (l) =>
-                {
-                    EditorUtility.SetDirty(m_Target);
-                };
-
-                m_CustomLists.Add(evt, list);
-            }
         }
 
         void OnDisable()
@@ -283,7 +249,65 @@ namespace UnityEditor.Rendering.PostProcessing
 
             if (m_ShowCustomSorter.boolValue)
             {
+                bool isInPrefab = false;
+
+                // Init lists if needed
+                if (m_CustomLists == null)
+                {
+                    // In some cases the editor will refresh before components which means
+                    // components might not have been fully initialized yet. In this case we also
+                    // need to make sure that we're not in a prefab as sorteBundles isn't a
+                    // serializable object and won't exist until put on a scene.
+                    if (m_Target.sortedBundles == null)
+                    {
+                        isInPrefab = string.IsNullOrEmpty(m_Target.gameObject.scene.name);
+
+                        if (!isInPrefab)
+                        {
+                            // sortedBundles will be initialized and ready to use on the next frame
+                            Repaint();
+                        }
+                    }
+                    else
+                    {
+                        // Create a reorderable list for each injection event
+                        m_CustomLists = new Dictionary<PostProcessEvent, ReorderableList>();
+                        foreach (var evt in Enum.GetValues(typeof(PostProcessEvent)).Cast<PostProcessEvent>())
+                        {
+                            var bundles = m_Target.sortedBundles[evt];
+                            var listName = ObjectNames.NicifyVariableName(evt.ToString());
+
+                            var list = new ReorderableList(bundles, typeof(SerializedBundleRef), true, true, false, false);
+
+                            list.drawHeaderCallback = (rect) =>
+                            {
+                                EditorGUI.LabelField(rect, listName);
+                            };
+
+                            list.drawElementCallback = (rect, index, isActive, isFocused) =>
+                            {
+                                var sbr = (SerializedBundleRef)list.list[index];
+                                EditorGUI.LabelField(rect, sbr.bundle.attribute.menuItem);
+                            };
+
+                            list.onReorderCallback = (l) =>
+                            {
+                                EditorUtility.SetDirty(m_Target);
+                            };
+
+                            m_CustomLists.Add(evt, list);
+                        }
+                    }
+                }
+
                 GUILayout.Space(5);
+
+                if (isInPrefab)
+                {
+                    EditorGUILayout.HelpBox("Not supported in prefabs.", MessageType.Info);
+                    GUILayout.Space(3);
+                    return;
+                }
 
                 bool anyList = false;
                 if (m_CustomLists != null)
