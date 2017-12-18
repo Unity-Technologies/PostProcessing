@@ -195,7 +195,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 DoStandardModeGUI(true);
             else if (gradingMode == GradingMode.External)
                 DoExternalModeGUI();
-            
+
             EditorGUILayout.Space();
         }
 
@@ -266,7 +266,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             EditorGUILayout.Space();
             EditorUtilities.DrawHeaderLabel("White Balance");
-            
+
             PropertyField(m_Temperature);
             PropertyField(m_Tint);
 
@@ -687,7 +687,7 @@ namespace UnityEditor.Rendering.PostProcessing
             float scale = EditorGUIUtility.pixelsPerPoint;
 
             var oldRt = RenderTexture.active;
-            var rt = RenderTexture.GetTemporary(Mathf.CeilToInt(rect.width * scale), Mathf.CeilToInt(rect.height * scale), 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            var rt = RenderTexture.GetTemporary(Mathf.CeilToInt(rect.width * scale), Mathf.CeilToInt(rect.height * scale), 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             s_MaterialGrid.SetFloat("_DisabledState", GUI.enabled ? 1f : 0.5f);
             s_MaterialGrid.SetFloat("_PixelScaling", EditorGUIUtility.pixelsPerPoint);
 
