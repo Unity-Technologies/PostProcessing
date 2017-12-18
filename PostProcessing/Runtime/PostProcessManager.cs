@@ -265,10 +265,23 @@ namespace UnityEngine.Rendering.PostProcessing
             Unregister(volume, layer);
         }
 
+        // Faster version of OverrideSettings to force replace values in the global state
+        void ReplaceData(PostProcessLayer postProcessLayer)
+        {
+            foreach (var settings in m_BaseSettings)
+            {
+                var target = postProcessLayer.GetBundle(settings.GetType()).settings;
+                int count = settings.parameters.Count;
+
+                for (int i = 0; i < count; i++)
+                    target.parameters[i].SetValue(settings.parameters[i]);
+            }
+        }
+
         internal void UpdateSettings(PostProcessLayer postProcessLayer)
         {
             // Reset to base state
-            postProcessLayer.OverrideSettings(m_BaseSettings, 1f);
+            ReplaceData(postProcessLayer);
 
             // If no trigger is set, only global volumes will have influence
             int mask = postProcessLayer.volumeLayer.value;

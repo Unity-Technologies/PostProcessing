@@ -14,6 +14,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return ((ParameterOverride<T>)this).value;
         }
+
+        internal abstract void SetValue(ParameterOverride parameter);
     }
 
     [Serializable]
@@ -54,6 +56,11 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             overrideState = true;
             value = x;
+        }
+
+        internal override void SetValue(ParameterOverride parameter)
+        {
+            value = parameter.GetValue<T>();
         }
 
         public override int GetHash()
@@ -188,4 +195,4 @@ namespace UnityEngine.Rendering.PostProcessing
             value = TextureLerper.instance.Lerp(from, to, t);
         }
     }
-} 
+}
