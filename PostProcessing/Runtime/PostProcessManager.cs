@@ -23,9 +23,9 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         const int k_MaxLayerCount = 32; // Max amount of layers available in Unity
-        readonly Dictionary<LayerMask, List<PostProcessVolume>> m_SortedVolumes;
+        readonly Dictionary<int, List<PostProcessVolume>> m_SortedVolumes;
         readonly List<PostProcessVolume> m_Volumes;
-        readonly Dictionary<LayerMask, bool> m_SortNeeded;
+        readonly Dictionary<int, bool> m_SortNeeded;
         readonly List<PostProcessEffectSettings> m_BaseSettings;
         readonly List<Collider> m_TempColliders;
 
@@ -33,9 +33,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         PostProcessManager()
         {
-            m_SortedVolumes = new Dictionary<LayerMask, List<PostProcessVolume>>();
+            m_SortedVolumes = new Dictionary<int, List<PostProcessVolume>>();
             m_Volumes = new List<PostProcessVolume>();
-            m_SortNeeded = new Dictionary<LayerMask, bool>();
+            m_SortNeeded = new Dictionary<int, bool>();
             m_BaseSettings = new List<PostProcessEffectSettings>();
             m_TempColliders = new List<Collider>(5);
 
