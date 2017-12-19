@@ -9,19 +9,19 @@
 // -----------------------------------------------------------------------------
 // API macros
 
-#if SHADER_API_PSSL
+#if defined(SHADER_API_PSSL)
     #include "API/PSSL.hlsl"
-#elif SHADER_API_XBOXONE
+#elif defined(SHADER_API_XBOXONE)
     #include "API/XboxOne.hlsl"
-#elif SHADER_API_D3D11
+#elif defined(SHADER_API_D3D11)
     #include "API/D3D11.hlsl"
-#elif SHADER_API_D3D12
+#elif defined(SHADER_API_D3D12)
     #include "API/D3D12.hlsl"
-#elif SHADER_API_D3D9 || SHADER_API_D3D11_9X
+#elif defined(SHADER_API_D3D9) || defined(SHADER_API_D3D11_9X)
     #include "API/D3D9.hlsl"
-#elif SHADER_API_VULKAN || SHADER_API_SWITCH
+#elif defined(SHADER_API_VULKAN) || defined(SHADER_API_SWITCH)
     #include "API/Vulkan.hlsl"
-#elif SHADER_API_METAL
+#elif defined(SHADER_API_METAL)
     #include "API/Metal.hlsl"
 #else
     #include "API/OpenGL.hlsl"
@@ -145,7 +145,7 @@ float4 PositivePow(float4 base, float4 power)
 // NaN checker
 bool IsNan(float x)
 {
-#if !SHADER_API_GLES
+#if !defined(SHADER_API_GLES)
     return isnan(x) || isinf(x);
 #else
     return (x <= 0.0 || 0.0 <= x) ? false : true;
@@ -154,7 +154,7 @@ bool IsNan(float x)
 
 bool AnyIsNan(float2 x)
 {
-#if !SHADER_API_GLES
+#if !defined(SHADER_API_GLES)
     return any(isnan(x)) || any(isinf(x));
 #else
     return IsNan(x.x) || IsNan(x.y);
@@ -163,7 +163,7 @@ bool AnyIsNan(float2 x)
 
 bool AnyIsNan(float3 x)
 {
-#if !SHADER_API_GLES
+#if !defined(SHADER_API_GLES)
     return any(isnan(x)) || any(isinf(x));
 #else
     return IsNan(x.x) || IsNan(x.y) || IsNan(x.z);
@@ -172,7 +172,7 @@ bool AnyIsNan(float3 x)
 
 bool AnyIsNan(float4 x)
 {
-#if !SHADER_API_GLES
+#if !defined(SHADER_API_GLES)
     return any(isnan(x)) || any(isinf(x));
 #else
     return IsNan(x.x) || IsNan(x.y) || IsNan(x.z) || IsNan(x.w);
