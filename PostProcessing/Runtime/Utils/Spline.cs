@@ -36,9 +36,10 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Loop = loop;
             m_Range = bounds.magnitude;
             cachedData = new float[k_Precision];
+            Cache(0, true);
         }
 
-        public void Cache(int frame)
+        public void Cache(int frame, bool skipFrameCountTest = false)
         {
             // Only cache once per frame
             if (frame == frameCount)
@@ -63,7 +64,8 @@ namespace UnityEngine.Rendering.PostProcessing
             for (int i = 0; i < k_Precision; i++)
                 cachedData[i] = Evaluate((float)i * k_Step);
 
-            frameCount = Time.renderedFrameCount;
+            if (!skipFrameCountTest)
+                frameCount = Time.renderedFrameCount;
         }
 
         public float Evaluate(float t)
