@@ -91,7 +91,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Gets a list of all volumes currently affecting the given layer. Results aren't sorted.
         // Volume with weight of 0 or no profile set will be skipped. Results list won't be cleared.
-        public void GetActiveVolumes(PostProcessLayer layer, List<PostProcessVolume> results)
+        public void GetActiveVolumes(PostProcessLayer layer, List<PostProcessVolume> results, bool skipDisabled = true, bool skipZeroWeight = true)
         {
             // If no trigger is set, only global volumes will have influence
             int mask = layer.volumeLayer.value;
@@ -106,7 +106,7 @@ namespace UnityEngine.Rendering.PostProcessing
             foreach (var volume in volumes)
             {
                 // Skip disabled volumes and volumes without any data or weight
-                if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
+                if ((skipDisabled && !volume.enabled) || volume.profileRef == null || (skipZeroWeight && volume.weight <= 0f))
                     continue;
 
                 // Global volume always have influence
