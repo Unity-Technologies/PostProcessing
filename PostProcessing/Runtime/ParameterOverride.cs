@@ -15,6 +15,20 @@ namespace UnityEngine.Rendering.PostProcessing
             return ((ParameterOverride<T>)this).value;
         }
 
+        // This is used in case you need to access fields/properties that can't be accessed in the
+        // constructor of a ScriptableObject (ParameterOverride are generally declared and inited in
+        // a PostProcessEffectSettings which is a ScriptableObject). This will be called right
+        // after the settings object has been constructed, thus allowing previously "forbidden"
+        // fields/properties.
+        protected internal virtual void OnEnable()
+        {
+        }
+
+        // Here for consistency reasons (cf. OnEnable)
+        protected internal virtual void OnDisable()
+        {
+        }
+
         internal abstract void SetValue(ParameterOverride parameter);
     }
 
@@ -166,9 +180,22 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class SplineParameter : ParameterOverride<Spline>
     {
+        protected internal override void OnEnable()
+        {
+            if (value != null)
+                value.Cache(int.MinValue);
+        }
+
         public override void Interp(Spline from, Spline to, float t)
         {
             int frameCount = Time.renderedFrameCount;
+
+            if (from == null || to == null)
+            {
+                base.Interp(from, to, t);
+                return;
+            }
+
             from.Cache(frameCount);
             to.Cache(frameCount);
 

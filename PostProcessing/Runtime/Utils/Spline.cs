@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -31,15 +32,15 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public Spline(AnimationCurve curve, float zeroValue, bool loop, Vector2 bounds)
         {
+            Assert.IsNotNull(curve);
             this.curve = curve;
             m_ZeroValue = zeroValue;
             m_Loop = loop;
             m_Range = bounds.magnitude;
             cachedData = new float[k_Precision];
-            Cache(0, true);
         }
 
-        public void Cache(int frame, bool skipFrameCountTest = false)
+        public void Cache(int frame)
         {
             // Only cache once per frame
             if (frame == frameCount)
@@ -64,8 +65,7 @@ namespace UnityEngine.Rendering.PostProcessing
             for (int i = 0; i < k_Precision; i++)
                 cachedData[i] = Evaluate((float)i * k_Step);
 
-            if (!skipFrameCountTest)
-                frameCount = Time.renderedFrameCount;
+            frameCount = Time.renderedFrameCount;
         }
 
         public float Evaluate(float t)

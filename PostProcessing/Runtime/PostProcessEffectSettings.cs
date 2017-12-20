@@ -28,6 +28,18 @@ namespace UnityEngine.Rendering.PostProcessing
                 .Select(t => (ParameterOverride)t.GetValue(this))
                 .ToList()
                 .AsReadOnly();
+
+            foreach (var parameter in parameters)
+                parameter.OnEnable();
+        }
+
+        void OnDisable()
+        {
+            if (parameters == null)
+                return;
+
+            foreach (var parameter in parameters)
+                parameter.OnDisable();
         }
 
         public void SetAllOverridesTo(bool state, bool excludeEnabled = true)
