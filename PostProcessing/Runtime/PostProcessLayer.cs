@@ -122,14 +122,11 @@ namespace UnityEngine.Rendering.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            CheckInitLegacy();
+            InitLegacy();
         }
 
-        void CheckInitLegacy()
+        void InitLegacy()
         {
-            if (m_Camera != null && m_CurrentContext != null)
-                return;
-
             m_LegacyCmdBufferBeforeReflections = new CommandBuffer { name = "Deferred Ambient Occlusion" };
             m_LegacyCmdBufferBeforeLighting = new CommandBuffer { name = "Deferred Ambient Occlusion" };
             m_LegacyCmdBufferOpaque = new CommandBuffer { name = "Opaque Only Post-processing" };
@@ -272,7 +269,8 @@ namespace UnityEngine.Rendering.PostProcessing
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
 
-            CheckInitLegacy();
+            if (m_Camera == null || m_CurrentContext == null)
+                InitLegacy();
 
             // Resets the projection matrix from previous frame in case TAA was enabled.
             // We also need to force reset the non-jittered projection matrix here as it's not done
