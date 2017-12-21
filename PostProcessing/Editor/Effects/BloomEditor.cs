@@ -24,7 +24,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_Diffusion = FindParameterOverride(x => x.diffusion);
             m_AnamorphicRatio = FindParameterOverride(x => x.anamorphicRatio);
             m_Color = FindParameterOverride(x => x.color);
-            m_MobileOptimized = FindParameterOverride(x => x.mobileOptimized);
+            m_MobileOptimized = FindParameterOverride(x => x.fastMode);
             
             m_DirtTexture = FindParameterOverride(x => x.dirtTexture);
             m_DirtIntensity = FindParameterOverride(x => x.dirtIntensity);

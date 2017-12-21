@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -12,8 +13,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Amount of tangential distortion.")]
         public FloatParameter intensity = new FloatParameter { value = 0f };
 
-        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms.")]
-        public BoolParameter mobileOptimized = new BoolParameter { value = false };
+        [FormerlySerializedAs("mobileOptimized")]
+        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
+        public BoolParameter fastMode = new BoolParameter { value = false };
 
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
@@ -57,7 +59,7 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             
             var sheet = context.uberSheet;
-            sheet.EnableKeyword(settings.mobileOptimized
+            sheet.EnableKeyword(settings.fastMode
                 ? "CHROMATIC_ABERRATION_LOW"
                 : "CHROMATIC_ABERRATION"
             );

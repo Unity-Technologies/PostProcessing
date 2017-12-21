@@ -877,7 +877,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
                 {
-                    uberSheet.EnableKeyword(fastApproximateAntialiasing.mobileOptimized
+                    uberSheet.EnableKeyword(fastApproximateAntialiasing.fastMode
                         ? "FXAA_LOW"
                         : "FXAA"
                     );
