@@ -686,8 +686,14 @@ namespace UnityEditor.Rendering.PostProcessing
 
             float scale = EditorGUIUtility.pixelsPerPoint;
 
+        #if UNITY_2018_1_OR_NEWER
+            const RenderTextureReadWrite kReadWrite = RenderTextureReadWrite.sRGB;
+        #else
+            const RenderTextureReadWrite kReadWrite = RenderTextureReadWrite.Linear;
+        #endif
+
             var oldRt = RenderTexture.active;
-            var rt = RenderTexture.GetTemporary(Mathf.CeilToInt(rect.width * scale), Mathf.CeilToInt(rect.height * scale), 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            var rt = RenderTexture.GetTemporary(Mathf.CeilToInt(rect.width * scale), Mathf.CeilToInt(rect.height * scale), 0, RenderTextureFormat.ARGB32, kReadWrite);
             s_MaterialGrid.SetFloat("_DisabledState", GUI.enabled ? 1f : 0.5f);
             s_MaterialGrid.SetFloat("_PixelScaling", EditorGUIUtility.pixelsPerPoint);
 
