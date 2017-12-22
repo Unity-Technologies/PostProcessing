@@ -33,9 +33,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         PostProcessManager()
         {
-            m_SortedVolumes = new Dictionary<int, List<PostProcessVolume>>();
+            m_SortedVolumes = new Dictionary<int, List<PostProcessVolume>>(new LayerMaskComparer());
             m_Volumes = new List<PostProcessVolume>();
-            m_SortNeeded = new Dictionary<int, bool>();
+            m_SortNeeded = new Dictionary<int, bool>(new LayerMaskComparer());
             m_BaseSettings = new List<PostProcessEffectSettings>();
             m_TempColliders = new List<Collider>(5);
 
@@ -405,6 +405,18 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
 
                 volumes[j + 1] = temp;
+            }
+        }
+        
+        public class LayerMaskComparer : IEqualityComparer<LayerMask>
+        {
+            public bool Equals(LayerMask x, LayerMask y)
+            {
+                return x.value == y.value;
+            }
+            public int GetHashCode(LayerMask obj)
+            {
+                return obj.value;
             }
         }
     }
