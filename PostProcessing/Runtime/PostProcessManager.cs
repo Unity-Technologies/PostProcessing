@@ -410,8 +410,14 @@ namespace UnityEngine.Rendering.PostProcessing
         
         public class LayerMaskComparer : IEqualityComparer<LayerMask>
         {
-            public bool Equals(LayerMask x, LayerMask y) => x.value == y.value;
-            public int GetHashCode(LayerMask obj) => obj.value;
+            public bool Equals(LayerMask x, LayerMask y)
+            {
+                return x.value == y.value;
+            }
+            public int GetHashCode(LayerMask obj)
+            {
+                return obj.value;
+            }
         }
     }
 }
