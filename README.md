@@ -21,4 +21,4 @@ Requires Unity 5.6.1+ or 2017.1+.
 License
 -------
 
-MIT (see [LICENSE](LICENSE))
+Unity Companion License (see [LICENSE](LICENSE))
