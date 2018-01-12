@@ -56,3 +56,11 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
     if (localThreadId < HISTOGRAM_BINS)
         InterlockedAdd(_Histogram[localThreadId], gs_histogram[localThreadId]);
 }
+
+#pragma kernel KEyeHistogramClear
+[numthreads(HISTOGRAM_THREAD_X, 1, 1)]
+void KEyeHistogramClear(uint dispatchThreadId : SV_DispatchThreadID)
+{
+    if (dispatchThreadId < HISTOGRAM_BINS)
+        _Histogram[dispatchThreadId] = 0u;
+}

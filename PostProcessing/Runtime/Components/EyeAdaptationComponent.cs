@@ -21,8 +21,6 @@ namespace UnityEngine.PostProcessing
 
         RenderTexture m_DebugHistogram;
 
-        static uint[] s_EmptyHistogramBuffer;
-
         int m_FrameCount = 0;
 
         // Don't forget to update 'EyeAdaptation.cginc' if you change these values !
@@ -89,9 +87,6 @@ namespace UnityEngine.PostProcessing
             if (m_HistogramBuffer == null)
                 m_HistogramBuffer = new ComputeBuffer(k_HistogramBins, sizeof(uint));
 
-            if (s_EmptyHistogramBuffer == null)
-                s_EmptyHistogramBuffer = new uint[k_HistogramBins];
-
             // Downscale the framebuffer, we don't need an absolute precision for auto exposure and it
             // helps making it more stable
             var scaleOffsetRes = GetHistogramScaleOffsetRes();
@@ -105,11 +100,13 @@ namespace UnityEngine.PostProcessing
             if (m_AutoExposurePool[1] == null || !m_AutoExposurePool[1].IsCreated())
                 m_AutoExposurePool[1] = new RenderTexture(1, 1, 0, RenderTextureFormat.RFloat);
 
-            // Clears the buffer on every frame as we use it to accumulate luminance values on each frame
-            m_HistogramBuffer.SetData(s_EmptyHistogramBuffer);
+            // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
+            int kernel = m_EyeCompute.FindKernel("KEyeHistogramClear");
+            m_EyeCompute.SetBuffer(kernel, "_Histogram", m_HistogramBuffer);
+            m_EyeCompute.Dispatch(kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
 
             // Gets a log histogram
-            int kernel = m_EyeCompute.FindKernel("KEyeHistogram");
+            kernel = m_EyeCompute.FindKernel("KEyeHistogram");
             m_EyeCompute.SetBuffer(kernel, "_Histogram", m_HistogramBuffer);
             m_EyeCompute.SetTexture(kernel, "_Source", rt);
             m_EyeCompute.SetVector("_ScaleOffsetRes", scaleOffsetRes);
