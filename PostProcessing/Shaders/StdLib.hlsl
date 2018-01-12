@@ -55,6 +55,10 @@ float rcp(float value)
 }
 #endif
 
+#if defined(SHADER_API_GLES)
+#define mad(a, b, c) (a * b + c)
+#endif
+
 #ifndef INTRINSIC_MINMAX3
 float Min3(float a, float b, float c)
 {
