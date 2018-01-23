@@ -226,6 +226,21 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+        public static bool supportsDeferredShading
+        {
+            get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DeferredShading) != BuiltinShaderMode.Disabled; }
+        }
+
+        public static bool supportsMotionVectors
+        {
+            get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.MotionVectors) != BuiltinShaderMode.Disabled; }
+        }
+
+        public static bool supportsDepthNormals
+        {
+            get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DepthNormals) != BuiltinShaderMode.Disabled; }
+        }
+
 #if UNITY_EDITOR
         public static bool isSinglePassStereoSelected
         {
