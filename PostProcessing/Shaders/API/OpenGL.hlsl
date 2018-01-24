@@ -29,11 +29,19 @@
 #define SAMPLE_DEPTH_TEXTURE(textureName, samplerName, coord2) SAMPLE_TEXTURE2D(textureName, samplerName, coord2).r
 #define SAMPLE_DEPTH_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod).r
 
-#define UNITY_BRANCH
-#define UNITY_FLATTEN
-#define UNITY_UNROLL
-#define UNITY_LOOP
-#define UNITY_FASTOPT
+#if SHADER_API_GLES
+#    define UNITY_BRANCH
+#    define UNITY_FLATTEN
+#    define UNITY_UNROLL
+#    define UNITY_LOOP
+#    define UNITY_FASTOPT
+#else
+#    define UNITY_BRANCH    [branch]
+#    define UNITY_FLATTEN   [flatten]
+#    define UNITY_UNROLL    [unroll]
+#    define UNITY_LOOP      [loop]
+#    define UNITY_FASTOPT   [fastopt]
+#endif
 
 #define CBUFFER_START(name)
 #define CBUFFER_END
