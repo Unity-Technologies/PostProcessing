@@ -450,13 +450,13 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_InternalLogLut = new RenderTexture(k_Lut3DSize, k_Lut3DSize, 0, format, RenderTextureReadWrite.Linear)
                 {
                     name = "Color Grading Log Lut",
+                    dimension = TextureDimension.Tex3D,
                     hideFlags = HideFlags.DontSave,
                     filterMode = FilterMode.Bilinear,
                     wrapMode = TextureWrapMode.Clamp,
                     anisoLevel = 0,
                     enableRandomWrite = true,
                     volumeDepth = k_Lut3DSize,
-                    dimension = TextureDimension.Tex3D,
                     autoGenerateMips = false,
                     useMipMap = false
                 };
