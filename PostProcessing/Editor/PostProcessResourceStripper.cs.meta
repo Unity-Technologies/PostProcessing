@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 39fd865e83c22c54ea18f4b72b707a10
+timeCreated: 1516717074
+licenseType: Pro
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - resources: {fileID: 11400000, guid: d82512f9c8e5d4a4d938b575d47f88d4, type: 2}
+  - unstrippedResources: {fileID: 11400000, guid: fef5d8f16dc2eb84b9b0c1b962d72095,
+      type: 2}
+  - stripping: {fileID: 11400000, guid: 2d01135b2873ca145ab1fc265f2acf6a, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
