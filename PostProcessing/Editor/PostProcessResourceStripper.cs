@@ -6,19 +6,25 @@ using UnityEngine.Rendering.PostProcessing;
 namespace UnityEditor.Rendering.PostProcessing
 {
     public sealed class PostProcessResourceStripper : ScriptableObject
-#if UNITY_2017_1_OR_NEWER
-    , IPreprocessBuild, IActiveBuildTargetChanged
-#endif
     {
-        public int callbackOrder { get { return 0; } }
+        [SerializeField] private PostProcessResources resources;
+        [SerializeField] private PostProcessResources unstrippedResources;
+        [SerializeField] private PostProcessStrippingConfig stripping;
 
-        [SerializeField] PostProcessResources resources;
-        [SerializeField] PostProcessResources unstrippedResources;
-        [SerializeField] PostProcessStrippingConfig stripping;
+        static PostProcessResourceStripper s_Instance;
 
-        void Awake()
+        public static PostProcessResourceStripper instance
         {
-            unstrippedResources.changeHandler = Update;
+            get
+            {
+                if (s_Instance == null)
+                {
+                    s_Instance = CreateInstance<PostProcessResourceStripper>();
+                    s_Instance.unstrippedResources.changeHandler = Update;
+                }
+
+                return s_Instance;
+            }
         }
 
         void OnDestroy()
@@ -106,20 +112,43 @@ namespace UnityEditor.Rendering.PostProcessing
             }
         }
 
-        public void OnPreprocessBuild(BuildTarget target, string path)
-        {
-            Apply(target);
-        }
-
-        public void OnActiveBuildTargetChanged(BuildTarget previousTarget, BuildTarget newTarget)
-        {
-            Apply(newTarget);
-        }
-
         public static void Update()
         {
-            PostProcessResourceStripper stripper = new PostProcessResourceStripper();
-            stripper.Apply(EditorUserBuildSettings.activeBuildTarget);
+            Update(EditorUserBuildSettings.activeBuildTarget);
+        }
+
+        public static void Update(BuildTarget target)
+        {
+            instance.Apply(EditorUserBuildSettings.activeBuildTarget);
         }
     }
+
+#if UNITY_2017_1_OR_NEWER
+    sealed class UpdateStrippingOnBuildTargetChange : IActiveBuildTargetChanged
+    {
+        public int callbackOrder { get { return 0; } }
+        public void OnActiveBuildTargetChanged(BuildTarget previousTarget, BuildTarget newTarget)
+        {
+            PostProcessResourceStripper.Update(newTarget);
+        }
+    }
+
+    sealed class UpdateStrippingBeforeBuild : IPreprocessBuild
+    {
+        public int callbackOrder { get { return 0; } }
+
+    #if UNITY_2018_1_OR_NEWER
+        public void OnPreprocessBuild(Build.Reporting.BuildReport report)
+        {
+            PostProcessResourceStripper.Update(report.summary.platform);
+        }
+    #else
+        public void OnPreprocessBuild(BuildTarget target, string path)
+        {
+            PostProcessResourceStripper.Update(target);
+        }
+    #endif
+    }
+#endif
+
 }
