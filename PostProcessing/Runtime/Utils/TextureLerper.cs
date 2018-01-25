@@ -82,12 +82,12 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 rt = new RenderTexture(w, h, d, format)
                 {
+                    dimension = dimension,
                     filterMode = FilterMode.Bilinear,
                     wrapMode = TextureWrapMode.Clamp,
                     anisoLevel = 0,
                     volumeDepth = d,
-                    enableRandomWrite = enableRandomWrite,
-                    dimension = dimension
+                    enableRandomWrite = enableRandomWrite
                 };
                 rt.Create();
             }
