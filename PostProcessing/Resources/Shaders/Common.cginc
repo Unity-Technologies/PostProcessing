@@ -105,6 +105,27 @@ float rcp(float value)
 }
 #endif
 
+// NAN checker
+bool IsNan(float x)
+{
+    return (x <= 0.0 || 0.0 <= x) ? false : true;
+}
+
+bool AnyIsNan(float2 x)
+{
+    return IsNan(x.x) || IsNan(x.y);
+}
+
+bool AnyIsNan(float3 x)
+{
+    return IsNan(x.x) || IsNan(x.y) || IsNan(x.z);
+}
+
+bool AnyIsNan(float4 x)
+{
+    return IsNan(x.x) || IsNan(x.y) || IsNan(x.z) || IsNan(x.w);
+}
+
 // Tonemapper from http://gpuopen.com/optimized-reversible-tonemapper-for-resolve/
 float4 FastToneMap(in float4 color)
 {

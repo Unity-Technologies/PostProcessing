@@ -657,17 +657,6 @@ Shader "Hidden/Post FX/Screen Space Reflection"
             return fmod(floor(t * float3(8.0, 4.0, 2.0)), 2.0);
         }
 
-        bool isnan_custom(float v)
-        {
-            uint i = asuint(v);
-            return (i >= 0x7F800001 && i <= 0x7FFFFFFF) || (i >= 0xFF800001 && i <= 0xFFFFFFFF);
-        }
-
-        bool3 isnan_custom(float3 v)
-        {
-            return bool3(isnan_custom(v.x), isnan_custom(v.y), isnan_custom(v.z));
-        }
-
         float4 fragCompositeSSR(v2f i) : SV_Target
         {
             // Pixel being shaded
@@ -760,7 +749,7 @@ Shader "Hidden/Post FX/Screen Space Reflection"
             float confidence = temp.w;
             float3 colorResult = confidence > 0.0 ? tex2D(_MainTex, hitPoint).rgb : tex2D(_CameraReflectionsTexture, tsP).rgb;
 
-            if (any(isnan_custom(colorResult)))
+            if (AnyIsNan(colorResult))
                 colorResult = float3(0.0, 0.0, 0.0);
 
             return float4(colorResult, confidence);
