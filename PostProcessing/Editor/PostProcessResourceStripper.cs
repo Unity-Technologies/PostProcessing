@@ -103,7 +103,7 @@ namespace UnityEditor.Rendering.PostProcessing
                     resources.shaders.scalableAO = null;
             }
 
-            if (stripping.stripUnsupportedShaders && !RuntimeUtilities.supportsMotionVectors)
+            if (stripping.stripUnsupportedShaders && !SystemInfo.supportsMotionVectors)
             {
                 resources.shaders.motionBlur = null;
                 resources.shaders.temporalAntialiasing = null;

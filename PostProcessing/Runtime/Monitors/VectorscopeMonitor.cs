@@ -33,6 +33,11 @@ namespace UnityEngine.Rendering.PostProcessing
             return true;
         }
 
+        internal override bool ShaderResourcesAvailable(PostProcessRenderContext context)
+        {
+            return context.resources.computeShaders.vectorscope;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             CheckOutput(size, size);

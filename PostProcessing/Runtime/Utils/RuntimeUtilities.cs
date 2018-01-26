@@ -231,11 +231,6 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DeferredShading) != BuiltinShaderMode.Disabled; }
         }
 
-        public static bool supportsMotionVectors
-        {
-            get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.MotionVectors) != BuiltinShaderMode.Disabled; }
-        }
-
         public static bool supportsDepthNormals
         {
             get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DepthNormals) != BuiltinShaderMode.Disabled; }

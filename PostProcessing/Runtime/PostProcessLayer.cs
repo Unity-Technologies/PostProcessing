@@ -940,7 +940,7 @@ namespace UnityEngine.Rendering.PostProcessing
         bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
             bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
-            bool lightMeter = debugLayer.lightMeter.IsRequestedAndSupported();
+            bool lightMeter = debugLayer.lightMeter.IsRequestedAndSupported(context);
             return autoExpo || lightMeter;
         }
     }

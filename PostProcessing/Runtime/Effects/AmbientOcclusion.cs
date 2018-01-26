@@ -71,12 +71,20 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (mode.value == AmbientOcclusionMode.ScalableAmbientObscurance)
             {
-                state &= !RuntimeUtilities.scriptableRenderPipelineActive;
+                state &= !RuntimeUtilities.scriptableRenderPipelineActive
+                      && context.resources.shaders.scalableAO
+                      && context.resources.shaders.scalableAO.isSupported;
             }
             else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
             {
 #if UNITY_2017_1_OR_NEWER
                 state &= SystemInfo.supportsComputeShaders
+                      && context.resources.shaders.multiScaleAO
+                      && context.resources.shaders.multiScaleAO.isSupported
+                      && context.resources.computeShaders.multiScaleAODownsample1
+                      && context.resources.computeShaders.multiScaleAODownsample2
+                      && context.resources.computeShaders.multiScaleAORender
+                      && context.resources.computeShaders.multiScaleAOUpsample
                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf)
                       && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.R8);

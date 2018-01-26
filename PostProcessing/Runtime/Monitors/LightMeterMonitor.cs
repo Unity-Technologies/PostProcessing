@@ -11,6 +11,11 @@ namespace UnityEngine.Rendering.PostProcessing
         // Note: only works with HDR grading, as this monitor only makes sense when working in HDR
         public bool showCurves = true;
 
+        internal override bool ShaderResourcesAvailable(PostProcessRenderContext context)
+        {
+            return context.resources.shaders.lightMeter && context.resources.shaders.lightMeter.isSupported;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             CheckOutput(width, height);
