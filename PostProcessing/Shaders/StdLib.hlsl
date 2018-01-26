@@ -55,6 +55,10 @@ float rcp(float value)
 }
 #endif
 
+#if defined(SHADER_API_GLES)
+#define mad(a, b, c) (a * b + c)
+#endif
+
 #ifndef INTRINSIC_MINMAX3
 float Min3(float a, float b, float c)
 {
@@ -143,40 +147,25 @@ float4 PositivePow(float4 base, float4 power)
 }
 
 // NaN checker
+// /Gic isn't enabled on fxc so we can't rely on isnan() anymore
 bool IsNan(float x)
 {
-#if !defined(SHADER_API_GLES)
-    return isnan(x) || isinf(x);
-#else
     return (x <= 0.0 || 0.0 <= x) ? false : true;
-#endif
 }
 
 bool AnyIsNan(float2 x)
 {
-#if !defined(SHADER_API_GLES)
-    return any(isnan(x)) || any(isinf(x));
-#else
     return IsNan(x.x) || IsNan(x.y);
-#endif
 }
 
 bool AnyIsNan(float3 x)
 {
-#if !defined(SHADER_API_GLES)
-    return any(isnan(x)) || any(isinf(x));
-#else
     return IsNan(x.x) || IsNan(x.y) || IsNan(x.z);
-#endif
 }
 
 bool AnyIsNan(float4 x)
 {
-#if !defined(SHADER_API_GLES)
-    return any(isnan(x)) || any(isinf(x));
-#else
     return IsNan(x.x) || IsNan(x.y) || IsNan(x.z) || IsNan(x.w);
-#endif
 }
 
 // -----------------------------------------------------------------------------
