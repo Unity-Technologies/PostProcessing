@@ -9,6 +9,11 @@ namespace UnityEditor.Rendering.PostProcessing
         public bool stripDebugShaders = false;
         public bool stripComputeShaders = false;
 
+        public void Awake()
+        {
+            PostProcessResourceStripper.Update();
+        }
+
         public void OnValidate()
         {
             PostProcessResourceStripper.Update();
