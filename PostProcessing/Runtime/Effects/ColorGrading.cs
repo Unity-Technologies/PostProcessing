@@ -176,7 +176,8 @@ namespace UnityEngine.Rendering.PostProcessing
             var gradingMode = settings.gradingMode.value;
             var supportComputeTex3D = SystemInfo.supports3DRenderTextures
                 && SystemInfo.supportsComputeShaders
-                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore;
+                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore
+                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES3;
 
             if (gradingMode == GradingMode.External)
                 RenderExternalPipeline3D(context);
