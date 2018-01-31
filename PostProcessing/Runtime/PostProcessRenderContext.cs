@@ -81,7 +81,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Should we flip the last pass?
         public bool flip { get; set; }
-        
+
         // -----------------------------------------------------------------------------------------
         // The following is auto-populated by the post-processing stack
 
@@ -106,12 +106,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // TODO: Change w/h name to texture w/h in order to make
         // size usages explicit
-
 #if UNITY_2017_2_OR_NEWER
-        private RenderTextureDescriptor m_sourceDescriptor;
-        private RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        RenderTextureDescriptor m_sourceDescriptor;
+        RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
-            var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height, 
+            var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height,
                                                                                 m_sourceDescriptor.colorFormat, depthBufferBits);
             modifiedDesc.dimension = m_sourceDescriptor.dimension;
             modifiedDesc.volumeDepth = m_sourceDescriptor.volumeDepth;
@@ -126,14 +125,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (colorFormat != RenderTextureFormat.Default)
                 modifiedDesc.colorFormat = colorFormat;
-            if (readWrite != RenderTextureReadWrite.Default)
-                modifiedDesc.sRGB = (readWrite != RenderTextureReadWrite.Linear);
+
+            modifiedDesc.sRGB = readWrite != RenderTextureReadWrite.Linear;
 
             return modifiedDesc;
         }
 #endif
 
-        public void GetScreenSpaceTemporaryRT(CommandBuffer cmd, int nameID, 
+        public void GetScreenSpaceTemporaryRT(CommandBuffer cmd, int nameID,
                                             int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default,
                                             FilterMode filter = FilterMode.Bilinear, int widthOverride = 0, int heightOverride = 0)
         {
@@ -155,11 +154,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.GetTemporaryRT(nameID, actualWidth, actualHeight, depthBufferBits, filter, colorFormat, readWrite);
             // TODO: How to handle MSAA for XR in older versions?  Query cam?
-            // TODO: Pass in vrUsage into the args 
+            // TODO: Pass in vrUsage into the args
 #endif
         }
 
-        public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, 
+        public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default,
                                                         RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int widthOverride = 0, int heightOverride = 0)
         {
 #if UNITY_2017_2_OR_NEWER
@@ -194,7 +193,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Are we currently rendering in the scene view?
         public bool isSceneView { get; internal set; }
-        
+
         // Current antialiasing method set
         public PostProcessLayer.Antialiasing antialiasing { get; internal set; }
 

@@ -178,6 +178,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 && SystemInfo.supportsComputeShaders
                 && context.resources.computeShaders.lut3DBaker != null
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore;
+                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES3;
 
             if (gradingMode == GradingMode.External)
                 RenderExternalPipeline3D(context);
