@@ -177,7 +177,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var supportComputeTex3D = SystemInfo.supports3DRenderTextures
                 && SystemInfo.supportsComputeShaders
                 && context.resources.computeShaders.lut3DBaker != null
-                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore;
+                && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLCore
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES3;
 
             if (gradingMode == GradingMode.External)
