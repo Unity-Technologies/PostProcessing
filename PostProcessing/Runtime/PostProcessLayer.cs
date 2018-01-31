@@ -375,7 +375,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // We need to use the internal Blit method to copy the camera target or it'll fail
                 // on tiled GPU as it won't be able to resolve
                 int tempTarget0 = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(cmd, tempTarget0, 24, sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, tempTarget0, 0, sourceFormat);
                 cmd.Blit(cameraTarget, tempTarget0);
                 context.source = tempTarget0;
 
@@ -384,7 +384,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (opaqueOnlyEffects > 1)
                 {
                     tempTarget1 = m_TargetPool.Get();
-                    context.GetScreenSpaceTemporaryRT(cmd, tempTarget1, 24, sourceFormat);
+                    context.GetScreenSpaceTemporaryRT(cmd, tempTarget1, 0, sourceFormat);
                     context.destination = tempTarget1;
                 }
                 else context.destination = cameraTarget;
@@ -420,7 +420,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Same as before, first blit needs to use the builtin Blit command to properly handle
             // tiled GPUs
             int tempRt = m_TargetPool.Get();
-            context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 24, sourceFormat, RenderTextureReadWrite.sRGB);
+            context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
             m_NaNKilled = stopNaNPropagation;
 
@@ -633,7 +633,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (stopNaNPropagation && !m_NaNKilled)
             {
                 lastTarget = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 24, context.sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
                 cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
                 context.source = lastTarget;
                 m_NaNKilled = true;
@@ -658,7 +658,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 var taaTarget = m_TargetPool.Get();
                 var finalDestination = context.destination;
-                context.GetScreenSpaceTemporaryRT(cmd, taaTarget, 24, context.sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, taaTarget, 0, context.sourceFormat);
                 context.destination = taaTarget;
                 temporalAntialiasing.Render(context);
                 context.source = taaTarget;
@@ -708,7 +708,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var finalDestination = context.destination;
 
             var cmd = context.command;
-            context.GetScreenSpaceTemporaryRT(cmd, tempTarget, 24, context.sourceFormat);
+            context.GetScreenSpaceTemporaryRT(cmd, tempTarget, 0, context.sourceFormat);
             context.destination = tempTarget;
             RenderList(sortedBundles[evt], context, marker);
             context.source = tempTarget;
@@ -759,9 +759,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Targets.Add(context.destination); // Last target is always destination
 
                 // Render
-                context.GetScreenSpaceTemporaryRT(cmd, tempTarget1, 24, context.sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, tempTarget1, 0, context.sourceFormat);
                 if (count > 2)
-                    context.GetScreenSpaceTemporaryRT(cmd, tempTarget2, 24, context.sourceFormat);
+                    context.GetScreenSpaceTemporaryRT(cmd, tempTarget2, 0, context.sourceFormat);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -797,7 +797,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 // Render to an intermediate target as this won't be the final pass
                 tempTarget = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(cmd, tempTarget, 24, context.sourceFormat);
+                context.GetScreenSpaceTemporaryRT(cmd, tempTarget, 0, context.sourceFormat);
                 context.destination = tempTarget;
 
                 // Handle FXAA's keep alpha mode
@@ -889,7 +889,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     tempTarget = m_TargetPool.Get();
                     var finalDestination = context.destination;
-                    context.GetScreenSpaceTemporaryRT(context.command, tempTarget, 24, context.sourceFormat);
+                    context.GetScreenSpaceTemporaryRT(context.command, tempTarget, 0, context.sourceFormat);
                     context.destination = tempTarget;
                     subpixelMorphologicalAntialiasing.Render(context);
                     context.source = tempTarget;
@@ -929,7 +929,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var finalDestination = context.destination;
             var tempTarget = m_TargetPool.Get();
-            context.GetScreenSpaceTemporaryRT(context.command, tempTarget, 24, context.sourceFormat);
+            context.GetScreenSpaceTemporaryRT(context.command, tempTarget, 0, context.sourceFormat);
             context.destination = tempTarget;
             effect.renderer.Render(context);
             context.source = tempTarget;
