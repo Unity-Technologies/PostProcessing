@@ -2,7 +2,11 @@
 #if !UNITY_2018_2_OR_NEWER && (UNITY_XBOXONE || UNITY_SWITCH) && !UNITY_EDITOR
 using System;
 
+#if UNITY_2017_2_OR_NEWER
 namespace UnityEngine.XR
+#else
+namespace UnityEngine.VR
+#endif
 {
 #if UNITY_2017_2_OR_NEWER
     public static class XRSettings
