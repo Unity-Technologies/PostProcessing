@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
@@ -7,11 +8,12 @@ namespace UnityEngine.Rendering.PostProcessing
     // Temporary code dump until the texture format refactor goes into trunk...
     public static class TextureFormatUtilities
     {
-        static Dictionary<TextureFormat, RenderTextureFormat> s_FormatMap;
+        static Dictionary<TextureFormat, RenderTextureFormat> s_FormatAliasMap;
+        static Dictionary<int, bool> s_SupportedRenderTextureFormats;
 
         static TextureFormatUtilities()
         {
-            s_FormatMap = new Dictionary<TextureFormat, RenderTextureFormat>
+            s_FormatAliasMap = new Dictionary<TextureFormat, RenderTextureFormat>
             {
                 { TextureFormat.Alpha8, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ARGB4444, RenderTextureFormat.ARGB4444 },
@@ -66,6 +68,17 @@ namespace UnityEngine.Rendering.PostProcessing
                 { TextureFormat.ETC_RGB4_3DS, RenderTextureFormat.ARGB32 },
                 { TextureFormat.ETC_RGBA8_3DS, RenderTextureFormat.ARGB32 }
             };
+
+            // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
+            // cache its calls to avoid that...
+            s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
+            var values = Enum.GetValues(typeof(RenderTextureFormat)).Cast<int>();
+
+            foreach (var format in values)
+            {
+                bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
+                s_SupportedRenderTextureFormats.Add(format, supported);
+            }
         }
 
         public static RenderTextureFormat GetUncompressedRenderTextureFormat(Texture texture)
@@ -80,13 +93,20 @@ namespace UnityEngine.Rendering.PostProcessing
                 var inFormat = ((Texture2D)texture).format;
                 RenderTextureFormat outFormat;
 
-                if (!s_FormatMap.TryGetValue(inFormat, out outFormat))
+                if (!s_FormatAliasMap.TryGetValue(inFormat, out outFormat))
                     throw new NotSupportedException("Texture format not supported");
 
                 return outFormat;
             }
 
             return RenderTextureFormat.Default;
+        }
+
+        internal static bool IsSupported(this RenderTextureFormat format)
+        {
+            bool supported;
+            s_SupportedRenderTextureFormats.TryGetValue((int)format, out supported);
+            return supported;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 && SystemInfo.graphicsShaderLevel >= 35;
         }
     }
-    
+
     // TODO: Look into minimum blur amount in the distance, right now it's lerped until a point
     // TODO: Doesn't play nice with alpha propagation, see if it can be fixed without killing performances
     public sealed class DepthOfFieldRenderer : PostProcessEffectRenderer<DepthOfField>
@@ -81,10 +81,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         RenderTextureFormat SelectFormat(RenderTextureFormat primary, RenderTextureFormat secondary)
         {
-            if (SystemInfo.SupportsRenderTextureFormat(primary))
+            if (primary.IsSupported())
                 return primary;
 
-            if (SystemInfo.SupportsRenderTextureFormat(secondary))
+            if (secondary.IsSupported())
                 return secondary;
 
             return RenderTextureFormat.Default;
@@ -159,7 +159,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 float motionBlending = context.temporalAntialiasing.motionBlending;
                 float blend = m_ResetHistory ? 0f : motionBlending; // Handles first frame blending
                 var jitter = context.temporalAntialiasing.jitter;
-                
+
                 sheet.properties.SetVector(ShaderIDs.TaaParams, new Vector3(jitter.x, jitter.y, blend));
 
                 int pp = m_HistoryPingPong[context.xrActiveEye];
