@@ -85,9 +85,9 @@ namespace UnityEngine.Rendering.PostProcessing
                       && context.resources.computeShaders.multiScaleAODownsample2
                       && context.resources.computeShaders.multiScaleAORender
                       && context.resources.computeShaders.multiScaleAOUpsample
-                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
-                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RHalf)
-                      && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.R8);
+                      && RenderTextureFormat.RFloat.IsSupported()
+                      && RenderTextureFormat.RHalf.IsSupported()
+                      && RenderTextureFormat.R8.IsSupported();
 #else
                 state = false;
 #endif

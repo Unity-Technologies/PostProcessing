@@ -40,7 +40,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return enabled.value
                 && SystemInfo.supportsComputeShaders
-                && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RFloat)
+                && RenderTextureFormat.RFloat.IsSupported()
                 && context.resources.shaders.autoExposure
                 && context.resources.shaders.autoExposure.isSupported
                 && context.resources.computeShaders.exposureHistogram;
@@ -127,7 +127,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_AutoExposurePingPong[context.xrActiveEye] = ++pp % 2;
                 m_CurrentAutoExposure = dst;
             }
-            
+
             cmd.EndSample("AutoExposureLookup");
 
             context.autoExposureTexture = m_CurrentAutoExposure;

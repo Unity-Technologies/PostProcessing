@@ -24,11 +24,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 && intensity.value > 0f;
         }
     }
-    
+
     public sealed class GrainRenderer : PostProcessEffectRenderer<Grain>
     {
         RenderTexture m_GrainLookupRT;
-        
+
         const int k_SampleCount = 1024;
         int m_SampleIndex;
 
@@ -63,7 +63,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 m_GrainLookupRT.Create();
             }
-            
+
             var sheet = context.propertySheets.Get(context.resources.shaders.grainBaker);
             sheet.properties.Clear();
             sheet.properties.SetFloat(ShaderIDs.Phase, time % 10f);
@@ -82,7 +82,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         RenderTextureFormat GetLookupFormat()
         {
-            if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
+            if (RenderTextureFormat.ARGBHalf.IsSupported())
                 return RenderTextureFormat.ARGBHalf;
 
             return RenderTextureFormat.ARGB32;

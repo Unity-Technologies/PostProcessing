@@ -202,7 +202,7 @@ half4 QuadraticThreshold(half4 color, half threshold, half3 curve)
     rq = curve.z * rq * rq;
 
     // Combine and apply the brightness response curve.
-    color *= max(rq, br - threshold) / max(br, 1e-5);
+    color *= max(rq, br - threshold) / max(br, EPSILON);
 
     return color;
 }

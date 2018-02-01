@@ -104,6 +104,95 @@ namespace UnityEngine.Rendering.PostProcessing
         // Current camera height in pixels
         public int height { get; private set; }
 
+        public bool stereoActive { get; private set; }
+
+        // Current active rendering eye (for XR)
+        public int xrActiveEye { get; private set; }
+
+        // Pixel dimensions of logical screen size
+        public int screenWidth { get; private set; }
+
+        public int screenHeight { get; private set; }
+
+        // Are we currently rendering in the scene view?
+        public bool isSceneView { get; internal set; }
+
+        // Current antialiasing method set
+        public PostProcessLayer.Antialiasing antialiasing { get; internal set; }
+
+        // Mostly used to grab the jitter vector and other TAA-related values when an effect needs
+        // to do temporal reprojection (see: Depth of Field)
+        public TemporalAntialiasing temporalAntialiasing { get; internal set; }
+
+        // Internal values used for builtin effects
+        // Beware, these may not have been set before a specific builtin effect has been executed
+        internal PropertySheet uberSheet;
+        internal Texture autoExposureTexture;
+        internal LogHistogram logHistogram;
+        internal Texture logLut;
+        internal AutoExposure autoExposure;
+        internal int bloomBufferNameID;
+
+        public void Reset()
+        {
+            m_Camera = null;
+            width = 0;
+            height = 0;
+
+#if UNITY_2017_2_OR_NEWER
+            m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
+#endif
+
+            stereoActive = false;
+            xrActiveEye = (int)Camera.StereoscopicEye.Left;
+            screenWidth = 0;
+            screenHeight = 0;
+
+            command = null;
+            source = 0;
+            destination = 0;
+            sourceFormat = RenderTextureFormat.ARGB32;
+            flip = false;
+
+            resources = null;
+            propertySheets = null;
+            debugLayer = null;
+            isSceneView = false;
+            antialiasing = PostProcessLayer.Antialiasing.None;
+            temporalAntialiasing = null;
+
+            uberSheet = null;
+            autoExposureTexture = null;
+            logLut = null;
+            autoExposure = null;
+            bloomBufferNameID = -1;
+
+            if (userData == null)
+                userData = new Dictionary<string, object>();
+
+            userData.Clear();
+        }
+
+        // Checks if TAA is enabled & supported
+        public bool IsTemporalAntialiasingActive()
+        {
+            return antialiasing == PostProcessLayer.Antialiasing.TemporalAntialiasing
+                && !isSceneView
+                && temporalAntialiasing.IsSupported();
+        }
+
+        // Checks if a specific debug overlay is enabled
+        public bool IsDebugOverlayEnabled(DebugOverlay overlay)
+        {
+            return debugLayer.debugOverlay == overlay;
+        }
+
+        // Shortcut function
+        public void PushDebugOverlay(CommandBuffer cmd, RenderTargetIdentifier source, PropertySheet sheet, int pass)
+        {
+            debugLayer.PushDebugOverlay(cmd, source, sheet, pass);
+        }
+
         // TODO: Change w/h name to texture w/h in order to make
         // size usages explicit
 #if UNITY_2017_2_OR_NEWER
@@ -180,94 +269,5 @@ namespace UnityEngine.Rendering.PostProcessing
             return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
 #endif
         }
-
-        public bool stereoActive { get; private set; }
-
-        // Current active rendering eye (for XR)
-        public int xrActiveEye { get; private set; }
-
-        // Pixel dimensions of logical screen size
-        public int screenWidth { get; private set; }
-
-        public int screenHeight { get; private set; }
-
-        // Are we currently rendering in the scene view?
-        public bool isSceneView { get; internal set; }
-
-        // Current antialiasing method set
-        public PostProcessLayer.Antialiasing antialiasing { get; internal set; }
-
-        // Mostly used to grab the jitter vector and other TAA-related values when an effect needs
-        // to do temporal reprojection (see: Depth of Field)
-        public TemporalAntialiasing temporalAntialiasing { get; internal set; }
-
-        public void Reset()
-        {
-            m_Camera = null;
-            width = 0;
-            height = 0;
-
-#if UNITY_2017_2_OR_NEWER
-            m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
-#endif
-
-            stereoActive = false;
-            xrActiveEye = (int)Camera.StereoscopicEye.Left;
-            screenWidth = 0;
-            screenHeight = 0;
-
-            command = null;
-            source = 0;
-            destination = 0;
-            sourceFormat = RenderTextureFormat.ARGB32;
-            flip = false;
-
-            resources = null;
-            propertySheets = null;
-            debugLayer = null;
-            isSceneView = false;
-            antialiasing = PostProcessLayer.Antialiasing.None;
-            temporalAntialiasing = null;
-
-            uberSheet = null;
-            autoExposureTexture = null;
-            logLut = null;
-            autoExposure = null;
-            bloomBufferNameID = -1;
-
-            if (userData == null)
-                userData = new Dictionary<string, object>();
-
-            userData.Clear();
-        }
-
-        // Checks if TAA is enabled & supported
-        public bool IsTemporalAntialiasingActive()
-        {
-            return antialiasing == PostProcessLayer.Antialiasing.TemporalAntialiasing
-                && !isSceneView
-                && temporalAntialiasing.IsSupported();
-        }
-
-        // Checks if a specific debug overlay is enabled
-        public bool IsDebugOverlayEnabled(DebugOverlay overlay)
-        {
-            return debugLayer.debugOverlay == overlay;
-        }
-
-        // Shortcut function
-        public void PushDebugOverlay(CommandBuffer cmd, RenderTargetIdentifier source, PropertySheet sheet, int pass)
-        {
-            debugLayer.PushDebugOverlay(cmd, source, sheet, pass);
-        }
-
-        // Internal values used for builtin effects
-        // Beware, these may not have been set before a specific builtin effect has been executed
-        internal PropertySheet uberSheet;
-        internal Texture autoExposureTexture;
-        internal LogHistogram logHistogram;
-        internal Texture logLut;
-        internal AutoExposure autoExposure;
-        internal int bloomBufferNameID;
     }
 }
