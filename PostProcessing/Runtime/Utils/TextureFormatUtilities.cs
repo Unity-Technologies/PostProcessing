@@ -72,9 +72,9 @@ namespace UnityEngine.Rendering.PostProcessing
             // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
             // cache its calls to avoid that...
             s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
-            var values = Enum.GetValues(typeof(RenderTextureFormat)).Cast<int>();
+            IEnumerable<int> values = Enum.GetValues(typeof(RenderTextureFormat)).Cast<int>();
 
-            foreach (var format in values)
+            foreach (int format in values)
             {
                 bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
                 s_SupportedRenderTextureFormats.Add(format, supported);
