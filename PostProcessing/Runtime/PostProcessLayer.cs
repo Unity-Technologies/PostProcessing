@@ -145,6 +145,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Init(PostProcessResources resources)
         {
+#if UNITY_EDITOR
+            m_Resources = PostProcessResourcesFactory.Stripped(m_Resources);
+#endif
             if (resources != null) m_Resources = resources;
 
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);

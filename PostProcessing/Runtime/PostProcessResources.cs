@@ -77,16 +77,16 @@ namespace UnityEngine.Rendering.PostProcessing
         public Shaders shaders;
         public ComputeShaders computeShaders;
 
-#if UNITY_EDITOR
-        public delegate void ChangeHandler();
-        public ChangeHandler changeHandler;
-
-        void OnValidate()
+        public PostProcessResources StrippableClone()
         {
-            if (changeHandler != null)
-                changeHandler();
+            PostProcessResources clone = CreateInstance<PostProcessResources>();
+            clone.blueNoise64 = (Texture2D[]) blueNoise64.Clone();
+            clone.blueNoise256 = (Texture2D[]) blueNoise256.Clone();
+            clone.smaaLuts = smaaLuts;
+            clone.shaders = shaders.Clone();
+            clone.computeShaders = computeShaders.Clone();
+            return clone;
         }
-#endif
     }
 
 }
