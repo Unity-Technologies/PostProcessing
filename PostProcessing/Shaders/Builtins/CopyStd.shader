@@ -53,7 +53,7 @@ Shader "Hidden/PostProcessing/CopyStd"
         //>>> We don't want to include StdLib.hlsl in this file so let's copy/paste what we need
         bool IsNan(float x)
         {
-            return (x <= 0.0 || 0.0 <= x) ? false : true;
+            return (x < 0.0 || x > 0.0 || x == 0.0) ? false : true;
         }
 
         bool AnyIsNan(float4 x)
