@@ -8,6 +8,9 @@ namespace UnityEditor.Rendering.PostProcessing
 {
     public sealed class PostProcessResourceStripper : ScriptableObject
     {
+        public const string DefaultStrippingConfigAssetPath = "Assets/PostProcessStrippingConfig.asset";
+
+
         private PostProcessStrippingConfig stripping;
         private PostProcessStrippingConfig defaultConfig;
 
@@ -32,7 +35,6 @@ namespace UnityEditor.Rendering.PostProcessing
         void Awake()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
-
         }
 
         void OnDestroy()
@@ -68,22 +70,35 @@ namespace UnityEditor.Rendering.PostProcessing
             resources.computeShaders.vectorscope = null;
         }
 
-        private void LazyInitStrippingConfig()
+        static private string FindPostProcessStrippingConfigGUID()
+        {
+            var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
+            if (guids.Length > 0)
+                return guids[0];
+            else
+                return null;
+        }
+
+        static public void EnsurePostProcessStrippingConfigAssetExists()
+        {
+            var guid = FindPostProcessStrippingConfigGUID();
+            if (guid != null)
+                return;
+
+            AssetDatabase.CreateAsset(CreateInstance<PostProcessStrippingConfig>(), DefaultStrippingConfigAssetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private void LazyLoadStrippingConfig()
         {
             if (stripping != null)
                 return;
 
-            var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
-            if (guids.Length > 0)
+            var guid = FindPostProcessStrippingConfigGUID();
+            if (guid != null)
             {
-                stripping = (PostProcessStrippingConfig) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guids[0]), typeof(PostProcessStrippingConfig));
-            }
-            else
-            {
-                // Create a new config asset
-                AssetDatabase.CreateAsset(defaultConfig, "Assets/PostProcessStrippingConfig.asset");
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
+                stripping = (PostProcessStrippingConfig) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
             }
 
             if (stripping == null)
@@ -115,7 +130,7 @@ namespace UnityEditor.Rendering.PostProcessing
             if (defaultConfig == null)
                 return;
 
-            LazyInitStrippingConfig();
+            LazyLoadStrippingConfig();
             if (stripping == null)
                 return;
 
@@ -230,6 +245,7 @@ namespace UnityEditor.Rendering.PostProcessing
 public class SetupStripping {
     static SetupStripping()
     {
+        PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
         PostProcessResourcesFactory.Init(PostProcessResourceStripper.Strip);
     }
 }
