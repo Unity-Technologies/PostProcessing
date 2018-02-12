@@ -64,6 +64,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Tooltip("Number of sample points, which affects quality and performance. Lowest, Low & Medium passes are downsampled. High and Ultra are not and should only be used on high-end hardware.")]
         public AmbientOcclusionQualityParameter quality = new AmbientOcclusionQualityParameter { value = AmbientOcclusionQuality.Medium };
 
+        // SRPs can call this method without a context set (see HDRP)
+        // We need a better way to handle this than checking for a null context, context should
+        // never be null.
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             bool state = enabled.value
@@ -71,20 +74,28 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (mode.value == AmbientOcclusionMode.ScalableAmbientObscurance)
             {
-                state &= !RuntimeUtilities.scriptableRenderPipelineActive
-                      && context.resources.shaders.scalableAO
-                      && context.resources.shaders.scalableAO.isSupported;
+                state &= !RuntimeUtilities.scriptableRenderPipelineActive;
+
+                if (context != null)
+                {
+                    state &= context.resources.shaders.scalableAO
+                          && context.resources.shaders.scalableAO.isSupported;
+                }
             }
             else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
             {
 #if UNITY_2017_1_OR_NEWER
+                if (context != null)
+                {
+                    state &= context.resources.shaders.multiScaleAO
+                          && context.resources.shaders.multiScaleAO.isSupported
+                          && context.resources.computeShaders.multiScaleAODownsample1
+                          && context.resources.computeShaders.multiScaleAODownsample2
+                          && context.resources.computeShaders.multiScaleAORender
+                          && context.resources.computeShaders.multiScaleAOUpsample;
+                }
+
                 state &= SystemInfo.supportsComputeShaders
-                      && context.resources.shaders.multiScaleAO
-                      && context.resources.shaders.multiScaleAO.isSupported
-                      && context.resources.computeShaders.multiScaleAODownsample1
-                      && context.resources.computeShaders.multiScaleAODownsample2
-                      && context.resources.computeShaders.multiScaleAORender
-                      && context.resources.computeShaders.multiScaleAOUpsample
                       && RenderTextureFormat.RFloat.IsSupported()
                       && RenderTextureFormat.RHalf.IsSupported()
                       && RenderTextureFormat.R8.IsSupported();
