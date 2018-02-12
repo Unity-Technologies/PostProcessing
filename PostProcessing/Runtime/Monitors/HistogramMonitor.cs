@@ -53,6 +53,11 @@ namespace UnityEngine.Rendering.PostProcessing
             return true;
         }
 
+        internal override bool ShaderResourcesAvailable(PostProcessRenderContext context)
+        {
+            return context.resources.computeShaders.gammaHistogram;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             CheckOutput(width, height);

@@ -45,6 +45,12 @@ namespace UnityEngine.Rendering.PostProcessing
             return true;
         }
 
+
+        internal override bool ShaderResourcesAvailable(PostProcessRenderContext context)
+        {
+            return context.resources.computeShaders.waveform;
+        }
+
         internal override void Render(PostProcessRenderContext context)
         {
             // Waveform show localized data, so width depends on the aspect ratio

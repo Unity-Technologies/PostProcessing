@@ -164,7 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             foreach (var kvp in m_Monitors)
             {
-                bool active = kvp.Value.IsRequestedAndSupported();
+                bool active = kvp.Value.IsRequestedAndSupported(context);
                 anyActive |= active;
                 needsHalfRes |= active && kvp.Value.NeedsHalfRes();
             }

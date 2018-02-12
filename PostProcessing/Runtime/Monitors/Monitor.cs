@@ -14,11 +14,14 @@
 
         internal bool requested = false;
 
-        public bool IsRequestedAndSupported()
+        public bool IsRequestedAndSupported(PostProcessRenderContext context)
         {
             return requested
-                && SystemInfo.supportsComputeShaders;
+                && SystemInfo.supportsComputeShaders
+                && ShaderResourcesAvailable(context);
         }
+
+        internal abstract bool ShaderResourcesAvailable(PostProcessRenderContext context);
 
         internal virtual bool NeedsHalfRes()
         {

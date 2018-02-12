@@ -40,7 +40,10 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return enabled.value
                 && SystemInfo.supportsComputeShaders
-                && RenderTextureFormat.RFloat.IsSupported();
+                && RenderTextureFormat.RFloat.IsSupported()
+                && context.resources.shaders.autoExposure
+                && context.resources.shaders.autoExposure.isSupported
+                && context.resources.computeShaders.exposureHistogram;
         }
     }
 

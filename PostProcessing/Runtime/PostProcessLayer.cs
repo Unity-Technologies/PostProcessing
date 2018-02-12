@@ -145,6 +145,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void Init(PostProcessResources resources)
         {
+#if UNITY_EDITOR
+            m_Resources = PostProcessResourcesFactory.Stripped(m_Resources);
+#endif
             if (resources != null) m_Resources = resources;
 
             RuntimeUtilities.CreateIfNull(ref temporalAntialiasing);
@@ -940,7 +943,7 @@ namespace UnityEngine.Rendering.PostProcessing
         bool ShouldGenerateLogHistogram(PostProcessRenderContext context)
         {
             bool autoExpo = GetBundle<AutoExposure>().settings.IsEnabledAndSupported(context);
-            bool lightMeter = debugLayer.lightMeter.IsRequestedAndSupported();
+            bool lightMeter = debugLayer.lightMeter.IsRequestedAndSupported(context);
             return autoExpo || lightMeter;
         }
     }

@@ -52,7 +52,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 && context.camera.actualRenderingPath == RenderingPath.DeferredShading
                 && SystemInfo.supportsMotionVectors
                 && SystemInfo.supportsComputeShaders
-                && SystemInfo.copyTextureSupport > CopyTextureSupport.None;
+                && SystemInfo.copyTextureSupport > CopyTextureSupport.None
+                && context.resources.shaders.screenSpaceReflections
+                && context.resources.shaders.screenSpaceReflections.isSupported
+                && context.resources.computeShaders.gaussianDownsample;
         }
     }
 
