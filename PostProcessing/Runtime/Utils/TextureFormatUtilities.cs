@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
@@ -72,12 +71,12 @@ namespace UnityEngine.Rendering.PostProcessing
             // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
             // cache its calls to avoid that...
             s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
-            IEnumerable<int> values = Enum.GetValues(typeof(RenderTextureFormat)).Cast<int>();
+            var values = Enum.GetValues(typeof(RenderTextureFormat));
 
-            foreach (int format in values)
+            foreach (var format in values)
             {
                 bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
-                s_SupportedRenderTextureFormats.Add(format, supported);
+                s_SupportedRenderTextureFormats.Add((int)format, supported);
             }
         }
 
