@@ -580,7 +580,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (m_SettingsUpdateNeeded)
             {
                 context.command.BeginSample("VolumeBlending");
-                PostProcessManager.instance.UpdateSettings(this);
+                PostProcessManager.instance.UpdateSettings(this, context.camera);
                 context.command.EndSample("VolumeBlending");
                 m_TargetPool.Reset();
 
