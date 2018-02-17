@@ -36,7 +36,7 @@ namespace UnityEngine.Rendering.PostProcessing
         bool m_ResetHistory = true;
 
         const int k_SampleCount = 8;
-        int m_SampleIndex;
+        public int sampleIndex { get; private set; }
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
@@ -71,12 +71,12 @@ namespace UnityEngine.Rendering.PostProcessing
             // The variance between 0 and the actual halton sequence values reveals noticeable instability
             // in Unity's shadow maps, so we avoid index 0.
             var offset = new Vector2(
-                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 2) - 0.5f,
-                    HaltonSeq.Get((m_SampleIndex & 1023) + 1, 3) - 0.5f
+                    HaltonSeq.Get((sampleIndex & 1023) + 1, 2) - 0.5f,
+                    HaltonSeq.Get((sampleIndex & 1023) + 1, 3) - 0.5f
                 );
 
-            if (++m_SampleIndex >= k_SampleCount)
-                m_SampleIndex = 0;
+            if (++sampleIndex >= k_SampleCount)
+                sampleIndex = 0;
 
             return offset;
         }
@@ -232,7 +232,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
             }
 
-            m_SampleIndex = 0;
+            sampleIndex = 0;
             m_HistoryPingPong[0] = 0;
             m_HistoryPingPong[1] = 0;
             
