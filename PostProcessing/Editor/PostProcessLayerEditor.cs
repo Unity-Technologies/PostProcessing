@@ -23,6 +23,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_TaaSharpness;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
+        SerializedProperty m_SmaaQuality;
         SerializedProperty m_FxaaMobileOptimized;
         SerializedProperty m_FxaaKeepAlpha;
 
@@ -61,6 +62,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaSharpness = FindProperty(x => x.temporalAntialiasing.sharpness);
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
+            m_SmaaQuality = FindProperty(x => x.subpixelMorphologicalAntialiasing.quality);
             m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.fastMode);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
@@ -160,6 +162,8 @@ namespace UnityEditor.Rendering.PostProcessing
                 {
                     if (RuntimeUtilities.isSinglePassStereoSelected)
                         EditorGUILayout.HelpBox("SMAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
+
+                    EditorGUILayout.PropertyField(m_SmaaQuality);
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {
