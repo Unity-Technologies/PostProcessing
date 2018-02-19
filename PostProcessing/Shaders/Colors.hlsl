@@ -25,8 +25,16 @@
     #define DEFAULT_MAX_PQ 100.0
 #endif
 
+#ifndef USE_VERY_FAST_SRGB
+    #if defined(SHADER_API_MOBILE)
+        #define USE_VERY_FAST_SRGB 1
+    #else
+        #define USE_VERY_FAST_SRGB 0
+    #endif
+#endif
+
 #ifndef USE_FAST_SRGB
-    #ifdef SHADER_API_MOBILE
+    #if defined(SHADER_API_CONSOLE)
         #define USE_FAST_SRGB 1
     #else
         #define USE_FAST_SRGB 0
@@ -150,7 +158,9 @@ float3 PQToLinear(float3 x)
 //
 half SRGBToLinear(half c)
 {
-#if USE_FAST_SRGB
+#if USE_VERY_FAST_SRGB
+    return c * c;
+#elif USE_FAST_SRGB
     return c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878);
 #else
     half linearRGBLo = c / 12.92;
@@ -162,7 +172,9 @@ half SRGBToLinear(half c)
 
 half3 SRGBToLinear(half3 c)
 {
-#if USE_FAST_SRGB
+#if USE_VERY_FAST_SRGB
+    return c * c;
+#elif USE_FAST_SRGB
     return c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878);
 #else
     half3 linearRGBLo = c / 12.92;
@@ -179,7 +191,9 @@ half4 SRGBToLinear(half4 c)
 
 half LinearToSRGB(half c)
 {
-#if USE_FAST_SRGB
+#if USE_VERY_FAST_SRGB
+    return sqrt(c);
+#elif USE_FAST_SRGB
     return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
 #else
     half sRGBLo = c * 12.92;
@@ -191,7 +205,9 @@ half LinearToSRGB(half c)
 
 half3 LinearToSRGB(half3 c)
 {
-#if USE_FAST_SRGB
+#if USE_VERY_FAST_SRGB
+    return sqrt(c);
+#elif USE_FAST_SRGB
     return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
 #else
     half3 sRGBLo = c * 12.92;
