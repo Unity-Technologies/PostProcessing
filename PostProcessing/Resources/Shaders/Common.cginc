@@ -6,7 +6,7 @@
 // Mobile: use RGBM instead of float/half RGB
 #define USE_RGBM defined(SHADER_API_MOBILE)
 
-#define MOBILE_OR_CONSOLE (defined(SHADER_API_MOBILE) || defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_WIIU))
+#define MOBILE_OR_CONSOLE (defined(SHADER_API_MOBILE) || defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_WIIU) || defined(SHADER_API_SWITCH))
 
 #if defined(SHADER_API_PSSL)
 // No support for sampler2D_half on PS4 in 5.4

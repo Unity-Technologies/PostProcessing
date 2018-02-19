@@ -48,9 +48,10 @@ namespace UnityEngine.PostProcessing
             // Blur buffer format
             // TODO: Extend the use of RGBM to the whole chain for mobile platforms
             var useRGBM = Application.isMobilePlatform;
+            var useRGB111110 = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float);
             var rtFormat = useRGBM
                 ? RenderTextureFormat.Default
-                : RenderTextureFormat.DefaultHDR;
+                : useRGB111110 ? RenderTextureFormat.RGB111110Float : RenderTextureFormat.DefaultHDR;
 
             // Determine the iteration count
             float logh = Mathf.Log(th, 2f) + bloom.radius - 8f;
