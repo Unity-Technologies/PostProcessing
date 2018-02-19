@@ -27,6 +27,10 @@
     #include "API/OpenGL.hlsl"
 #endif
 
+#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH)
+    #define SHADER_API_CONSOLE
+#endif
+
 // -----------------------------------------------------------------------------
 // Constants
 
