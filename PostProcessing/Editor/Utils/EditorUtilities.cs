@@ -14,6 +14,36 @@ namespace UnityEditor.Rendering.PostProcessing
 
         static PostProcessEffectSettings s_ClipboardContent;
 
+        public static bool isTargetingConsoles
+        {
+            get
+            {
+                var t = EditorUserBuildSettings.activeBuildTarget;
+                return t == BuildTarget.PS4
+                    || t == BuildTarget.XboxOne
+                    || t == BuildTarget.Switch;
+            }
+        }
+
+        public static bool isTargetingMobiles
+        {
+            get
+            {
+                var t = EditorUserBuildSettings.activeBuildTarget;
+                return t == BuildTarget.Android
+                    || t == BuildTarget.iOS
+                    || t == BuildTarget.tvOS
+                    || t == BuildTarget.Tizen
+                    || t == BuildTarget.N3DS
+                    || t == BuildTarget.PSP2;
+            }
+        }
+
+        public static bool isTargetingConsolesOrMobiles
+        {
+            get { return isTargetingConsoles || isTargetingMobiles; }
+        }
+
         static EditorUtilities()
         {
             s_GUIContentCache = new Dictionary<string, GUIContent>();
@@ -209,7 +239,7 @@ namespace UnityEditor.Rendering.PostProcessing
             var e = Event.current;
 
             if (e.type == EventType.MouseDown)
-            {   
+            {
                 if (menuRect.Contains(e.mousePosition))
                 {
                     ShowHeaderContextMenu(new Vector2(menuRect.x, menuRect.yMax), target, resetAction, removeAction);
