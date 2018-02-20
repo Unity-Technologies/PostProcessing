@@ -97,18 +97,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-                #pragma target 5.0
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefaultNoFlip
+                #pragma vertex VertUVTransform
                 #pragma fragment Frag
                 #pragma target 5.0
 
@@ -124,18 +113,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-                #pragma target 3.0
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefaultNoFlip
+                #pragma vertex VertUVTransform
                 #pragma fragment Frag
                 #pragma target 3.0
 
