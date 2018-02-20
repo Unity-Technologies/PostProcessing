@@ -309,7 +309,10 @@ namespace UnityEngine.Rendering.PostProcessing
         void BuildCommandBuffers()
         {
             var context = m_CurrentContext;
-            var sourceFormat = m_Camera.allowHDR ? RuntimeUtilities.defaultHDRRenderTextureFormat : RenderTextureFormat.Default; 
+            var sourceFormat = m_Camera.allowHDR ? RuntimeUtilities.defaultHDRRenderTextureFormat : RenderTextureFormat.Default;
+
+            if (!RuntimeUtilities.isFloatingPointFormat(sourceFormat))
+                m_NaNKilled = true;
 
             context.Reset();
             context.camera = m_Camera;
@@ -425,7 +428,8 @@ namespace UnityEngine.Rendering.PostProcessing
             int tempRt = m_TargetPool.Get();
             context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
-            m_NaNKilled = stopNaNPropagation;
+            if (!m_NaNKilled)
+                m_NaNKilled = stopNaNPropagation;
 
             context.command = m_LegacyCmdBuffer;
             context.source = tempRt;

@@ -305,6 +305,14 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        public static bool isFloatingPointFormat(RenderTextureFormat format)
+        {
+            return format == RenderTextureFormat.DefaultHDR || format == RenderTextureFormat.ARGBHalf || format == RenderTextureFormat.ARGBFloat ||
+                   format == RenderTextureFormat.RGFloat || format == RenderTextureFormat.RGHalf ||
+                   format == RenderTextureFormat.RFloat || format == RenderTextureFormat.RHalf ||
+                   format == RenderTextureFormat.RGB111110Float;
+        }
+
         public static void Destroy(UnityObject obj)
         {
             if (obj != null)
