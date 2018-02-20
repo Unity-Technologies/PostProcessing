@@ -1,3 +1,9 @@
-/artifacts*
-/build*
-/.gitignore
+artifacts/**
+build/**
+Documentation/ApiDocs/**
+.DS_Store
+.npmrc
+.npmignore
+.gitignore
+QAReport.md
+QAReport.md.meta
