@@ -64,7 +64,7 @@ namespace UnityEditor.Rendering.PostProcessing
             {
                 bool wasEnabled = instance.enabled;
                 instance.enabled = false;
-                stripping = (PostProcessStrippingConfig) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
+                stripping = (PostProcessStrippingConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
                 instance.enabled = wasEnabled;
             }
         }
@@ -200,12 +200,12 @@ namespace UnityEditor.Rendering.PostProcessing
 #endif
 
 
-[InitializeOnLoad]
-public class SetupStrippingConfig {
-    static SetupStrippingConfig()
+    [InitializeOnLoad]
+    public class SetupStrippingConfig
     {
-        PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
+        static SetupStrippingConfig()
+        {
+            PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
+        }
     }
-}
-
 }
