@@ -214,6 +214,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
+                UNITY_BRANCH
                 if (_LumaInAlpha > 0.5)
                 {
                     // Put saturated luma in alpha for FXAA - higher quality than "green as luma" and
