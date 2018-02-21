@@ -1,7 +1,6 @@
 using System;
 
 
-
 namespace UnityEngine.Rendering.PostProcessing
 {
     // This asset is used to store references to shaders and other resources we might need at
@@ -37,9 +36,9 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader multiScaleAO;
             public Shader screenSpaceReflections;
 
-            public Shaders Clone() 
+            public Shaders Clone()
             {
-                return (Shaders) MemberwiseClone();
+                return (Shaders)MemberwiseClone();
             }
         }
 
@@ -58,9 +57,9 @@ namespace UnityEngine.Rendering.PostProcessing
             public ComputeShader multiScaleAOUpsample;
             public ComputeShader gaussianDownsample;
 
-            public ComputeShaders Clone() 
+            public ComputeShaders Clone()
             {
-                return (ComputeShaders) MemberwiseClone();
+                return (ComputeShaders)MemberwiseClone();
             }
         }
 
@@ -70,7 +69,7 @@ namespace UnityEngine.Rendering.PostProcessing
             public Texture2D area;
             public Texture2D search;
         }
-       
+
         public Texture2D[] blueNoise64;
         public Texture2D[] blueNoise256;
         public SMAALuts smaaLuts;
@@ -86,7 +85,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (changeHandler != null)
                 changeHandler();
         }
+
 #endif
     }
-
 }

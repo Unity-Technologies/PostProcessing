@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -142,13 +142,14 @@ namespace UnityEditor.Rendering.PostProcessing
         {
             PostProcessResourceStripper.Update(report.summary.platform);
         }
+
     #else
         public void OnPreprocessBuild(BuildTarget target, string path)
         {
             PostProcessResourceStripper.Update(target);
         }
+
     #endif
     }
 #endif
-
 }
