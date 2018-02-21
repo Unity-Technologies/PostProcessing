@@ -27,6 +27,10 @@
     #include "API/OpenGL.hlsl"
 #endif
 
+#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH)
+    #define SHADER_API_CONSOLE
+#endif
+
 // -----------------------------------------------------------------------------
 // Constants
 
@@ -278,11 +282,13 @@ VaryingsDefault VertDefault(AttributesDefault v)
     return o;
 }
 
-VaryingsDefault VertDefaultNoFlip(AttributesDefault v)
+float4 _UVTransform; // xy: scale, wz: translate
+
+VaryingsDefault VertUVTransform(AttributesDefault v)
 {
     VaryingsDefault o;
     o.vertex = float4(v.vertex.xy, 0.0, 1.0);
-    o.texcoord = TransformTriangleVertexToUV(v.vertex.xy);
+    o.texcoord = TransformTriangleVertexToUV(v.vertex.xy) * _UVTransform.xy + _UVTransform.zw;
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
     return o;
 }

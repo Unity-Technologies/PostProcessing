@@ -146,5 +146,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int VectorscopeBuffer               = Shader.PropertyToID("_VectorscopeBuffer");
 
         internal static readonly int RenderViewportScaleFactor       = Shader.PropertyToID("_RenderViewportScaleFactor");
+
+        internal static readonly int UVTransform                     = Shader.PropertyToID("_UVTransform");
     }
 }

@@ -21,12 +21,12 @@ Shader "Hidden/PostProcessing/FinalPass"
         #endif
 
         #if FXAA_LOW
-            #define FXAA_QUALITY__PRESET 28
+            #define FXAA_QUALITY__PRESET 12
             #define FXAA_QUALITY_SUBPIX 1.0
-            #define FXAA_QUALITY_EDGE_THRESHOLD 0.125
+            #define FXAA_QUALITY_EDGE_THRESHOLD 0.166
             #define FXAA_QUALITY_EDGE_THRESHOLD_MIN 0.0625
         #else
-            #define FXAA_QUALITY__PRESET 39
+            #define FXAA_QUALITY__PRESET 28
             #define FXAA_QUALITY_SUBPIX 1.0
             #define FXAA_QUALITY_EDGE_THRESHOLD 0.063
             #define FXAA_QUALITY_EDGE_THRESHOLD_MIN 0.0312
@@ -97,18 +97,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-                #pragma target 5.0
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefaultNoFlip
+                #pragma vertex VertUVTransform
                 #pragma fragment Frag
                 #pragma target 5.0
 
@@ -124,18 +113,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
 
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-                #pragma target 3.0
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefaultNoFlip
+                #pragma vertex VertUVTransform
                 #pragma fragment Frag
                 #pragma target 3.0
 

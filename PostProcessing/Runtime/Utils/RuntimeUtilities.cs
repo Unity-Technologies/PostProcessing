@@ -6,6 +6,10 @@ using System.Reflection;
 using System.Text;
 using UnityEngine.Assertions;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace UnityEngine.Rendering.PostProcessing
 {
     using SceneManagement;
@@ -281,6 +285,32 @@ namespace UnityEngine.Rendering.PostProcessing
         public static bool isAndroidOpenGL
         {
             get { return Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan; }
+        }
+
+        public static RenderTextureFormat defaultHDRRenderTextureFormat
+        {
+            get
+            {
+#if UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
+                RenderTextureFormat format = RenderTextureFormat.RGB111110Float;
+#   if UNITY_EDITOR
+                var target = EditorUserBuildSettings.activeBuildTarget;
+                if (target != BuildTarget.Android && target != BuildTarget.iOS && target != BuildTarget.tvOS && target != BuildTarget.Switch)
+                    return RenderTextureFormat.DefaultHDR;
+#   endif // UNITY_EDITOR
+                if (format.IsSupported())
+                    return format;
+#endif // UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
+                return RenderTextureFormat.DefaultHDR;
+            }
+        }
+
+        public static bool isFloatingPointFormat(RenderTextureFormat format)
+        {
+            return format == RenderTextureFormat.DefaultHDR || format == RenderTextureFormat.ARGBHalf || format == RenderTextureFormat.ARGBFloat ||
+                   format == RenderTextureFormat.RGFloat || format == RenderTextureFormat.RGHalf ||
+                   format == RenderTextureFormat.RFloat || format == RenderTextureFormat.RHalf ||
+                   format == RenderTextureFormat.RGB111110Float;
         }
 
         public static void Destroy(UnityObject obj)

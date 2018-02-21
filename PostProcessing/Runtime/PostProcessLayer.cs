@@ -309,7 +309,10 @@ namespace UnityEngine.Rendering.PostProcessing
         void BuildCommandBuffers()
         {
             var context = m_CurrentContext;
-            var sourceFormat = m_Camera.allowHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
+            var sourceFormat = m_Camera.allowHDR ? RuntimeUtilities.defaultHDRRenderTextureFormat : RenderTextureFormat.Default;
+
+            if (!RuntimeUtilities.isFloatingPointFormat(sourceFormat))
+                m_NaNKilled = true;
 
             context.Reset();
             context.camera = m_Camera;
@@ -425,7 +428,8 @@ namespace UnityEngine.Rendering.PostProcessing
             int tempRt = m_TargetPool.Get();
             context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
             m_LegacyCmdBuffer.Blit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
-            m_NaNKilled = stopNaNPropagation;
+            if (!m_NaNKilled)
+                m_NaNKilled = stopNaNPropagation;
 
             context.command = m_LegacyCmdBuffer;
             context.source = tempRt;
@@ -781,6 +785,19 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.EndSample(marker);
         }
 
+        void ApplyFlip(PostProcessRenderContext context, MaterialPropertyBlock properties)
+        {
+            if (context.flip && !context.isSceneView)
+                properties.SetVector(ShaderIDs.UVTransform, new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
+            else
+                ApplyDefaultFlip(properties);
+        }
+
+        void ApplyDefaultFlip(MaterialPropertyBlock properties)
+        {
+            properties.SetVector(ShaderIDs.UVTransform, SystemInfo.graphicsUVStartsAtTop ? new Vector4(1.0f, -1.0f, 0.0f, 1.0f) : new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
+        }
+
         int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1)
         {
             var uberSheet = context.propertySheets.Get(context.resources.shaders.uber);
@@ -833,18 +850,18 @@ namespace UnityEngine.Rendering.PostProcessing
             if (!breakBeforeColorGrading)
                 RenderEffect<ColorGrading>(context);
 
-            int pass = 0;
-
             if (isFinalPass)
             {
                 uberSheet.EnableKeyword("FINALPASS");
                 dithering.Render(context);
-
-                if (context.flip && !context.isSceneView)
-                    pass = 1;
+                ApplyFlip(context, uberSheet.properties);
+            }
+            else
+            {
+                ApplyDefaultFlip(uberSheet.properties);
             }
 
-            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, pass);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
             context.source = context.destination;
             context.destination = finalDestination;
@@ -901,7 +918,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 dithering.Render(context);
 
-                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, (context.flip && !context.isSceneView) ? 1 : 0);
+                ApplyFlip(context, uberSheet.properties);
+                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
                 if (tempTarget > -1)
                     cmd.ReleaseTemporaryRT(tempTarget);

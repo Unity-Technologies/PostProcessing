@@ -7,17 +7,39 @@
 #define LUT_SPACE_ENCODE(x) LinearToLogC(x)
 #define LUT_SPACE_DECODE(x) LogCToLinear(x)
 
-// Set to 1 to use more precise but more expensive log/linear conversions. I haven't found a proper
-// use case for the high precision version yet so I'm leaving this to 0.
-#define USE_PRECISE_LOGC 0
+#ifndef USE_PRECISE_LOGC
+    // Set to 1 to use more precise but more expensive log/linear conversions. I haven't found a proper
+    // use case for the high precision version yet so I'm leaving this to 0.
+    #define USE_PRECISE_LOGC 0
+#endif
 
-// Set to 1 to use the full reference ACES tonemapper. This should only be used for research
-// purposes as it's quite heavy and generally overkill.
-#define TONEMAPPING_USE_FULL_ACES 0
+#ifndef TONEMAPPING_USE_FULL_ACES
+    // Set to 1 to use the full reference ACES tonemapper. This should only be used for research
+    // purposes as it's quite heavy and generally overkill.
+    #define TONEMAPPING_USE_FULL_ACES 0
+#endif
 
-// PQ ST.2048 max value
-// 1.0 = 100nits, 100.0 = 10knits
-#define DEFAULT_MAX_PQ 100.0
+#ifndef DEFAULT_MAX_PQ
+    // PQ ST.2048 max value
+    // 1.0 = 100nits, 100.0 = 10knits
+    #define DEFAULT_MAX_PQ 100.0
+#endif
+
+#ifndef USE_VERY_FAST_SRGB
+    #if defined(SHADER_API_MOBILE)
+        #define USE_VERY_FAST_SRGB 1
+    #else
+        #define USE_VERY_FAST_SRGB 0
+    #endif
+#endif
+
+#ifndef USE_FAST_SRGB
+    #if defined(SHADER_API_CONSOLE)
+        #define USE_FAST_SRGB 1
+    #else
+        #define USE_FAST_SRGB 0
+    #endif
+#endif
 
 //
 // Alexa LogC converters (El 1000)
@@ -132,21 +154,34 @@ float3 PQToLinear(float3 x)
 
 //
 // sRGB transfer functions
+// Fast path ref: http://chilliant.blogspot.com.au/2012/08/srgb-approximations-for-hlsl.html?m=1
 //
 half SRGBToLinear(half c)
 {
+#if USE_VERY_FAST_SRGB
+    return c * c;
+#elif USE_FAST_SRGB
+    return c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878);
+#else
     half linearRGBLo = c / 12.92;
     half linearRGBHi = PositivePow((c + 0.055) / 1.055, 2.4);
     half linearRGB = (c <= 0.04045) ? linearRGBLo : linearRGBHi;
     return linearRGB;
+#endif
 }
 
 half3 SRGBToLinear(half3 c)
 {
+#if USE_VERY_FAST_SRGB
+    return c * c;
+#elif USE_FAST_SRGB
+    return c * (c * (c * 0.305306011 + 0.682171111) + 0.012522878);
+#else
     half3 linearRGBLo = c / 12.92;
     half3 linearRGBHi = PositivePow((c + 0.055) / 1.055, half3(2.4, 2.4, 2.4));
     half3 linearRGB = (c <= 0.04045) ? linearRGBLo : linearRGBHi;
     return linearRGB;
+#endif
 }
 
 half4 SRGBToLinear(half4 c)
@@ -156,18 +191,30 @@ half4 SRGBToLinear(half4 c)
 
 half LinearToSRGB(half c)
 {
+#if USE_VERY_FAST_SRGB
+    return sqrt(c);
+#elif USE_FAST_SRGB
+    return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
+#else
     half sRGBLo = c * 12.92;
     half sRGBHi = (PositivePow(c, 1.0 / 2.4) * 1.055) - 0.055;
     half sRGB = (c <= 0.0031308) ? sRGBLo : sRGBHi;
     return sRGB;
+#endif
 }
 
 half3 LinearToSRGB(half3 c)
 {
+#if USE_VERY_FAST_SRGB
+    return sqrt(c);
+#elif USE_FAST_SRGB
+    return max(1.055 * PositivePow(c, 0.416666667) - 0.055, 0.0);
+#else
     half3 sRGBLo = c * 12.92;
     half3 sRGBHi = (PositivePow(c, half3(1.0 / 2.4, 1.0 / 2.4, 1.0 / 2.4)) * 1.055) - 0.055;
     half3 sRGB = (c <= 0.0031308) ? sRGBLo : sRGBHi;
     return sRGB;
+#endif
 }
 
 half4 LinearToSRGB(half4 c)
