@@ -11,6 +11,9 @@ namespace UnityEditor.Rendering.PostProcessing
         [SerializeField] private PostProcessResources unstrippedResources;
         [SerializeField] private PostProcessStrippingConfig stripping;
 
+        public const string DefaultStrippingConfigAssetPath = "Assets/PostProcessStrippingConfig.asset";
+        bool enabled = true;
+
         static PostProcessResourceStripper s_Instance;
 
         public static PostProcessResourceStripper instance
@@ -24,6 +27,45 @@ namespace UnityEditor.Rendering.PostProcessing
                 }
 
                 return s_Instance;
+            }
+        }
+
+        static private string FindPostProcessStrippingConfigGUID()
+        {
+            var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
+            if (guids.Length > 0)
+                return guids[0];
+            else
+                return null;
+        }
+
+        static public string EnsurePostProcessStrippingConfigAssetExists()
+        {
+            var guid = FindPostProcessStrippingConfigGUID();
+            if (guid != null)
+                return guid;
+
+            bool wasEnabled = instance.enabled;
+            instance.enabled = false;
+            AssetDatabase.CreateAsset(CreateInstance<PostProcessStrippingConfig>(), DefaultStrippingConfigAssetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            instance.enabled = wasEnabled;
+            return FindPostProcessStrippingConfigGUID();
+        }
+
+        private void LazyLoadStrippingConfig()
+        {
+            if (stripping != null)
+                return;
+
+            var guid = EnsurePostProcessStrippingConfigAssetExists();
+            if (guid != null)
+            {
+                bool wasEnabled = instance.enabled;
+                instance.enabled = false;
+                stripping = (PostProcessStrippingConfig) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
+                instance.enabled = wasEnabled;
             }
         }
 
@@ -62,12 +104,16 @@ namespace UnityEditor.Rendering.PostProcessing
 
         private void Apply(BuildTarget target)
         {
+            if (!enabled)
+                return;
+
             if (resources == null)
                 return;
 
             if (unstrippedResources == null)
                 return;
 
+            LazyLoadStrippingConfig();
             if (stripping == null)
                 return;
 
@@ -152,4 +198,14 @@ namespace UnityEditor.Rendering.PostProcessing
     #endif
     }
 #endif
+
+
+[InitializeOnLoad]
+public class SetupStrippingConfig {
+    static SetupStrippingConfig()
+    {
+        PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
+    }
+}
+
 }
