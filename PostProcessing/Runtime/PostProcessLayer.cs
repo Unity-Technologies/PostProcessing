@@ -858,7 +858,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             else
             {
-                uberSheet.EnableKeyword("FINALPASS");
                 ApplyDefaultFlip(uberSheet.properties);
             }
 
