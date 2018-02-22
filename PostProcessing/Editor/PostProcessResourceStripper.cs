@@ -1,19 +1,18 @@
+using System;
 using UnityEditor.Build;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
     public sealed class PostProcessResourceStripper : ScriptableObject
     {
+        [SerializeField] private PostProcessResources resources;
+        [SerializeField] private PostProcessResources unstrippedResources;
+        [SerializeField] private PostProcessStrippingConfig stripping;
+
         public const string DefaultStrippingConfigAssetPath = "Assets/PostProcessStrippingConfig.asset";
-
-        PostProcessStrippingConfig stripping;
-        PostProcessStrippingConfig defaultConfig;
-
-        [SerializeField]
-        PostProcessResources unstrippedResources;
+        bool enabled = true;
 
         static PostProcessResourceStripper s_Instance;
 
@@ -24,24 +23,58 @@ namespace UnityEditor.Rendering.PostProcessing
                 if (s_Instance == null)
                 {
                     s_Instance = CreateInstance<PostProcessResourceStripper>();
-                    s_Instance.defaultConfig = CreateInstance<PostProcessStrippingConfig>();
+                    s_Instance.unstrippedResources.changeHandler = Update;
                 }
 
                 return s_Instance;
             }
         }
 
-        void Awake()
+        static private string FindPostProcessStrippingConfigGUID()
         {
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
+            if (guids.Length > 0)
+                return guids[0];
+            else
+                return null;
+        }
+
+        static public string EnsurePostProcessStrippingConfigAssetExists()
+        {
+            var guid = FindPostProcessStrippingConfigGUID();
+            if (guid != null)
+                return guid;
+
+            bool wasEnabled = instance.enabled;
+            instance.enabled = false;
+            AssetDatabase.CreateAsset(CreateInstance<PostProcessStrippingConfig>(), DefaultStrippingConfigAssetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            instance.enabled = wasEnabled;
+            return FindPostProcessStrippingConfigGUID();
+        }
+
+        private void LazyLoadStrippingConfig()
+        {
+            if (stripping != null)
+                return;
+
+            var guid = EnsurePostProcessStrippingConfigAssetExists();
+            if (guid != null)
+            {
+                bool wasEnabled = instance.enabled;
+                instance.enabled = false;
+                stripping = (PostProcessStrippingConfig)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
+                instance.enabled = wasEnabled;
+            }
         }
 
         void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            unstrippedResources.changeHandler = null;
         }
 
-        static void StripMultiScaleAO(PostProcessResources resources)
+        private void StripMultiScaleAO()
         {
             resources.computeShaders.multiScaleAODownsample1 = null;
             resources.computeShaders.multiScaleAODownsample2 = null;
@@ -50,13 +83,13 @@ namespace UnityEditor.Rendering.PostProcessing
             resources.shaders.multiScaleAO = null;
         }
 
-        static void StripScreenSpaceReflections(PostProcessResources resources)
+        private void StripScreenSpaceReflections()
         {
             resources.shaders.screenSpaceReflections = null;
             resources.computeShaders.gaussianDownsample = null;
         }
 
-        static void StripDebugShaders(PostProcessResources resources)
+        private void StripDebugShaders()
         {
             resources.shaders.lightMeter = null;
             resources.shaders.gammaHistogram = null;
@@ -69,74 +102,19 @@ namespace UnityEditor.Rendering.PostProcessing
             resources.computeShaders.vectorscope = null;
         }
 
-        static string FindPostProcessStrippingConfigGUID()
+        private void Apply(BuildTarget target)
         {
-            var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
-            if (guids.Length > 0)
-                return guids[0];
-            else
-                return null;
-        }
-
-        static public void EnsurePostProcessStrippingConfigAssetExists()
-        {
-            var guid = FindPostProcessStrippingConfigGUID();
-            if (guid != null)
+            if (!enabled)
                 return;
 
-            AssetDatabase.CreateAsset(CreateInstance<PostProcessStrippingConfig>(), DefaultStrippingConfigAssetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
-
-        void LazyLoadStrippingConfig()
-        {
-            if (stripping != null)
-                return;
-
-            var guid = FindPostProcessStrippingConfigGUID();
-            if (guid != null)
-            {
-                stripping = (PostProcessStrippingConfig) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(PostProcessStrippingConfig));
-            }
-
-            if (stripping == null)
-                stripping = defaultConfig;
-        }
-
-        void SetConfig(PostProcessStrippingConfig config)
-        {
-            if (config == stripping)
-                return;
-
-            if (defaultConfig == null)
-                return;
-
-            if (config == defaultConfig)
-                return;
-
-            if (config == null)
-            {
-                stripping = defaultConfig;
-                return;
-            }
-
-            stripping = config;
-        }
-
-        void Apply(BuildTarget target, PostProcessResources resources)
-        {
-            if (defaultConfig == null)
-                return;
-
-            LazyLoadStrippingConfig();
-            if (stripping == null)
+            if (resources == null)
                 return;
 
             if (unstrippedResources == null)
                 return;
 
-            if (resources == null)
+            LazyLoadStrippingConfig();
+            if (stripping == null)
                 return;
 
             resources.computeShaders = unstrippedResources.computeShaders.Clone();
@@ -146,26 +124,26 @@ namespace UnityEditor.Rendering.PostProcessing
             if (stripping.stripUnsupportedShaders &&
                 (target == BuildTarget.Android || target == BuildTarget.iOS || target == BuildTarget.tvOS))
             {
-                StripMultiScaleAO(resources);
+                StripMultiScaleAO();
             }
 
             if (stripping.stripDebugShaders)
             {
-                StripDebugShaders(resources);
+                StripDebugShaders();
             }
 
             if (stripping.stripComputeShaders)
             {
                 resources.computeShaders = new PostProcessResources.ComputeShaders();
                 resources.shaders.autoExposure = null;
-                StripScreenSpaceReflections(resources);
-                StripMultiScaleAO(resources);
-                StripDebugShaders(resources);
+                StripScreenSpaceReflections();
+                StripMultiScaleAO();
+                StripDebugShaders();
             }
 
             if (stripping.stripUnsupportedShaders && !RuntimeUtilities.supportsDeferredShading)
             {
-                StripScreenSpaceReflections(resources);
+                StripScreenSpaceReflections();
                 resources.shaders.deferredFog = null;
                 if (!RuntimeUtilities.supportsDepthNormals)
                     resources.shaders.scalableAO = null;
@@ -180,35 +158,14 @@ namespace UnityEditor.Rendering.PostProcessing
             }
         }
 
-        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        public static void Update()
         {
-            StripAll();
+            Update(EditorUserBuildSettings.activeBuildTarget);
         }
 
-        public static void Strip(PostProcessResources resources)
+        public static void Update(BuildTarget target)
         {
-            instance.Apply(EditorUserBuildSettings.activeBuildTarget, resources);
-        }
-
-        public static void StripAll(BuildTarget target)
-        {
-            var allResources = PostProcessResourcesFactory.AllResources();
-            if (allResources == null)
-                return;
-
-            foreach (var resources in allResources)
-                instance.Apply(EditorUserBuildSettings.activeBuildTarget, resources);
-        }
-
-        public static void StripAll()
-        {
-            StripAll(EditorUserBuildSettings.activeBuildTarget);
-        }
-
-        public static void StripAll(PostProcessStrippingConfig config)
-        {
-            instance.SetConfig(config);
-            StripAll(EditorUserBuildSettings.activeBuildTarget);
+            instance.Apply(EditorUserBuildSettings.activeBuildTarget);
         }
     }
 
@@ -218,7 +175,7 @@ namespace UnityEditor.Rendering.PostProcessing
         public int callbackOrder { get { return 0; } }
         public void OnActiveBuildTargetChanged(BuildTarget previousTarget, BuildTarget newTarget)
         {
-            PostProcessResourceStripper.StripAll(newTarget);
+            PostProcessResourceStripper.Update(newTarget);
         }
     }
 
@@ -229,24 +186,26 @@ namespace UnityEditor.Rendering.PostProcessing
     #if UNITY_2018_1_OR_NEWER
         public void OnPreprocessBuild(Build.Reporting.BuildReport report)
         {
-            PostProcessResourceStripper.StripAll(report.summary.platform);
+            PostProcessResourceStripper.Update(report.summary.platform);
         }
+
     #else
         public void OnPreprocessBuild(BuildTarget target, string path)
         {
-            PostProcessResourceStripper.StripAll(target);
+            PostProcessResourceStripper.Update(target);
         }
+
     #endif
     }
 #endif
 
+
     [InitializeOnLoad]
-    public class SetupStripping
+    public class SetupStrippingConfig
     {
-        static SetupStripping()
+        static SetupStrippingConfig()
         {
             PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
-            PostProcessResourcesFactory.Init(PostProcessResourceStripper.Strip);
         }
     }
 }
