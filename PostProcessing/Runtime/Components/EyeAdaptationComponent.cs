@@ -6,10 +6,20 @@ namespace UnityEngine.PostProcessing
         {
             internal static readonly int _Params               = Shader.PropertyToID("_Params");
             internal static readonly int _Speed                = Shader.PropertyToID("_Speed");
-            internal static readonly int _ScaleOffsetRes       = Shader.PropertyToID("_ScaleOffsetRes");
             internal static readonly int _ExposureCompensation = Shader.PropertyToID("_ExposureCompensation");
             internal static readonly int _AutoExposure         = Shader.PropertyToID("_AutoExposure");
             internal static readonly int _DebugWidth           = Shader.PropertyToID("_DebugWidth");
+            
+            //The overloads for the PropertyID werent completely added until 5.5.1, so use int where possible but fallback to strings if required.
+#if UNITY_5_6_OR_NEWER
+            internal static readonly int _Histogram            = Shader.PropertyToID("_Histogram");
+            internal static readonly int _Source               = Shader.PropertyToID("_Source");
+            internal static readonly int _ScaleOffsetRes       = Shader.PropertyToID("_ScaleOffsetRes");
+#else
+            internal static readonly string _Histogram         = "_Histogram";
+            internal static readonly string _Source            = "_Source";
+            internal static readonly string _ScaleOffsetRes    = "_ScaleOffsetRes";
+#endif
         }
 
         ComputeShader m_EyeCompute;
@@ -102,14 +112,14 @@ namespace UnityEngine.PostProcessing
 
             // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
             int kernel = m_EyeCompute.FindKernel("KEyeHistogramClear");
-            m_EyeCompute.SetBuffer(kernel, "_Histogram", m_HistogramBuffer);
+            m_EyeCompute.SetBuffer(kernel, Uniforms._Histogram, m_HistogramBuffer);
             m_EyeCompute.Dispatch(kernel, Mathf.CeilToInt(k_HistogramBins / (float)k_HistogramThreadX), 1, 1);
 
             // Gets a log histogram
             kernel = m_EyeCompute.FindKernel("KEyeHistogram");
-            m_EyeCompute.SetBuffer(kernel, "_Histogram", m_HistogramBuffer);
-            m_EyeCompute.SetTexture(kernel, "_Source", rt);
-            m_EyeCompute.SetVector("_ScaleOffsetRes", scaleOffsetRes);
+            m_EyeCompute.SetBuffer(kernel, Uniforms._Histogram, m_HistogramBuffer);
+            m_EyeCompute.SetTexture(kernel, Uniforms._Source, rt);
+            m_EyeCompute.SetVector(Uniforms._ScaleOffsetRes, scaleOffsetRes);
             m_EyeCompute.Dispatch(kernel, Mathf.CeilToInt(rt.width / (float)k_HistogramThreadX), Mathf.CeilToInt(rt.height / (float)k_HistogramThreadY), 1);
 
             // Cleanup
@@ -121,7 +131,7 @@ namespace UnityEngine.PostProcessing
             settings.lowPercent = Mathf.Clamp(settings.lowPercent, 1f, settings.highPercent - minDelta);
 
             // Compute auto exposure
-            material.SetBuffer("_Histogram", m_HistogramBuffer); // No (int, buffer) overload for SetBuffer ?
+            material.SetBuffer(Uniforms._Histogram, m_HistogramBuffer);
             material.SetVector(Uniforms._Params, new Vector4(settings.lowPercent * 0.01f, settings.highPercent * 0.01f, Mathf.Exp(settings.minLuminance * 0.69314718055994530941723212145818f), Mathf.Exp(settings.maxLuminance * 0.69314718055994530941723212145818f)));
             material.SetVector(Uniforms._Speed, new Vector2(settings.speedDown, settings.speedUp));
             material.SetVector(Uniforms._ScaleOffsetRes, scaleOffsetRes);
