@@ -10,6 +10,7 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _AutoExposure         = Shader.PropertyToID("_AutoExposure");
             internal static readonly int _DebugWidth           = Shader.PropertyToID("_DebugWidth");
             
+            //The overloads for the PropertyID werent completely added until 5.5.1, so use int where possible but fallback to strings if required.
 #if UNITY_5_6_OR_NEWER
             internal static readonly int _Histogram            = Shader.PropertyToID("_Histogram");
             internal static readonly int _Source               = Shader.PropertyToID("_Source");
