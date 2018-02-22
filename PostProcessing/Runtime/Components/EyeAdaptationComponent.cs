@@ -9,8 +9,8 @@ namespace UnityEngine.PostProcessing
             internal static readonly int _ExposureCompensation = Shader.PropertyToID("_ExposureCompensation");
             internal static readonly int _AutoExposure         = Shader.PropertyToID("_AutoExposure");
             internal static readonly int _DebugWidth           = Shader.PropertyToID("_DebugWidth");
-
-#if UNITY_5_5_OR_NEWER
+            
+#if UNITY_5_6_OR_NEWER
             internal static readonly int _Histogram            = Shader.PropertyToID("_Histogram");
             internal static readonly int _Source               = Shader.PropertyToID("_Source");
             internal static readonly int _ScaleOffsetRes       = Shader.PropertyToID("_ScaleOffsetRes");
