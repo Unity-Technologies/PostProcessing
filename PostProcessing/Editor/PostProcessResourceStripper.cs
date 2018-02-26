@@ -204,13 +204,13 @@ namespace UnityEditor.Rendering.PostProcessing
     }
 #endif
 
-
-    [InitializeOnLoad]
-    public class SetupStrippingConfig
+    public class SetupStrippingConfig : AssetPostprocessor
     {
-        static SetupStrippingConfig()
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
+            // check if the config asset is missing, but only after other .asset files have been imported
+            if (Array.FindIndex(importedAssets, asset => asset != null && asset.Contains("PostProcessResources.asset")) > -1)
+                PostProcessResourceStripper.EnsurePostProcessStrippingConfigAssetExists();
         }
     }
 }
