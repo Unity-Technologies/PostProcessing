@@ -12,7 +12,6 @@ namespace UnityEngine.Rendering.PostProcessing
         [Serializable]
         public sealed class Shaders
         {
-            public Shader autoExposure;
             public Shader bloom;
             public Shader copy;
             public Shader copyStd;
@@ -45,6 +44,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [Serializable]
         public sealed class ComputeShaders
         {
+            public ComputeShader autoExposure;
             public ComputeShader exposureHistogram;
             public ComputeShader lut3DBaker;
             public ComputeShader texture3dLerp;

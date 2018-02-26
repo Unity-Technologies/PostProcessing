@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEditor.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {

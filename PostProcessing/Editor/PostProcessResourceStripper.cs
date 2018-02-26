@@ -1,4 +1,3 @@
-using System;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -7,9 +6,9 @@ namespace UnityEditor.Rendering.PostProcessing
 {
     public sealed class PostProcessResourceStripper : ScriptableObject
     {
-        [SerializeField] private PostProcessResources resources;
-        [SerializeField] private PostProcessResources unstrippedResources;
-        [SerializeField] private PostProcessStrippingConfig stripping;
+        [SerializeField] PostProcessResources resources;
+        [SerializeField] PostProcessResources unstrippedResources;
+        [SerializeField] PostProcessStrippingConfig stripping;
 
         public const string DefaultStrippingConfigAssetPath = "Assets/PostProcessStrippingConfig.asset";
         bool enabled = true;
@@ -30,7 +29,7 @@ namespace UnityEditor.Rendering.PostProcessing
             }
         }
 
-        static private string FindPostProcessStrippingConfigGUID()
+        static string FindPostProcessStrippingConfigGUID()
         {
             var guids = AssetDatabase.FindAssets("t:PostProcessStrippingConfig", null);
             if (guids.Length > 0)
@@ -39,7 +38,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 return null;
         }
 
-        static public string EnsurePostProcessStrippingConfigAssetExists()
+        public static string EnsurePostProcessStrippingConfigAssetExists()
         {
             var guid = FindPostProcessStrippingConfigGUID();
             if (guid != null)
@@ -54,7 +53,7 @@ namespace UnityEditor.Rendering.PostProcessing
             return FindPostProcessStrippingConfigGUID();
         }
 
-        private void LazyLoadStrippingConfig()
+        void LazyLoadStrippingConfig()
         {
             if (stripping != null)
                 return;
@@ -74,7 +73,7 @@ namespace UnityEditor.Rendering.PostProcessing
             unstrippedResources.changeHandler = null;
         }
 
-        private void StripMultiScaleAO()
+        void StripMultiScaleAO()
         {
             resources.computeShaders.multiScaleAODownsample1 = null;
             resources.computeShaders.multiScaleAODownsample2 = null;
@@ -83,13 +82,19 @@ namespace UnityEditor.Rendering.PostProcessing
             resources.shaders.multiScaleAO = null;
         }
 
-        private void StripScreenSpaceReflections()
+        void StripScreenSpaceReflections()
         {
             resources.shaders.screenSpaceReflections = null;
             resources.computeShaders.gaussianDownsample = null;
         }
 
-        private void StripDebugShaders()
+        void StripAutoExposure()
+        {
+            resources.computeShaders.autoExposure = null;
+            resources.computeShaders.exposureHistogram = null;
+        }
+
+        void StripDebugShaders()
         {
             resources.shaders.lightMeter = null;
             resources.shaders.gammaHistogram = null;
@@ -102,7 +107,7 @@ namespace UnityEditor.Rendering.PostProcessing
             resources.computeShaders.vectorscope = null;
         }
 
-        private void Apply(BuildTarget target)
+        void Apply(BuildTarget target)
         {
             if (!enabled)
                 return;
@@ -135,9 +140,9 @@ namespace UnityEditor.Rendering.PostProcessing
             if (stripping.stripComputeShaders)
             {
                 resources.computeShaders = new PostProcessResources.ComputeShaders();
-                resources.shaders.autoExposure = null;
                 StripScreenSpaceReflections();
                 StripMultiScaleAO();
+                StripAutoExposure();
                 StripDebugShaders();
             }
 
