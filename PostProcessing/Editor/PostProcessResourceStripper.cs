@@ -1,6 +1,7 @@
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using System;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
