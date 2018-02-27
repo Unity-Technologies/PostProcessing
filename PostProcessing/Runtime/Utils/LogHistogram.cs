@@ -37,8 +37,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeTextureParam(compute, kernel, "_Source", context.source);
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
             cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(scaleOffsetRes.z / m_ThreadX),
-                Mathf.CeilToInt(scaleOffsetRes.w / m_ThreadY),
+                Mathf.CeilToInt(scaleOffsetRes.z / 2f / m_ThreadX),
+                Mathf.CeilToInt(scaleOffsetRes.w / 2f / m_ThreadY),
                 1
             );
 
