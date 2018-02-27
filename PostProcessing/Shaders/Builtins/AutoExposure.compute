@@ -42,6 +42,7 @@ void MAIN(uint2 groupThreadId : SV_GroupThreadID)
     GroupMemoryBarrierWithGroupSync();
 
     // Parallel reduction to find the max value
+    UNITY_UNROLL
     for (uint i = HISTOGRAM_BINS >> 1u; i > 32u; i >>= 1u)
     {
         if (thread_id < i)
