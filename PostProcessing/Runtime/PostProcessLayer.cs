@@ -839,6 +839,7 @@ namespace UnityEngine.Rendering.PostProcessing
             RenderEffect<AutoExposure>(context);
             uberSheet.properties.SetTexture(ShaderIDs.AutoExposureTex, context.autoExposureTexture);
 
+            RenderEffect<LensDistortion>(context);
             RenderEffect<ChromaticAberration>(context);
             RenderEffect<Bloom>(context);
             RenderEffect<Vignette>(context);

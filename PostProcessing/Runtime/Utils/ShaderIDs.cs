@@ -93,6 +93,9 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
         internal static readonly int ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
 
+        internal static readonly int Distortion_CenterScale          = Shader.PropertyToID("_Distortion_CenterScale");
+        internal static readonly int Distortion_Amount               = Shader.PropertyToID("_Distortion_Amount");
+
         internal static readonly int Lut2D                           = Shader.PropertyToID("_Lut2D");
         internal static readonly int Lut3D                           = Shader.PropertyToID("_Lut3D");
         internal static readonly int Lut3D_Params                    = Shader.PropertyToID("_Lut3D_Params");
