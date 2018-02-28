@@ -11,7 +11,7 @@ namespace UnityEditor.Experimental.Rendering
 #endif
         public static string[] GetPaths()
         {
-            var srpMarker = Directory.GetFiles(Application.dataPath, "SRPMARKER", SearchOption.AllDirectories).FirstOrDefault();
+            var srpMarker = Directory.GetFiles(Application.dataPath, "POSTFXMARKER", SearchOption.AllDirectories).FirstOrDefault();
             var paths = new string[srpMarker == null ? 1 : 2];
             var index = 0;
             if (srpMarker != null)
