@@ -9,14 +9,8 @@ namespace UnityEngine.Rendering.PostProcessing
         public float exposure = 0.12f;
 
         ComputeBuffer m_Data;
-        int m_ThreadGroupSizeX;
-        int m_ThreadGroupSizeY;
-            
-        internal override void OnEnable()
-        {
-            m_ThreadGroupSizeX = 16;
-            m_ThreadGroupSizeY = RuntimeUtilities.isAndroidOpenGL ? 8 : 16;
-        }
+        const int k_ThreadGroupSizeX = 16;
+        const int k_ThreadGroupSizeY = 16;
 
         internal override void OnDisable()
         {
@@ -68,8 +62,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_VectorscopeBuffer", m_Data);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
             cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(size / (float)m_ThreadGroupSizeX),
-                Mathf.CeilToInt(size / (float)m_ThreadGroupSizeY),
+                Mathf.CeilToInt(size / (float)k_ThreadGroupSizeX),
+                Mathf.CeilToInt(size / (float)k_ThreadGroupSizeY),
                 1
             );
 
@@ -78,8 +72,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_VectorscopeBuffer", m_Data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.HalfResFinalCopy);
             cmd.DispatchCompute(compute, kernel, 
-                Mathf.CeilToInt(parameters.x / m_ThreadGroupSizeX),
-                Mathf.CeilToInt(parameters.y / m_ThreadGroupSizeY),
+                Mathf.CeilToInt(parameters.x / k_ThreadGroupSizeX),
+                Mathf.CeilToInt(parameters.y / k_ThreadGroupSizeY),
                 1
             );
 

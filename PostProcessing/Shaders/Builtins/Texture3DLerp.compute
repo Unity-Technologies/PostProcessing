@@ -1,3 +1,6 @@
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #include "../StdLib.hlsl"
 
 #pragma kernel KTexture3DLerp
@@ -11,15 +14,9 @@ CBUFFER_END
 Texture3D _From;
 Texture3D _To;
 
-#ifdef SHADER_API_GLES3
-    #define GROUP_SIZE_XY 8
-    #define GROUP_SIZE_Z 2
-#else
-    #define GROUP_SIZE_XY 8
-    #define GROUP_SIZE_Z 8
-#endif
+#define GROUP_SIZE 8
 
-[numthreads(GROUP_SIZE_XY, GROUP_SIZE_XY, GROUP_SIZE_Z)]
+[numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KTexture3DLerp(uint3 id : SV_DispatchThreadID)
 {
     if (float(id.x) < _Params.y && float(id.y) < _Params.y && float(id.z) < _Params.y)
