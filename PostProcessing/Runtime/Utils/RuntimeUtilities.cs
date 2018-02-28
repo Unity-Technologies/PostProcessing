@@ -146,12 +146,31 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd, RenderTargetIdentifier rt, RenderBufferLoadAction loadAction, RenderBufferStoreAction storeAction)
+        {
+            #if UNITY_2018_2_OR_NEWER
+            cmd.SetRenderTarget(rt, loadAction, storeAction);
+            #else
+            cmd.SetRenderTarget(rt);
+            #endif
+        }
+        public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd,
+            RenderTargetIdentifier color, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction,
+            RenderTargetIdentifier depth, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
+        {
+            #if UNITY_2018_2_OR_NEWER
+            cmd.SetRenderTarget(color, colorLoadAction, colorStoreAction, depth, depthLoadAction, depthStoreAction);
+            #else
+            cmd.SetRenderTarget(color, depth);
+            #endif
+        }
+
         // Use a custom blit method to draw a fullscreen triangle instead of a fullscreen quad
         // https://michaldrobot.com/2014/04/01/gcn-execution-patterns-in-full-screen-passes/
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            cmd.SetRenderTarget(destination);
+            cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
             if (clear)
                 cmd.ClearRenderTarget(true, true, Color.clear);
@@ -162,7 +181,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            cmd.SetRenderTarget(destination);
+            cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
             if (clear)
                 cmd.ClearRenderTarget(true, true, Color.clear);
@@ -173,10 +192,18 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            cmd.SetRenderTarget(destination, depth);
-
+            
             if (clear)
+            {
+                cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
+                                                       depth, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
                 cmd.ClearRenderTarget(true, true, Color.clear);
+            }
+            else
+            {
+                cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
+                                                       depth, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+            }
 
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
@@ -200,9 +227,30 @@ namespace UnityEngine.Rendering.PostProcessing
             if (source != null)
                 material.SetTexture(ShaderIDs.MainTex, source);
 
+            if (destination != null)
+                destination.DiscardContents(true, false);
+
             Graphics.SetRenderTarget(destination);
             Graphics.DrawMeshNow(fullscreenTriangle, Matrix4x4.identity);
             RenderTexture.active = oldRt;
+        }
+
+        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest)
+        {
+            #if UNITY_2018_2_OR_NEWER
+            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            dest = BuiltinRenderTextureType.CurrentActive;
+            #endif
+            cmd.Blit(source, dest);
+        }
+
+        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest, Material mat, int pass = 0)
+        {
+            #if UNITY_2018_2_OR_NEWER
+            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            dest = BuiltinRenderTextureType.CurrentActive;
+            #endif
+            cmd.Blit(source, dest, mat, pass);
         }
 
         // Fast basic copy texture if available, falls back to blit copy if not
@@ -532,20 +580,27 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Reflection
 
+        static IEnumerable<Type> m_AssemblyTypes;
+
         public static IEnumerable<Type> GetAllAssemblyTypes()
         {
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(t =>
-                {
-                    // Ugly hack to handle mis-versioned dlls
-                    var innerTypes = new Type[0];
-                    try
+            if (m_AssemblyTypes == null)
+            {
+                m_AssemblyTypes = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(t =>
                     {
-                        innerTypes = t.GetTypes();
-                    }
-                    catch {}
-                    return innerTypes;
-                });
+                        // Ugly hack to handle mis-versioned dlls
+                        var innerTypes = new Type[0];
+                        try
+                        {
+                            innerTypes = t.GetTypes();
+                        }
+                        catch { }
+                        return innerTypes;
+                    });
+            }
+
+            return m_AssemblyTypes;
         }
 
         // Quick extension method to get the first attribute of type T on a given Type

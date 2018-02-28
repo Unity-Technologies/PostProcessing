@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30f4b897495c7ad40b2d47143e02aaba, type: 3}
-  m_Name: PostProcessResources
+  m_Name: PostProcessResourcesUnstripped
   m_EditorClassIdentifier: 
   blueNoise64:
   - {fileID: 2800000, guid: 50b54341495978843a6f85583ed4417d, type: 3}

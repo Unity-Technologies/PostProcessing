@@ -23,7 +23,8 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_TaaSharpness;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
-        SerializedProperty m_FxaaMobileOptimized;
+        SerializedProperty m_SmaaQuality;
+        SerializedProperty m_FxaaFastMode;
         SerializedProperty m_FxaaKeepAlpha;
 
         SerializedProperty m_FogEnabled;
@@ -61,7 +62,8 @@ namespace UnityEditor.Rendering.PostProcessing
             m_TaaSharpness = FindProperty(x => x.temporalAntialiasing.sharpness);
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
             m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
-            m_FxaaMobileOptimized = FindProperty(x => x.fastApproximateAntialiasing.fastMode);
+            m_SmaaQuality = FindProperty(x => x.subpixelMorphologicalAntialiasing.quality);
+            m_FxaaFastMode = FindProperty(x => x.fastApproximateAntialiasing.fastMode);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
@@ -160,11 +162,19 @@ namespace UnityEditor.Rendering.PostProcessing
                 {
                     if (RuntimeUtilities.isSinglePassStereoSelected)
                         EditorGUILayout.HelpBox("SMAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
+
+                    EditorGUILayout.PropertyField(m_SmaaQuality);
+
+                    if (m_SmaaQuality.intValue != (int)SubpixelMorphologicalAntialiasing.Quality.Low && EditorUtilities.isTargetingConsolesOrMobiles)
+                        EditorGUILayout.HelpBox("For performance reasons it is recommended to use Low Quality on mobile and console platforms.", MessageType.Warning);
                 }
                 else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {
-                    EditorGUILayout.PropertyField(m_FxaaMobileOptimized);
+                    EditorGUILayout.PropertyField(m_FxaaFastMode);
                     EditorGUILayout.PropertyField(m_FxaaKeepAlpha);
+
+                    if (!m_FxaaFastMode.boolValue && EditorUtilities.isTargetingConsolesOrMobiles)
+                        EditorGUILayout.HelpBox("For performance reasons it is recommended to use Fast Mode on mobile and console platforms.", MessageType.Warning);
                 }
             }
             EditorGUI.indentLevel--;

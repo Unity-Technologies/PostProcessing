@@ -7,6 +7,7 @@
 
 RWStructuredBuffer<uint> _HistogramBuffer;
 Texture2D<float4> _Source;
+SamplerState sampler_LinearClamp;
 
 CBUFFER_START(Params)
     float4 _ScaleOffsetRes; // x: scale, y: offset, z: width, w: height
@@ -29,25 +30,27 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
     if (localThreadId < HISTOGRAM_BINS)
         gs_histogram[localThreadId] = 0u;
 
+    float2 ipos = float2(dispatchThreadId) * 2.0;
+
     GroupMemoryBarrierWithGroupSync();
 
     // Gather local group histogram
-    if (dispatchThreadId.x < (uint)_ScaleOffsetRes.z && dispatchThreadId.y < (uint)_ScaleOffsetRes.w)
+    if (ipos.x < _ScaleOffsetRes.z && ipos.y < _ScaleOffsetRes.w)
     {
         uint weight = 1u;
+        float2 sspos = ipos / _ScaleOffsetRes.zw;
 
         // Vignette weighting to put more focus on what's in the center of the screen
         #if USE_VIGNETTE_WEIGHTING
         {
-            float2 uv01 = float2(dispatchThreadId) / float2(_ScaleOffsetRes.z, _ScaleOffsetRes.w);
-            float2 d = abs(uv01 - (0.5).xx);
+            float2 d = abs(sspos - (0.5).xx);
             float vfactor = saturate(1.0 - dot(d, d));
             vfactor *= vfactor;
             weight = (uint)(64.0 * vfactor);
         }
         #endif
 
-        float3 color = _Source[dispatchThreadId].xyz;
+        float3 color = _Source.SampleLevel(sampler_LinearClamp, sspos, 0.0).xyz; // Bilinear downsample 2x
         float luminance = Luminance(color);
         float logLuminance = GetHistogramBinFromLuminance(luminance, _ScaleOffsetRes.xy);
         uint idx = (uint)(logLuminance * (HISTOGRAM_BINS - 1u));

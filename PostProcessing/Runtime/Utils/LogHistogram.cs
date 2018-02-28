@@ -18,7 +18,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_ThreadX = 16;
                 m_ThreadY = RuntimeUtilities.isAndroidOpenGL ? 8 : 16;
-                data = new ComputeBuffer (k_Bins, sizeof(uint));
+                data = new ComputeBuffer(k_Bins, sizeof(uint));
             }
             
             var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
@@ -37,8 +37,8 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeTextureParam(compute, kernel, "_Source", context.source);
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
             cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(scaleOffsetRes.z / (float)m_ThreadX),
-                Mathf.CeilToInt(scaleOffsetRes.w / (float)m_ThreadY),
+                Mathf.CeilToInt(scaleOffsetRes.z / 2f / m_ThreadX),
+                Mathf.CeilToInt(scaleOffsetRes.w / 2f / m_ThreadY),
                 1
             );
 

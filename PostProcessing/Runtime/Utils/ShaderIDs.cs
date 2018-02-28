@@ -79,9 +79,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int AutoExposureTex                 = Shader.PropertyToID("_AutoExposureTex");
         internal static readonly int HistogramBuffer                 = Shader.PropertyToID("_HistogramBuffer");
         internal static readonly int Params                          = Shader.PropertyToID("_Params");
-        internal static readonly int Speed                           = Shader.PropertyToID("_Speed");
         internal static readonly int ScaleOffsetRes                  = Shader.PropertyToID("_ScaleOffsetRes");
-        internal static readonly int ExposureCompensation            = Shader.PropertyToID("_ExposureCompensation");
 
         internal static readonly int BloomTex                        = Shader.PropertyToID("_BloomTex");
         internal static readonly int SampleScale                     = Shader.PropertyToID("_SampleScale");
