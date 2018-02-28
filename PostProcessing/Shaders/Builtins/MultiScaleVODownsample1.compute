@@ -19,6 +19,9 @@
 // Author:  James Stanard
 //
 
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #pragma kernel main
 
 #include "../StdLib.hlsl"

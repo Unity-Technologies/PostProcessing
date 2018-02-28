@@ -2,6 +2,9 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 {
     HLSLINCLUDE
 
+        #pragma exclude_renderers gles gles3 d3d11_9x
+        #pragma target 4.5
+
         #include "../StdLib.hlsl"
         #include "Fog.hlsl"
 

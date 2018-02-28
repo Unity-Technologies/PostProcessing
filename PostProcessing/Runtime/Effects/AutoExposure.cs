@@ -40,6 +40,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return enabled.value
                 && SystemInfo.supportsComputeShaders
+                && !RuntimeUtilities.isAndroidOpenGL
                 && RenderTextureFormat.RFloat.IsSupported()
                 && context.resources.computeShaders.autoExposure
                 && context.resources.computeShaders.exposureHistogram;

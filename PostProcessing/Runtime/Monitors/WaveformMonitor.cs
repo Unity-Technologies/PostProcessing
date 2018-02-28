@@ -10,25 +10,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
         ComputeBuffer m_Data;
 
-        int m_ThreadGroupSize;
-        int m_ThreadGroupSizeX;
-        int m_ThreadGroupSizeY;
-
-        internal override void OnEnable()
-        {
-            m_ThreadGroupSizeX = 16;
-
-            if (RuntimeUtilities.isAndroidOpenGL)
-            {
-                m_ThreadGroupSize = 128;
-                m_ThreadGroupSizeY = 8;
-            }
-            else
-            {
-                m_ThreadGroupSize = 256;
-                m_ThreadGroupSizeY = 16;
-            }
-        }
+        const int k_ThreadGroupSize = 256;
+        const int k_ThreadGroupSizeX = 16;
+        const int k_ThreadGroupSizeY = 16;
 
         internal override void OnDisable()
         {
@@ -86,7 +70,7 @@ namespace UnityEngine.Rendering.PostProcessing
             int kernel = compute.FindKernel("KWaveformClear");
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / (float)m_ThreadGroupSizeX), Mathf.CeilToInt(height / (float)m_ThreadGroupSizeY), 1);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(width / (float)k_ThreadGroupSizeX), Mathf.CeilToInt(height / (float)k_ThreadGroupSizeY), 1);
 
             // For performance reasons, especially on consoles, we'll just downscale the source
             // again to reduce VMEM stalls. Eventually the whole algorithm needs to be rewritten as
@@ -99,7 +83,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeBufferParam(compute, kernel, "_WaveformBuffer", m_Data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", ShaderIDs.WaveformSource);
             cmd.SetComputeVectorParam(compute, "_Params", parameters);
-            cmd.DispatchCompute(compute, kernel, width, Mathf.CeilToInt(height / (float)m_ThreadGroupSize), 1);
+            cmd.DispatchCompute(compute, kernel, width, Mathf.CeilToInt(height / (float)k_ThreadGroupSize), 1);
             cmd.ReleaseTemporaryRT(ShaderIDs.WaveformSource);
 
             // Generate the waveform texture

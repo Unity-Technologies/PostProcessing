@@ -96,6 +96,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
 
                 state &= SystemInfo.supportsComputeShaders
+                      && !RuntimeUtilities.isAndroidOpenGL
                       && RenderTextureFormat.RFloat.IsSupported()
                       && RenderTextureFormat.RHalf.IsSupported()
                       && RenderTextureFormat.R8.IsSupported();

@@ -1,3 +1,6 @@
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
 
@@ -8,13 +11,8 @@ CBUFFER_START (Params)
     float4 _Params; // x: source width, y: source height, z: buffer size, w: linear?
 CBUFFER_END
 
-#if SHADER_API_GLES3
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 8
-#else
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 16
-#endif
+#define GROUP_SIZE_X 16
+#define GROUP_SIZE_Y 16
 
 #pragma kernel KVectorscopeGather
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
