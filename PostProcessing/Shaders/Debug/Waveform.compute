@@ -1,3 +1,6 @@
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
 
@@ -9,15 +12,9 @@ CBUFFER_START(Params)
     float4 _Params; // x: source width, y: source height, z: linear, w: unused
 CBUFFER_END
 
-#if defined SHADER_API_GLES3
-    #define GROUP_SIZE 128
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 8
-#else
-    #define GROUP_SIZE 256
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 16
-#endif
+#define GROUP_SIZE 256
+#define GROUP_SIZE_X 16
+#define GROUP_SIZE_Y 16
 
 #pragma kernel KWaveformGather
 [numthreads(1, GROUP_SIZE, 1)]

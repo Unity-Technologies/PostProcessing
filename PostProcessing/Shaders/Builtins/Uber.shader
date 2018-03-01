@@ -5,6 +5,7 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma target 3.0
 
         #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
+        #pragma multi_compile __ DISTORT
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
         #pragma multi_compile __ BLOOM
         #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
@@ -15,6 +16,7 @@ Shader "Hidden/PostProcessing/Uber"
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
+        #include "Distortion.hlsl"
         #include "Dithering.hlsl"
 
         #define MAX_CHROMATIC_SAMPLES 16
@@ -71,6 +73,12 @@ Shader "Hidden/PostProcessing/Uber"
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
             float2 uv = i.texcoord;
+
+            //>>> Automatically skipped by the shader optimizer when not used
+            float2 uvDistorted = Distort(i.texcoord);
+            float2 uvStereoDistorted = Distort(i.texcoordStereo);
+            //<<<
+
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             half4 color = (0.0).xxxx;
 
@@ -90,7 +98,7 @@ Shader "Hidden/PostProcessing/Uber"
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
-                    half4 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(pos), 0);
+                    half4 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(pos)), 0);
                     half4 filter = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0), 0).rgb, 1.0);
 
                     sum += s * filter;
@@ -110,9 +118,9 @@ Shader "Hidden/PostProcessing/Uber"
                 half4 filterB = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(1.5 / 3, 0.0), 0).rgb, 1.0);
                 half4 filterC = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(2.5 / 3, 0.0), 0).rgb, 1.0);
 
-                half4 texelA = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(uv), 0);
-                half4 texelB = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(delta + uv), 0);
-                half4 texelC = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(delta * 2.0 + uv), 0);
+                half4 texelA = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(uv)), 0);
+                half4 texelB = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta + uv)), 0);
+                half4 texelC = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta * 2.0 + uv)), 0);
 
                 half4 sum = texelA * filterA + texelB * filterB + texelC * filterC;
                 half4 filterSum = filterA + filterB + filterC;
@@ -120,7 +128,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvStereoDistorted);
             }
             #endif
 
@@ -135,8 +143,13 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if BLOOM
             {
-                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), i.texcoord, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
-                half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, i.texcoord * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
+                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+
+                // UVs should be Distort(uv * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw)
+                // but considering we use a cover-style scale on the dirt texture the difference
+                // isn't massive so we chose to save a few ALUs here instead in case lens distortion
+                // is active
+                half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, uvDistorted * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
 
                 // Additive bloom (artist friendly)
                 bloom *= _Bloom_Settings.y;
@@ -151,7 +164,7 @@ Shader "Hidden/PostProcessing/Uber"
                 UNITY_BRANCH
                 if (_Vignette_Mode < 0.5)
                 {
-                    half2 d = abs(uv - _Vignette_Center) * _Vignette_Settings.x;
+                    half2 d = abs(uvDistorted - _Vignette_Center) * _Vignette_Settings.x;
                     d.x *= lerp(1.0, _ScreenParams.x / _ScreenParams.y, _Vignette_Settings.w);
                     d = pow(saturate(d), _Vignette_Settings.z); // Roundness
                     half vfactor = pow(saturate(1.0 - dot(d, d)), _Vignette_Settings.y);
@@ -160,7 +173,7 @@ Shader "Hidden/PostProcessing/Uber"
                 }
                 else
                 {
-                    half vfactor = SAMPLE_TEXTURE2D(_Vignette_Mask, sampler_Vignette_Mask, uv).a;
+                    half vfactor = SAMPLE_TEXTURE2D(_Vignette_Mask, sampler_Vignette_Mask, uvDistorted).a;
 
                     #if !UNITY_COLORSPACE_GAMMA
                     {
