@@ -3,8 +3,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
     HLSLINCLUDE
 
         #pragma target 3.0
-        #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-
+  
     ENDHLSL
 
     SubShader

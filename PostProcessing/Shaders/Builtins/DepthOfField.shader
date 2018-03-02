@@ -39,7 +39,6 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 5.0
                 #pragma vertex VertDefault
                 #pragma fragment FragPrefilter
-                #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
                 #include "DepthOfField.hlsl"
             ENDHLSL
         }
@@ -171,7 +170,6 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragPrefilter
-                #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
                 #include "DepthOfField.hlsl"
             ENDHLSL
         }
