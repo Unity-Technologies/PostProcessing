@@ -24,7 +24,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
         public FloatParameter maxLuminance = new FloatParameter { value = 0f };
 
-        [Min(0f), Tooltip("Exposure bias. Use this to offset the global exposure of the scene.")]
+        [Min(0f), DisplayName("Exposure Compensation"), Tooltip("Use this to scale the global exposure of the scene.")]
         public FloatParameter keyValue = new FloatParameter { value = 1f };
 
         [DisplayName("Type"), Tooltip("Use \"Progressive\" if you want auto exposure to be animated. Use \"Fixed\" otherwise.")]
