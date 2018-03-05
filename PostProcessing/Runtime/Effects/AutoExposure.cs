@@ -97,12 +97,12 @@ namespace UnityEngine.Rendering.PostProcessing
             settings.maxLuminance.value = Mathf.Max(minLum, maxLum);
 
             // Compute average luminance & auto exposure
-            bool isStatic = m_ResetHistory || !Application.isPlaying;
+            bool firstFrame = m_ResetHistory || !Application.isPlaying;
             string adaptation = null;
 
-            if (isStatic)
+            if (firstFrame || settings.eyeAdaptation.value == EyeAdaptation.Fixed)
                 adaptation = "KAutoExposureAvgLuminance_fixed";
-            else if (settings.eyeAdaptation.value == EyeAdaptation.Progressive)
+            else
                 adaptation = "KAutoExposureAvgLuminance_progressive";
 
             var compute = context.resources.computeShaders.autoExposure;
@@ -112,7 +112,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeVectorParam(compute, "_Params2", new Vector4(settings.speedDown.value, settings.speedUp.value, settings.keyValue.value, Time.deltaTime));
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", context.logHistogram.GetHistogramScaleOffsetRes(context));
 
-            if (isStatic)
+            if (firstFrame)
             {
                 // We don't want eye adaptation when not in play mode because the GameView isn't
                 // animated, thus making it harder to tweak. Just use the final audo exposure value.
