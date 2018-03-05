@@ -215,7 +215,18 @@ Shader "Hidden/PostProcessing/Uber"
             #elif COLOR_GRADING_LDR_2D
             {
                 color = saturate(color);
-                color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color.rgb, _Lut2D_Params);
+
+                #if UNITY_COLORSPACE_GAMMA
+                {
+                    color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color.rgb, _Lut2D_Params);
+                }
+                #else
+                {
+                    color.rgb = LinearToSRGB(color.rgb);
+                    color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color.rgb, _Lut2D_Params);
+                    color.rgb = SRGBToLinear(color.rgb);
+                }
+                #endif
             }
             #endif
 

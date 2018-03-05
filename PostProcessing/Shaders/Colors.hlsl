@@ -468,7 +468,7 @@ half3 ApplyLut2D(TEXTURE2D_ARGS(tex, samplerTex), float3 uvw, float3 scaleOffset
 {
     // Strip format where `height = sqrt(width)`
     uvw.z *= scaleOffset.z;
-    half shift = floor(uvw.z);
+    float shift = floor(uvw.z);
     uvw.xy = uvw.xy * scaleOffset.z * scaleOffset.xy + scaleOffset.xy * 0.5;
     uvw.x += shift * scaleOffset.y;
     uvw.xyz = lerp(
