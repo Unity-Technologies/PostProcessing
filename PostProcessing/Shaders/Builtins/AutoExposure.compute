@@ -36,6 +36,12 @@ float InterpolateExposure(float newExposure, float oldExposure)
     return exposure;
 }
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(MAIN)
+
+#else
+
 [numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_BINS / HISTOGRAM_THREAD_X, 1)]
 void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 {
@@ -83,3 +89,5 @@ void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 #endif
     }
 }
+
+#endif // DISABLE_COMPUTE_SHADERS
