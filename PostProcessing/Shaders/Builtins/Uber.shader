@@ -215,7 +215,11 @@ Shader "Hidden/PostProcessing/Uber"
             #elif COLOR_GRADING_LDR_2D
             {
                 color = saturate(color);
+
+                // LDR Lut lookup needs to be in sRGB - for HDR stick to linear
+                color.rgb = LinearToSRGB(color.rgb);
                 color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), color.rgb, _Lut2D_Params);
+                color.rgb = SRGBToLinear(color.rgb);
             }
             #endif
 
