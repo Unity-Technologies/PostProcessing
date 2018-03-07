@@ -186,16 +186,23 @@ namespace UnityEngine.Rendering.PostProcessing
                 value.Cache(int.MinValue);
         }
 
+        internal override void SetValue(ParameterOverride parameter)
+        {
+            base.SetValue(parameter);
+
+            if (value != null)
+                value.Cache(Time.renderedFrameCount);
+        }
+
         public override void Interp(Spline from, Spline to, float t)
         {
-            int frameCount = Time.renderedFrameCount;
-
             if (from == null || to == null)
             {
                 base.Interp(from, to, t);
                 return;
             }
-
+            
+            int frameCount = Time.renderedFrameCount;
             from.Cache(frameCount);
             to.Cache(frameCount);
 
