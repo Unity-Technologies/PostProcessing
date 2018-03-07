@@ -24,6 +24,8 @@
 
 #pragma kernel main
 
+#include "../StdLib.hlsl"
+
 Texture2D<float> DS4x;
 RWTexture2D<float> DS8x;
 RWTexture2DArray<float> DS8xAtlas;
