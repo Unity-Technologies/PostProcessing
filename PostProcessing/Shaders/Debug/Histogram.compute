@@ -17,6 +17,13 @@ CBUFFER_END
 
 groupshared uint gs_histogram[HISTOGRAM_BINS];
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(KHistogramGather)
+TRIVIAL_COMPUTE_KERNEL(KHistogramClear)
+
+#else
+
 #pragma kernel KHistogramGather
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
 void KHistogramGather(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThreadId : SV_GroupThreadID)
@@ -64,3 +71,5 @@ void KHistogramClear(uint dispatchThreadId : SV_DispatchThreadID)
     if (dispatchThreadId < HISTOGRAM_BINS)
         _HistogramBuffer[dispatchThreadId] = 0u;
 }
+
+#endif // DISABLE_COMPUTE_SHADERS
