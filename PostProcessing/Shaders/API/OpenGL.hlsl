@@ -48,3 +48,9 @@
 
 #define FXAA_HLSL_3 1
 #define SMAA_HLSL_3 1
+
+// pragma exclude_renderers is only supported since Unity 2018.1 for compute shaders
+#if UNITY_VERSION < 201810 && !defined(SHADER_API_GLCORE)
+#    define DISABLE_COMPUTE_SHADERS 1
+#    define TRIVIAL_COMPUTE_KERNEL(name) [numthreads(1, 1, 1)] void name() {}
+#endif

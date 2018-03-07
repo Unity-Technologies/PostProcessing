@@ -188,6 +188,12 @@ float BilateralUpsample(float HiDepth, float HiAO, float4 LowDepths, float4 LowA
     return HiAO * WeightedSum / TotalWeight;
 }
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(MAIN)
+
+#else
+
 [numthreads(8, 8, 1)]
 void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_GroupThreadID, uint3 DTid : SV_DispatchThreadID)
 {
@@ -245,3 +251,5 @@ void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
     AoResult[OutST + int2(-1, -1)] = BilateralUpsample(HiDepths.w, HiSSAOs.w, LoDepths.wxyz, LoSSAOs.wxyz);
 #endif
 }
+
+#endif // DISABLE_COMPUTE_SHADERS
