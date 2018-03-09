@@ -246,7 +246,8 @@ namespace UnityEngine.Rendering.PostProcessing
             get
             {
                 return UnityEditor.PlayerSettings.virtualRealitySupported
-                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+                    && ((UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass) ||
+                        (UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.Instancing));
             }
         }
 #endif

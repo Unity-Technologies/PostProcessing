@@ -258,6 +258,9 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 struct AttributesDefault
 {
     float3 vertex : POSITION;
+#if defined(STEREO_INSTANCING_ON)
+    uint instanceID : SV_InstanceID;
+#endif
 };
 
 struct VaryingsDefault
@@ -265,6 +268,9 @@ struct VaryingsDefault
     float4 vertex : SV_POSITION;
     float2 texcoord : TEXCOORD0;
     float2 texcoordStereo : TEXCOORD1;
+#if defined(STEREO_INSTANCING_ON)
+    uint stereoTargetEyeIndex : SV_RenderTargetArrayIndex;
+#endif
 };
 
 VaryingsDefault VertDefault(AttributesDefault v)
@@ -279,6 +285,10 @@ VaryingsDefault VertDefault(AttributesDefault v)
 
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
 
+#if defined(STEREO_INSTANCING_ON)
+    o.stereoTargetEyeIndex = v.instanceID & 0x01;
+#endif
+
     return o;
 }
 
@@ -290,6 +300,11 @@ VaryingsDefault VertUVTransform(AttributesDefault v)
     o.vertex = float4(v.vertex.xy, 0.0, 1.0);
     o.texcoord = TransformTriangleVertexToUV(v.vertex.xy) * _UVTransform.xy + _UVTransform.zw;
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
+
+#if defined(STEREO_INSTANCING_ON)
+    o.stereoTargetEyeIndex = v.instanceID & 0x01;
+#endif
+
     return o;
 }
 

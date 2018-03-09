@@ -12,21 +12,36 @@ Shader "Hidden/PostProcessing/CopyStd"
         _MainTex ("", 2D) = "white" {}
     }
 
+
     CGINCLUDE
+
+#pragma enable_d3d11_debug_symbols
 
         struct Attributes
         {
             float4 vertex : POSITION;
             float2 texcoord : TEXCOORD0;
+#if defined(STEREO_INSTANCING_ON)
+            uint instanceID : SV_InstanceID;
+#endif
         };
 
         struct Varyings
         {
             float4 vertex : SV_POSITION;
             float2 texcoord : TEXCOORD0;
+#if defined(STEREO_INSTANCING_ON)
+            uint stereoTargetEyeIndex : SV_RenderTargetArrayIndex;
+#endif
         };
 
+#if defined(STEREO_INSTANCING_ON)
+        Texture2DArray _MainTex;
+        SamplerState sampler_MainTex;
+        // CG versions of 2Darray don't seem to work...
+#else
         sampler2D _MainTex;
+#endif
         float4 _MainTex_ST;
 
         Varyings Vert(Attributes v)
@@ -41,12 +56,21 @@ Shader "Hidden/PostProcessing/CopyStd"
 
             o.texcoord = o.texcoord * _MainTex_ST.xy + _MainTex_ST.zw; // We need this for VR
 
+#if defined(STEREO_INSTANCING_ON)
+            o.stereoTargetEyeIndex = v.instanceID & 0x01;
+#endif
+
             return o;
         }
 
         float4 Frag(Varyings i) : SV_Target
         {
+#if defined(STEREO_INSTANCING_ON)
+            float eyeIndex = i.stereoTargetEyeIndex;
+            float4 color = _MainTex.Sample(sampler_MainTex, float3(i.texcoord, eyeIndex));
+#else
             float4 color = tex2D(_MainTex, i.texcoord);
+#endif
             return color;
         }
 
@@ -64,7 +88,12 @@ Shader "Hidden/PostProcessing/CopyStd"
 
         float4 FragKillNaN(Varyings i) : SV_Target
         {
+#if defined(STEREO_INSTANCING_ON)
+            float eyeIndex = i.stereoTargetEyeIndex;
+            float4 color = _MainTex.Sample(sampler_MainTex, float3(i.texcoord, eyeIndex));
+#else
             float4 color = tex2D(_MainTex, i.texcoord);
+#endif
 
             if (AnyIsNan(color))
             {

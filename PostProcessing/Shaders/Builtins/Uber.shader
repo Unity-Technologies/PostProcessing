@@ -20,8 +20,12 @@ Shader "Hidden/PostProcessing/Uber"
         #include "Dithering.hlsl"
 
         #define MAX_CHROMATIC_SAMPLES 16
-
+#if defined(STEREO_INSTANCING_ON)
+        Texture2DArray _MainTex;
+        SamplerState sampler_MainTex;
+#else
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+#endif
         float4 _MainTex_TexelSize;
 
         // Auto exposure / eye adaptation
@@ -128,7 +132,13 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
+#if defined(STEREO_INSTANCING_ON)
+                float eyeIndex = i.stereoTargetEyeIndex;
+                //float4 color = _MainTex.Sample(sampler_MainTex, float3(i.texcoord, eyeIndex));
+                color = _MainTex.Sample(sampler_MainTex, float3(uvStereoDistorted, eyeIndex));
+#else
                 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvStereoDistorted);
+#endif
             }
             #endif
 
