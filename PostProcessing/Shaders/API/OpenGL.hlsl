@@ -2,12 +2,20 @@
 #define UNITY_UV_STARTS_AT_TOP 0
 #define UNITY_REVERSED_Z 0
 #define UNITY_GATHER_SUPPORTED 0
+#define UNITY_TEXARRAY_SUPPORTED (SHADER_TARGET >= 30)
+
+#define ERROR_ON_UNSUPPORTED_FUNCTION(funcName) #error ##funcName is not supported on GLES 2.0
 
 #define TEXTURE2D_SAMPLER2D(textureName, samplerName) sampler2D textureName
 #define TEXTURE3D_SAMPLER3D(textureName, samplerName) sampler3D textureName
 
 #define TEXTURE2D(textureName) sampler2D textureName
 #define SAMPLER2D(samplerName)
+#if UNITY_TEXARRAY_SUPPORTED
+#define TEXTURE2D_ARRAY(textureName) Texture2DArray textureName
+#else
+#define TEXTURE2D_ARRAY(textureName) samplerCUBE textureName // No support to texture2DArray
+#endif
 
 #define TEXTURE3D(textureName) sampler3D textureName
 #define SAMPLER3D(samplerName)
@@ -20,6 +28,11 @@
 
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) tex2D(textureName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) tex2Dlod(textureName, float4(coord2, 0.0, lod))
+#if UNITY_TEXARRAY_SUPPORTED
+#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))
+#else
+#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY)
+#endif
 
 #define SAMPLE_TEXTURE3D(textureName, samplerName, coord3) tex3D(textureName, coord3)
 

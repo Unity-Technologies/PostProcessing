@@ -6,8 +6,8 @@
 #define TEXTURE3D_SAMPLER3D(textureName, samplerName) Texture3D textureName; SamplerState samplerName
 
 #define TEXTURE2D(textureName) Texture2D textureName
-#define TEXTURE2D_ARRAY(textureName) Texture2DArray textureName
 #define SAMPLER2D(samplerName) SamplerState samplerName
+#define TEXTURE2D_ARRAY(textureName) Texture2DArray textureName
 
 #define TEXTURE3D(textureName) Texture3D textureName
 #define SAMPLER3D(samplerName) SamplerState samplerName

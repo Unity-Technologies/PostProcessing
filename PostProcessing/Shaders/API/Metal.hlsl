@@ -7,6 +7,7 @@
 
 #define TEXTURE2D(textureName) Texture2D textureName
 #define SAMPLER2D(samplerName) SamplerState samplerName
+#define TEXTURE2D_ARRAY(textureName) Texture2DArray textureName
 
 #define TEXTURE3D(textureName) Texture3D textureName
 #define SAMPLER3D(samplerName) SamplerState samplerName
@@ -19,6 +20,7 @@
 
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) textureName.Sample(samplerName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) textureName.SampleLevel(samplerName, coord2, lod)
+#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))
 
 #define SAMPLE_TEXTURE3D(textureName, samplerName, coord3) textureName.Sample(samplerName, coord3)
 
