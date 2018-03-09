@@ -251,6 +251,15 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 }
 
 #include "xRLib.hlsl"
+#include "xRHelpers.hlsl"
+
+#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+    #define SCREENSPACE_TEXTURE TEXTURE2D_ARRAY
+    #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, float3(uv.xy, (float)unity_StereoEyeIndex))
+#else
+    #define SCREENSPACE_TEXTURE TEXTURE2D
+    #define SAMPLE_SCREENSPACE_TEXTURE SAMPLE_TEXTURE2D
+#endif
 
 // -----------------------------------------------------------------------------
 // Default vertex shaders
@@ -258,9 +267,7 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 struct AttributesDefault
 {
     float3 vertex : POSITION;
-#if defined(STEREO_INSTANCING_ON)
-    uint instanceID : SV_InstanceID;
-#endif
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct VaryingsDefault
@@ -268,14 +275,16 @@ struct VaryingsDefault
     float4 vertex : SV_POSITION;
     float2 texcoord : TEXCOORD0;
     float2 texcoordStereo : TEXCOORD1;
-#if defined(STEREO_INSTANCING_ON)
-    uint stereoTargetEyeIndex : SV_RenderTargetArrayIndex;
-#endif
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 VaryingsDefault VertDefault(AttributesDefault v)
 {
     VaryingsDefault o;
+
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
     o.vertex = float4(v.vertex.xy, 0.0, 1.0);
     o.texcoord = TransformTriangleVertexToUV(v.vertex.xy);
 
@@ -285,10 +294,6 @@ VaryingsDefault VertDefault(AttributesDefault v)
 
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
 
-#if defined(STEREO_INSTANCING_ON)
-    o.stereoTargetEyeIndex = v.instanceID & 0x01;
-#endif
-
     return o;
 }
 
@@ -297,13 +302,13 @@ float4 _UVTransform; // xy: scale, wz: translate
 VaryingsDefault VertUVTransform(AttributesDefault v)
 {
     VaryingsDefault o;
+
+    UNITY_SETUP_INSTANCE_ID(v);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
     o.vertex = float4(v.vertex.xy, 0.0, 1.0);
     o.texcoord = TransformTriangleVertexToUV(v.vertex.xy) * _UVTransform.xy + _UVTransform.zw;
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
-
-#if defined(STEREO_INSTANCING_ON)
-    o.stereoTargetEyeIndex = v.instanceID & 0x01;
-#endif
 
     return o;
 }

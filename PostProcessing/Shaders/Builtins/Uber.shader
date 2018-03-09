@@ -2,30 +2,27 @@ Shader "Hidden/PostProcessing/Uber"
 {
     HLSLINCLUDE
 
-        #pragma target 3.0
+#pragma target 3.0
 
-        #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-        #pragma multi_compile __ DISTORT
-        #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
-        #pragma multi_compile __ BLOOM
-        #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-        #pragma multi_compile __ VIGNETTE
-        #pragma multi_compile __ GRAIN
-        #pragma multi_compile __ FINALPASS
+#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
+#pragma multi_compile __ DISTORT
+#pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
+#pragma multi_compile __ BLOOM
+#pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
+#pragma multi_compile __ VIGNETTE
+#pragma multi_compile __ GRAIN
+#pragma multi_compile __ FINALPASS
 
-        #include "../StdLib.hlsl"
-        #include "../Colors.hlsl"
-        #include "../Sampling.hlsl"
-        #include "Distortion.hlsl"
-        #include "Dithering.hlsl"
+#include "../StdLib.hlsl"
+#include "../Colors.hlsl"
+#include "../Sampling.hlsl"
+#include "Distortion.hlsl"
+#include "Dithering.hlsl"
 
-        #define MAX_CHROMATIC_SAMPLES 16
-#if defined(STEREO_INSTANCING_ON)
-        Texture2DArray _MainTex;
-        SamplerState sampler_MainTex;
-#else
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-#endif
+#define MAX_CHROMATIC_SAMPLES 16
+
+        SCREENSPACE_TEXTURE(_MainTex);
+        SAMPLER2D(sampler_MainTex);
         float4 _MainTex_TexelSize;
 
         // Auto exposure / eye adaptation
@@ -76,6 +73,8 @@ Shader "Hidden/PostProcessing/Uber"
 
         half4 FragUber(VaryingsDefault i) : SV_Target
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
             float2 uv = i.texcoord;
 
             //>>> Automatically skipped by the shader optimizer when not used
@@ -132,13 +131,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
-#if defined(STEREO_INSTANCING_ON)
-                float eyeIndex = i.stereoTargetEyeIndex;
-                //float4 color = _MainTex.Sample(sampler_MainTex, float3(i.texcoord, eyeIndex));
-                color = _MainTex.Sample(sampler_MainTex, float3(uvStereoDistorted, eyeIndex));
-#else
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvStereoDistorted);
-#endif
+                color = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, sampler_MainTex, uvStereoDistorted);
             }
             #endif
 
