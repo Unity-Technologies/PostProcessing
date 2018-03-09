@@ -15,7 +15,14 @@ Shader "Hidden/PostProcessing/CopyStd"
 
     CGINCLUDE
 
-#pragma enable_d3d11_debug_symbols
+// XRTODO:
+// #pragma multi_compile _ UNITY_SINGLE_PASS_STEREO STEREO_INSTANCING_ON STEREO_MULTIVIEW_ON
+// Instancing needs to support D3D11 (and OGL in the future)
+// Multi-view needs to support OGL
+
+#if defined(STEREO_INSTANCING_ON)
+#else
+#endif
 
         struct Attributes
         {
