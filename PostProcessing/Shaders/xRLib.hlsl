@@ -3,7 +3,7 @@
 #ifndef UNITY_POSTFX_XRLIB
 #define UNITY_POSTFX_XRLIB
 
-#if defined(UNITY_SINGLE_PASS_STEREO)
+#if defined(UNITY_SINGLE_PASS_STEREO) || defined(STEREO_INSTANCING_ON) || defined(STEREO_MULTIVIEW_ON)
 CBUFFER_START(UnityStereoGlobals)
     float4x4 unity_StereoMatrixP[2];
     float4x4 unity_StereoMatrixV[2];
