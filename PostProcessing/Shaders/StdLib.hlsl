@@ -255,7 +255,7 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 
 #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
     #define SCREENSPACE_TEXTURE TEXTURE2D_ARRAY
-    #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, float3(uv.xy, (float)unity_StereoEyeIndex))
+    #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, uv.xy, (float)unity_StereoEyeIndex)
 #else
     #define SCREENSPACE_TEXTURE TEXTURE2D
     #define SAMPLE_SCREENSPACE_TEXTURE SAMPLE_TEXTURE2D
