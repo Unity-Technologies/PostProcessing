@@ -29,7 +29,8 @@
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) tex2D(textureName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) tex2Dlod(textureName, float4(coord2, 0.0, lod))
 #if UNITY_TEXARRAY_SUPPORTED
-#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))
+//#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))
+#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) texture(textureName, float3(coord2, index))
 #else
 #define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY)
 #endif

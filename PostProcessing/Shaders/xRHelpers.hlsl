@@ -27,9 +27,9 @@
 
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED)
     // Will this be injected already?
-    CBUFFER_START(UnityStereoEyeIndices)
-    float4 unity_StereoEyeIndices[2];
-    CBUFFER_END
+    //CBUFFER_START(UnityStereoEyeIndices)
+    //float4 unity_StereoEyeIndices[2];
+    //CBUFFER_END
 
     // This seems to be injected already?
     //CBUFFER_START(UnityStereoEyeIndex)

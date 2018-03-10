@@ -24,6 +24,12 @@ CBUFFER_START(UnityStereoEyeIndex)
 CBUFFER_END
 #endif
 
+#if defined(STEREO_MULTIVIEW_ON)
+CBUFFER_START(UnityStereoEyeIndices)
+    float4 unity_StereoEyeIndices[2];
+CBUFFER_END
+#endif
+
 float _RenderViewportScaleFactor;
 
 float2 UnityStereoScreenSpaceUVAdjust(float2 uv, float4 scaleAndOffset)

@@ -21,8 +21,13 @@ Shader "Hidden/PostProcessing/Uber"
 
 #define MAX_CHROMATIC_SAMPLES 16
 
+#pragma enable_d3d11_debug_symbols
+
         SCREENSPACE_TEXTURE(_MainTex);
         SAMPLER2D(sampler_MainTex);
+#if defined(STEREO_MULTIVIEW_ON)
+        SamplerState sampler_MainTex;
+#endif
         float4 _MainTex_TexelSize;
 
         // Auto exposure / eye adaptation
@@ -101,7 +106,11 @@ Shader "Hidden/PostProcessing/Uber"
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
+#if defined(STEREO_MULTIVIEW_ON)
+                    half s = 1.0f;
+#else
                     half4 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(pos)), 0);
+#endif
                     half4 filter = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0), 0).rgb, 1.0);
 
                     sum += s * filter;
@@ -120,10 +129,15 @@ Shader "Hidden/PostProcessing/Uber"
                 half4 filterA = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(0.5 / 3, 0.0), 0).rgb, 1.0);
                 half4 filterB = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(1.5 / 3, 0.0), 0).rgb, 1.0);
                 half4 filterC = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(2.5 / 3, 0.0), 0).rgb, 1.0);
-
+#if defined(STEREO_MULTIVIEW_ON)
+                half4 texelA = 1.0f;
+                half4 texelB = 1.0f;
+                half4 texelC = 1.0f;
+#else
                 half4 texelA = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(uv)), 0);
                 half4 texelB = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta + uv)), 0);
                 half4 texelC = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta * 2.0 + uv)), 0);
+#endif
 
                 half4 sum = texelA * filterA + texelB * filterB + texelC * filterC;
                 half4 filterSum = filterA + filterB + filterC;
@@ -131,7 +145,21 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #else
             {
+#if defined(STEREO_MULTIVIEW_ON)
+                float3 coords = float3(uvStereoDistorted.xy, float(unity_StereoEyeIndex));
+                color = _MainTex.Sample(sampler_MainTex, coords);
+                if (unity_StereoEyeIndices[unity_StereoEyeIndex].x > 0.0f)
+                {
+                    color = half4(1.0f, 0.0f, 0.0f, 1.0f);
+                }
+                else
+                {
+                    color = half4(0.0f, 1.0f, 0.0f, 1.0f);
+                }
+                //color = texture(_MainTex, coords);
+#else
                 color = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, sampler_MainTex, uvStereoDistorted);
+#endif
             }
             #endif
 
