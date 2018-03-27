@@ -34,7 +34,8 @@
 // -----------------------------------------------------------------------------
 // Constants
 
-#define HALF_MAX        65504.0
+#define HALF_MAX        65504.0 // (2 - 2^-10) * 2^15
+#define HALF_MAX_MINUS1 65472.0 // (2 - 2^-9) * 2^15
 #define EPSILON         1.0e-4
 #define PI              3.14159265359
 #define TWO_PI          6.28318530718
