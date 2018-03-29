@@ -9,7 +9,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _Lut2D_Params;
-        float3 _UserLut2D_Params;
+        float4 _UserLut2D_Params;
 
         float3 _ColorBalance;
         float3 _ColorFilter;
@@ -100,7 +100,8 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         {
             // Note: user luts may not have the same size as the internal one
             float3 neutralColorLinear = GetLutStripValue(i.texcoordStereo, _Lut2D_Params);
-            float3 colorLinear = ApplyLut2D(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), neutralColorLinear, _UserLut2D_Params);
+            float3 lookup = ApplyLut2D(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), neutralColorLinear, _UserLut2D_Params.xyz);
+            float3 colorLinear = lerp(neutralColorLinear, lookup, _UserLut2D_Params.w);
             float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }

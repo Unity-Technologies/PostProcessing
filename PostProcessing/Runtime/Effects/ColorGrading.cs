@@ -64,6 +64,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [DisplayName("Lookup Texture"), Tooltip("Custom lookup texture (strip format, e.g. 256x16) to apply before the rest of the color grading operators. If none is provided, a neutral one will be generated internally.")]
         public TextureParameter ldrLut = new TextureParameter { value = null, defaultState = TextureParameterDefault.Lut2D }; // LDR only
 
+        [DisplayName("Contribution"), Range(0f, 1f), Tooltip("How much of the lookup texture will contribute to the color grading effect.")]
+        public FloatParameter ldrLutContribution = new FloatParameter { value = 1f };
+
         [DisplayName("Temperature"), Range(-100f, 100f), Tooltip("Sets the white balance to a custom color temperature.")]
         public FloatParameter temperature = new FloatParameter { value = 0f };
 
@@ -431,7 +434,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
                 else
                 {
-                    lutSheet.properties.SetVector(ShaderIDs.UserLut2D_Params, new Vector3(1f / userLut.width, 1f / userLut.height, userLut.height - 1f));
+                    lutSheet.properties.SetVector(ShaderIDs.UserLut2D_Params, new Vector4(1f / userLut.width, 1f / userLut.height, userLut.height - 1f, settings.ldrLutContribution));
                     context.command.BlitFullscreenTriangle(userLut, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDR);
                 }
 
