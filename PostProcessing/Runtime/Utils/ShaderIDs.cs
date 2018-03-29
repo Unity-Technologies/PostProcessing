@@ -100,6 +100,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int Lut3D                           = Shader.PropertyToID("_Lut3D");
         internal static readonly int Lut3D_Params                    = Shader.PropertyToID("_Lut3D_Params");
         internal static readonly int Lut2D_Params                    = Shader.PropertyToID("_Lut2D_Params");
+        internal static readonly int UserLut2D_Params                = Shader.PropertyToID("_UserLut2D_Params");
         internal static readonly int PostExposure                    = Shader.PropertyToID("_PostExposure");
         internal static readonly int ColorBalance                    = Shader.PropertyToID("_ColorBalance");
         internal static readonly int ColorFilter                     = Shader.PropertyToID("_ColorFilter");

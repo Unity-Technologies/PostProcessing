@@ -26,7 +26,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (m_WhiteTexture == null)
                 {
-                    m_WhiteTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                    m_WhiteTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false) { name = "White Texture" };
                     m_WhiteTexture.SetPixel(0, 0, Color.white);
                     m_WhiteTexture.Apply();
                 }
@@ -42,7 +42,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (m_BlackTexture == null)
                 {
-                    m_BlackTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                    m_BlackTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false) { name = "Black Texture" };
                     m_BlackTexture.SetPixel(0, 0, Color.black);
                     m_BlackTexture.Apply();
                 }
@@ -58,13 +58,62 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 if (m_TransparentTexture == null)
                 {
-                    m_TransparentTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                    m_TransparentTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false) { name = "Transparent Texture" };
                     m_TransparentTexture.SetPixel(0, 0, Color.clear);
                     m_TransparentTexture.Apply();
                 }
 
                 return m_TransparentTexture;
             }
+        }
+
+        static Dictionary<int, Texture2D> m_LutStrips = new Dictionary<int, Texture2D>();
+
+        public static Texture2D GetLutStrip(int size)
+        {
+            Texture2D texture;
+            if (!m_LutStrips.TryGetValue(size, out texture))
+            {
+                int width = size * size;
+                int height = size;
+                var pixels = new Color[width * height];
+                float inv = 1f / (size - 1f);
+
+                for (int z = 0; z < size; z++)
+                {
+                    var offset = z * size;
+                    var b = z * inv;
+
+                    for (int y = 0; y < size; y++)
+                    {
+                        var g = y * inv;
+
+                        for (int x = 0; x < size; x++)
+                        {
+                            var r = x * inv;
+                            pixels[y * width + offset + x] = new Color(r, g, b);
+                        }
+                    }
+                }
+
+                var format = TextureFormat.RGBAHalf;
+                if (!format.IsSupported())
+                    format = TextureFormat.ARGB32;
+                    
+                texture = new Texture2D(size * size, size, format, false, true)
+                {
+                    name = "Strip Lut" + size,
+                    hideFlags = HideFlags.DontSave,
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                    anisoLevel = 0
+                };
+                texture.SetPixels(pixels);
+                texture.Apply();
+                m_LutStrips.Add(size, texture);
+            }
+
+            return texture;
         }
 
         #endregion
