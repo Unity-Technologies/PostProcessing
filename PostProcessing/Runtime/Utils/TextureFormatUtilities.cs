@@ -77,6 +77,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 foreach (var format in values)
                 {
+                    if ((int)format < 0) // Safe guard, negative values are deprecated stuff
+                        continue;
+
                     bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
                     s_SupportedRenderTextureFormats.Add((int)format, supported);
                 }
