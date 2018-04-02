@@ -75,5 +75,13 @@ namespace UnityEngine.Rendering.PostProcessing
                 return hash;
             }
         }
+
+        public virtual void Reset(PostProcessEffectSettings defaultSettings)
+        {
+            int count = defaultSettings.parameters.Count;
+
+            for (int i = 0; i < count; i++)
+                parameters[i].SetValue(defaultSettings.parameters[i]);
+        }
     }
 }
