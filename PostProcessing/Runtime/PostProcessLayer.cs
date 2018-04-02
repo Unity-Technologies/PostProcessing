@@ -35,7 +35,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public TemporalAntialiasing temporalAntialiasing;
         public SubpixelMorphologicalAntialiasing subpixelMorphologicalAntialiasing;
         public FastApproximateAntialiasing fastApproximateAntialiasing;
-        public Fog fog;
+        public DeferredFog fog;
         public Dithering dithering;
 
         public PostProcessDebugLayer debugLayer;
@@ -327,6 +327,13 @@ namespace UnityEngine.Rendering.PostProcessing
             TextureLerper.instance.BeginFrame(context);
             UpdateSettingsIfNeeded(context);
 
+            // Fog effect settings
+            var fogBundle = GetBundle<Fog>();
+            if (fogBundle != null)
+            {
+                fogBundle.CastRenderer<FogRenderer>().ApplySettings(context, ref fog.excludeSkybox);
+            }
+
             // Lighting & opaque-only effects
             var aoBundle = GetBundle<AmbientOcclusion>();
             var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
@@ -441,6 +448,13 @@ namespace UnityEngine.Rendering.PostProcessing
             // Unused in scriptable render pipelines
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
+
+            // Restore original fog settings
+            var fogBundle = GetBundle<Fog>();
+            if (fogBundle != null)
+            {
+                fogBundle.CastRenderer<FogRenderer>().RestoreSettings(ref fog.excludeSkybox);
+            }
 
             if (m_CurrentContext.IsTemporalAntialiasingActive())
             {
