@@ -21,11 +21,11 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             PropertySheet sheet;
 
-            if (m_Sheets.TryGetValue(shader, out sheet))
-                return sheet;
-
             if (shader == null)
                 throw new ArgumentException(string.Format("Invalid shader ({0})", shader));
+
+            if (m_Sheets.TryGetValue(shader, out sheet))
+                return sheet;
 
             var shaderName = shader.name;
             var material = new Material(shader)
