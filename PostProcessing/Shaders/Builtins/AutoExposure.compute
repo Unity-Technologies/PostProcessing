@@ -1,3 +1,6 @@
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #pragma kernel KAutoExposureAvgLuminance_fixed MAIN=KAutoExposureAvgLuminance_fixed
 #pragma kernel KAutoExposureAvgLuminance_progressive MAIN=KAutoExposureAvgLuminance_progressive PROGRESSIVE
 
@@ -33,10 +36,16 @@ float InterpolateExposure(float newExposure, float oldExposure)
     return exposure;
 }
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(MAIN)
+
+#else
+
 [numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_BINS / HISTOGRAM_THREAD_X, 1)]
 void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 {
-    const uint thread_id = groupThreadId.y * 8u + groupThreadId.x;
+    const uint thread_id = groupThreadId.y * HISTOGRAM_THREAD_X + groupThreadId.x;
     gs_pyramid[thread_id] = _HistogramBuffer[thread_id];
 
     GroupMemoryBarrierWithGroupSync();
@@ -80,3 +89,5 @@ void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 #endif
     }
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

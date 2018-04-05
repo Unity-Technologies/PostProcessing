@@ -1,5 +1,5 @@
 // Small shim for VRSettings/XRSettings on XboxOne and Switch
-#if !UNITY_2018_2_OR_NEWER && (UNITY_XBOXONE || UNITY_SWITCH) && !UNITY_EDITOR
+#if (UNITY_XBOXONE || UNITY_SWITCH) && !UNITY_EDITOR
 using System;
 
 #if UNITY_2017_2_OR_NEWER

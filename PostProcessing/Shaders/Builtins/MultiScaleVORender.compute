@@ -19,6 +19,9 @@
 // Author:  James Stanard
 //
 
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #pragma kernel main MAIN=main
 #pragma kernel main_interleaved MAIN=main_interleaved INTERLEAVE_RESULT
 
@@ -115,6 +118,12 @@ float TestSamples(uint centerIdx, uint x, uint y, float invDepth, float invThick
     }
 }
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(MAIN)
+
+#else
+
 [numthreads(THREAD_COUNT_X, THREAD_COUNT_Y, 1)]
 void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_GroupThreadID, uint3 DTid : SV_DispatchThreadID)
 {
@@ -181,3 +190,5 @@ void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
 #endif
     Occlusion[OutPixel] = lerp(1, ao, gIntensity);
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

@@ -1,3 +1,6 @@
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
 
@@ -8,13 +11,15 @@ CBUFFER_START (Params)
     float4 _Params; // x: source width, y: source height, z: buffer size, w: linear?
 CBUFFER_END
 
-#if SHADER_API_GLES3
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 8
+#define GROUP_SIZE_X 16
+#define GROUP_SIZE_Y 16
+
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(KVectorscopeGather)
+TRIVIAL_COMPUTE_KERNEL(KVectorscopeClear)
+
 #else
-    #define GROUP_SIZE_X 16
-    #define GROUP_SIZE_Y 16
-#endif
 
 #pragma kernel KVectorscopeGather
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
@@ -42,3 +47,5 @@ void KVectorscopeClear(uint2 dispatchThreadId : SV_DispatchThreadID)
     if (dispatchThreadId.x < uint(_Params.z) && dispatchThreadId.y < uint(_Params.z))
         _VectorscopeBuffer[dispatchThreadId.y * _Params.z + dispatchThreadId.x] = 0u;
 }
+
+#endif

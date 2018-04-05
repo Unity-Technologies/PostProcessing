@@ -19,6 +19,9 @@
 // Author:  James Stanard
 //
 
+#pragma warning(disable : 3568)
+#pragma exclude_renderers gles gles3 d3d11_9x
+
 #pragma kernel main
 
 #include "../StdLib.hlsl"
@@ -50,6 +53,12 @@ float Linearize(uint2 st)
 
 groupshared float g_CacheW[256];
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(main)
+
+#else
+
 [numthreads(8, 8, 1)]
 void main(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_GroupThreadID, uint3 DTid : SV_DispatchThreadID)
 {
@@ -80,3 +89,5 @@ void main(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
     }
 
 }
+
+#endif

@@ -1,4 +1,4 @@
-﻿namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PostProcessing
 {
     public enum MonitorType
     {
@@ -18,6 +18,7 @@
         {
             return requested
                 && SystemInfo.supportsComputeShaders
+                && !RuntimeUtilities.isAndroidOpenGL
                 && ShaderResourcesAvailable(context);
         }
 

@@ -102,11 +102,16 @@ namespace UnityEngine.Rendering.PostProcessing
             Assert.IsNotNull(from);
             Assert.IsNotNull(to);
 
+            // Saves a potentially expensive fullscreen blit when using dirt textures & the likes
+            if (from == to)
+                return from;
+
             bool is3d = to is Texture3D
                     || (to is RenderTexture && ((RenderTexture)to).volumeDepth > 1);
 
-            RenderTexture rt = null;
+            RenderTexture rt;
 
+            // 3D texture blending is a special case and only works on compute enabled platforms
             if (is3d)
             {
                 int size = to.width;
@@ -122,18 +127,24 @@ namespace UnityEngine.Rendering.PostProcessing
                 int groupSizeXY = Mathf.CeilToInt(size / 8f);
                 int groupSizeZ = Mathf.CeilToInt(size / (RuntimeUtilities.isAndroidOpenGL ? 2f : 8f));
                 m_Command.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
+                return rt;
             }
-            else
-            {
-                var format = TextureFormatUtilities.GetUncompressedRenderTextureFormat(to);
-                rt = Get(format, to.width, to.height);
 
-                var sheet = m_PropertySheets.Get(m_Resources.shaders.texture2dLerp);
-                sheet.properties.SetTexture(ShaderIDs.To, to);
-                sheet.properties.SetFloat(ShaderIDs.Interp, t);
+            // 2D texture blending
+            // We could handle textures with different sizes by picking the biggest one to avoid
+            // popping effects. This would work in most cases but will still pop if one texture is
+            // wider but shorter than the other. Generally speaking you're expected to use same-size
+            // textures anyway so we decided not to handle this case at the moment, especially since
+            // it would waste a lot of texture memory as soon as you start using bigger textures
+            // (snow ball effect).
+            var format = TextureFormatUtilities.GetUncompressedRenderTextureFormat(to);
+            rt = Get(format, to.width, to.height);
 
-                m_Command.BlitFullscreenTriangle(from, rt, sheet, 0);
-            }
+            var sheet = m_PropertySheets.Get(m_Resources.shaders.texture2dLerp);
+            sheet.properties.SetTexture(ShaderIDs.To, to);
+            sheet.properties.SetFloat(ShaderIDs.Interp, t);
+
+            m_Command.BlitFullscreenTriangle(from, rt, sheet, 0);
 
             return rt;
         }
