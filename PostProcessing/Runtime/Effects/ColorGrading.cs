@@ -342,7 +342,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 lutSheet.properties.SetVector(ShaderIDs.InvGamma, invgamma);
                 lutSheet.properties.SetVector(ShaderIDs.Gain, gain);
 
-                lutSheet.properties.SetTexture(ShaderIDs.Curves, GetCurveTexture(false));
+                lutSheet.properties.SetTexture(ShaderIDs.Curves, GetCurveTexture(true));
 
                 var tonemapper = settings.tonemapper.value;
                 if (tonemapper == Tonemapper.Custom)
