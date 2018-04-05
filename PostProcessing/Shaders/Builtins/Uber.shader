@@ -6,7 +6,7 @@ Shader "Hidden/PostProcessing/Uber"
 
         #pragma multi_compile __ DISTORT
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
-        #pragma multi_compile __ BLOOM
+        #pragma multi_compile __ BLOOM BLOOM_LOW
         #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
@@ -140,9 +140,13 @@ Shader "Hidden/PostProcessing/Uber"
 
             color.rgb *= autoExposure;
 
-            #if BLOOM
+            #if BLOOM || BLOOM_LOW
             {
+                #if BLOOM
                 half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                #else
+                half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                #endif
 
                 // UVs should be Distort(uv * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw)
                 // but considering we use a cover-style scale on the dirt texture the difference

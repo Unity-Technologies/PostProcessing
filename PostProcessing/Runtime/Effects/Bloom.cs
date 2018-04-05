@@ -194,7 +194,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Shader properties
             var uberSheet = context.uberSheet;
-            uberSheet.EnableKeyword("BLOOM");
+            if (settings.fastMode)
+                uberSheet.EnableKeyword("BLOOM_LOW");
+            else
+                uberSheet.EnableKeyword("BLOOM");
             uberSheet.properties.SetVector(ShaderIDs.Bloom_DirtTileOffset, dirtTileOffset);
             uberSheet.properties.SetVector(ShaderIDs.Bloom_Settings, shaderSettings);
             uberSheet.properties.SetColor(ShaderIDs.Bloom_Color, linearColor);
