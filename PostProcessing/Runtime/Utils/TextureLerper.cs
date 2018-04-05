@@ -102,6 +102,10 @@ namespace UnityEngine.Rendering.PostProcessing
             Assert.IsNotNull(from);
             Assert.IsNotNull(to);
 
+            // Saves a potentially expensive fullscreen blit when using dirt textures & the likes
+            if (from == to)
+                return from;
+
             bool is3d = to is Texture3D
                     || (to is RenderTexture && ((RenderTexture)to).volumeDepth > 1);
 

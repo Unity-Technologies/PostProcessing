@@ -16,6 +16,12 @@ Texture3D _To;
 
 #define GROUP_SIZE 8
 
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(KTexture3DLerp)
+
+#else
+
 [numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KTexture3DLerp(uint3 id : SV_DispatchThreadID)
 {
@@ -26,3 +32,5 @@ void KTexture3DLerp(uint3 id : SV_DispatchThreadID)
         _Output[id] = float4(lerp(from, to, _Params.xxx), 1.0);
     }
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

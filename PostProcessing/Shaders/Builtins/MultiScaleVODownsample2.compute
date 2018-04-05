@@ -24,11 +24,19 @@
 
 #pragma kernel main
 
+#include "../StdLib.hlsl"
+
 Texture2D<float> DS4x;
 RWTexture2D<float> DS8x;
 RWTexture2DArray<float> DS8xAtlas;
 RWTexture2D<float> DS16x;
 RWTexture2DArray<float> DS16xAtlas;
+
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(main)
+
+#else
 
 [numthreads(8, 8, 1)]
 void main(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_GroupThreadID, uint3 DTid : SV_DispatchThreadID)
@@ -50,3 +58,5 @@ void main(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
         DS16xAtlas[uint3(stAtlas, stSlice)] = m1;
     }
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

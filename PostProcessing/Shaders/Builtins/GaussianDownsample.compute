@@ -116,6 +116,13 @@ void BlurVertically(uint2 pixelCoord, uint topMostIndex)
 }
 
 #pragma kernel KMain
+
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(KMain)
+
+#else
+
 [numthreads(8, 8, 1)]
 void KMain(uint2 groupId : SV_GroupID, uint2 groupThreadId : SV_GroupThreadID, uint2 dispatchThreadId : SV_DispatchThreadID)
 {
@@ -145,3 +152,5 @@ void KMain(uint2 groupId : SV_GroupID, uint2 groupThreadId : SV_GroupThreadID, u
     // Vertically blur the pixels in LDS and write the result to memory
     BlurVertically(dispatchThreadId, (groupThreadId.y << 3u) + groupThreadId.x);
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

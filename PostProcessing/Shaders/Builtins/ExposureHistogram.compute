@@ -19,6 +19,14 @@ CBUFFER_END
 groupshared uint gs_histogram[HISTOGRAM_BINS];
 
 #pragma kernel KEyeHistogram
+
+#ifdef DISABLE_COMPUTE_SHADERS
+
+TRIVIAL_COMPUTE_KERNEL(KEyeHistogram)
+TRIVIAL_COMPUTE_KERNEL(KEyeHistogramClear)
+
+#else
+
 [numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_THREAD_Y, 1)]
 void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThreadId : SV_GroupThreadID)
 {
@@ -74,3 +82,5 @@ void KEyeHistogramClear(uint dispatchThreadId : SV_DispatchThreadID)
     if (dispatchThreadId < HISTOGRAM_BINS)
         _HistogramBuffer[dispatchThreadId] = 0u;
 }
+
+#endif // DISABLE_COMPUTE_SHADERS

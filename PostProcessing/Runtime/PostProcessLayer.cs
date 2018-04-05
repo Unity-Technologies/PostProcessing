@@ -380,6 +380,7 @@ namespace UnityEngine.Rendering.PostProcessing
             SetupContext(context);
 
             context.command = m_LegacyCmdBufferOpaque;
+            TextureLerper.instance.BeginFrame(context);
             UpdateSettingsIfNeeded(context);
 
             // Lighting & opaque-only effects
