@@ -9,6 +9,7 @@ namespace UnityEngine.Rendering.PostProcessing
     {
         static Dictionary<int, RenderTextureFormat> s_FormatAliasMap;
         static Dictionary<int, bool> s_SupportedRenderTextureFormats;
+        static Dictionary<int, bool> s_SupportedTextureFormats;
 
         static TextureFormatUtilities()
         {
@@ -70,13 +71,33 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
             // cache its calls to avoid that...
-            s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
-            var values = Enum.GetValues(typeof(RenderTextureFormat));
-
-            foreach (var format in values)
             {
-                bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
-                s_SupportedRenderTextureFormats.Add((int)format, supported);
+                s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
+                var values = Enum.GetValues(typeof(RenderTextureFormat));
+
+                foreach (var format in values)
+                {
+                    if ((int)format < 0) // Safe guard, negative values are deprecated stuff
+                        continue;
+
+                    bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
+                    s_SupportedRenderTextureFormats.Add((int)format, supported);
+                }
+            }
+
+            // Same for TextureFormat
+            {
+                s_SupportedTextureFormats = new Dictionary<int, bool>();
+                var values = Enum.GetValues(typeof(TextureFormat));
+
+                foreach (var format in values)
+                {
+                    if ((int)format < 0) // Crashes the runtime otherwise (!)
+                        continue;
+
+                    bool supported = SystemInfo.SupportsTextureFormat((TextureFormat)format);
+                    s_SupportedTextureFormats.Add((int)format, supported);
+                }
             }
         }
 
@@ -105,6 +126,13 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             bool supported;
             s_SupportedRenderTextureFormats.TryGetValue((int)format, out supported);
+            return supported;
+        }
+
+        internal static bool IsSupported(this TextureFormat format)
+        {
+            bool supported;
+            s_SupportedTextureFormats.TryGetValue((int)format, out supported);
             return supported;
         }
     }

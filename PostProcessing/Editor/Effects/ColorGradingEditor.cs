@@ -32,6 +32,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_ToneCurveGamma;
 
         SerializedParameterOverride m_LdrLut;
+        SerializedParameterOverride m_LdrLutContribution;
 
         SerializedParameterOverride m_Temperature;
         SerializedParameterOverride m_Tint;
@@ -108,6 +109,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_ToneCurveGamma = FindParameterOverride(x => x.toneCurveGamma);
 
             m_LdrLut = FindParameterOverride(x => x.ldrLut);
+            m_LdrLutContribution = FindParameterOverride(x => x.ldrLutContribution);
 
             m_Temperature = FindParameterOverride(x => x.temperature);
             m_Tint = FindParameterOverride(x => x.tint);
@@ -241,6 +243,7 @@ namespace UnityEditor.Rendering.PostProcessing
             if (!hdr)
             {
                 PropertyField(m_LdrLut);
+                PropertyField(m_LdrLutContribution);
 
                 var lut = (target as ColorGrading).ldrLut.value;
                 CheckLutImportSettings(lut);

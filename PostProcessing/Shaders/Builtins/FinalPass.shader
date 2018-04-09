@@ -2,7 +2,6 @@ Shader "Hidden/PostProcessing/FinalPass"
 {
     HLSLINCLUDE
 
-        #pragma multi_compile __ UNITY_COLORSPACE_GAMMA
         #pragma multi_compile __ FXAA FXAA_LOW
         #pragma multi_compile __ FXAA_KEEP_ALPHA
         #include "../StdLib.hlsl"

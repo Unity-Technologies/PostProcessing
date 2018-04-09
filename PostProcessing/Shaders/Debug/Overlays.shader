@@ -5,7 +5,6 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #pragma target 3.0
-        #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);

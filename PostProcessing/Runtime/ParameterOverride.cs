@@ -215,18 +215,73 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+    public enum TextureParameterDefault
+    {
+        None,
+        Black,
+        White,
+        Transparent,
+        Lut2D
+    }
+
     [Serializable]
     public sealed class TextureParameter : ParameterOverride<Texture>
     {
+        public TextureParameterDefault defaultState = TextureParameterDefault.Black;
+
         public override void Interp(Texture from, Texture to, float t)
         {
-            if (from == null || to == null)
+            // Both are null, do nothing
+            if (from == null && to == null)
             {
-                base.Interp(from, to, t);
+                value = null;
                 return;
             }
 
-            value = TextureLerper.instance.Lerp(from, to, t);
+            // Both aren't null we're ready to blend
+            if (from != null && to != null)
+            {
+                value = TextureLerper.instance.Lerp(from, to, t);
+                return;
+            }
+
+            // One of them is null, blend to/from a default value is applicable
+            {
+                Texture defaultTexture;
+
+                switch (defaultState)
+                {
+                    case TextureParameterDefault.Black:
+                        defaultTexture = RuntimeUtilities.blackTexture;
+                        break;
+                    case TextureParameterDefault.White:
+                        defaultTexture = RuntimeUtilities.whiteTexture;
+                        break;
+                    case TextureParameterDefault.Transparent:
+                        defaultTexture = RuntimeUtilities.transparentTexture;
+                        break;
+                    case TextureParameterDefault.Lut2D:
+                        // Find the current lut size
+                        int size = from != null ? from.height : to.height;
+                        defaultTexture = RuntimeUtilities.GetLutStrip(size);
+                        break;
+                    default:
+                        defaultTexture = null;
+                        break;
+                }
+
+                if (from == null) from = defaultTexture;
+                if (to == null) to = defaultTexture;
+
+                // defaultState could have been explicitly set to None
+                if (from == null || to == null)
+                {
+                    base.Interp(from, to, t);
+                    return;
+                }
+
+                value = TextureLerper.instance.Lerp(from, to, t);
+            }
         }
     }
 }
