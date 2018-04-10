@@ -17,6 +17,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_StopNaNPropagation;
         SerializedProperty m_VolumeTrigger;
         SerializedProperty m_VolumeLayer;
+        SerializedProperty m_DefaultProfile;
 
         SerializedProperty m_AntialiasingMode;
         SerializedProperty m_TaaJitterSpread;
@@ -54,6 +55,7 @@ namespace UnityEditor.Rendering.PostProcessing
         void OnEnable()
         {
             m_StopNaNPropagation = FindProperty(x => x.stopNaNPropagation);
+            m_DefaultProfile = FindProperty(x => x.defaultProfile);
             m_VolumeTrigger = FindProperty(x => x.volumeTrigger);
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
 
@@ -127,6 +129,7 @@ namespace UnityEditor.Rendering.PostProcessing
                     EditorGUILayout.HelpBox("No trigger has been set, the camera will only be affected by global volumes.", MessageType.Info);
 
                 EditorGUILayout.PropertyField(m_VolumeLayer, EditorUtilities.GetContent("Layer|This camera will only be affected by volumes in the selected scene-layers."));
+                EditorGUILayout.PropertyField(m_DefaultProfile, EditorUtilities.GetContent("Default Profile|The default post-processing profile to use for this layer. This is similar to setting a global volume with the absolute minimum priority but only affects this layer."));
 
                 int mask = m_VolumeLayer.intValue;
                 if (mask == 0)

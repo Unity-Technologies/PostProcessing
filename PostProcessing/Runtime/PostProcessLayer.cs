@@ -28,6 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // Settings
         public Transform volumeTrigger;
         public LayerMask volumeLayer;
+        public PostProcessProfile defaultProfile;
         public bool stopNaNPropagation = true;
 
         // Builtins / hardcoded effects that don't benefit from volume blending

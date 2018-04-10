@@ -283,6 +283,11 @@ namespace UnityEngine.Rendering.PostProcessing
             // Reset to base state
             ReplaceData(postProcessLayer);
 
+            // Default profile
+            var defaultProfile = postProcessLayer.defaultProfile;
+            if (defaultProfile != null)
+                postProcessLayer.OverrideSettings(defaultProfile.settings, 1f);
+
             // If no trigger is set, only global volumes will have influence
             int mask = postProcessLayer.volumeLayer.value;
             var volumeTrigger = postProcessLayer.volumeTrigger;
