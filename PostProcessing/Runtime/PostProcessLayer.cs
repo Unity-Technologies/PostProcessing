@@ -380,7 +380,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // on tiled GPU as it won't be able to resolve
                 int tempTarget0 = m_TargetPool.Get();
                 context.GetScreenSpaceTemporaryRT(cmd, tempTarget0, 0, sourceFormat);
-                cmd.BuiltinBlit(cameraTarget, tempTarget0);
+                cmd.BuiltinBlit(cameraTarget, tempTarget0, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
                 context.source = tempTarget0;
 
                 int tempTarget1 = -1;
