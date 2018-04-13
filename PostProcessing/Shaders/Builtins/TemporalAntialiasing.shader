@@ -2,7 +2,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 {
     HLSLINCLUDE
 
-        #pragma exclude_renderers gles
+        #pragma exclude_renderers gles psp2
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
 
