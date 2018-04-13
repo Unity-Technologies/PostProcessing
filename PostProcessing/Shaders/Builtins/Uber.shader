@@ -40,6 +40,7 @@ Shader "Hidden/PostProcessing/Uber"
 
         // Color grading
     #if COLOR_GRADING_HDR_3D
+
         TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
         float2 _Lut3D_Params;
 
