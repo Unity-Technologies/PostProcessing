@@ -42,7 +42,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
             colorLinear = LiftGammaGainHDR(colorLinear, _Lift, _InvGamma, _Gain);
 
             // Do NOT feed negative values to RgbToHsv or they'll wrap around
-            colorLinear = max(0.0, colorLinear);
+            colorLinear = max((float3)0.0, colorLinear);
 
             float3 hsv = RgbToHsv(colorLinear);
 
