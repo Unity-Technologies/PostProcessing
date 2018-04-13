@@ -39,7 +39,7 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
-    #if COLOR_GRADING_HDR_3D
+    #if COLOR_GRADING_HDR_3D && UNITY_3D_TEXTURES_SUPPORTED
 
         TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
         float2 _Lut3D_Params;
@@ -203,7 +203,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            #if COLOR_GRADING_HDR_3D
+            #if COLOR_GRADING_HDR_3D && UNITY_3D_TEXTURES_SUPPORTED
             {
                 color *= _PostExposure;
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
