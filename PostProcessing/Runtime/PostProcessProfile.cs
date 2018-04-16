@@ -100,6 +100,16 @@ namespace UnityEngine.Rendering.PostProcessing
             return false;
         }
 
+        public T GetSetting<T>() where T : PostProcessEffectSettings
+        {
+            foreach (var setting in settings)
+            {
+                if (setting is T)
+                    return setting as T;
+            }
+            return null;
+        }
+
         public bool TryGetSettings<T>(out T outSetting)
             where T : PostProcessEffectSettings
         {
