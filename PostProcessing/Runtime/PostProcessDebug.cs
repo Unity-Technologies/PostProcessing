@@ -16,7 +16,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         Camera m_CurrentCamera;
         CommandBuffer m_CmdAfterEverything;
-        
+
         void OnEnable()
         {
             m_CmdAfterEverything = new CommandBuffer { name = "Post-processing Debug Overlay" };
@@ -41,7 +41,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentCamera = null;
             m_PreviousPostProcessLayer = null;
         }
-        
+
 #if !UNITY_EDITOR
         void Update()
         {
@@ -102,6 +102,9 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (postProcessLayer == null || !postProcessLayer.enabled)
                 return;
+
+            // Some SRPs don't unbind render targets and leave them as-is
+            RenderTexture.active = null;
 
             var rect = new Rect(5, 5, 0, 0);
             var debugLayer = postProcessLayer.debugLayer;
