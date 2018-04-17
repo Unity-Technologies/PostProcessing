@@ -263,7 +263,7 @@ Shader "Hidden/Post FX/Screen Space Reflection"
             // Let core Unity functions do the dirty work of applying the BRDF
             float3 baseColor = gbuffer0.rgb;
             float occlusion = gbuffer0.a;
-            float oneMinusReflectivity;
+            half oneMinusReflectivity;
             baseColor = EnergyConservationBetweenDiffuseAndSpecular(baseColor, specColor, oneMinusReflectivity);
 
             float3 wsNormal = tex2D(_CameraGBufferTexture2, tsP).rgb * 2.0 - 1.0;
