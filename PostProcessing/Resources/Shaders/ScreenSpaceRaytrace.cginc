@@ -58,7 +58,7 @@ void rayIterations(in bool traceBehindObjects, inout float2 P, inout float stepD
         // Q at each point
         hitPixel = permute ? P.yx : P;
 
-        sceneZ = tex2Dlod(_CameraDepthTexture, float4(hitPixel * invSize,0,0)).r;
+        sceneZ = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, float4(hitPixel * invSize,0,0)).r;
         sceneZ = -LinearEyeDepth(sceneZ);
 
         bool isBehind = (rayZMin <= sceneZ);
