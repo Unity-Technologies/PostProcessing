@@ -214,17 +214,17 @@ namespace UnityEditor.Rendering.PostProcessing
             var effectProp = m_SettingsProperty.GetArrayElementAtIndex(m_SettingsProperty.arraySize - 1);
             effectProp.objectReferenceValue = effect;
 
-            // Force save / refresh
+            // Create & store the internal editor object for this effect
+            CreateEditor(effect, effectProp);
+
+            m_SerializedObject.ApplyModifiedProperties();
+
+            // Force save / refresh. Important to do this last because SaveAssets can cause effect to become null!
             if (EditorUtility.IsPersistent(Asset))
             {
                 EditorUtility.SetDirty(Asset);
                 AssetDatabase.SaveAssets();
             }
-
-            // Create & store the internal editor object for this effect
-            CreateEditor(effect, effectProp);
-
-            m_SerializedObject.ApplyModifiedProperties();
         }
 
         void RemoveEffectOverride(int id)
