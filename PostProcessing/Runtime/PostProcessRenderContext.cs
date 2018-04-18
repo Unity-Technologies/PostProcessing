@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -23,6 +23,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
+#if !UNITY_SWITCH
                 if (m_Camera.stereoEnabled)
                 {
 #if UNITY_2017_2_OR_NEWER
@@ -48,6 +49,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     stereoActive = true;
                 }
                 else
+#endif
                 {
                     width = m_Camera.pixelWidth;
                     height = m_Camera.pixelHeight;
