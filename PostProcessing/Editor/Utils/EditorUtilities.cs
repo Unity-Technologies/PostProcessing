@@ -33,7 +33,9 @@ namespace UnityEditor.Rendering.PostProcessing
                 return t == BuildTarget.Android
                     || t == BuildTarget.iOS
                     || t == BuildTarget.tvOS
+#if !UNITY_2018_2_OR_NEWER
                     || t == BuildTarget.Tizen
+#endif
                     || t == BuildTarget.N3DS
                     || t == BuildTarget.PSP2;
             }
