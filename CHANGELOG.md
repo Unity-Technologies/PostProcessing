@@ -4,13 +4,19 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Indev]
+## [2.0.4-preview]
 
 ### Fixed
 - Temporal Anti-aliasing creating NaN values in some cases. ([#337](https://github.com/Unity-Technologies/PostProcessing/issues/337))
 - Auto-exposure has been fixed to work the same way it did before the full-compute port.
 - XR compilation errors on Xbox One & Switch (2018.2).
 - `ArgumentNullException` when attempting to get a property sheet for a null shader. ([#515](https://github.com/Unity-Technologies/PostProcessing/pull/515))
+- Stop NaN Propagation not working for opaque-only effects.
+- HDR color grading had a slight color temperature offset.
+- PSVita compatibility.
+- Tizen warning on 2018.2.
+- Errors in the console when toggling lighting on/off in the scene view when working in Deferred.
+- Debug monitors now work properly with HDRP.
 
 ### Added
 - Contribution slider for the LDR Lut.
