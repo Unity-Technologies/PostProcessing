@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Assertions;
@@ -279,12 +279,14 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
+#if !UNITY_SWITCH
             if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
                 Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, XRSettings.renderViewportScale);
             }
             else
+#endif
             {
                 Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, 1.0f);
             }
