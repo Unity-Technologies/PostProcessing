@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEditorInternal;
 using System.IO;
+#if UNITY_2018_2_OR_NEWER
+using UnityEngine.Animations;
+#endif
 
 namespace UnityEditor.Rendering.PostProcessing
 {
@@ -92,6 +95,7 @@ namespace UnityEditor.Rendering.PostProcessing
             DoVolumeBlending();
             DoAntialiasing();
             DoFog(camera);
+            DoDepthOfField(camera);
 
             EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms."));
             EditorGUILayout.Space();
@@ -201,6 +205,22 @@ namespace UnityEditor.Rendering.PostProcessing
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Space();
+        }
+
+        void DoDepthOfField(Camera camera)
+        {
+#if UNITY_2018_2_OR_NEWER
+            EditorGUILayout.LabelField(EditorUtilities.GetContent("Depth Of Field"), EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            string helpBoxContent ="";
+            if (camera.usePhysicalProperties)
+                helpBoxContent += "Physical camera is enabled, DoF effect will use the physical camera's Focal length property\n";
+
+            if (m_Target.GetComponent<LookAtConstraint>())
+                helpBoxContent += "This Camera has a LookAtConstraint, DoF will use the constraint's sources weighted average position to calculate the focus distance.";
+                
+            EditorGUILayout.HelpBox(helpBoxContent, MessageType.Info);
+#endif
         }
 
         void DoToolkit()
