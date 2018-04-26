@@ -112,6 +112,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        public bool HasInstantiatedProfile()
+        {
+            return m_InternalProfile != null;
+        }
+
         int m_PreviousLayer;
         float m_PreviousPriority;
         List<Collider> m_TempColliders;
