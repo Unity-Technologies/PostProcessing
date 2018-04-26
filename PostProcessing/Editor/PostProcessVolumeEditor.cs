@@ -148,7 +148,7 @@ namespace UnityEditor.Rendering.PostProcessing
             }
             else
             {
-                if (assetHasChanged || profileRef != m_EffectList.Asset) //Refresh when the user just dragged in a new asset, or when it was instantiated by code.
+                if (assetHasChanged || profileRef != m_EffectList.asset) //Refresh when the user just dragged in a new asset, or when it was instantiated by code.
                     RefreshEffectListEditor(profileRef);
 
                 if (!multiEdit)
