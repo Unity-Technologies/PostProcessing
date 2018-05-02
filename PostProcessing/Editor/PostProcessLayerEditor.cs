@@ -210,8 +210,7 @@ namespace UnityEditor.Rendering.PostProcessing
         void DoDepthOfField(Camera camera)
         {
 #if UNITY_2018_2_OR_NEWER
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Depth Of Field"), EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
+            
             string helpBoxContent ="";
             if (camera.usePhysicalProperties)
                 helpBoxContent += "Physical camera is enabled, DoF effect will use the physical camera's Focal length property\n";
@@ -219,7 +218,12 @@ namespace UnityEditor.Rendering.PostProcessing
             if (m_Target.GetComponent<LookAtConstraint>())
                 helpBoxContent += "This Camera has a LookAtConstraint, DoF will use the constraint's sources weighted average position to calculate the focus distance.";
                 
-            EditorGUILayout.HelpBox(helpBoxContent, MessageType.Info);
+            if (helpBoxContent!="")
+            {
+                EditorGUILayout.LabelField(EditorUtilities.GetContent("Depth Of Field"), EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                EditorGUILayout.HelpBox(helpBoxContent, MessageType.Info);
+            }
 #endif
         }
 
