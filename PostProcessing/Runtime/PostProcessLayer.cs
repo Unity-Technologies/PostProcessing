@@ -44,8 +44,11 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
+        // disabled warnings about 'variable not used' here as it is used on PostProcessLayerEditor.cs
+        #pragma warning disable 0169
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
+        #pragma warning restore 0169
 
         // Will stop applying post-processing effects just before color grading is applied
         // Currently used to export to exr without color grading
