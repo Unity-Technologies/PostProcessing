@@ -136,8 +136,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal int bloomBufferNameID;
 #if UNITY_2018_2_OR_NEWER
         internal bool physicalCamera;
-        internal bool cameraHasInterestPosition;
-        internal Vector3 cameraInterestPosition;
 #endif
         public void Reset()
         {
@@ -150,8 +148,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 #if UNITY_2018_2_OR_NEWER
             physicalCamera = false;
-            cameraHasInterestPosition = false;
-            cameraInterestPosition = new Vector3();
 #endif
             stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;

@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Assertions;
-#if UNITY_2018_2_OR_NEWER
-using UnityEngine.Animations;
-#endif
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -585,24 +582,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
 #if UNITY_2018_2_OR_NEWER
             context.physicalCamera = context.camera.usePhysicalProperties;
-            
-            LookAtConstraint lookAtConstraint = context.camera.gameObject.GetComponent<LookAtConstraint>();
-            if (lookAtConstraint && lookAtConstraint.sourceCount>0 && lookAtConstraint.enabled && lookAtConstraint.constraintActive)
-            {
-                List<ConstraintSource> sources = new List<ConstraintSource>();
-                lookAtConstraint.GetSources(sources);
-                float weightSum = 0f;
-                foreach (var constraintSource in sources)
-                {
-                    if (constraintSource.sourceTransform)
-                    {
-                        context.cameraHasInterestPosition = true;
-                        context.cameraInterestPosition +=  constraintSource.sourceTransform.position * constraintSource.weight;
-                        weightSum += constraintSource.weight;
-                    }
-                }
-                context.cameraInterestPosition /= weightSum;
-            }
 #endif
 
             SetLegacyCameraFlags(context);

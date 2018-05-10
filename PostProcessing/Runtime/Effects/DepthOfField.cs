@@ -62,6 +62,7 @@ namespace UnityEngine.Rendering.PostProcessing
         int[] m_HistoryPingPong = new int[k_NumEyes];
 
         // Height of the 35mm full-frame format (36mm x 24mm)
+        // TODO: Should be set by a physical camera
         const float k_FilmHeight = 0.024f;
 
         public DepthOfFieldRenderer()
@@ -133,17 +134,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Material setup
             float scaledFilmHeight = k_FilmHeight * (context.height / 1080f);
             var f = settings.focalLength.value / 1000f;
-            var focusDistance = settings.focusDistance.value;
-#if UNITY_2018_2_OR_NEWER
-            if (context.physicalCamera)
-            {
-                f = context.camera.focalLength / 1000f;
-                scaledFilmHeight = (context.camera.sensorSize.y/1000f) * (context.height / 1080f);
-            }
-            if (context.cameraHasInterestPosition)
-                    focusDistance = Vector3.Distance(context.cameraInterestPosition,context.camera.gameObject.transform.position);
-#endif
-            var s1 = Mathf.Max(focusDistance, f);
+            var s1 = Mathf.Max(settings.focusDistance.value, f);
             var aspect = (float)context.screenWidth / (float)context.screenHeight;
             var coeff = f * f / (settings.aperture.value * (s1 - f) * scaledFilmHeight * 2f);
             var maxCoC = CalculateMaxCoCRadius(context.screenHeight);
