@@ -21,7 +21,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
         static Styling()
         {
-            smallTickbox = new GUIStyle("ShurikenCheckMark");
+            smallTickbox = new GUIStyle("ShurikenToggle");
 
             miniLabelButton = new GUIStyle(EditorStyles.miniLabel);
             miniLabelButton.normal = new GUIStyleState
