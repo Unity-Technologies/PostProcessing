@@ -104,10 +104,15 @@ namespace UnityEngine.Rendering.PostProcessing
             float rw = ratio < 0 ? -ratio : 0f;
             float rh = ratio > 0 ?  ratio : 0f;
 
+            // Stereo double-wide
+            var camera = context.camera;
+            int screenWidth = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            int screenHeight = camera.pixelHeight;
+
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
-            int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
+            int tw = Mathf.FloorToInt(screenWidth / (2f - rw));
+            int th = Mathf.FloorToInt(screenHeight / (2f - rh));
 
             // Determine the iteration count
             int s = Mathf.Max(tw, th);
