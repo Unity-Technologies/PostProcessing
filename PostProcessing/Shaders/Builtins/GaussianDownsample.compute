@@ -23,14 +23,18 @@
 #pragma exclude_renderers gles gles3 d3d11_9x
 
 #include "../StdLib.hlsl"
+#include "../Colors.hlsl"
 
 Texture2D<float4> _Source;
 RWTexture2D<float4> _Result;
 
 SamplerState sampler_LinearClamp;
 
+TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
+
 CBUFFER_START(cb)
     float4 _Size;
+    float4 _Threshold;
 CBUFFER_END
 
 // 16x16 pixels with an 8x8 center that we will be blurring writing out. Each uint is two color
@@ -96,7 +100,7 @@ void BlurHorizontally(uint outIndex, uint leftMostIndex)
     Store1Pixel(outIndex + 1, BlurPixels(s1, s2, s3, s4, s5, s6, s7, s8, s9));
 }
 
-void BlurVertically(uint2 pixelCoord, uint topMostIndex)
+void BlurVertically(uint2 pixelCoord, uint topMostIndex, float autoExposure)
 {
     float4 s0, s1, s2, s3, s4, s5, s6, s7, s8;
     Load1Pixel(topMostIndex     , s0);
@@ -111,30 +115,45 @@ void BlurVertically(uint2 pixelCoord, uint topMostIndex)
 
     float4 blurred = BlurPixels(s0, s1, s2, s3, s4, s5, s6, s7, s8);
 
+    // Pre-filter if needed
+#if BLOOM_PRE_FILTER
+    blurred = SafeHDR(blurred);
+    blurred *= autoExposure;
+    blurred = QuadraticThreshold(blurred, _Threshold.x, _Threshold.yzw);
+#endif
+
     // Write to the final target
     _Result[pixelCoord] = blurred;
 }
 
-#pragma kernel KMain
+#pragma kernel KMain          KERNEL=KMain          BLOOM_PRE_FILTER=0
+#pragma kernel KMainPreFilter KERNEL=KMainPreFilter BLOOM_PRE_FILTER=1
 
 #ifdef DISABLE_COMPUTE_SHADERS
 
-TRIVIAL_COMPUTE_KERNEL(KMain)
+TRIVIAL_COMPUTE_KERNEL(KERNEL)
 
 #else
 
 [numthreads(8, 8, 1)]
-void KMain(uint2 groupId : SV_GroupID, uint2 groupThreadId : SV_GroupThreadID, uint2 dispatchThreadId : SV_DispatchThreadID)
+void KERNEL(uint2 groupId : SV_GroupID, uint2 groupThreadId : SV_GroupThreadID, uint2 dispatchThreadId : SV_DispatchThreadID)
 {
     // Upper-left pixel coordinate of quad that this thread will read
     int2 threadUL = (groupThreadId << 1) + (groupId << 3) - 4;
 
     // Downsample the block
     float2 offset = float2(threadUL);
+
     float4 p00 = _Source.SampleLevel(sampler_LinearClamp, (offset                    + 0.5) * _Size.zw, 0.0);
     float4 p10 = _Source.SampleLevel(sampler_LinearClamp, (offset + float2(1.0, 0.0) + 0.5) * _Size.zw, 0.0);
     float4 p01 = _Source.SampleLevel(sampler_LinearClamp, (offset + float2(0.0, 1.0) + 0.5) * _Size.zw, 0.0);
     float4 p11 = _Source.SampleLevel(sampler_LinearClamp, (offset + float2(1.0, 1.0) + 0.5) * _Size.zw, 0.0);
+
+#if BLOOM_PRE_FILTER
+    float autoExposure = _AutoExposureTex.SampleLevel(sampler_LinearClamp, (offset + 0.5) * _Size.xy, 0.0).r;
+#else
+    float autoExposure = 0;
+#endif
 
     // Store the 4 downsampled pixels in LDS
     uint destIdx = groupThreadId.x + (groupThreadId.y << 4u);
@@ -150,7 +169,7 @@ void KMain(uint2 groupId : SV_GroupID, uint2 groupThreadId : SV_GroupThreadID, u
     GroupMemoryBarrierWithGroupSync();
 
     // Vertically blur the pixels in LDS and write the result to memory
-    BlurVertically(dispatchThreadId, (groupThreadId.y << 3u) + groupThreadId.x);
+    BlurVertically(dispatchThreadId, (groupThreadId.y << 3u) + groupThreadId.x, autoExposure);
 }
 
 #endif // DISABLE_COMPUTE_SHADERS

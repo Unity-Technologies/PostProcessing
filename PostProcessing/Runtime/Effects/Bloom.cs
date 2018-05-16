@@ -104,10 +104,15 @@ namespace UnityEngine.Rendering.PostProcessing
             float rw = ratio < 0 ? -ratio : 0f;
             float rh = ratio > 0 ?  ratio : 0f;
 
+            // Stereo double-wide
+            var camera = context.camera;
+            int screenWidth = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            int screenHeight = camera.pixelHeight;
+
             // Do bloom on a half-res buffer, full-res doesn't bring much and kills performances on
             // fillrate limited platforms
-            int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
-            int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
+            int tw = Mathf.FloorToInt(screenWidth / (2f - rw));
+            int th = Mathf.FloorToInt(screenHeight / (2f - rh));
 
             // Determine the iteration count
             int s = Mathf.Max(tw, th);
@@ -127,21 +132,55 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Downsample
             var lastDown = context.source;
-            for (int i = 0; i < iterations; i++)
+            if (!settings.fastMode && SystemInfo.supportsComputeShaders)
             {
-                int mipDown = m_Pyramid[i].down;
-                int mipUp = m_Pyramid[i].up;
-                int pass = i == 0
-                    ? (int)Pass.Prefilter13 + qualityOffset
-                    : (int)Pass.Downsample13 + qualityOffset;
+                var compute = context.resources.computeShaders.gaussianDownsample;
+                int kernelMain = compute.FindKernel("KMain");
+                int kernelPrefilter = compute.FindKernel("KMainPreFilter");
+                
+                for (int i = 0; i < iterations; i++)
+                {
+                    int mipDown = m_Pyramid[i].down;
+                    int mipUp = m_Pyramid[i].up;
+                    int kernel = i == 0 ? kernelPrefilter : kernelMain;
 
-                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
-                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
-                cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
+                    cmd.GetTemporaryRT(mipDown, tw, th, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Default, 1, true);
+                    cmd.GetTemporaryRT(mipUp, tw, th, 0, FilterMode.Bilinear, context.sourceFormat, RenderTextureReadWrite.Default, 1, true);
 
-                lastDown = mipDown;
-                tw = Mathf.Max(tw / 2, 1);
-                th = Mathf.Max(th / 2, 1);
+                    if (i == 0)
+                    {
+                        cmd.SetComputeVectorParam(compute, "_Threshold", threshold);
+                        cmd.SetComputeTextureParam(compute, kernel, "_AutoExposureTex", context.autoExposureTexture);
+                    }
+
+                    cmd.SetComputeTextureParam(compute, kernel, "_Source", lastDown);
+                    cmd.SetComputeTextureParam(compute, kernel, "_Result", mipDown);
+                    cmd.SetComputeVectorParam(compute, "_Size", new Vector4(tw, th, 1f / tw, 1f / th));
+                    cmd.DispatchCompute(compute, kernel, (tw + 7) / 8, (th + 7) / 8, 1);
+
+                    lastDown = mipDown;
+                    tw = Mathf.Max(tw / 2, 1);
+                    th = Mathf.Max(th / 2, 1);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    int mipDown = m_Pyramid[i].down;
+                    int mipUp = m_Pyramid[i].up;
+                    int pass = i == 0
+                        ? (int)Pass.Prefilter13 + qualityOffset
+                        : (int)Pass.Downsample13 + qualityOffset;
+
+                    context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                    context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                    cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
+
+                    lastDown = mipDown;
+                    tw = Mathf.Max(tw / 2, 1);
+                    th = Mathf.Max(th / 2, 1);
+                }
             }
 
             // Upsample
