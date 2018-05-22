@@ -230,6 +230,12 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if FINALPASS
             {
+                #if UNITY_COLORSPACE_GAMMA
+                {
+                    output = LinearToSRGB(output);
+                }
+                #endif
+
                 output.rgb = Dither(output.rgb, i.texcoord);
             }
             #else
@@ -242,12 +248,12 @@ Shader "Hidden/PostProcessing/Uber"
                     half luma = Luminance(saturate(output));
                     output.a = luma;
                 }
-            }
-            #endif
 
-            #if UNITY_COLORSPACE_GAMMA
-            {
-                output = LinearToSRGB(output);
+                #if UNITY_COLORSPACE_GAMMA
+                {
+                    output = LinearToSRGB(output);
+                }
+                #endif
             }
             #endif
 
