@@ -142,6 +142,11 @@ namespace UnityEngine.Rendering.PostProcessing
             value.b = from.b + (to.b - from.b) * t;
             value.a = from.a + (to.a - from.a) * t;
         }
+
+        public static implicit operator Vector4(ColorParameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -151,6 +156,16 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             value.x = from.x + (to.x - from.x) * t;
             value.y = from.y + (to.y - from.y) * t;
+        }
+
+        public static implicit operator Vector3(Vector2Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector2Parameter prop)
+        {
+            return prop.value;
         }
     }
 
@@ -163,6 +178,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
         }
+
+        public static implicit operator Vector2(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -174,6 +199,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
             value.w = from.w + (to.w - from.w) * t;
+        }
+
+        public static implicit operator Vector2(Vector4Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector3(Vector4Parameter prop)
+        {
+            return prop.value;
         }
     }
 
