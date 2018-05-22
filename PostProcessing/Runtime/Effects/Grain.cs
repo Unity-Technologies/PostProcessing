@@ -36,7 +36,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
 #if POSTFX_DEBUG_STATIC_GRAIN
             // Chosen by a fair dice roll
-            float time = 4f;
+            float time = 0.4f;
             float rndOffsetX = 0f;
             float rndOffsetY = 0f;
 #else
