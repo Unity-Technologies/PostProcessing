@@ -139,22 +139,17 @@ namespace UnityEditor.Rendering.PostProcessing
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            EditorGUI.DrawRect(rect, !EditorGUIUtility.isProSkin
-                ? new Color(0.6f, 0.6f, 0.6f, 1.333f)
-                : new Color(0.12f, 0.12f, 0.12f, 1.333f));
+            EditorGUI.DrawRect(rect, Styling.splitter);
         }
 
         public static void DrawOverrideCheckbox(Rect rect, SerializedProperty property)
         {
-            var oldColor = GUI.color;
-            GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.75f);
             property.boolValue = GUI.Toggle(rect, property.boolValue, GetContent("|Override this setting for this volume."), Styling.smallTickbox);
-            GUI.color = oldColor;
         }
 
         public static void DrawHeaderLabel(string title)
         {
-            EditorGUILayout.LabelField(title, Styling.labelHeader);
+            EditorGUILayout.LabelField(title, Styling.headerLabel);
         }
 
         public static bool DrawHeader(string title, bool state)
@@ -175,13 +170,12 @@ namespace UnityEditor.Rendering.PostProcessing
             backgroundRect.width += 4f;
 
             // Background
-            float backgroundTint = EditorGUIUtility.isProSkin ? 0.1f : 1f;
-            EditorGUI.DrawRect(backgroundRect, new Color(backgroundTint, backgroundTint, backgroundTint, 0.2f));
+            EditorGUI.DrawRect(backgroundRect, Styling.headerBackground);
 
             // Title
             EditorGUI.LabelField(labelRect, GetContent(title), EditorStyles.boldLabel);
 
-            // Active checkbox
+            // Foldout
             state = GUI.Toggle(foldoutRect, state, GUIContent.none, EditorStyles.foldout);
 
             var e = Event.current;
@@ -203,18 +197,21 @@ namespace UnityEditor.Rendering.PostProcessing
             var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
 
             var labelRect = backgroundRect;
-            labelRect.xMin += 16f;
+            labelRect.xMin += 32f;
             labelRect.xMax -= 20f;
 
+            var foldoutRect = backgroundRect;
+            foldoutRect.y += 1f;
+            foldoutRect.width = 13f;
+            foldoutRect.height = 13f;
+
             var toggleRect = backgroundRect;
+            toggleRect.x += 16f;
             toggleRect.y += 2f;
             toggleRect.width = 13f;
             toggleRect.height = 13f;
 
-            var menuIcon = EditorGUIUtility.isProSkin
-                ? Styling.paneOptionsIconDark
-                : Styling.paneOptionsIconLight;
-
+            var menuIcon = Styling.paneOptionsIcon;
             var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y + 4f, menuIcon.width, menuIcon.height);
 
             // Background rect should be full-width
@@ -222,12 +219,16 @@ namespace UnityEditor.Rendering.PostProcessing
             backgroundRect.width += 4f;
 
             // Background
-            float backgroundTint = EditorGUIUtility.isProSkin ? 0.1f : 1f;
-            EditorGUI.DrawRect(backgroundRect, new Color(backgroundTint, backgroundTint, backgroundTint, 0.2f));
+            EditorGUI.DrawRect(backgroundRect, Styling.headerBackground);
 
             // Title
             using (new EditorGUI.DisabledScope(!activeField.boolValue))
                 EditorGUI.LabelField(labelRect, GetContent(title), EditorStyles.boldLabel);
+
+            // foldout
+            group.serializedObject.Update();
+            group.isExpanded = GUI.Toggle(foldoutRect, group.isExpanded, GUIContent.none, EditorStyles.foldout);
+            group.serializedObject.ApplyModifiedProperties();
 
             // Active checkbox
             activeField.serializedObject.Update();
