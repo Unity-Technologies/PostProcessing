@@ -10,11 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - On large scenes, the first object you'd add to a profile could throw a `NullReferenceException`. ([#530](https://github.com/Unity-Technologies/PostProcessing/pull/530))
 - Dithering now works correctly in dark areas when working in Gamma mode.
 - Colored grain wasn't colored when `POSTFX_DEBUG_STATIC_GRAIN` was set.
+- No more warning in the console when `POSTFX_DEBUG_STATIC_GRAIN` is set.
 
 ### Changed
 - Minor scripting API improvements. ([#530](https://github.com/Unity-Technologies/PostProcessing/pull/530))
 - More implicit casts for `VectorXParameter` and `ColorParameter` to `Vector2`, `Vector3` and `Vector4`.
 - Script-instantiated profiles in volumes are now properly supported in the inspector. ([#530](https://github.com/Unity-Technologies/PostProcessing/pull/530))
+- Improved volume UI & styling.
 
 ## [2.0.5-preview]
 
