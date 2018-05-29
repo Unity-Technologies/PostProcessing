@@ -23,8 +23,8 @@ Shader "Hidden/PostProcessing/Bloom"
         {
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             color *= autoExposure;
-            color = QuadraticThreshold(color, _Threshold.x, _Threshold.yzw);
             color = min(_Params.x, color); // clamp to max
+            color = QuadraticThreshold(color, _Threshold.x, _Threshold.yzw);
             return color;
         }
 
