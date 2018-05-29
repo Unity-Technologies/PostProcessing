@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [InDev]
+
+### Added
+- Bloom now comes with a **Clamp** parameter to limit the amount of bloom that comes with ultra-bright pixels.
+
 ## [2.0.6-preview]
 
 ### Fixed
