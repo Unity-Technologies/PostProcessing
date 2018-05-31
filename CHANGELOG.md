@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [InDev]
 
+### Fixed
+- Post-processing wasn't working on Unity 2018.3.
+
 ### Added
 - Bloom now comes with a **Clamp** parameter to limit the amount of bloom that comes with ultra-bright pixels.
 

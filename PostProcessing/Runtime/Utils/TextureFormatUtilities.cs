@@ -69,6 +69,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 { (int)TextureFormat.ETC_RGBA8_3DS, RenderTextureFormat.ARGB32 }
             };
 
+            // TODO: refactor the next two scopes in a generic function once we have support for enum constraints on generics
             // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
             // cache its calls to avoid that...
             {
@@ -78,6 +79,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 foreach (var format in values)
                 {
                     if ((int)format < 0) // Safe guard, negative values are deprecated stuff
+                        continue;
+
+                    if (IsObsolete(format))
                         continue;
 
                     bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
@@ -95,10 +99,20 @@ namespace UnityEngine.Rendering.PostProcessing
                     if ((int)format < 0) // Crashes the runtime otherwise (!)
                         continue;
 
+                    if (IsObsolete(format))
+                        continue;
+
                     bool supported = SystemInfo.SupportsTextureFormat((TextureFormat)format);
                     s_SupportedTextureFormats.Add((int)format, supported);
                 }
             }
+        }
+
+        static bool IsObsolete(object value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            var attributes = (ObsoleteAttribute[])fieldInfo.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+            return attributes != null && attributes.Length > 0;
         }
 
         public static RenderTextureFormat GetUncompressedRenderTextureFormat(Texture texture)
