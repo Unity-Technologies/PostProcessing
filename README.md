@@ -12,4 +12,4 @@ The current version requires Unity 5.6.1+. Some effects and features are only av
 License
 -------
 
-Unity Companion License (see [LICENSE](LICENSE))
+Unity Companion License (see [LICENSE](LICENSE.md))

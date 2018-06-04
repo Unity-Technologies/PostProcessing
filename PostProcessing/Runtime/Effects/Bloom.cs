@@ -20,6 +20,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold).")]
         public FloatParameter softKnee = new FloatParameter { value = 0.5f };
 
+        [Tooltip("Clamps pixels to control the bloom amount. Value is in gamma-space.")]
+        public FloatParameter clamp = new FloatParameter { value = 65472f };
+
         [Range(1f, 10f), Tooltip("Changes the extent of veiling effects. For maximum quality stick to integer values. Because this value changes the internal iteration count, animating it isn't recommended as it may introduce small hiccups in the perceived radius.")]
         public FloatParameter diffusion = new FloatParameter { value = 7f };
 
@@ -122,6 +125,8 @@ namespace UnityEngine.Rendering.PostProcessing
             float knee = lthresh * settings.softKnee.value + 1e-5f;
             var threshold = new Vector4(lthresh, lthresh - knee, knee * 2f, 0.25f / knee);
             sheet.properties.SetVector(ShaderIDs.Threshold, threshold);
+            float lclamp = Mathf.GammaToLinearSpace(settings.clamp.value);
+            sheet.properties.SetVector(ShaderIDs.Params, new Vector4(lclamp, 0f, 0f, 0f));
 
             int qualityOffset = settings.fastMode ? 1 : 0;
 

@@ -102,6 +102,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragMotionVectors(VaryingsDefault i) : SV_Target
         {
+#if UNITY_CAN_READ_POSITION_IN_FRAGMENT_PROGRAM
             float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
             float2 mv = SampleMotionVectors(i.texcoord);
 
@@ -158,6 +159,10 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         #endif
 
             return float4(color.rgb + d.xxx, 1.0);
+#else
+            // Reading vertex SV_POSITION in a fragment shader is not supported by this platform so just return solid color.
+            return float4(1.0f, 0.0f, 1.0f, 1.0f);
+#endif
         }
 
         // -----------------------------------------------------------------------------

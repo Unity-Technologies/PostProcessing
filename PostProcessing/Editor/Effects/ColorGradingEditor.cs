@@ -293,7 +293,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.PrefixLabel("Channel Mixer", GUIStyle.none, Styling.labelHeader);
+                EditorGUILayout.PrefixLabel("Channel Mixer", GUIStyle.none, Styling.headerLabel);
 
                 EditorGUI.BeginChangeCheck();
                 {

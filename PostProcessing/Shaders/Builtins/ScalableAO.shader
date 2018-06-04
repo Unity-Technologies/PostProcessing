@@ -2,6 +2,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 {
     HLSLINCLUDE
 
+        #pragma exclude_renderers psp2
         #pragma target 3.0
   
     ENDHLSL

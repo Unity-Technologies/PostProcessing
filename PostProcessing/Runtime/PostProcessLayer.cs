@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Assertions;
@@ -295,12 +295,14 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
+#if !UNITY_SWITCH
             if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
                 Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, XRSettings.renderViewportScale);
             }
             else
+#endif
             {
                 Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, 1.0f);
             }
@@ -440,7 +442,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (RequiresInitialBlit(m_Camera, context) || opaqueOnlyEffects == 1)
                 {
-                    cmd.BuiltinBlit(context.source, context.destination);
+                    cmd.BuiltinBlit(context.source, context.destination, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
                     UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
  

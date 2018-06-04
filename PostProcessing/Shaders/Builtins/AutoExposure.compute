@@ -52,22 +52,12 @@ void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 
     // Parallel reduction to find the max value
     UNITY_UNROLL
-    for (uint i = HISTOGRAM_BINS >> 1u; i > 32u; i >>= 1u)
+    for (uint i = HISTOGRAM_BINS >> 1u; i > 0u; i >>= 1u)
     {
         if (thread_id < i)
             gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + i]);
 
         GroupMemoryBarrierWithGroupSync();
-    }
-
-    if (thread_id < 32u)
-    {
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 32]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 16]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 8]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 4]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 2]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 1]);
     }
 
     GroupMemoryBarrierWithGroupSync();

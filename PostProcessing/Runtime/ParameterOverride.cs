@@ -142,6 +142,11 @@ namespace UnityEngine.Rendering.PostProcessing
             value.b = from.b + (to.b - from.b) * t;
             value.a = from.a + (to.a - from.a) * t;
         }
+
+        public static implicit operator Vector4(ColorParameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -151,6 +156,16 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             value.x = from.x + (to.x - from.x) * t;
             value.y = from.y + (to.y - from.y) * t;
+        }
+
+        public static implicit operator Vector3(Vector2Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector2Parameter prop)
+        {
+            return prop.value;
         }
     }
 
@@ -163,6 +178,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
         }
+
+        public static implicit operator Vector2(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -174,6 +199,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
             value.w = from.w + (to.w - from.w) * t;
+        }
+
+        public static implicit operator Vector2(Vector4Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector3(Vector4Parameter prop)
+        {
+            return prop.value;
         }
     }
 
@@ -249,16 +284,24 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 Texture defaultTexture;
 
+                bool is3d = false;
+                if(to != null)
+                    is3d = to is Texture3D
+                            || (to is RenderTexture && ((RenderTexture)to).volumeDepth > 1);
+                else
+                    is3d = from is Texture3D
+                            || (from is RenderTexture && ((RenderTexture)from).volumeDepth > 1);
+
                 switch (defaultState)
                 {
                     case TextureParameterDefault.Black:
-                        defaultTexture = RuntimeUtilities.blackTexture;
+                        defaultTexture = is3d ? (Texture)RuntimeUtilities.blackTexture3D : RuntimeUtilities.blackTexture;
                         break;
                     case TextureParameterDefault.White:
-                        defaultTexture = RuntimeUtilities.whiteTexture;
+                        defaultTexture = is3d ? (Texture)RuntimeUtilities.whiteTexture3D : RuntimeUtilities.whiteTexture;
                         break;
                     case TextureParameterDefault.Transparent:
-                        defaultTexture = RuntimeUtilities.transparentTexture;
+                        defaultTexture = is3d ? (Texture)RuntimeUtilities.transparentTexture3D : RuntimeUtilities.transparentTexture;
                         break;
                     case TextureParameterDefault.Lut2D:
                         // Find the current lut size
