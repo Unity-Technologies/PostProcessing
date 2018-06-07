@@ -80,7 +80,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? TextureDimension.Tex3D
                     : TextureDimension.Tex2D;
 
-                rt = new RenderTexture(w, h, d, format)
+                rt = new RenderTexture(w, h, 0, format)
                 {
                     dimension = dimension,
                     filterMode = FilterMode.Bilinear,
