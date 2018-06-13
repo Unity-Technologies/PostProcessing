@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Crash on Vulkan when blending 3D textures.
 
+### Changed
+- Improved volume texture blending.
+
 ## [2.0.7-preview]
 
 ### Fixed
