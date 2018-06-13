@@ -117,8 +117,8 @@ namespace UnityEngine.Rendering.PostProcessing
             if (is3D)
             {
                 int dpth = @from is Texture3D ? ((Texture3D) @from).depth : ((RenderTexture) @from).volumeDepth;
-                int size = Math.Max(from.width, from.height);
-                size = Math.Max(size, dpth);
+                int size = Mathf.Max(from.width, from.height);
+                size = Mathf.Max(size, dpth);
                 
                 rt = Get(RenderTextureFormat.ARGBHalf, from.width, from.height, dpth, true, true);
 
@@ -170,8 +170,8 @@ namespace UnityEngine.Rendering.PostProcessing
             if (is3D)
             {
                 int dpth = @from is Texture3D ? ((Texture3D) @from).depth : ((RenderTexture) @from).volumeDepth;
-                int size = Math.Max(from.width, from.height);
-                size = Math.Max(size, dpth);
+                int size = Mathf.Max(from.width, from.height);
+                size = Mathf.Max(size, dpth);
                 
                 rt = Get(RenderTextureFormat.ARGBHalf, from.width, from.height, dpth, true, true);
 
