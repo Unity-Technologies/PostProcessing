@@ -499,12 +499,16 @@ namespace UnityEngine.Rendering.PostProcessing
             Destroy(profile);
         }
 
-        public static void DestroyVolume(PostProcessVolume volume, bool destroySharedProfile)
+        public static void DestroyVolume(PostProcessVolume volume, bool destroyProfile, bool destroyGameObject = false)
         {
-            if (destroySharedProfile)
-                DestroyProfile(volume.sharedProfile, true);
+            if (destroyProfile)
+                DestroyProfile(volume.profileRef, true);
 
+            var gameObject = volume.gameObject;
             Destroy(volume);
+
+            if (destroyGameObject)
+                Destroy(gameObject);
         }
 
         public static bool IsPostProcessingActive(PostProcessLayer layer)
