@@ -507,6 +507,19 @@ namespace UnityEngine.Rendering.PostProcessing
             Destroy(volume);
         }
 
+        public static bool IsPostProcessingActive(PostProcessLayer layer)
+        {
+            return layer != null
+                && layer.enabled;
+        }
+
+        public static bool IsTemporalAntialiasingActive(PostProcessLayer layer)
+        {
+            return IsPostProcessingActive(layer)
+                && layer.antialiasingMode == PostProcessLayer.Antialiasing.TemporalAntialiasing
+                && layer.temporalAntialiasing.IsSupported();
+        }
+
         // Returns ALL scene objects in the hierarchy, included inactive objects
         // Beware, this method will be slow for big scenes
         public static IEnumerable<T> GetAllSceneObjects<T>()
