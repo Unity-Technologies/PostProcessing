@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Crash on Vulkan when blending 3D textures.
 - `RuntimeUtilities.DestroyVolume()` works as expected now.
+- Excessive CPU usage on PS4 due to a badly initialized render texture.
 
 ### Changed
 - Improved volume texture blending.
