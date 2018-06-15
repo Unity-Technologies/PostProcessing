@@ -433,6 +433,12 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan; }
         }
 
+        public static bool isOSXMetal
+        {
+                get { return Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer
+                             && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Metal; }
+        }
+
         public static RenderTextureFormat defaultHDRRenderTextureFormat
         {
             get
