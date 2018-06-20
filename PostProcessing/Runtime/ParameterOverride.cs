@@ -282,48 +282,56 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // One of them is null, blend to/from a default value is applicable
             {
-                Texture defaultTexture;
 
-                bool is3d = false;
-                if(to != null)
-                    is3d = to is Texture3D
-                            || (to is RenderTexture && ((RenderTexture)to).volumeDepth > 1);
-                else
-                    is3d = from is Texture3D
-                            || (from is RenderTexture && ((RenderTexture)from).volumeDepth > 1);
+                if (defaultState == TextureParameterDefault.Lut2D)
+                {
+                    int size = from != null ? from.height : to.height;
+                    Texture defaultTexture = RuntimeUtilities.GetLutStrip(size);
+                    
+                    if (from == null) from = defaultTexture;
+                    if (to == null) to = defaultTexture;
+                }
 
+                Color tgtColor;
+                                
                 switch (defaultState)
                 {
                     case TextureParameterDefault.Black:
-                        defaultTexture = is3d ? (Texture)RuntimeUtilities.blackTexture3D : RuntimeUtilities.blackTexture;
+                        tgtColor = Color.black;
                         break;
                     case TextureParameterDefault.White:
-                        defaultTexture = is3d ? (Texture)RuntimeUtilities.whiteTexture3D : RuntimeUtilities.whiteTexture;
+                        tgtColor = Color.white;
                         break;
                     case TextureParameterDefault.Transparent:
-                        defaultTexture = is3d ? (Texture)RuntimeUtilities.transparentTexture3D : RuntimeUtilities.transparentTexture;
+                        tgtColor = Color.clear;
                         break;
                     case TextureParameterDefault.Lut2D:
+                    {
                         // Find the current lut size
                         int size = from != null ? from.height : to.height;
-                        defaultTexture = RuntimeUtilities.GetLutStrip(size);
-                        break;
+                        Texture defaultTexture = RuntimeUtilities.GetLutStrip(size);
+                        if (from == null) from = defaultTexture;
+                        if (to == null) to = defaultTexture;
+
+                        value = TextureLerper.instance.Lerp(from, to, t);
+                        // All done, return
+                        return;
+                    }
                     default:
-                        defaultTexture = null;
-                        break;
+                        // defaultState is none, so just interpolate the base and return
+                        base.Interp(from, to, t);
+                        return;
                 }
-
-                if (from == null) from = defaultTexture;
-                if (to == null) to = defaultTexture;
-
-                // defaultState could have been explicitly set to None
-                if (from == null || to == null)
+                // If we made it this far, tgtColor contains the color we'll be lerping into (or out of)
+                if (from == null)
                 {
-                    base.Interp(from, to, t);
-                    return;
+                    // color -> texture lerp, invert ratio
+                    value = TextureLerper.instance.Lerp(to, tgtColor, 1f - t);
                 }
-
-                value = TextureLerper.instance.Lerp(from, to, t);
+                else
+                {
+                    value = TextureLerper.instance.Lerp(from, tgtColor, t);
+                }
             }
         }
     }

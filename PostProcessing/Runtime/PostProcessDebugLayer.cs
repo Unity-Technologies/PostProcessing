@@ -52,6 +52,8 @@ namespace UnityEngine.Rendering.PostProcessing
         [Serializable]
         public class OverlaySettings
         {
+            public bool linearDepth = false;
+
             [Range(0f, 16f)]
             public float motionColorIntensity = 4f;
 
@@ -200,6 +202,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (debugOverlay == DebugOverlay.Depth)
             {
                 var sheet = context.propertySheets.Get(context.resources.shaders.debugOverlays);
+                sheet.properties.SetVector(ShaderIDs.Params, new Vector4(overlaySettings.linearDepth ? 1f : 0f, 0f, 0f, 0f));
                 PushDebugOverlay(context.command, BuiltinRenderTextureType.None, sheet, 0);
             }
             else if (debugOverlay == DebugOverlay.Normals)

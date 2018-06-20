@@ -24,6 +24,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         float4 FragDepth(VaryingsDefault i) : SV_Target
         {
             float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo, 0);
+            d = lerp(d, Linear01Depth(d), _Params.x);
 
         //#if !UNITY_COLORSPACE_GAMMA
         //    d = SRGBToLinear(d);
