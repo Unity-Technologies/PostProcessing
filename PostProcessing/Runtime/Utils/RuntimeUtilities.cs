@@ -499,12 +499,29 @@ namespace UnityEngine.Rendering.PostProcessing
             Destroy(profile);
         }
 
-        public static void DestroyVolume(PostProcessVolume volume, bool destroySharedProfile)
+        public static void DestroyVolume(PostProcessVolume volume, bool destroyProfile, bool destroyGameObject = false)
         {
-            if (destroySharedProfile)
-                DestroyProfile(volume.sharedProfile, true);
+            if (destroyProfile)
+                DestroyProfile(volume.profileRef, true);
 
+            var gameObject = volume.gameObject;
             Destroy(volume);
+
+            if (destroyGameObject)
+                Destroy(gameObject);
+        }
+
+        public static bool IsPostProcessingActive(PostProcessLayer layer)
+        {
+            return layer != null
+                && layer.enabled;
+        }
+
+        public static bool IsTemporalAntialiasingActive(PostProcessLayer layer)
+        {
+            return IsPostProcessingActive(layer)
+                && layer.antialiasingMode == PostProcessLayer.Antialiasing.TemporalAntialiasing
+                && layer.temporalAntialiasing.IsSupported();
         }
 
         // Returns ALL scene objects in the hierarchy, included inactive objects

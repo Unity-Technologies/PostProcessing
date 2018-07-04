@@ -82,6 +82,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 height = m_Heights[sizeId],
                 colorFormat = format,
                 depthBufferBits = 0,
+                volumeDepth = 1,
                 autoGenerateMips = false,
                 msaaSamples = 1,
                 enableRandomWrite = uav,
