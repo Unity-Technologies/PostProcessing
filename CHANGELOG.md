@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- Post-processing wasn't working on VR
+- Post-processing is now working with VR SRP in PC.
 
 ## [2.0.7-preview]
 
