@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Next Version]
 
 ### Fixed
+- Post-processing is now working with VR SRP in PC.
 - Crash on Vulkan when blending 3D textures.
 - `RuntimeUtilities.DestroyVolume()` works as expected now.
 - Excessive CPU usage on PS4 due to a badly initialized render texture.
