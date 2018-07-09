@@ -384,9 +384,9 @@ namespace UnityEngine.Rendering.PostProcessing
             Release(cmd, ShaderIDs.LinearDepth);
 
             Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
+            Release(cmd, ShaderIDs.LowDepth2);
+            Release(cmd, ShaderIDs.LowDepth3);
+            Release(cmd, ShaderIDs.LowDepth4);
 
             Release(cmd, ShaderIDs.TiledDepth1);
             Release(cmd, ShaderIDs.TiledDepth2);
