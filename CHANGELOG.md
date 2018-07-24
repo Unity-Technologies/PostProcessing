@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Better handling of volumes in nested-prefabs.
 - The Multi-scale volumetric obscurance effect wasn't properly releasing some of its temporary targets.
+- N3DS deprecation warnings in 2018.3.
 
 
 ## [2.0.9-preview]

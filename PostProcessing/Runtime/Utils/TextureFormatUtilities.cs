@@ -65,8 +65,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 { (int)TextureFormat.ASTC_RGBA_8x8, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ASTC_RGBA_10x10, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ASTC_RGBA_12x12, RenderTextureFormat.ARGB32 },
+            #if !UNITY_2018_3_OR_NEWER
                 { (int)TextureFormat.ETC_RGB4_3DS, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ETC_RGBA8_3DS, RenderTextureFormat.ARGB32 }
+            #endif
             };
 
             // TODO: refactor the next two scopes in a generic function once we have support for enum constraints on generics
