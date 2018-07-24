@@ -325,7 +325,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
                 return true;
-            if (RuntimeUtilities.scriptableRenderPipelineActive) // not tested yet
+            if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
                 return true;
             
             return false;
@@ -333,7 +333,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool RequiresFinalBlit(Camera camera)
         {
-            if (RuntimeUtilities.scriptableRenderPipelineActive) // not tested yet
+            if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
                 return true;
             if (camera.targetTexture != null)
                 return true;
