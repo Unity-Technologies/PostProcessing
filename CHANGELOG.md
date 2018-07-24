@@ -4,9 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Next Version]
+## [2.0.9-preview]
+- Update assembly definitions to output assemblies that match Unity naming convention (Unity.*).
+
+## [2.0.8-preview]
 
 ### Fixed
+- Post-processing is now working with VR SRP in PC.
 - Crash on Vulkan when blending 3D textures.
 - `RuntimeUtilities.DestroyVolume()` works as expected now.
 - Excessive CPU usage on PS4 due to a badly initialized render texture.
