@@ -251,7 +251,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
-             }
+            }
 
             temporalAntialiasing.Release();
             m_LogHistogram.Release();
