@@ -45,29 +45,19 @@ TRIVIAL_COMPUTE_KERNEL(MAIN)
 [numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_BINS / HISTOGRAM_THREAD_X, 1)]
 void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 {
-    const uint thread_id = groupThreadId.y * 8u + groupThreadId.x;
+    const uint thread_id = groupThreadId.y * HISTOGRAM_THREAD_X + groupThreadId.x;
     gs_pyramid[thread_id] = _HistogramBuffer[thread_id];
 
     GroupMemoryBarrierWithGroupSync();
 
     // Parallel reduction to find the max value
     UNITY_UNROLL
-    for (uint i = HISTOGRAM_BINS >> 1u; i > 32u; i >>= 1u)
+    for (uint i = HISTOGRAM_BINS >> 1u; i > 0u; i >>= 1u)
     {
         if (thread_id < i)
             gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + i]);
 
         GroupMemoryBarrierWithGroupSync();
-    }
-
-    if (thread_id < 32u)
-    {
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 32]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 16]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 8]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 4]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 2]);
-        gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + 1]);
     }
 
     GroupMemoryBarrierWithGroupSync();

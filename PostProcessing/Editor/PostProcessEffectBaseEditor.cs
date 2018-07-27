@@ -132,7 +132,7 @@ namespace UnityEditor.Rendering.PostProcessing
                         var rect = EditorGUILayout.GetControlRect(false, 24f);
                         rect.y += 8f;
                         rect = EditorGUI.IndentedRect(rect);
-                        EditorGUI.LabelField(rect, (attr as HeaderAttribute).header, Styling.labelHeader);
+                        EditorGUI.LabelField(rect, (attr as HeaderAttribute).header, Styling.headerLabel);
                     }
                 }
             }

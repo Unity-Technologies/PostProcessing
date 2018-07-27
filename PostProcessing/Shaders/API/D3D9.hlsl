@@ -2,6 +2,7 @@
 #define UNITY_UV_STARTS_AT_TOP 1
 #define UNITY_REVERSED_Z 0
 #define UNITY_GATHER_SUPPORTED 0
+#define UNITY_CAN_READ_POSITION_IN_FRAGMENT_PROGRAM 1
 
 #define ERROR_ON_UNSUPPORTED_FUNCTION(funcName) #error ##funcName is not supported on D3D9-level HLSL
 

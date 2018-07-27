@@ -9,6 +9,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _Lut2D_Params;
+        float4 _UserLut2D_Params;
 
         float3 _ColorBalance;
         float3 _ColorFilter;
@@ -41,7 +42,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
             colorLinear = LiftGammaGainHDR(colorLinear, _Lift, _InvGamma, _Gain);
 
             // Do NOT feed negative values to RgbToHsv or they'll wrap around
-            colorLinear = max(0.0, colorLinear);
+            colorLinear = max((float3)0.0, colorLinear);
 
             float3 hsv = RgbToHsv(colorLinear);
 
@@ -97,7 +98,10 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
 
         float4 FragLDR(VaryingsDefault i) : SV_Target
         {
-            float3 colorLinear = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
+            // Note: user luts may not have the same size as the internal one
+            float3 neutralColorLinear = GetLutStripValue(i.texcoordStereo, _Lut2D_Params);
+            float3 lookup = ApplyLut2D(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), neutralColorLinear, _UserLut2D_Params.xyz);
+            float3 colorLinear = lerp(neutralColorLinear, lookup, _UserLut2D_Params.w);
             float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }

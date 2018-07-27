@@ -25,6 +25,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+#if POSTFX_DEBUG_STATIC_GRAIN
+    #pragma warning disable 414
+#endif
+
     public sealed class GrainRenderer : PostProcessEffectRenderer<Grain>
     {
         RenderTexture m_GrainLookupRT;
@@ -36,7 +40,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
 #if POSTFX_DEBUG_STATIC_GRAIN
             // Chosen by a fair dice roll
-            float time = 4f;
+            float time = 0.4f;
             float rndOffsetX = 0f;
             float rndOffsetY = 0f;
 #else
@@ -95,4 +99,8 @@ namespace UnityEngine.Rendering.PostProcessing
             m_SampleIndex = 0;
         }
     }
+    
+#if POSTFX_DEBUG_STATIC_GRAIN
+    #pragma warning restore 414
+#endif
 }

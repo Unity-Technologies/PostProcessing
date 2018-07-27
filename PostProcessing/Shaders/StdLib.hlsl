@@ -1,4 +1,4 @@
-// Because this framework is supposed to work with the legacy render pipelines AND scriptable render
+﻿// Because this framework is supposed to work with the legacy render pipelines AND scriptable render
 // pipelines we can't use Unity's shader libraries (some scriptable pipelines come with their own
 // shader lib). So here goes a minimal shader lib only used for post-processing to ensure good
 // compatibility with all pipelines.
@@ -19,22 +19,27 @@
     #include "API/D3D12.hlsl"
 #elif defined(SHADER_API_D3D9) || defined(SHADER_API_D3D11_9X)
     #include "API/D3D9.hlsl"
-#elif defined(SHADER_API_VULKAN) || defined(SHADER_API_SWITCH)
+#elif defined(SHADER_API_VULKAN)
     #include "API/Vulkan.hlsl"
+#elif defined(SHADER_API_SWITCH)
+    #include "API/Switch.hlsl"
 #elif defined(SHADER_API_METAL)
     #include "API/Metal.hlsl"
+#elif defined(SHADER_API_PSP2)
+    #include "API/PSP2.hlsl"
 #else
     #include "API/OpenGL.hlsl"
 #endif
 
-#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH)
+#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH) || defined(SHADER_API_PSP2)
     #define SHADER_API_CONSOLE
 #endif
 
 // -----------------------------------------------------------------------------
 // Constants
 
-#define HALF_MAX        65504.0
+#define HALF_MAX        65504.0 // (2 - 2^-10) * 2^15
+#define HALF_MAX_MINUS1 65472.0 // (2 - 2^-9) * 2^15
 #define EPSILON         1.0e-4
 #define PI              3.14159265359
 #define TWO_PI          6.28318530718

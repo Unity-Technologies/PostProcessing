@@ -14,18 +14,23 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public PropertySheet Get(string shaderName)
         {
-            return Get(Shader.Find(shaderName));
+            var shader = Shader.Find(shaderName);
+
+            if (shader == null)
+                throw new ArgumentException(string.Format("Invalid shader ({0})", shaderName));
+
+            return Get(shader);
         }
 
         public PropertySheet Get(Shader shader)
         {
             PropertySheet sheet;
 
-            if (m_Sheets.TryGetValue(shader, out sheet))
-                return sheet;
-
             if (shader == null)
                 throw new ArgumentException(string.Format("Invalid shader ({0})", shader));
+
+            if (m_Sheets.TryGetValue(shader, out sheet))
+                return sheet;
 
             var shaderName = shader.name;
             var material = new Material(shader)

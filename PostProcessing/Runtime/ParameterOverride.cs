@@ -142,6 +142,11 @@ namespace UnityEngine.Rendering.PostProcessing
             value.b = from.b + (to.b - from.b) * t;
             value.a = from.a + (to.a - from.a) * t;
         }
+
+        public static implicit operator Vector4(ColorParameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -151,6 +156,16 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             value.x = from.x + (to.x - from.x) * t;
             value.y = from.y + (to.y - from.y) * t;
+        }
+
+        public static implicit operator Vector3(Vector2Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector2Parameter prop)
+        {
+            return prop.value;
         }
     }
 
@@ -163,6 +178,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
         }
+
+        public static implicit operator Vector2(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector4(Vector3Parameter prop)
+        {
+            return prop.value;
+        }
     }
 
     [Serializable]
@@ -174,6 +199,16 @@ namespace UnityEngine.Rendering.PostProcessing
             value.y = from.y + (to.y - from.y) * t;
             value.z = from.z + (to.z - from.z) * t;
             value.w = from.w + (to.w - from.w) * t;
+        }
+
+        public static implicit operator Vector2(Vector4Parameter prop)
+        {
+            return prop.value;
+        }
+
+        public static implicit operator Vector3(Vector4Parameter prop)
+        {
+            return prop.value;
         }
     }
 
@@ -215,18 +250,89 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+    public enum TextureParameterDefault
+    {
+        None,
+        Black,
+        White,
+        Transparent,
+        Lut2D
+    }
+
     [Serializable]
     public sealed class TextureParameter : ParameterOverride<Texture>
     {
+        public TextureParameterDefault defaultState = TextureParameterDefault.Black;
+
         public override void Interp(Texture from, Texture to, float t)
         {
-            if (from == null || to == null)
+            // Both are null, do nothing
+            if (from == null && to == null)
             {
-                base.Interp(from, to, t);
+                value = null;
                 return;
             }
 
-            value = TextureLerper.instance.Lerp(from, to, t);
+            // Both aren't null we're ready to blend
+            if (from != null && to != null)
+            {
+                value = TextureLerper.instance.Lerp(from, to, t);
+                return;
+            }
+
+            // One of them is null, blend to/from a default value is applicable
+            {
+
+                if (defaultState == TextureParameterDefault.Lut2D)
+                {
+                    int size = from != null ? from.height : to.height;
+                    Texture defaultTexture = RuntimeUtilities.GetLutStrip(size);
+                    
+                    if (from == null) from = defaultTexture;
+                    if (to == null) to = defaultTexture;
+                }
+
+                Color tgtColor;
+                                
+                switch (defaultState)
+                {
+                    case TextureParameterDefault.Black:
+                        tgtColor = Color.black;
+                        break;
+                    case TextureParameterDefault.White:
+                        tgtColor = Color.white;
+                        break;
+                    case TextureParameterDefault.Transparent:
+                        tgtColor = Color.clear;
+                        break;
+                    case TextureParameterDefault.Lut2D:
+                    {
+                        // Find the current lut size
+                        int size = from != null ? from.height : to.height;
+                        Texture defaultTexture = RuntimeUtilities.GetLutStrip(size);
+                        if (from == null) from = defaultTexture;
+                        if (to == null) to = defaultTexture;
+
+                        value = TextureLerper.instance.Lerp(from, to, t);
+                        // All done, return
+                        return;
+                    }
+                    default:
+                        // defaultState is none, so just interpolate the base and return
+                        base.Interp(from, to, t);
+                        return;
+                }
+                // If we made it this far, tgtColor contains the color we'll be lerping into (or out of)
+                if (from == null)
+                {
+                    // color -> texture lerp, invert ratio
+                    value = TextureLerper.instance.Lerp(to, tgtColor, 1f - t);
+                }
+                else
+                {
+                    value = TextureLerper.instance.Lerp(from, tgtColor, t);
+                }
+            }
         }
     }
 }

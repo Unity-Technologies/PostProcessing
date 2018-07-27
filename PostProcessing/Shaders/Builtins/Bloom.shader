@@ -14,6 +14,7 @@ Shader "Hidden/PostProcessing/Bloom"
         float _SampleScale;
         float4 _ColorIntensity;
         float4 _Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
+        float4 _Params; // x: clamp, yzw: unused
 
         // ----------------------------------------------------------------------------------------
         // Prefilter
@@ -22,6 +23,7 @@ Shader "Hidden/PostProcessing/Bloom"
         {
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
             color *= autoExposure;
+            color = min(_Params.x, color); // clamp to max
             color = QuadraticThreshold(color, _Threshold.x, _Threshold.yzw);
             return color;
         }

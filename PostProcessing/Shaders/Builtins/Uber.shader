@@ -2,24 +2,23 @@ Shader "Hidden/PostProcessing/Uber"
 {
     HLSLINCLUDE
 
-#pragma target 3.0
+        #pragma target 3.0
 
-#pragma multi_compile __ UNITY_COLORSPACE_GAMMA
-#pragma multi_compile __ DISTORT
-#pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
-#pragma multi_compile __ BLOOM
-#pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-#pragma multi_compile __ VIGNETTE
-#pragma multi_compile __ GRAIN
-#pragma multi_compile __ FINALPASS
+        #pragma multi_compile __ DISTORT
+        #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
+        #pragma multi_compile __ BLOOM BLOOM_LOW
+        #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
+        #pragma multi_compile __ VIGNETTE
+        #pragma multi_compile __ GRAIN
+        #pragma multi_compile __ FINALPASS
 
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
-#include "../Sampling.hlsl"
-#include "Distortion.hlsl"
-#include "Dithering.hlsl"
+        #include "../StdLib.hlsl"
+        #include "../Colors.hlsl"
+        #include "../Sampling.hlsl"
+        #include "Distortion.hlsl"
+        #include "Dithering.hlsl"
 
-#define MAX_CHROMATIC_SAMPLES 16
+        #define MAX_CHROMATIC_SAMPLES 16
 
         SCREENSPACE_TEXTURE(_MainTex);
         SAMPLER2D(sampler_MainTex);
@@ -144,9 +143,13 @@ Shader "Hidden/PostProcessing/Uber"
 
             color.rgb *= autoExposure;
 
-            #if BLOOM
+            #if BLOOM || BLOOM_LOW
             {
+                #if BLOOM
                 half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                #else
+                half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                #endif
 
                 // UVs should be Distort(uv * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw)
                 // but considering we use a cover-style scale on the dirt texture the difference
@@ -230,6 +233,12 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if FINALPASS
             {
+                #if UNITY_COLORSPACE_GAMMA
+                {
+                    output = LinearToSRGB(output);
+                }
+                #endif
+
                 output.rgb = Dither(output.rgb, i.texcoord);
             }
             #else
@@ -242,12 +251,12 @@ Shader "Hidden/PostProcessing/Uber"
                     half luma = Luminance(saturate(output));
                     output.a = luma;
                 }
-            }
-            #endif
 
-            #if UNITY_COLORSPACE_GAMMA
-            {
-                output = LinearToSRGB(output);
+                #if UNITY_COLORSPACE_GAMMA
+                {
+                    output = LinearToSRGB(output);
+                }
+                #endif
             }
             #endif
 

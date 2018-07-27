@@ -2,7 +2,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 {
     HLSLINCLUDE
 
-        #pragma exclude_renderers gles
+        #pragma exclude_renderers gles psp2
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
 
@@ -87,15 +87,10 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             // Sharpen output
             color += (color - (corners * 0.166667)) * 2.718282 * _Sharpness;
-            color = max(0.0, color);
+            color = clamp(color, 0.0, HALF_MAX_MINUS1);
 
             // Tonemap color and history samples
-            float4 average = FastTonemap((corners + color) * 0.142857);
-
-            topLeft = FastTonemap(topLeft);
-            bottomRight = FastTonemap(bottomRight);
-
-            color = FastTonemap(color);
+            float4 average = (corners + color) * 0.142857;
 
             float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(texcoord - motion));
 
@@ -107,8 +102,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             float4 minimum = min(bottomRight, topLeft) - nudge;
             float4 maximum = max(topLeft, bottomRight) + nudge;
 
-            history = FastTonemap(history);
-
             // Clip history samples
             history = ClipToAABB(history, minimum.xyz, maximum.xyz);
 
@@ -118,7 +111,8 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
                 _FinalBlendParameters.y, _FinalBlendParameters.x
             );
 
-            color = FastTonemapInvert(lerp(color, history, weight));
+            color = lerp(color, history, weight);
+            color = clamp(color, 0.0, HALF_MAX_MINUS1);
 
             OutputSolver output;
             output.destination = color;

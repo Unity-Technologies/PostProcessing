@@ -9,6 +9,7 @@ namespace UnityEngine.Rendering.PostProcessing
     {
         static Dictionary<int, RenderTextureFormat> s_FormatAliasMap;
         static Dictionary<int, bool> s_SupportedRenderTextureFormats;
+        static Dictionary<int, bool> s_SupportedTextureFormats;
 
         static TextureFormatUtilities()
         {
@@ -64,20 +65,56 @@ namespace UnityEngine.Rendering.PostProcessing
                 { (int)TextureFormat.ASTC_RGBA_8x8, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ASTC_RGBA_10x10, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ASTC_RGBA_12x12, RenderTextureFormat.ARGB32 },
+            #if !UNITY_2018_3_OR_NEWER
                 { (int)TextureFormat.ETC_RGB4_3DS, RenderTextureFormat.ARGB32 },
                 { (int)TextureFormat.ETC_RGBA8_3DS, RenderTextureFormat.ARGB32 }
+            #endif
             };
 
+            // TODO: refactor the next two scopes in a generic function once we have support for enum constraints on generics
             // In 2018.1 SystemInfo.SupportsRenderTextureFormat() generates garbage so we need to
             // cache its calls to avoid that...
-            s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
-            var values = Enum.GetValues(typeof(RenderTextureFormat));
-
-            foreach (var format in values)
             {
-                bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
-                s_SupportedRenderTextureFormats.Add((int)format, supported);
+                s_SupportedRenderTextureFormats = new Dictionary<int, bool>();
+                var values = Enum.GetValues(typeof(RenderTextureFormat));
+
+                foreach (var format in values)
+                {
+                    if ((int)format < 0) // Safe guard, negative values are deprecated stuff
+                        continue;
+
+                    if (IsObsolete(format))
+                        continue;
+
+                    bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
+                    s_SupportedRenderTextureFormats.Add((int)format, supported);
+                }
             }
+
+            // Same for TextureFormat
+            {
+                s_SupportedTextureFormats = new Dictionary<int, bool>();
+                var values = Enum.GetValues(typeof(TextureFormat));
+
+                foreach (var format in values)
+                {
+                    if ((int)format < 0) // Crashes the runtime otherwise (!)
+                        continue;
+
+                    if (IsObsolete(format))
+                        continue;
+
+                    bool supported = SystemInfo.SupportsTextureFormat((TextureFormat)format);
+                    s_SupportedTextureFormats.Add((int)format, supported);
+                }
+            }
+        }
+
+        static bool IsObsolete(object value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+            var attributes = (ObsoleteAttribute[])fieldInfo.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+            return attributes != null && attributes.Length > 0;
         }
 
         public static RenderTextureFormat GetUncompressedRenderTextureFormat(Texture texture)
@@ -105,6 +142,13 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             bool supported;
             s_SupportedRenderTextureFormats.TryGetValue((int)format, out supported);
+            return supported;
+        }
+
+        internal static bool IsSupported(this TextureFormat format)
+        {
+            bool supported;
+            s_SupportedTextureFormats.TryGetValue((int)format, out supported);
             return supported;
         }
     }

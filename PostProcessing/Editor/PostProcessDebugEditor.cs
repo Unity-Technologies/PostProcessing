@@ -19,7 +19,8 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_HistogramChannel;
         SerializedProperty m_WaveformExposure;
         SerializedProperty m_VectorscopeExposure;
-        
+
+        SerializedProperty m_LinearDepth;
         SerializedProperty m_MotionColorIntensity;
         SerializedProperty m_MotionGridSize;
         SerializedProperty m_ColorBlindness;
@@ -50,6 +51,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_WaveformExposure = m_LayerObject.FindProperty("debugLayer.waveform.exposure");
             m_VectorscopeExposure = m_LayerObject.FindProperty("debugLayer.vectorscope.exposure");
 
+            m_LinearDepth = m_LayerObject.FindProperty("debugLayer.overlaySettings.linearDepth");
             m_MotionColorIntensity = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionColorIntensity");
             m_MotionGridSize = m_LayerObject.FindProperty("debugLayer.overlaySettings.motionGridSize");
             m_ColorBlindness = m_LayerObject.FindProperty("debugLayer.overlaySettings.colorBlindnessType");
@@ -79,6 +81,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 EditorGUILayout.LabelField(EditorUtilities.GetContent("Overlay"), EditorStyles.boldLabel);
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(m_Overlay);
+                DoOverlayGUI(DebugOverlay.Depth, m_LinearDepth);
                 DoOverlayGUI(DebugOverlay.MotionVectors, m_MotionColorIntensity, m_MotionGridSize);
                 DoOverlayGUI(DebugOverlay.ColorBlindnessSimulation, m_ColorBlindness, m_ColorBlindnessStrength);
 

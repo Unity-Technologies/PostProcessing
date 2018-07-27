@@ -98,7 +98,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal void CheckRT(ref RenderTexture rt, int width, int height, RenderTextureFormat format, FilterMode filterMode, bool useMipMap)
         {
-            if (rt == null || !rt.IsCreated() || rt.width != width || rt.height != height)
+            if (rt == null || !rt.IsCreated() || rt.width != width || rt.height != height || rt.format != format)
             {
                 if (rt != null)
                     rt.Release();

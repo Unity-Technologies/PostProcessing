@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Instead of trying to be smart and blend two curves by generating a new one, we'll simply
         // store the curve data in a float array and blend these instead.
-        internal float[] cachedData;
+        public float[] cachedData;
 
         public Spline(AnimationCurve curve, float zeroValue, bool loop, Vector2 bounds)
         {

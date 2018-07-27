@@ -82,6 +82,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 height = m_Heights[sizeId],
                 colorFormat = format,
                 depthBufferBits = 0,
+                volumeDepth = 1,
                 autoGenerateMips = false,
                 msaaSamples = 1,
                 enableRandomWrite = uav,
@@ -383,9 +384,9 @@ namespace UnityEngine.Rendering.PostProcessing
             Release(cmd, ShaderIDs.LinearDepth);
 
             Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
-            Release(cmd, ShaderIDs.LowDepth1);
+            Release(cmd, ShaderIDs.LowDepth2);
+            Release(cmd, ShaderIDs.LowDepth3);
+            Release(cmd, ShaderIDs.LowDepth4);
 
             Release(cmd, ShaderIDs.TiledDepth1);
             Release(cmd, ShaderIDs.TiledDepth2);
