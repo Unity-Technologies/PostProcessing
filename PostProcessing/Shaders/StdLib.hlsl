@@ -260,10 +260,14 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 
 #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
     #define SCREENSPACE_TEXTURE TEXTURE2D_ARRAY
+    #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_ARRAY_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, uv.xy, (float)unity_StereoEyeIndex)
+    #define SAMPLE_SCREENSPACE_TEXTURE_LOD(tex, sampler, uv, lod) SAMPLE_TEXTURE2D_ARRAY_LOD(tex, sampler, uv.xy, (float)unity_StereoEyeIndex, lod)
 #else
     #define SCREENSPACE_TEXTURE TEXTURE2D
+    #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE SAMPLE_TEXTURE2D
+    #define SAMPLE_SCREENSPACE_TEXTURE_LOD SAMPLE_TEXTURE2D_LOD
 #endif
 
 // -----------------------------------------------------------------------------

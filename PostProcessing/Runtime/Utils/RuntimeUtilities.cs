@@ -245,17 +245,32 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd, RenderTargetIdentifier rt, RenderBufferLoadAction loadAction, RenderBufferStoreAction storeAction)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(rt, loadAction, storeAction);
+            if(isVREnabled && isSinglePassStereoInstancedEnabled)
+            {
+                cmd.SetRenderTarget(rt, 0, CubemapFace.Unknown, -1);
+            }
+            else
+            {
+                cmd.SetRenderTarget(rt, loadAction, storeAction);    
+            }
             #else
             cmd.SetRenderTarget(rt);
             #endif
         }
+
         public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd,
             RenderTargetIdentifier color, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction,
             RenderTargetIdentifier depth, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(color, colorLoadAction, colorStoreAction, depth, depthLoadAction, depthStoreAction);
+            if(isVREnabled && isSinglePassStereoInstancedEnabled)
+            {
+                cmd.SetRenderTarget(color, depth, 0, CubemapFace.Unknown, -1);
+            }
+            else
+            {
+                cmd.SetRenderTarget(color, colorLoadAction, colorStoreAction, depth, depthLoadAction, depthStoreAction);
+            }
             #else
             cmd.SetRenderTarget(color, depth);
             #endif
@@ -306,7 +321,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier[] destinations, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
-            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);         
             cmd.SetRenderTarget(destinations, depth);
 
             if (clear)
@@ -334,8 +349,11 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            dest = BuiltinRenderTextureType.CurrentActive;
+            if(!isVREnabled || !isSinglePassStereoInstancedEnabled)
+            {
+                cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+                dest = BuiltinRenderTextureType.CurrentActive;
+            }
             #endif
             cmd.Blit(source, dest);
         }
@@ -343,8 +361,11 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest, Material mat, int pass = 0)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            dest = BuiltinRenderTextureType.CurrentActive;
+            if(!isVREnabled || !isSinglePassStereoInstancedEnabled)
+            {
+                cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+                dest = BuiltinRenderTextureType.CurrentActive;
+            }
             #endif
             cmd.Blit(source, dest, mat, pass);
         }
@@ -407,6 +428,20 @@ namespace UnityEngine.Rendering.PostProcessing
                 return false;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isSinglePassStereoInstancedEnabled
+        {
+            get
+            {                
+#if UNITY_2017_3_OR_NEWER
+                return UnityEngine.XR.XRSettings.stereoRenderingMode == UnityEngine.XR.XRSettings.StereoRenderingMode.SinglePassInstanced;
+#elif UNITY_2017_2_OR_NEWER
+                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes && UnityEngine.XR.XRSettings.eyeTextureDesc.dimensions == TextureDimension.Tex2DArray;
 #else
                 return false;
 #endif

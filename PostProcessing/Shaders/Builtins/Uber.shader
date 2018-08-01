@@ -20,8 +20,7 @@ Shader "Hidden/PostProcessing/Uber"
 
         #define MAX_CHROMATIC_SAMPLES 16
 
-        SCREENSPACE_TEXTURE(_MainTex);
-        SAMPLER2D(sampler_MainTex);
+        SCREENSPACE_TEXTURE_SAMPLER(_MainTex, sampler_MainTex);
         float4 _MainTex_TexelSize;
 
         // Auto exposure / eye adaptation
@@ -100,7 +99,7 @@ Shader "Hidden/PostProcessing/Uber"
                 for (int i = 0; i < samples; i++)
                 {
                     half t = (i + 0.5) / samples;
-                    half4 s = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(pos)), 0);
+                    half4 s = SAMPLE_SCREENSPACE_TEXTURE_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(pos)), 0);
                     half4 filter = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(t, 0.0), 0).rgb, 1.0);
 
                     sum += s * filter;
@@ -120,9 +119,9 @@ Shader "Hidden/PostProcessing/Uber"
                 half4 filterB = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(1.5 / 3, 0.0), 0).rgb, 1.0);
                 half4 filterC = half4(SAMPLE_TEXTURE2D_LOD(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut, float2(2.5 / 3, 0.0), 0).rgb, 1.0);
 
-                half4 texelA = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(uv)), 0);
-                half4 texelB = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta + uv)), 0);
-                half4 texelC = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta * 2.0 + uv)), 0);
+                half4 texelA = SAMPLE_SCREENSPACE_TEXTURE_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(uv)), 0);
+                half4 texelB = SAMPLE_SCREENSPACE_TEXTURE_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta + uv)), 0);
+                half4 texelC = SAMPLE_SCREENSPACE_TEXTURE_LOD(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(Distort(delta * 2.0 + uv)), 0);
 
                 half4 sum = texelA * filterA + texelB * filterB + texelC * filterC;
                 half4 filterSum = filterA + filterB + filterC;

@@ -29,6 +29,12 @@
 #define TEXTURE3D_PARAM(textureName, samplerName) textureName
 #define SAMPLE_TEXTURE3D(textureName, samplerName, coord3) tex2D(textureName, coord3)
 
+// 2DArray textures are not supported on Vita, use 2D to avoid compile errors.
+#define TEXTURE2D_ARRAY_SAMPLER2D(textureName, samplerName) sampler2D textureName
+#define TEXTURE2D_ARRAY(textureName) sampler2D textureName
+#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) tex2D(textureName, coord2)
+#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod) tex2D(textureName, coord2)
+
 #define UNITY_BRANCH
 #define UNITY_FLATTEN
 #define UNITY_UNROLL

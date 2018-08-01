@@ -4,17 +4,19 @@ Shader "Hidden/PostProcessing/Copy"
 
         #include "../StdLib.hlsl"
 
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        SCREENSPACE_TEXTURE_SAMPLER(_MainTex, sampler_MainTex);
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+            float4 color = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, sampler_MainTex, i.texcoordStereo);
             return color;
         }
 
         float4 FragKillNaN(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+            float4 color = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, sampler_MainTex, i.texcoordStereo);
 
             if (AnyIsNan(color))
             {
