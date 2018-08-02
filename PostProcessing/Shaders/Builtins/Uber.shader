@@ -27,7 +27,7 @@ Shader "Hidden/PostProcessing/Uber"
         TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
 
         // Bloom
-        TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
+        SCREENSPACE_TEXTURE_SAMPLER(_BloomTex, sampler_BloomTex);
         TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
         float4 _Bloom_DirtTileOffset; // xy: tiling, zw: offset
@@ -145,9 +145,9 @@ Shader "Hidden/PostProcessing/Uber"
             #if BLOOM || BLOOM_LOW
             {
                 #if BLOOM
-                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
                 #else
-                half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
+                half4 bloom = UpsampleBox(SCREENSPACE_TEXTURE_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
                 #endif
 
                 // UVs should be Distort(uv * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw)

@@ -258,16 +258,39 @@ float2 TransformTriangleVertexToUV(float2 vertex)
 #include "xRLib.hlsl"
 #include "xRHelpers.hlsl"
 
+// Define wrapper macros for screenspace textures that could be either a 2d or a array2d depending on the mode we are running in.
 #if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
     #define SCREENSPACE_TEXTURE TEXTURE2D_ARRAY
     #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_ARRAY_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, uv.xy, (float)unity_StereoEyeIndex)
     #define SAMPLE_SCREENSPACE_TEXTURE_LOD(tex, sampler, uv, lod) SAMPLE_TEXTURE2D_ARRAY_LOD(tex, sampler, uv.xy, (float)unity_StereoEyeIndex, lod)
+
+    #define GATHER_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)       GATHER_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+    #define GATHER_RED_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)   GATHER_RED_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+    #define GATHER_GREEN_SCREENSPACE_TEXTURE(textureName, samplerName, coord2) GATHER_GREEN_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+    #define GATHER_BLUE_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)  GATHER_BLUE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+
+    #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE(textureName, samplerName, coord2) SAMPLE_DEPTH_TEXTURE_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex).r
+    #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_DEPTH_TEXTURE_ARRAY_LOD(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, lod).r
+
+    #define SCREENSPACE_TEXTURE_ARGS TEXTURE2D_ARRAY_ARGS
+    #define SCREENSPACE_TEXTURE_PARAM TEXTURE2D_ARRAY_PARAM
 #else
     #define SCREENSPACE_TEXTURE TEXTURE2D
     #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE SAMPLE_TEXTURE2D
     #define SAMPLE_SCREENSPACE_TEXTURE_LOD SAMPLE_TEXTURE2D_LOD
+
+    #define GATHER_SCREENSPACE_TEXTURE GATHER_TEXTURE2D
+    #define GATHER_RED_SCREENSPACE_TEXTURE GATHER_RED_TEXTURE2D
+    #define GATHER_GREEN_SCREENSPACE_TEXTURE GATHER_GREEN_TEXTURE2D
+    #define GATHER_BLUE_SCREENSPACE_TEXTURE GATHER_BLUE_TEXTURE2D
+
+    #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE SAMPLE_DEPTH_TEXTURE
+    #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE_LOD SAMPLE_DEPTH_TEXTURE_LOD
+
+    #define SCREENSPACE_TEXTURE_ARGS TEXTURE2D_ARGS
+    #define SCREENSPACE_TEXTURE_PARAM TEXTURE2D_PARAM
 #endif
 
 // -----------------------------------------------------------------------------

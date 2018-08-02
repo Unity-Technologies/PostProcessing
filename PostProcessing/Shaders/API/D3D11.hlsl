@@ -20,6 +20,9 @@
 #define TEXTURE3D_ARGS(textureName, samplerName) Texture3D textureName, SamplerState samplerName
 #define TEXTURE3D_PARAM(textureName, samplerName) textureName, samplerName
 
+#define TEXTURE2D_ARRAY_ARGS(textureName, samplerName) Texture2DArray textureName, SamplerState samplerName
+#define TEXTURE2D_ARRAY_PARAM(textureName, samplerName) textureName, samplerName
+
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) textureName.Sample(samplerName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) textureName.SampleLevel(samplerName, coord2, lod)
 #define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))
@@ -35,8 +38,15 @@
 #define GATHER_GREEN_TEXTURE2D(textureName, samplerName, coord2) textureName.GatherGreen(samplerName, coord2)
 #define GATHER_BLUE_TEXTURE2D(textureName, samplerName, coord2) textureName.GatherBlue(samplerName, coord2)
 
+#define GATHER_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Gather(samplerName, float3(coord2, index))
+#define GATHER_RED_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.GatherRed(samplerName, float3(coord2, index))
+#define GATHER_GREEN_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.GatherGreen(samplerName, float3(coord2, index))
+#define GATHER_BLUE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.GatherBlue(samplerName, float3(coord2, index))
+
 #define SAMPLE_DEPTH_TEXTURE(textureName, samplerName, coord2) SAMPLE_TEXTURE2D(textureName, samplerName, coord2).r
 #define SAMPLE_DEPTH_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod).r
+#define SAMPLE_DEPTH_TEXTURE_ARRAY(textureName, samplerName, coord2, index) SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index).r
+#define SAMPLE_DEPTH_TEXTURE_ARRAY_LOD(textureName, samplerName, coord2, index, lod) SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod).r
 
 #define UNITY_BRANCH    [branch]
 #define UNITY_FLATTEN   [flatten]
