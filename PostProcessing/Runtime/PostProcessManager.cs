@@ -416,17 +416,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool IsVolumeRenderedByCamera(PostProcessVolume volume, Camera camera)
         {
-            // TODO: trunk has branched to 2018.3 but nested prefabs aren't merged yet, uncomment me when they are
-//#if UNITY_2018_3_OR_NEWER && UNITY_EDITOR
-//            // If the current camera have a custom scene then the camera is rendering that scene,
-//            // otherwise the camera is rendering the scenes in the SceneManager.
-//            var customScene = camera.scene;
-//            return customScene.IsValid()
-//                ? UnityEditor.SceneManagement.EditorSceneManager.IsGameObjectInScene(volume.gameObject, customScene)
-//                : UnityEditor.SceneManagement.EditorSceneManager.IsGameObjectInMainScenes(volume.gameObject);
-//#else
+#if UNITY_2018_3_OR_NEWER && UNITY_EDITOR
+            return UnityEditor.SceneManagement.StageUtility.IsGameObjectRenderedByCamera(volume.gameObject, camera);
+#else
             return true;
-//#endif
+#endif
         }
     }
 }
