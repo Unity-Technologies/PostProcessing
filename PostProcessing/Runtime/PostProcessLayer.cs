@@ -101,8 +101,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
         bool m_NaNKilled = false;
 
-        bool m_RequireFinalBlit = true;
-
         // Recycled list - used to reduce GC stress when gathering active effects in a bundle list
         // on each frame
         readonly List<PostProcessEffectRenderer> m_ActiveEffects = new List<PostProcessEffectRenderer>();
@@ -136,29 +134,27 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Camera = GetComponent<Camera>();
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
+#if UNITY_2018_3_OR_NEWER
+            m_Camera.forceTempRenderTexture = true; // Also force an extra RenderTexture if Camera.targetTexture is set
+#endif
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
-            // m_LegacyCmdBuffer is executed manually from OnRenderImage
-           
+            m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
+               
             // Internal context used if no SRP is set
             m_CurrentContext = new PostProcessRenderContext();
         }
 
+
+#if UNITY_2018_3_OR_NEWER
+        // We always use a CommandBuffer to blit to the final render target
+        // OnRenderImage is used only to avoid the automatic blit from the RenderTexture of Camera.forceIntoRenderTexture to the actual target
         void OnRenderImage(RenderTexture src, RenderTexture dst)
         {
-            Graphics.ExecuteCommandBuffer(m_LegacyCmdBuffer);
-            if (m_RequireFinalBlit)
-            {
-                if (dst != null)
-                    dst.DiscardContents();
-                Graphics.Blit(src, dst);
-            }
-            else
-            {
-                RenderTexture.active = dst;
-            }
+            RenderTexture.active = dst; // silce warning
         }
+#endif
 
         public void Init(PostProcessResources resources)
         {
@@ -251,6 +247,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
                 m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
+                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
             }
 
             temporalAntialiasing.Release();
@@ -323,22 +320,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
         {
+#if UNITY_2018_3_OR_NEWER
             if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
                 return true;
             if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
                 return true;
-            
+              
             return false;
-        }
-
-        static bool RequiresFinalBlit(Camera camera)
-        {
-            if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
-                return true;
-            if (camera.targetTexture != null)
-                return true;
-
-            return false;
+#else
+            return true;
+#endif
         }
 
         void UpdateSrcDstForOpaqueOnly(ref int src, ref int dst, PostProcessRenderContext context, RenderTargetIdentifier cameraTarget, int opaqueOnlyEffectsRemaining)
@@ -484,16 +475,19 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.source = cameraTarget;
             }
 
-            m_RequireFinalBlit = RequiresFinalBlit(m_Camera);
-            if (m_RequireFinalBlit)
+#if UNITY_2018_3_OR_NEWER
+            if (m_Camera.targetTexture)
             {
-                context.destination = cameraTarget;
+                context.destination = m_Camera.targetTexture.colorBuffer;
             }
             else
             {
                 context.flip = true;
                 context.destination = Display.main.colorBuffer;
             }
+#else
+            context.destination = cameraTarget;
+#endif
 
             context.command = m_LegacyCmdBuffer;
 
