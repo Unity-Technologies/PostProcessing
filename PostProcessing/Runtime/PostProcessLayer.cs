@@ -29,6 +29,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public Transform volumeTrigger;
         public LayerMask volumeLayer;
         public bool stopNaNPropagation = true;
+        public bool finalBlitToCameraTarget = true;
 
         // Builtins / hardcoded effects that don't benefit from volume blending
         public Antialiasing antialiasingMode = Antialiasing.None;
@@ -133,9 +134,11 @@ namespace UnityEngine.Rendering.PostProcessing
             m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
             m_Camera = GetComponent<Camera>();
+
+#if !UNITY_2018_3_OR_NEWER // OnRenderImage (bewlow) implies forceIntoRenderTexture
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
-#if UNITY_2018_3_OR_NEWER
 #endif
+
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
@@ -152,7 +155,10 @@ namespace UnityEngine.Rendering.PostProcessing
         [ImageEffectUsesCommandBuffer]
         void OnRenderImage(RenderTexture src, RenderTexture dst)
         {
-            RenderTexture.active = dst; // silce warning
+            if (finalBlitToCameraTarget)
+                RenderTexture.active = dst; // silence warning
+            else
+                Graphics.Blit(src, dst);
         }
 #endif
 
@@ -475,18 +481,20 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.source = cameraTarget;
             }
 
-#if UNITY_2018_3_OR_NEWER
-            if (m_Camera.targetTexture)
-            {
-                context.destination = m_Camera.targetTexture.colorBuffer;
-            }
-            else
-            {
-                context.flip = true;
-                context.destination = Display.main.colorBuffer;
-            }
-#else
             context.destination = cameraTarget;
+#if UNITY_2018_3_OR_NEWER
+            if (finalBlitToCameraTarget)
+            {
+                if (m_Camera.targetTexture)
+                {
+                    context.destination = m_Camera.targetTexture.colorBuffer;
+                }
+                else
+                {
+                    context.flip = true;
+                    context.destination = Display.main.colorBuffer;
+                }
+            } 
 #endif
 
             context.command = m_LegacyCmdBuffer;
