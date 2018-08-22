@@ -135,7 +135,6 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera = GetComponent<Camera>();
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
 #if UNITY_2018_3_OR_NEWER
-            m_Camera.forceTempRenderTexture = true; // Also force an extra RenderTexture if Camera.targetTexture is set
 #endif
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
@@ -150,6 +149,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2018_3_OR_NEWER
         // We always use a CommandBuffer to blit to the final render target
         // OnRenderImage is used only to avoid the automatic blit from the RenderTexture of Camera.forceIntoRenderTexture to the actual target
+        [ImageEffectUsesCommandBuffer]
         void OnRenderImage(RenderTexture src, RenderTexture dst)
         {
             RenderTexture.active = dst; // silce warning
