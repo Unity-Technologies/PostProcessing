@@ -48,8 +48,25 @@ namespace UnityEditor.Rendering.PostProcessing
             Load();
         }
 
-        [PreferenceItem("PostProcessing")]
+        #if UNITY_2018_3_OR_NEWER
+        [SettingsProvider]
+        static SettingsProvider PreferenceGUI()
+        {
+            return new SettingsProvider("Preferences/Post-processing")
+            {
+                guiHandler = searchContext => OpenGUI(),
+                scopes = SettingsScopes.User
+            };
+        }
+        #else
+        [PreferenceItem("Post-processing")]
         static void PreferenceGUI()
+        {
+            OpenGUI();
+        }
+        #endif
+
+        static void OpenGUI()
         {
             if (!m_Loaded)
                 Load();

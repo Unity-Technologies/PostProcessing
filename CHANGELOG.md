@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Ambient Occlusion could distort the screen on Android/Vulkan.
+- Warning about SettingsProvider in 2018.3.
 
 ## [2.0.10-preview]
 
