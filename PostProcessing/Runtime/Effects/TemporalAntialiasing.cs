@@ -109,34 +109,7 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.projectionMatrix = GetJitteredProjectionMatrix(camera);
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
-
-        // TODO: We'll probably need to isolate most of this for SRPs
-        public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
-        {
-#if  UNITY_2017_3_OR_NEWER
-            var camera = context.camera;
-            jitter = GenerateRandomOffset();
-            jitter *= jitterSpread;
-
-            for (var eye = Camera.StereoscopicEye.Left; eye <= Camera.StereoscopicEye.Right; eye++)
-            {
-                // This saves off the device generated projection matrices as non-jittered
-                context.camera.CopyStereoDeviceProjectionMatrixToNonJittered(eye);
-                var originalProj = context.camera.GetStereoNonJitteredProjectionMatrix(eye);
-
-                // Currently no support for custom jitter func, as VR devices would need to provide
-                // original projection matrix as input along with jitter 
-                var jitteredMatrix = RuntimeUtilities.GenerateJitteredProjectionMatrixFromOriginal(context, originalProj, jitter);
-                context.camera.SetStereoProjectionMatrix(eye, jitteredMatrix);
-            }
-
-            // jitter has to be scaled for the actual eye texture size, not just the intermediate texture size
-            // which could be double-wide in certain stereo rendering scenarios
-            jitter = new Vector2(jitter.x / context.screenWidth, jitter.y / context.screenHeight);
-            camera.useJitteredProjectionMatrixForTransparentRendering = false;
-#endif
-        }
-
+        
         void GenerateHistoryName(RenderTexture rt, int id, PostProcessRenderContext context)
         {
             rt.name = "Temporal Anti-aliasing History id #" + id;
