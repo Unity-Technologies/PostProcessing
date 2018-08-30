@@ -134,7 +134,9 @@ namespace UnityEngine.Rendering.PostProcessing
         internal Texture logLut;
         internal AutoExposure autoExposure;
         internal int bloomBufferNameID;
-
+#if UNITY_2018_2_OR_NEWER
+        internal bool physicalCamera;
+#endif
         public void Reset()
         {
             m_Camera = null;
@@ -144,7 +146,9 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2017_2_OR_NEWER
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
 #endif
-
+#if UNITY_2018_2_OR_NEWER
+            physicalCamera = false;
+#endif
             stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
             screenWidth = 0;
