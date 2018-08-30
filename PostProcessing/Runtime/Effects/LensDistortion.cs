@@ -2,30 +2,56 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// This class holds settings for the Lens Distortion effect.
+    /// </summary>
     [Serializable]
     [PostProcess(typeof(LensDistortionRenderer), "Unity/Lens Distortion")]
     public sealed class LensDistortion : PostProcessEffectSettings
     {
+        /// <summary>
+        /// The total amount of distortion to apply.
+        /// </summary>
         [Range(-100f, 100f), Tooltip("Total distortion amount.")]
         public FloatParameter intensity = new FloatParameter { value = 0f };
 
+        /// <summary>
+        /// The intensity multiplier on X axis. Set it to 0 to disable distortion on this axis.
+        /// </summary>
         [Range(0f, 1f), DisplayName("Y Multiplier"), Tooltip("Intensity multiplier on X axis. Set it to 0 to disable distortion on this axis.")]
         public FloatParameter intensityX = new FloatParameter { value = 1f };
 
+        /// <summary>
+        /// The intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis.
+        /// </summary>
         [Range(0f, 1f), DisplayName("X Multiplier"), Tooltip("Intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis.")]
         public FloatParameter intensityY = new FloatParameter { value = 1f };
 
+        /// <summary>
+        /// The center point for the distortion (X axis).
+        /// </summary>
         [Space]
         [Range(-1f, 1f), Tooltip("Distortion center point (X axis).")]
         public FloatParameter centerX = new FloatParameter { value = 0f };
 
+        /// <summary>
+        /// The center point for the distortion (Y axis).
+        /// </summary>
         [Range(-1f, 1f), Tooltip("Distortion center point (Y axis).")]
         public FloatParameter centerY = new FloatParameter { value = 0f };
 
+        /// <summary>
+        /// A global screen scaling factor.
+        /// </summary>
         [Space]
         [Range(0.01f, 5f), Tooltip("Global screen scaling.")]
         public FloatParameter scale = new FloatParameter { value = 1f };
 
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
@@ -35,7 +61,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
-    public sealed class LensDistortionRenderer : PostProcessEffectRenderer<LensDistortion>
+    internal sealed class LensDistortionRenderer : PostProcessEffectRenderer<LensDistortion>
     {
         public override void Render(PostProcessRenderContext context)
         {
