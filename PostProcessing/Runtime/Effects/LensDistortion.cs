@@ -16,15 +16,15 @@ namespace UnityEngine.Rendering.PostProcessing
         public FloatParameter intensity = new FloatParameter { value = 0f };
 
         /// <summary>
-        /// The intensity multiplier on X axis. Set it to 0 to disable distortion on this axis.
+        /// Multiplies the intensity value on the X axis. Setting this value to 0 will disable distortion on this axis.
         /// </summary>
-        [Range(0f, 1f), DisplayName("Y Multiplier"), Tooltip("Intensity multiplier on X axis. Set it to 0 to disable distortion on this axis.")]
+        [Range(0f, 1f), DisplayName("X Multiplier"), Tooltip("Intensity multiplier on X axis. Set it to 0 to disable distortion on this axis.")]
         public FloatParameter intensityX = new FloatParameter { value = 1f };
 
         /// <summary>
-        /// The intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis.
+        /// Multiplies the intensity value on the Y axis. Setting this value to 0 will disable distortion on this axis.
         /// </summary>
-        [Range(0f, 1f), DisplayName("X Multiplier"), Tooltip("Intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis.")]
+        [Range(0f, 1f), DisplayName("Y Multiplier"), Tooltip("Intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis.")]
         public FloatParameter intensityY = new FloatParameter { value = 1f };
 
         /// <summary>
@@ -47,11 +47,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0.01f, 5f), Tooltip("Global screen scaling.")]
         public FloatParameter scale = new FloatParameter { value = 1f };
 
-        /// <summary>
-        /// Returns <c>true</c> if the effect is currently enabled and supported.
-        /// </summary>
-        /// <param name="context">The current post-processing render context</param>
-        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
+        /// <inheritdoc />
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value

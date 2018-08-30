@@ -44,7 +44,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public ColorParameter color = new ColorParameter { value = new Color(0f, 0f, 0f, 1f) };
 
         /// <summary>
-        /// Sets the vignette center point (screen center is [0.5,0.5]).
+        /// Sets the vignette center point (screen center is <c>[0.5,0.5]</c>).
         /// </summary>
         [Tooltip("Sets the vignette center point (screen center is [0.5,0.5]).")]
         public Vector2Parameter center = new Vector2Parameter { value = new Vector2(0.5f, 0.5f) };
@@ -85,11 +85,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Mask opacity.")]
         public FloatParameter opacity = new FloatParameter { value = 1f };
 
-        /// <summary>
-        /// Returns <c>true</c> if the effect is currently enabled and supported.
-        /// </summary>
-        /// <param name="context">The current post-processing render context</param>
-        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
+        /// <inheritdoc />
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
