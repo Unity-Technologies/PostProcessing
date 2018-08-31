@@ -130,7 +130,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Command.SetComputeTextureParam(compute, kernel, "_To", to);
 
                 int groupSizeXY = Mathf.CeilToInt(size / 8f);
-                int groupSizeZ = Mathf.CeilToInt(size / 8f);
+                int groupSizeZ = Mathf.CeilToInt(size / (RuntimeUtilities.isOSXMetal ? 2f : 8f));
                 m_Command.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
                 return rt;
             }

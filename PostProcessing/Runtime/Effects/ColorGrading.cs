@@ -238,7 +238,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
 
                 int groupSizeXY = Mathf.CeilToInt(k_Lut3DSize / 8f);
-                int groupSizeZ = Mathf.CeilToInt(k_Lut3DSize / (RuntimeUtilities.isAndroidOpenGL ? 2f : 8f));
+                int groupSizeZ = Mathf.CeilToInt(k_Lut3DSize / (RuntimeUtilities.isAndroidOpenGL || RuntimeUtilities.isOSXMetal ? 2f : 8f));
                 var cmd = context.command;
                 cmd.SetComputeTextureParam(compute, kernel, "_Output", m_InternalLogLut);
                 cmd.SetComputeVectorParam(compute, "_Size", new Vector4(k_Lut3DSize, 1f / (k_Lut3DSize - 1f), 0f, 0f));
@@ -289,6 +289,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 }
 
                 // Generate the lut
+                uint tx, ty, tz = 0;
+                compute.GetKernelThreadGroupSizes(kernel, out tx, out ty, out tz);
+                //Debug.LogFormat("Size: {0} {1} {2}", tx, ty, tz);
                 context.command.BeginSample("HdrColorGradingLut3D");
                 cmd.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
                 context.command.EndSample("HdrColorGradingLut3D");

@@ -151,7 +151,7 @@ void Eval(uint3 id)
     }
 }
 
-#ifdef SHADER_API_GLES3
+#if defined(SHADER_API_GLES3) || defined(SHADER_API_METAL)
     #define GROUP_SIZE_XY 8
     #define GROUP_SIZE_Z 2
 #else
