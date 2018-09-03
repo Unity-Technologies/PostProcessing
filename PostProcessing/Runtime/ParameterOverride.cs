@@ -5,6 +5,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <summary>
     /// The base abstract class for all parameter override types.
     /// </summary>
+    /// <seealso cref="ParameterOverride{T}"/>
     public abstract class ParameterOverride
     {
         /// <summary>
@@ -63,6 +64,19 @@ namespace UnityEngine.Rendering.PostProcessing
     /// directly. Use one of the pre-flatten types (like <see cref="FloatParameter"/> or make your
     /// own by extending this class.
     /// </remarks>
+    /// <example>
+    /// This sample code shows how to make a custom parameter holding a <c>float</c>.
+    /// <code>
+    /// [Serializable]
+    /// public sealed class FloatParameter : ParameterOverride&lt;float&gt;
+    /// {
+    ///     public override void Interp(float from, float to, float t)
+    ///     {
+    ///         value = from + (to - from) * t;
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     [Serializable]
     public class ParameterOverride<T> : ParameterOverride
     {

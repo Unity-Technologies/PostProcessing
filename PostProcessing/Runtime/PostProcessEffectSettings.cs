@@ -10,6 +10,23 @@ namespace UnityEngine.Rendering.PostProcessing
     /// members found in this class will be automatically handled and interpolated by the volume
     /// framework.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// [Serializable]
+    /// [PostProcess(typeof(ExampleRenderer), "Custom/ExampleEffect")]
+    /// public sealed class ExampleEffect : PostProcessEffectSettings
+    /// {
+    ///     [Range(0f, 1f), Tooltip("Effect intensity.")]
+    ///     public FloatParameter intensity = new FloatParameter { value = 0f };
+    ///
+    ///     public override bool IsEnabledAndSupported(PostProcessRenderContext context)
+    ///     {
+    ///         return enabled.value
+    ///             && intensity.value > 0f; // Only render the effect if intensity is greater than 0
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     [Serializable]
     public class PostProcessEffectSettings : ScriptableObject
     {
