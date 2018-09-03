@@ -100,15 +100,15 @@ namespace UnityEngine.Rendering.PostProcessing
 
         /// <summary>
         /// Returns the first instantiated <see cref="PostProcessProfile"/> assigned to the volume.
-        /// Modifying <c>profile</c> will change the profile for this volume only. If the profile is
-        /// used by any other volume, this will clone the shared profile and start using it from
-        /// now on.
+        /// Modifying <paramref name="profile"/> will change the profile for this volume only. If
+        /// the profile is used by any other volume, this will clone the shared profile and start
+        /// using it from now on.
         /// </summary>
         /// <remarks>
         /// This property automatically instantiates the profile and make it unique to this volume
         /// so you can safely edit it via scripting at runtime without changing the original asset
         /// in the project.
-        /// Note that if you pass in your own profile, it is your responsability to destroy it once
+        /// Note that if you pass in your own profile, it is your responsibility to destroy it once
         /// it's not in use anymore.
         /// </remarks>
         /// <seealso cref="sharedProfile"/>
