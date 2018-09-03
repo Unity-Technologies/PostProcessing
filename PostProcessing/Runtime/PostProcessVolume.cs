@@ -59,8 +59,6 @@ namespace UnityEngine.Rendering.PostProcessing
     [AddComponentMenu("Rendering/Post-process Volume", 1001)]
     public sealed class PostProcessVolume : MonoBehaviour
     {
-        // Modifying sharedProfile will change the behavior of all volumes using this profile, and
-        // change profile settings that are stored in the project too
         /// <summary>
         /// The shared profile of this volume.
         /// Modifying <c>sharedProfile</c> will change all volumes using this profile, and change
