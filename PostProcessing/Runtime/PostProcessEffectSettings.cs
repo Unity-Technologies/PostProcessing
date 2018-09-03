@@ -22,7 +22,7 @@ namespace UnityEngine.Rendering.PostProcessing
     ///     public override bool IsEnabledAndSupported(PostProcessRenderContext context)
     ///     {
     ///         return enabled.value
-    ///             && intensity.value > 0f; // Only render the effect if intensity is greater than 0
+    ///             &amp;&amp; intensity.value > 0f; // Only render the effect if intensity is greater than 0
     ///     }
     /// }
     /// </code>
