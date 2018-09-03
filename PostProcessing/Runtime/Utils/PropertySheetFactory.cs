@@ -3,15 +3,30 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// A <see cref="PropertySheet"/> factory for easy creation and destruction of <see cref="Material"/>
+    /// and <see cref="MaterialPropertyBlock"/>.
+    /// </summary>
+    /// <seealso cref="PropertySheet"/>
     public sealed class PropertySheetFactory
     {
         readonly Dictionary<Shader, PropertySheet> m_Sheets;
 
+        /// <summary>
+        /// Creates a new factory.
+        /// </summary>
         public PropertySheetFactory()
         {
             m_Sheets = new Dictionary<Shader, PropertySheet>();
         }
 
+        /// <summary>
+        /// Gets a <see cref="PropertySheet"/> for a given shader identifier. Sheets are recycled
+        /// so you can safely call this method on every frame.
+        /// </summary>
+        /// <param name="shaderName">The name of the shader to retrieve a sheet for</param>
+        /// <returns>A sheet for the given shader</returns>
+        /// <exception cref="ArgumentException">Thrown if the shader is invalid</exception>
         public PropertySheet Get(string shaderName)
         {
             var shader = Shader.Find(shaderName);
@@ -22,6 +37,13 @@ namespace UnityEngine.Rendering.PostProcessing
             return Get(shader);
         }
 
+        /// <summary>
+        /// Gets a <see cref="PropertySheet"/> for a given shader instance. Sheets are recycled so
+        /// you can safely call this method on every frame.
+        /// </summary>
+        /// <param name="shader">A shader instance to retrieve a sheet for</param>
+        /// <returns>A sheet for the given shader</returns>
+        /// <exception cref="ArgumentException">Thrown if the shader is invalid</exception>
         public PropertySheet Get(Shader shader)
         {
             PropertySheet sheet;
@@ -44,6 +66,13 @@ namespace UnityEngine.Rendering.PostProcessing
             return sheet;
         }
 
+        /// <summary>
+        /// Releases all resources used by this factory.
+        /// </summary>
+        /// <remarks>
+        /// You don't need to call this method when using the builtin factory from
+        /// <see cref="PostProcessRenderContext"/>.
+        /// </remarks>
         public void Release()
         {
             foreach (var sheet in m_Sheets.Values)

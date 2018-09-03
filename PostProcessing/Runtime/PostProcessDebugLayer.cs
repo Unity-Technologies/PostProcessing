@@ -3,25 +3,83 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// A list of debug overlays.
+    /// </summary>
     public enum DebugOverlay
     {
+        /// <summary>
+        /// No overlay.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Displays the depth buffer.
+        /// </summary>
         Depth,
+
+        /// <summary>
+        /// Displays the screen-space normals buffer.
+        /// </summary>
         Normals,
+
+        /// <summary>
+        /// Displays the screen-space motion vectors.
+        /// </summary>
         MotionVectors,
+
+        /// <summary>
+        /// Dims the screen and displays NaN and Inf pixels with a bright pink color.
+        /// </summary>
         NANTracker,
+
+        /// <summary>
+        /// A color blindness simulator.
+        /// </summary>
         ColorBlindnessSimulation,
+
+        // Menu item separator for the inspector
         _,
+
+        /// <summary>
+        /// Displays the raw ambient occlusion map.
+        /// </summary>
         AmbientOcclusion,
+
+        /// <summary>
+        /// Displays the bloom buffer.
+        /// </summary>
         BloomBuffer,
+
+        /// <summary>
+        /// Displays the thresholded buffer used to generate bloom.
+        /// </summary>
         BloomThreshold,
+
+        /// <summary>
+        /// Displays depth of field helpers.
+        /// </summary>
         DepthOfField
     }
 
+    /// <summary>
+    /// A list of color blindness types.
+    /// </summary>
     public enum ColorBlindnessType
     {
+        /// <summary>
+        /// Deuteranopia (red-green color blindness).
+        /// </summary>
         Deuteranopia,
+
+        /// <summary>
+        /// Protanopia (red-green color blindness).
+        /// </summary>
         Protanopia,
+
+        /// <summary>
+        /// Tritanopia (blue-yellow color blindness).
+        /// </summary>
         Tritanopia
     }
 

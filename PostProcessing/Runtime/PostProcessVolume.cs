@@ -54,6 +54,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <summary>
     /// A post-process volume component holding a post-process profile.
     /// </summary>
+    /// <seealso cref="RuntimeUtilities.DestroyVolume"/>
     [ExecuteInEditMode]
     [AddComponentMenu("Rendering/Post-process Volume", 1001)]
     public sealed class PostProcessVolume : MonoBehaviour
@@ -113,6 +114,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// it's not in use anymore.
         /// </remarks>
         /// <seealso cref="sharedProfile"/>
+        /// <seealso cref="RuntimeUtilities.DestroyProfile"/>
         public PostProcessProfile profile
         {
             get

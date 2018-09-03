@@ -15,11 +15,21 @@ namespace UnityEngine.Rendering.PostProcessing
     using SceneManagement;
     using UnityObject = UnityEngine.Object;
 
+    /// <summary>
+    /// A set of runtime utilities used by the post-processing stack.
+    /// </summary>
     public static class RuntimeUtilities
     {
         #region Textures
 
         static Texture2D m_WhiteTexture;
+
+        /// <summary>
+        /// A 1x1 white texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture2D whiteTexture
         {
             get
@@ -34,7 +44,15 @@ namespace UnityEngine.Rendering.PostProcessing
                 return m_WhiteTexture;
             }
         }
+
         static Texture3D m_WhiteTexture3D;
+
+        /// <summary>
+        /// A 1x1x1 white texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture3D whiteTexture3D
         {
             get
@@ -51,6 +69,13 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Texture2D m_BlackTexture;
+
+        /// <summary>
+        /// A 1x1 black texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture2D blackTexture
         {
             get
@@ -67,6 +92,13 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Texture3D m_BlackTexture3D;
+
+        /// <summary>
+        /// A 1x1x1 black texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture3D blackTexture3D
         {
             get
@@ -83,6 +115,13 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Texture2D m_TransparentTexture;
+
+        /// <summary>
+        /// A 1x1 transparent texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture2D transparentTexture
         {
             get
@@ -99,6 +138,13 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Texture3D m_TransparentTexture3D;
+
+        /// <summary>
+        /// A 1x1x1 transparent texture.
+        /// </summary>
+        /// <remarks>
+        /// This texture is only created once and recycled afterward. You shouldn't modify it.
+        /// </remarks>
         public static Texture3D transparentTexture3D
         {
             get
@@ -116,6 +162,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static Dictionary<int, Texture2D> m_LutStrips = new Dictionary<int, Texture2D>();
 
+        /// <summary>
+        /// Gets a 2D lookup table for color grading use. Its size will be <c>width = height * height</c>.
+        /// </summary>
+        /// <param name="size">The height of the lookup table</param>
+        /// <returns>A 2D lookup table</returns>
+        /// <remarks>
+        /// Lookup tables are recycled and only created once per size. You shouldn't modify them.
+        /// </remarks>
         public static Texture2D GetLutStrip(int size)
         {
             Texture2D texture;
@@ -168,6 +222,10 @@ namespace UnityEngine.Rendering.PostProcessing
         #region Rendering
 
         static Mesh s_FullscreenTriangle;
+
+        /// <summary>
+        /// A fullscreen triangle mesh.
+        /// </summary>
         public static Mesh fullscreenTriangle
         {
             get
@@ -193,6 +251,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Material s_CopyStdMaterial;
+
+        /// <summary>
+        /// A simple copy material to use with the builtin pipelines.
+        /// </summary>
         public static Material copyStdMaterial
         {
             get
@@ -212,6 +274,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Material s_CopyMaterial;
+
+        /// <summary>
+        /// A simple copy material independent from the rendering pipeline.
+        /// </summary>
         public static Material copyMaterial
         {
             get
@@ -231,6 +297,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static PropertySheet s_CopySheet;
+
+        /// <summary>
+        /// A pre-configured <see cref="PropertySheet"/> for <see cref="copyMaterial"/>.
+        /// </summary>
         public static PropertySheet copySheet
         {
             get
@@ -242,6 +312,16 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Sets the current render target using specified <see cref="RenderBufferLoadAction"/>.
+        /// </summary>
+        /// <param name="cmd">The command buffer to set the render target on</param>
+        /// <param name="rt">The render target to set</param>
+        /// <param name="loadAction">The load action</param>
+        /// <param name="storeAction">The store action</param>
+        /// <remarks>
+        /// <see cref="RenderBufferLoadAction"/> are only used on Unity 2018.2 or newer.
+        /// </remarks>
         public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd, RenderTargetIdentifier rt, RenderBufferLoadAction loadAction, RenderBufferStoreAction storeAction)
         {
             #if UNITY_2018_2_OR_NEWER
@@ -250,6 +330,17 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetRenderTarget(rt);
             #endif
         }
+
+        /// <summary>
+        /// Sets the current render target and its depth using specified <see cref="RenderBufferLoadAction"/>.
+        /// </summary>
+        /// <param name="cmd">The command buffer to set the render target on</param>
+        /// <param name="color">The render target to set as color</param>
+        /// <param name="colorLoadAction">The load action for the color render target</param>
+        /// <param name="colorStoreAction">The store action for the color render target</param>
+        /// <param name="depth">The render target to set as depth</param>
+        /// <param name="depthLoadAction">The load action for the depth render target</param>
+        /// <param name="depthStoreAction">The store action for the depth render target</param>
         public static void SetRenderTargetWithLoadStoreAction(this CommandBuffer cmd,
             RenderTargetIdentifier color, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction,
             RenderTargetIdentifier depth, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
@@ -261,8 +352,13 @@ namespace UnityEngine.Rendering.PostProcessing
             #endif
         }
 
-        // Use a custom blit method to draw a fullscreen triangle instead of a fullscreen quad
-        // https://michaldrobot.com/2014/04/01/gcn-execution-patterns-in-full-screen-passes/
+        /// <summary>
+        /// Does a copy of source to destination using a fullscreen triangle.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -274,6 +370,15 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, copyMaterial, 0, 0);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="loadAction">The load action for this blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -286,11 +391,30 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, clear ? RenderBufferLoadAction.Clear : RenderBufferLoadAction.DontCare);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="depth">The depth render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -310,6 +434,16 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destinations">An array of destinations render targets</param>
+        /// <param name="depth">The depth render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier[] destinations, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -321,42 +455,51 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
-        public static void BlitFullscreenTriangle(Texture source, RenderTexture destination, Material material, int pass)
-        {
-            var oldRt = RenderTexture.active;
-
-            material.SetPass(pass);
-            if (source != null)
-                material.SetTexture(ShaderIDs.MainTex, source);
-
-            if (destination != null)
-                destination.DiscardContents(true, false);
-
-            Graphics.SetRenderTarget(destination);
-            Graphics.DrawMeshNow(fullscreenTriangle, Matrix4x4.identity);
-            RenderTexture.active = oldRt;
-        }
-
-        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest)
+        /// <summary>
+        /// Does a copy of source to destination using the builtin blit command.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, RenderTargetIdentifier destination)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            dest = BuiltinRenderTextureType.CurrentActive;
+            cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            destination = BuiltinRenderTextureType.CurrentActive;
             #endif
-            cmd.Blit(source, dest);
+            cmd.Blit(source, destination);
         }
 
-        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, Rendering.RenderTargetIdentifier dest, Material mat, int pass = 0)
+        /// <summary>
+        /// Blits a fullscreen quad using the builtin blit command and a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="mat">The material to use for the blit</param>
+        /// <param name="pass">The pass from the material to use</param>
+        public static void BuiltinBlit(this CommandBuffer cmd, Rendering.RenderTargetIdentifier source, RenderTargetIdentifier destination, Material mat, int pass = 0)
         {
             #if UNITY_2018_2_OR_NEWER
-            cmd.SetRenderTarget(dest, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            dest = BuiltinRenderTextureType.CurrentActive;
+            cmd.SetRenderTarget(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            destination = BuiltinRenderTextureType.CurrentActive;
             #endif
-            cmd.Blit(source, dest, mat, pass);
+            cmd.Blit(source, destination, mat, pass);
         }
 
         // Fast basic copy texture if available, falls back to blit copy if not
         // Assumes that both textures have the exact same type and format
+        /// <summary>
+        /// Copies the content of a texture into the other. Both textures must have the same size
+        /// and format or this method will fail.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <remarks>
+        /// If the CopyTexture command isn't supported on the target platform it will revert to a
+        /// fullscreen blit command instead.
+        /// </remarks>
         public static void CopyTexture(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
         {
             if (SystemInfo.copyTextureSupport > CopyTextureSupport.None)
@@ -375,32 +518,56 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Unity specifics & misc methods
 
+        /// <summary>
+        /// Returns <c>true</c> if a scriptable render pipeline is currently in use, <c>false</c>
+        /// otherwise.
+        /// </summary>
         public static bool scriptableRenderPipelineActive
         {
             get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if deferred shading is supported on the target platform,
+        /// <c>false</c> otherwise.
+        /// </summary>
         public static bool supportsDeferredShading
         {
             get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DeferredShading) != BuiltinShaderMode.Disabled; }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if <see cref="DepthTextureMode.DepthNormals"/> is supported on the
+        /// target platform, <c>false</c> otherwise.
+        /// </summary>
         public static bool supportsDepthNormals
         {
             get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DepthNormals) != BuiltinShaderMode.Disabled; }
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Returns <c>true</c> if single-pass stereo rendering is selected, <c>false</c> otherwise.
+        /// </summary>
+        /// <remarks>
+        /// This property only works in the editor.
+        /// </remarks>
         public static bool isSinglePassStereoSelected
         {
             get
             {
-                return UnityEditor.PlayerSettings.virtualRealitySupported
-                    && UnityEditor.PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+                return PlayerSettings.virtualRealitySupported
+                    && PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
             }
         }
 #endif
 
+        /// <summary>
+        /// Returns <c>true</c> if single-pass stereo rendering is active, <c>false</c> otherwise.
+        /// </summary>
+        /// <remarks>
+        /// This property only works in the editor.
+        /// </remarks>
         // TODO: Check for SPSR support at runtime
         public static bool isSinglePassStereoEnabled
         {
@@ -418,6 +585,9 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if VR is enabled, <c>false</c> otherwise.
+        /// </summary>
         public static bool isVREnabled
         {
             get
@@ -434,11 +604,18 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if the target platform is Android and the selected API is OpenGL,
+        /// <c>false</c> otherwise.
+        /// </summary>
         public static bool isAndroidOpenGL
         {
             get { return Application.platform == RuntimePlatform.Android && SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan; }
         }
 
+        /// <summary>
+        /// Gets the default HDR render texture format for the current target platform.
+        /// </summary>
         public static RenderTextureFormat defaultHDRRenderTextureFormat
         {
             get
@@ -457,6 +634,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Checks if a given render texture format is a floating-point format.
+        /// </summary>
+        /// <param name="format">The format to test</param>
+        /// <returns><c>true</c> if the format is floating-point, <c>false</c> otherwise</returns>
         public static bool isFloatingPointFormat(RenderTextureFormat format)
         {
             return format == RenderTextureFormat.DefaultHDR || format == RenderTextureFormat.ARGBHalf || format == RenderTextureFormat.ARGBFloat ||
@@ -465,6 +647,10 @@ namespace UnityEngine.Rendering.PostProcessing
                    format == RenderTextureFormat.RGB111110Float;
         }
 
+        /// <summary>
+        /// Properly destroys a given Unity object.
+        /// </summary>
+        /// <param name="obj">The object to destroy</param>
         public static void Destroy(UnityObject obj)
         {
             if (obj != null)
@@ -480,11 +666,20 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if the current color space setting is set to <c>Linear</c>,
+        /// <c>false</c> otherwise.
+        /// </summary>
         public static bool isLinearColorSpace
         {
             get { return QualitySettings.activeColorSpace == ColorSpace.Linear; }
         }
 
+        /// <summary>
+        /// Checks if resolved depth is available on the current target platform.
+        /// </summary>
+        /// <param name="camera">A rendering camera</param>
+        /// <returns><c>true</c> if resolved depth is available, <c>false</c> otherwise</returns>
         public static bool IsResolvedDepthAvailable(Camera camera)
         {
             // AFAIK resolved depth is only available on D3D11/12 via BuiltinRenderTextureType.ResolvedDepth
@@ -494,6 +689,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 (gtype == GraphicsDeviceType.Direct3D11 || gtype == GraphicsDeviceType.Direct3D12 || gtype == GraphicsDeviceType.XboxOne);
         }
 
+        /// <summary>
+        /// Properly destroys a given profile.
+        /// </summary>
+        /// <param name="profile">The profile to destroy</param>
+        /// <param name="destroyEffects">Should we destroy all the embedded settings?</param>
         public static void DestroyProfile(PostProcessProfile profile, bool destroyEffects)
         {
             if (destroyEffects)
@@ -505,6 +705,12 @@ namespace UnityEngine.Rendering.PostProcessing
             Destroy(profile);
         }
 
+        /// <summary>
+        /// Properly destroys a volume.
+        /// </summary>
+        /// <param name="volume">The volume to destroy</param>
+        /// <param name="destroyProfile">Should we destroy the attached profile?</param>
+        /// <param name="destroyGameObject">Should we destroy the volume Game Object?</param>
         public static void DestroyVolume(PostProcessVolume volume, bool destroyProfile, bool destroyGameObject = false)
         {
             if (destroyProfile)
@@ -517,12 +723,22 @@ namespace UnityEngine.Rendering.PostProcessing
                 Destroy(gameObject);
         }
 
+        /// <summary>
+        /// Checks if a post-processing layer is active.
+        /// </summary>
+        /// <param name="layer">The layer to check; can be <c>null</c></param>
+        /// <returns><c>true</c> if the layer is enabled, <c>false</c> otherwise</returns>
         public static bool IsPostProcessingActive(PostProcessLayer layer)
         {
             return layer != null
                 && layer.enabled;
         }
 
+        /// <summary>
+        /// Checks if temporal anti-aliasing is active on a given post-process layer.
+        /// </summary>
+        /// <param name="layer">The layer to check</param>
+        /// <returns><c>true</c> if temporal anti-aliasing is active, <c>false</c> otherwise</returns>
         public static bool IsTemporalAntialiasingActive(PostProcessLayer layer)
         {
             return IsPostProcessingActive(layer)
@@ -530,8 +746,12 @@ namespace UnityEngine.Rendering.PostProcessing
                 && layer.temporalAntialiasing.IsSupported();
         }
 
-        // Returns ALL scene objects in the hierarchy, included inactive objects
-        // Beware, this method will be slow for big scenes
+        /// <summary>
+        /// Gets all scene objects in the hierarchy, including inactive objects. This method is slow
+        /// on large scenes and should be used with extreme caution.
+        /// </summary>
+        /// <typeparam name="T">The component to look for</typeparam>
+        /// <returns>A list of all components of type <c>T</c> in the scene</returns>
         public static IEnumerable<T> GetAllSceneObjects<T>()
             where T : Component
         {
@@ -560,6 +780,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Creates an instance of a class if it's <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T">The type to create</typeparam>
+        /// <param name="obj">A reference to an instance to check and create if needed</param>
         public static void CreateIfNull<T>(ref T obj)
             where T : class, new()
         {
@@ -571,31 +796,48 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Maths
 
+        /// <summary>
+        /// Returns the base-2 exponential function of <paramref name="x"/>, which is <c>2</c>
+        /// raised to the power <paramref name="x"/>.
+        /// </summary>
+        /// <param name="x">Value of the exponent</param>
+        /// <returns>The base-2 exponential function of <paramref name="x"/></returns>
         public static float Exp2(float x)
         {
             return Mathf.Exp(x * 0.69314718055994530941723212145818f);
         }
 
-
+        /// <summary>
+        /// Gets a jittered perspective projection matrix for a given camera.
+        /// </summary>
+        /// <param name="camera">The camera to build the projection matrix for</param>
+        /// <param name="offset">The jitter offset</param>
+        /// <returns>A jittered projection matrix</returns>
         public static Matrix4x4 GetJitteredPerspectiveProjectionMatrix(Camera camera, Vector2 offset)
         {
             float near = camera.nearClipPlane;
-			float far = camera.farClipPlane;
+            float far = camera.farClipPlane;
 
-			float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView) * near;
-			float horizontal = vertical * camera.aspect;
+            float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView) * near;
+            float horizontal = vertical * camera.aspect;
 
-			offset.x *= horizontal / (0.5f * camera.pixelWidth);
-			offset.y *= vertical / (0.5f * camera.pixelHeight);
+            offset.x *= horizontal / (0.5f * camera.pixelWidth);
+            offset.y *= vertical / (0.5f * camera.pixelHeight);
 
-			var matrix = camera.projectionMatrix;
+            var matrix = camera.projectionMatrix;
 
-			matrix[0, 2] += offset.x / horizontal;
-			matrix[1, 2] += offset.y / vertical;
+            matrix[0, 2] += offset.x / horizontal;
+            matrix[1, 2] += offset.y / vertical;
 
             return matrix;
         }
 
+        /// <summary>
+        /// Gets a jittered orthographic projection matrix for a given camera.
+        /// </summary>
+        /// <param name="camera">The camera to build the orthographic matrix for</param>
+        /// <param name="offset">The jitter offset</param>
+        /// <returns>A jittered projection matrix</returns>
         public static Matrix4x4 GetJitteredOrthographicProjectionMatrix(Camera camera, Vector2 offset)
         {
             float vertical = camera.orthographicSize;
@@ -612,6 +854,13 @@ namespace UnityEngine.Rendering.PostProcessing
             return Matrix4x4.Ortho(left, right, bottom, top, camera.nearClipPlane, camera.farClipPlane);
         }
 
+        /// <summary>
+        /// Gets a jittered perspective projection matrix from an original projection matrix.
+        /// </summary>
+        /// <param name="context">The current render context</param>
+        /// <param name="origProj">The original projection matrix</param>
+        /// <param name="jitter">The jitter offset</param>
+        /// <returns>A jittered projection matrix</returns>
         public static Matrix4x4 GenerateJitteredProjectionMatrixFromOriginal(PostProcessRenderContext context, Matrix4x4 origProj, Vector2 jitter)
         {
 #if UNITY_2017_2_OR_NEWER
@@ -681,6 +930,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static IEnumerable<Type> m_AssemblyTypes;
 
+        /// <summary>
+        /// Gets all currently available assembly types.
+        /// </summary>
+        /// <returns>A list of all currently available assembly types</returns>
+        /// <remarks>
+        /// This method is slow and should be use with extreme caution.
+        /// </remarks>
         public static IEnumerable<Type> GetAllAssemblyTypes()
         {
             if (m_AssemblyTypes == null)
@@ -702,15 +958,28 @@ namespace UnityEngine.Rendering.PostProcessing
             return m_AssemblyTypes;
         }
 
-        // Quick extension method to get the first attribute of type T on a given Type
+        /// <summary>
+        /// Helper method to get the first attribute of type <c>T</c> on a given type.
+        /// </summary>
+        /// <typeparam name="T">The attribute type to look for</typeparam>
+        /// <param name="type">The type to explore</param>
+        /// <returns>The attribute found</returns>
         public static T GetAttribute<T>(this Type type) where T : Attribute
         {
             Assert.IsTrue(type.IsDefined(typeof(T), false), "Attribute not found");
             return (T)type.GetCustomAttributes(typeof(T), false)[0];
         }
 
-        // Returns all attributes set on a specific member
-        // Note: doesn't include inherited attributes, only explicit ones
+        /// <summary>
+        /// Returns all attributes set on a specific member.
+        /// </summary>
+        /// <typeparam name="TType">The class type where the member is defined</typeparam>
+        /// <typeparam name="TValue">The member type</typeparam>
+        /// <param name="expr">An expression path to the member</param>
+        /// <returns>An array of attributes</returns>
+        /// <remarks>
+        /// This method doesn't return inherited attributes, only explicit ones.
+        /// </remarks>
         public static Attribute[] GetMemberAttributes<TType, TValue>(Expression<Func<TType, TValue>> expr)
         {
             Expression body = expr;
@@ -728,8 +997,15 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
-        // Returns a string path from an expression - mostly used to retrieve serialized properties
-        // without hardcoding the field path. Safer, and allows for proper refactoring.
+        /// <summary>
+        /// Returns a string path from an expression. This is mostly used to retrieve serialized
+        /// properties without hardcoding the field path as a string and thus allowing proper
+        /// refactoring features.
+        /// </summary>
+        /// <typeparam name="TType">The class type where the member is defined</typeparam>
+        /// <typeparam name="TValue">The member type</typeparam>
+        /// <param name="expr">An expression path fo the member</param>
+        /// <returns>A string representation of the expression path</returns>
         public static string GetFieldPath<TType, TValue>(Expression<Func<TType, TValue>> expr)
         {
             MemberExpression me;
@@ -757,19 +1033,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             return sb.ToString();
-        }
-
-        public static object GetParentObject(string path, object obj)
-        {
-            var fields = path.Split('.');
-
-            if (fields.Length == 1)
-                return obj;
-
-            var info = obj.GetType().GetField(fields[0], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            obj = info.GetValue(obj);
-
-            return GetParentObject(string.Join(".", fields, 1, fields.Length - 1), obj);
         }
 
 #endregion

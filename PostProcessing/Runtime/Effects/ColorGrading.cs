@@ -58,7 +58,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [DisplayName("Shoulder Angle"), Range(0f, 1f), Tooltip("Affects how much overshoot to add to the shoulder.")]
         public FloatParameter toneCurveShoulderAngle = new FloatParameter { value = 0f };
 
-        [DisplayName("Gamma"), Min(0.001f), Tooltip("")]
+        [DisplayName("Gamma"), Min(0.001f), Tooltip("Applies a gamma function to the curve.")]
         public FloatParameter toneCurveGamma = new FloatParameter { value = 1f };
 
         [DisplayName("Lookup Texture"), Tooltip("Custom lookup texture (strip format, e.g. 256x16) to apply before the rest of the color grading operators. If none is provided, a neutral one will be generated internally.")]
