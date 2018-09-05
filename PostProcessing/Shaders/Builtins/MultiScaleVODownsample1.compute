@@ -22,22 +22,62 @@
 #pragma warning(disable : 3568)
 #pragma exclude_renderers gles gles3 d3d11_9x
 
-#pragma kernel main
+#pragma kernel MultiScaleVODownsample1              main=MultiScaleVODownsample1
+#pragma kernel MultiScaleVODownsample1_MSAA         main=MultiScaleVODownsample1_MSAA           MSAA
 
 #include "../StdLib.hlsl"
 
-RWTexture2D<float> LinearZ;
+#ifdef MSAA
+// Output textures
+RWTexture2D<float2> LinearZ;
 RWTexture2D<float2> DS2x;
-RWTexture2DArray<float> DS2xAtlas;
+RWTexture2DArray<float2> DS2xAtlas;
 RWTexture2D<float2> DS4x;
+RWTexture2DArray<float2> DS4xAtlas;
+
+// Input textures
+Texture2D<float4> Depth;
+
+// Shared memory
+groupshared float2 g_CacheW[256];
+#else
+// Output textures
+RWTexture2D<float> LinearZ;
+RWTexture2D<float> DS2x;
+RWTexture2DArray<float> DS2xAtlas;
+RWTexture2D<float> DS4x;
 RWTexture2DArray<float> DS4xAtlas;
+
+// Input textures
+Texture2D<float> Depth;
+
+// Shared memory
+groupshared float g_CacheW[256];
+#endif
 
 CBUFFER_START(CB0)
     float4 ZBufferParams;
 CBUFFER_END
 
-Texture2D<float> Depth;
+#ifdef MSAA
+float2 Linearize(uint2 st)
+{
+    float depthMin = Depth[st].y;
+    float depthMax = Depth[st].x;
 
+    float2 depth = float2(depthMin, depthMax);
+    float2 dist = 1.0 / (ZBufferParams.x * depth + ZBufferParams.y);
+#ifdef UNITY_REVERSED_Z
+    if (depth.x == 0) dist.x = 1e5;
+    if (depth.y == 0) dist.y = 1e5;
+#else
+    if (depth.x == 1) dist.x = 1e5;
+    if (depth.y == 1) dist.y = 1e5;
+#endif
+    LinearZ[st] = dist;
+    return dist;
+}
+#else
 float Linearize(uint2 st)
 {
     float depth = Depth[st];
@@ -50,8 +90,8 @@ float Linearize(uint2 st)
     LinearZ[st] = dist;
     return dist;
 }
+#endif
 
-groupshared float g_CacheW[256];
 
 #ifdef DISABLE_COMPUTE_SHADERS
 
@@ -73,8 +113,11 @@ void main(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
 
     uint ldsIndex = (GTid.x << 1) | (GTid.y << 5);
 
+    #ifdef MSAA
+    float2 w1 = g_CacheW[ldsIndex];
+    #else
     float w1 = g_CacheW[ldsIndex];
-
+    #endif
     uint2 st = DTid.xy;
     uint slice = ((st.x & 3) | (st.y << 2)) & 15;
     DS2x[st] = w1;
