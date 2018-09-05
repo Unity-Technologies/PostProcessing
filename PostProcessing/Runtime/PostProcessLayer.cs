@@ -484,7 +484,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return GetBundle<T>().CastSettings<T>();
         }
 
-        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
+        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA = false)
         {
             var bundle = GetBundle<AmbientOcclusion>();
             var renderer = bundle.CastRenderer<AmbientOcclusionRenderer>().GetMultiScaleVO();
