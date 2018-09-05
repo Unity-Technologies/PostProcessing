@@ -23,6 +23,9 @@
 #define TEXTURE3D_ARGS(textureName, samplerName) sampler3D textureName
 #define TEXTURE3D_PARAM(textureName, samplerName) textureName
 
+#define TEXTURE2D_ARRAY_ARGS(textureName, samplerName) samplerCUBE textureName // No support to texture2DArray
+#define TEXTURE2D_ARRAY_PARAM(textureName, samplerName) textureName
+
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) tex2D(textureName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) tex2Dlod(textureName, float4(coord2, 0.0, lod))
 #define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY)

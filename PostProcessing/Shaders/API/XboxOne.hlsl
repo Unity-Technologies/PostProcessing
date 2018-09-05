@@ -19,6 +19,9 @@
 #define TEXTURE3D_ARGS(textureName, samplerName) Texture3D textureName, SamplerState samplerName
 #define TEXTURE3D_PARAM(textureName, samplerName) textureName, samplerName
 
+#define TEXTURE2D_ARRAY_ARGS(textureName, samplerName) Texture2DArray textureName, SamplerState samplerName
+#define TEXTURE2D_ARRAY_PARAM(textureName, samplerName) textureName, samplerName
+
 #define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) textureName.Sample(samplerName, coord2)
 #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) textureName.SampleLevel(samplerName, coord2, lod)
 #define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) textureName.Sample(samplerName, float3(coord2, index))

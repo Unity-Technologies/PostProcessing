@@ -34,6 +34,9 @@
 #define TEXTURE2D_ARRAY(textureName) sampler2D textureName
 #define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index) tex2D(textureName, coord2)
 #define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod) tex2D(textureName, coord2)
+#define TEXTURE2D_ARRAY_ARGS(textureName, samplerName) sampler2D textureName
+#define TEXTURE2D_ARRAY_PARAM(textureName, samplerName) textureName
+
 
 #define UNITY_BRANCH
 #define UNITY_FLATTEN
