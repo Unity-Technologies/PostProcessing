@@ -14,7 +14,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public readonly string displayName;
 
         /// <summary>
-        /// Craetes a new attribute.
+        /// Creates a new attribute.
         /// </summary>
         /// <param name="displayName">The label to display in the inspector</param>
         public DisplayNameAttribute(string displayName)

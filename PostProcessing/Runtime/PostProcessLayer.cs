@@ -96,10 +96,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public Fog fog;
 
-        /// <summary>
-        /// 8-bit dithering settings for this camera.
-        /// </summary>
-        public Dithering dithering;
+        Dithering dithering;
 
         /// <summary>
         /// The debug layer is reponsible for rendering debugging information on the screen. It will

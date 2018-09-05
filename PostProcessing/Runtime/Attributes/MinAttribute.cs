@@ -14,7 +14,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public readonly float min;
 
         /// <summary>
-        /// Craetes a new attribute.
+        /// Creates a new attribute.
         /// </summary>
         /// <param name="max">The minimum value the field will be clamped to</param>
         public MinAttribute(float min)

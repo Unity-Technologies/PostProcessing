@@ -14,7 +14,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public readonly float max;
 
         /// <summary>
-        /// Craetes a new attribute.
+        /// Creates a new attribute.
         /// </summary>
         /// <param name="max">The maximum value the field will be clamped to</param>
         public MaxAttribute(float max)

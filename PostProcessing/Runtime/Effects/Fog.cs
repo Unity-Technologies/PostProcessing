@@ -2,12 +2,22 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// This class holds settings for the Fog effect with the deferred rendering path.
+    /// </summary>
     [Serializable]
     public sealed class Fog
     {
+        /// <summary>
+        /// If <c>true</c>, enables the internal deferred fog pass. Actual fog settings should be
+        /// set in the Lighting panel.
+        /// </summary>
         [Tooltip("Enables the internal deferred fog pass. Actual fog settings should be set in the Lighting panel.")]
         public bool enabled = true;
 
+        /// <summary>
+        /// Should the fog affect the skybox?
+        /// </summary>
         [Tooltip("Should the fog affect the skybox?")]
         public bool excludeSkybox = true;
 
