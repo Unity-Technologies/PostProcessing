@@ -56,7 +56,7 @@ namespace UnityEngine.Rendering.PostProcessing
     }
 
     /// <summary>
-    /// The base typed clas for all parameter override types.
+    /// The base typed class for all parameter override types.
     /// </summary>
     /// <typeparam name="T">The type of value to store in this <c>ParameterOverride</c></typeparam>
     /// <remarks>

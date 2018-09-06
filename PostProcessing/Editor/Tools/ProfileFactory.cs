@@ -6,7 +6,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    public class ProfileFactory
+    internal sealed class ProfileFactory
     {
         [MenuItem("Assets/Create/Post-processing Profile", priority = 201)]
         static void CreatePostProcessProfile()

@@ -5,7 +5,7 @@ using UnityEngine.Rendering.PostProcessing;
 namespace UnityEditor.Rendering.PostProcessing
 {
     [PostProcessEditor(typeof(ColorGrading))]
-    public sealed class ColorGradingEditor : PostProcessEffectEditor<ColorGrading>
+    internal sealed class ColorGradingEditor : PostProcessEffectEditor<ColorGrading>
     {
         SerializedParameterOverride m_GradingMode;
 
