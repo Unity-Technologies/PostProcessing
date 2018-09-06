@@ -561,7 +561,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return GetBundle<T>().CastSettings<T>();
         }
 
-        /// <summary>
+		/// <summary>
         /// Utility method to bake a multi-scale volumetric obscurance map for the current camera.
         /// This will only work if ambient occlusion is active in the scene.
         /// </summary>
@@ -571,12 +571,13 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="depthMap">The depth map to use. If <c>null</c>, it will use the depth map
         /// from the given camera</param>
         /// <param name="invert">Should the result be inverted?</param>
-        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        /// <param name="isMSAA">Should use MSAA?</param>
+        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA = false)
         {
             var bundle = GetBundle<AmbientOcclusion>();
             var renderer = bundle.CastRenderer<AmbientOcclusionRenderer>().GetMultiScaleVO();
             renderer.SetResources(m_Resources);
-            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert);
+            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert, isMSAA);
         }
 
         internal void OverrideSettings(List<PostProcessEffectSettings> baseSettings, float interpFactor)
