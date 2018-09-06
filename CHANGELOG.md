@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Ambient Occlusion could distort the screen on Android/Vulkan.
 - Warning about SettingsProvider in 2018.3.
 - Fixed issue with physical camera mode not working with post-processing.
+- Fixed thread group warning message on Metal and Intel Iris.
 
 ## [2.0.10-preview]
 
