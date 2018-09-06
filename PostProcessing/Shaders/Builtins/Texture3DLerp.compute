@@ -16,7 +16,7 @@ CBUFFER_END
 Texture3D _From;
 Texture3D _To;
 
-#define GROUP_SIZE 8
+#define GROUP_SIZE 4
 
 #ifdef DISABLE_COMPUTE_SHADERS
 
