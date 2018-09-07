@@ -277,7 +277,11 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            #if UNITY_2018_2_OR_NEWER
             bool clear = (loadAction == RenderBufferLoadAction.Clear);
+            #else
+            bool clear = false;
+            #endif
             cmd.SetRenderTargetWithLoadStoreAction(destination, clear ? RenderBufferLoadAction.DontCare : loadAction, RenderBufferStoreAction.Store);
 
             if (clear)
@@ -288,7 +292,17 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false)
         {
+            #if UNITY_2018_2_OR_NEWER
             cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, clear ? RenderBufferLoadAction.Clear : RenderBufferLoadAction.DontCare);
+            #else
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
+            cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
+            #endif
         }
 
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
@@ -445,11 +459,11 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
                 RenderTextureFormat format = RenderTextureFormat.RGB111110Float;
-#   if UNITY_EDITOR
+#if UNITY_EDITOR
                 var target = EditorUserBuildSettings.activeBuildTarget;
                 if (target != BuildTarget.Android && target != BuildTarget.iOS && target != BuildTarget.tvOS && target != BuildTarget.Switch)
                     return RenderTextureFormat.DefaultHDR;
-#   endif // UNITY_EDITOR
+#endif // UNITY_EDITOR
                 if (format.IsSupported())
                     return format;
 #endif // UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
@@ -580,18 +594,18 @@ namespace UnityEngine.Rendering.PostProcessing
         public static Matrix4x4 GetJitteredPerspectiveProjectionMatrix(Camera camera, Vector2 offset)
         {
             float near = camera.nearClipPlane;
-			float far = camera.farClipPlane;
+            float far = camera.farClipPlane;
 
-			float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView) * near;
-			float horizontal = vertical * camera.aspect;
+            float vertical = Mathf.Tan(0.5f * Mathf.Deg2Rad * camera.fieldOfView) * near;
+            float horizontal = vertical * camera.aspect;
 
-			offset.x *= horizontal / (0.5f * camera.pixelWidth);
-			offset.y *= vertical / (0.5f * camera.pixelHeight);
+            offset.x *= horizontal / (0.5f * camera.pixelWidth);
+            offset.y *= vertical / (0.5f * camera.pixelHeight);
 
-			var matrix = camera.projectionMatrix;
+            var matrix = camera.projectionMatrix;
 
-			matrix[0, 2] += offset.x / horizontal;
-			matrix[1, 2] += offset.y / vertical;
+            matrix[0, 2] += offset.x / horizontal;
+            matrix[1, 2] += offset.y / vertical;
 
             return matrix;
         }
@@ -772,6 +786,6 @@ namespace UnityEngine.Rendering.PostProcessing
             return GetParentObject(string.Join(".", fields, 1, fields.Length - 1), obj);
         }
 
-#endregion
+        #endregion
     }
 }
