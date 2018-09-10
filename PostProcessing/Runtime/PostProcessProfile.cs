@@ -5,7 +5,7 @@ namespace UnityEngine.Rendering.PostProcessing
 {
     public sealed class PostProcessProfile : ScriptableObject
     {
-        [Tooltip("A list of all settings & overrides.")]
+        [Tooltip("A list of all effects currently set in the stack.")]
         public List<PostProcessEffectSettings> settings = new List<PostProcessEffectSettings>();
 
         // Editor only, doesn't have any use outside of it

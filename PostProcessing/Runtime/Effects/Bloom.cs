@@ -34,10 +34,10 @@ namespace UnityEngine.Rendering.PostProcessing
         public ColorParameter color = new ColorParameter { value = Color.white };
 
         [FormerlySerializedAs("mobileOptimized")]
-        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
+        [Tooltip("Boost performance by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
         public BoolParameter fastMode = new BoolParameter { value = false };
 
-        [Tooltip("Dirtiness texture to add smudges or dust to the bloom effect."), DisplayName("Texture")]
+        [Tooltip("Dirtiness texture used to add smudges or dust to the bloom effect."), DisplayName("Texture")]
         public TextureParameter dirtTexture = new TextureParameter { value = null };
 
         [Min(0f), Tooltip("Amount of dirtiness."), DisplayName("Intensity")]
