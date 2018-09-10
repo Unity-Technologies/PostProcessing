@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Documentation",
+    "\\PostProcessing",
+    "\\PostProcessing\\Editor",
+    "\\PostProcessing\\Editor\\Attributes",
+    "\\PostProcessing\\Editor\\Effects",
+    "\\PostProcessing\\Runtime",
+    "\\PostProcessing\\Runtime\\Effects",
+    "\\PostProcessing\\Runtime\\Utils"
+  ],
+  "PreviewInSolutionExplorer": false
+}

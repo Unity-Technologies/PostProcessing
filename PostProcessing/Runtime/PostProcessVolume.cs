@@ -74,28 +74,28 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Should this volume be applied to the whole scene?
         /// </summary>
-        [Tooltip("A global volume is applied to the whole scene.")]
+        [Tooltip("Check this box to mark this volume as global. This Volume's Profile will be applied to the whole Scene.")]
         public bool isGlobal = false;
         
         /// <summary>
         /// The outer distance to start blending from. A value of 0 means no blending and the volume
         /// overrides will be applied immediatly upon entry.
         /// </summary>
-        [Min(0f), Tooltip("Outer distance to start blending from. A value of 0 means no blending and the volume overrides will be applied immediatly upon entry.")]
+        [Min(0f), Tooltip("The distance (from the attached Collider) to start blending from. A value of 0 means there will be no blending and the Volume overrides will be applied immediatly upon entry to the attached Collider.")]
         public float blendDistance = 0f;
 
         /// <summary>
         /// The total weight of this volume in the scene. 0 means it won't do anything, 1 means full
         /// effect.
         /// </summary>
-        [Range(0f, 1f), Tooltip("Total weight of this volume in the scene. 0 means it won't do anything, 1 means full effect.")]
+        [Range(0f, 1f), Tooltip("The total weight of this Volume in the Scene. A value of 0 signifies that it will have no effect, 1 signifies full effect.")]
         public float weight = 1f;
         
         /// <summary>
         /// The volume priority in the stack. Higher number means higher priority. Negative values
         /// are supported.
         /// </summary>
-        [Tooltip("Volume priority in the stack. Higher number means higher priority. Negative values are supported.")]
+        [Tooltip("The volume priority in the stack. A higher value means higher priority. Negative values are supported.")]
         public float priority = 0f;
 
         /// <summary>

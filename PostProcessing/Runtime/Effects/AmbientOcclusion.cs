@@ -72,23 +72,26 @@ namespace UnityEngine.Rendering.PostProcessing
     public sealed class AmbientOcclusion : PostProcessEffectSettings
     {
         // Shared parameters
+        [Tooltip("The ambient occlusion method to use. \"MSVO\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
 
         /// <summary>
         /// The ambient occlusion method to use.
         /// </summary>
-        [Tooltip("The ambient occlusion method to use. \"MSVO\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
+        [Tooltip("The ambient occlusion method to use. \"Multi Scale Volumetric Obscurance\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
+        
         public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.MultiScaleVolumetricObscurance };
 
         /// <summary>
         /// The degree of darkness added by ambient occlusion.
         /// </summary>
-        [Range(0f, 4f), Tooltip("Degree of darkness added by ambient occlusion.")]
+        [Range(0f, 4f), Tooltip("The degree of darkness added by ambient occlusion. Higher values produce darker areas.")]
         public FloatParameter intensity = new FloatParameter { value = 0f };
 
         /// <summary>
         /// A custom color to use for the ambient occlusion.
         /// </summary>
-        [ColorUsage(false), Tooltip("Custom color to use for the ambient occlusion.")]
+        [ColorUsage(false), Tooltip("The custom color to use for the ambient occlusion. The default is black.")]
+        
         public ColorParameter color = new ColorParameter { value = Color.black };
 
         /// <summary>
@@ -96,7 +99,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// path and HDR rendering. Objects rendered with the Forward rendering path won't get any
         /// ambient occlusion.
         /// </summary>
-        [Tooltip("Only affects ambient lighting. This mode is only available with the Deferred rendering path and HDR rendering. Objects rendered with the Forward rendering path won't get any ambient occlusion.")]
+        [Tooltip("Check this box to mark this Volume as to only affect ambient lighting. This mode is only available with the Deferred rendering path and HDR rendering. Objects rendered with the Forward rendering path won't get any ambient occlusion.")]
         public BoolParameter ambientOnly = new BoolParameter { value = true };
 
         // MSVO-only parameters
@@ -123,7 +126,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Modifies the thickness of occluders. This increases dark areas but also introduces dark
         /// halo around objects.
         /// </summary>
-        [Range(1f, 10f), Tooltip("Modifies the thickness of occluders. This increases dark areas but also introduces dark halo around objects.")]
+        [Range(1f, 10f), Tooltip("This modifies the thickness of occluders. It increases the size of dark areas and also introduces a dark halo around objects.")]
         public FloatParameter thicknessModifier = new FloatParameter { value = 1f };
 
         // HDRP-only parameters
@@ -136,11 +139,10 @@ namespace UnityEngine.Rendering.PostProcessing
         public FloatParameter directLightingStrength = new FloatParameter { value = 0f };
 
         // SAO-only parameters
-
         /// <summary>
         /// Radius of sample points, which affects extent of darkened areas.
         /// </summary>
-        [Tooltip("Radius of sample points, which affects extent of darkened areas.")]
+        [Tooltip("The radius of sample points. This affects the size of darkened areas.")]
         public FloatParameter radius = new FloatParameter { value = 0.25f };
 
         /// <summary>
@@ -148,7 +150,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// passes are downsampled. High and Ultra are not and should only be used on high-end
         /// hardware.
         /// </summary>
-        [Tooltip("Number of sample points, which affects quality and performance. Lowest, Low & Medium passes are downsampled. High and Ultra are not and should only be used on high-end hardware.")]
+        [Tooltip("The number of sample points. This affects both quality and performance. For \"Lowest\", \"Low\", and \"Medium\", passes are downsampled. For \"High\" and \"Ultra\", they are not and therefore you should only \"High\" and \"Ultra\" on high-end hardware.")]
         public AmbientOcclusionQualityParameter quality = new AmbientOcclusionQualityParameter { value = AmbientOcclusionQuality.Medium };
 
         // SRPs can call this method without a context set (see HDRP).
