@@ -101,7 +101,10 @@ namespace UnityEngine.Rendering.PostProcessing
             if (rt == null || !rt.IsCreated() || rt.width != width || rt.height != height || rt.format != format)
             {
                 if (rt != null)
+                {
                     rt.Release();
+                    RuntimeUtilities.Destroy(rt);
+                }
 
                 rt = new RenderTexture(width, height, 0, format)
                 {
