@@ -74,7 +74,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Should this volume be applied to the whole scene?
         /// </summary>
-        [Tooltip("Check this box to mark this volume as global. This Volume's Profile will be applied to the whole Scene.")]
+        [Tooltip("Check this box to mark this volume as global. This volume's Profile will be applied to the whole Scene.")]
         public bool isGlobal = false;
         
         /// <summary>

@@ -18,7 +18,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Should the fog affect the skybox?
         /// </summary>
-        [Tooltip("Should the fog affect the skybox?")]
+        [Tooltip("Mark true for the fog to ignore the skybox")]
         public bool excludeSkybox = true;
 
         internal DepthTextureMode GetCameraFlags()

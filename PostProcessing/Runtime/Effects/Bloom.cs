@@ -31,7 +31,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft
         /// threshold).
         /// </summary>
-        [Range(0f, 1f), Tooltip("Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold).")]
+        [Range(0f, 1f), Tooltip("Makes transitions between under/over-threshold gradual. 0 for a hard threshold, 1 for a soft threshold).")]
         public FloatParameter softKnee = new FloatParameter { value = 0.5f };
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// iteration count, animating it isn't recommended as it may introduce small hiccups in
         /// the perceived radius.
         /// </summary>
-        [Range(1f, 10f), Tooltip("Changes the extent of veiling effects. For maximum quality stick to integer values. Because this value changes the internal iteration count, animating it isn't recommended as it may introduce small hiccups in the perceived radius.")]
+        [Range(1f, 10f), Tooltip("Changes the extent of veiling effects. For maximum quality, use integer values. Because this value changes the internal iteration count, You should not animating it as it may introduce issues with the perceived radius.")]
         public FloatParameter diffusion = new FloatParameter { value = 7f };
 
         /// <summary>
@@ -76,13 +76,13 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// The dirtiness texture to add smudges or dust to the lens.
         /// </summary>
-        [Tooltip("Dirtiness texture used to add smudges or dust to the bloom effect."), DisplayName("Texture")]
+        [Tooltip("The lens dirt texture used to add smudges or dust to the bloom effect."), DisplayName("Texture")]
         public TextureParameter dirtTexture = new TextureParameter { value = null };
 
         /// <summary>
         /// The amount of lens dirtiness.
         /// </summary>
-        [Min(0f), Tooltip("Amount of dirtiness."), DisplayName("Intensity")]
+        [Min(0f), Tooltip("The intensity of the lens dirtiness."), DisplayName("Intensity")]
         public FloatParameter dirtIntensity = new FloatParameter { value = 0f };
 
         /// <inheritdoc />

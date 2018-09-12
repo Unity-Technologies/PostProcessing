@@ -81,7 +81,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// The grading mode to use.
         /// </summary>
-        [DisplayName("Mode"), Tooltip("Select a color grading mode that fits your dynamic range and workflow. Use HDR if your camera is set to render in HDR and your target platform supports it. Use LDR for low-end mobiles or devices that don't support HDR. Use External if you prefer authoring a Log LUT in external softwares.")]
+        [DisplayName("Mode"), Tooltip("Select a color grading mode that fits your dynamic range and workflow. Use HDR if your camera is set to render in HDR and your target platform supports it. Use LDR for low-end mobiles or devices that don't support HDR. Use External if you prefer authoring a Log LUT in an external software.")]
         public GradingModeParameter gradingMode = new GradingModeParameter { value = GradingMode.HighDefinitionRange };
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when <see cref="Tonemapper.Custom"/> is active.
         /// </remarks>
-        [DisplayName("Toe Length"), Range(0f, 1f), Tooltip("Affects how much of the dynamic range is in the toe. With a small value, the toe will be very short and quickly transition into the linear section, and with a longer value having a longer toe.")]
+        [DisplayName("Toe Length"), Range(0f, 1f), Tooltip("Affects how much of the dynamic range is in the toe. With a small value, the toe will be very short and quickly transition into the linear section, with a larger value, the toe will be longer.")]
         public FloatParameter toneCurveToeLength = new FloatParameter { value = 0.5f };
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when <see cref="Tonemapper.Custom"/> is active.
         /// </remarks>
-        [DisplayName("Shoulder Length"), Min(0f), Tooltip("Affects how many F-stops (EV) to add to the dynamic range of the curve.")]
+        [DisplayName("Shoulder Length"), Min(0f), Tooltip("Affects how many F-stops (exposure value) to add to the dynamic range of the curve.")]
         public FloatParameter toneCurveShoulderLength = new FloatParameter { value = 0.5f };
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when working with <see cref="GradingMode.LowDefinitionRange"/>.
         /// </remarks>
-        [DisplayName("Lookup Texture"), Tooltip("Custom lookup texture (strip format, e.g. 256x16) to apply before the rest of the color grading operators. If none is provided, a neutral one will be generated internally.")]
+        [DisplayName("Lookup Texture"), Tooltip("Custom lookup texture (strip format, for example 256x16) to apply before the rest of the color grading operators. If none is provided, a neutral one will be generated internally.")]
         public TextureParameter ldrLut = new TextureParameter { value = null, defaultState = TextureParameterDefault.Lut2D }; // LDR only
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when working with <see cref="GradingMode.HighDefinitionRange"/>.
         /// </remarks>
-        [DisplayName("Post-exposure (EV)"), Tooltip("Adjusts the overall exposure of the scene in EV units. This is applied after HDR effect and right before tonemapping so it won't affect previous effects in the chain.")]
+        [DisplayName("Post-exposure (exposure value)"), Tooltip("Adjusts the overall exposure of the scene in exposure value units. This is applied after the HDR effect and right before tonemapping so it won't affect previous effects in the chain.")]
         public FloatParameter postExposure = new FloatParameter { value = 0f }; // HDR only
 
         /// <summary>

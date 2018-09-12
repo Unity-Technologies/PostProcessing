@@ -72,7 +72,6 @@ namespace UnityEngine.Rendering.PostProcessing
     public sealed class AmbientOcclusion : PostProcessEffectSettings
     {
         // Shared parameters
-        [Tooltip("The ambient occlusion method to use. \"MSVO\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
 
         /// <summary>
         /// The ambient occlusion method to use.
@@ -135,7 +134,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Modifies he influence of direct lighting on ambient occlusion. This is only used in the
         /// HD Render Pipeline currently.
         /// </summary>
-        [Range(0f, 1f), Tooltip("Modifies he influence of direct lighting on ambient occlusion.")]
+        [Range(0f, 1f), Tooltip("Modifies the influence of direct lighting on ambient occlusion.")]
         public FloatParameter directLightingStrength = new FloatParameter { value = 0f };
 
         // SAO-only parameters
