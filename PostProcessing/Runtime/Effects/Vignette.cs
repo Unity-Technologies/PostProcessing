@@ -46,7 +46,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Sets the vignette center point (screen center is <c>[0.5,0.5]</c>).
         /// </summary>
-        [Tooltip("Sets the vignette center point (screen center is [0.5,0.5]).")]
+        [Tooltip("Sets the vignette center point (screen center is [0.5, 0.5]).")]
         public Vector2Parameter center = new Vector2Parameter { value = new Vector2(0.5f, 0.5f) };
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Should the vignette be perfectly round or be dependent on the current aspect ratio?
         /// </summary>
-        [Tooltip("Should the vignette be perfectly round or be dependent on the current aspect ratio?")]
+        [Tooltip("Set to true to mark the vignette to be perfectly round. False will make its shape dependent on the current aspect ratio.")]
         public BoolParameter rounded = new BoolParameter { value = false };
 
         /// <summary>

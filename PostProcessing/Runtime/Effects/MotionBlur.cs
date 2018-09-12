@@ -19,7 +19,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// The amount of sample points, which affects quality and performances.
         /// </summary>
-        [Range(4, 32), Tooltip("The amount of sample points, which affects quality and performances.")]
+        [Range(4, 32), Tooltip("The amount of sample points. This affects quality and performance.")]
         public IntParameter sampleCount = new IntParameter { value = 10 };
 
         /// <inheritdoc />
