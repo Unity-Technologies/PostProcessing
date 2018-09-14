@@ -38,8 +38,9 @@ namespace UnityEditor.Rendering.PostProcessing
 #endif
 #if !UNITY_2018_3_OR_NEWER
                     || t == BuildTarget.N3DS
+                    || t == BuildTarget.PSP2          
 #endif
-                    || t == BuildTarget.PSP2;
+                    ;
             }
         }
 

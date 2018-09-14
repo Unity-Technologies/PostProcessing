@@ -276,7 +276,11 @@ namespace UnityEngine.Rendering.PostProcessing
             // We also need to force reset the non-jittered projection matrix here as it's not done
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
             // is switched off and the FOV or any other camera property changes.
-            m_Camera.ResetProjectionMatrix();
+ 
+#if UNITY_2018_2_OR_NEWER
+            if (!m_Camera.usePhysicalProperties)
+#endif
+                m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
 #if !UNITY_SWITCH
@@ -446,7 +450,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (m_CurrentContext.IsTemporalAntialiasingActive())
             {
-                m_Camera.ResetProjectionMatrix();
+#if UNITY_2018_2_OR_NEWER
+                // TAA calls SetProjectionMatrix so if the camera projection mode was physical, it gets set to explicit. So we set it back to physical.
+                if (m_CurrentContext.physicalCamera)   
+                    m_Camera.usePhysicalProperties = true;
+                else 
+#endif
+                    m_Camera.ResetProjectionMatrix();
 
                 if (m_CurrentContext.stereoActive)
                 {
@@ -474,12 +484,12 @@ namespace UnityEngine.Rendering.PostProcessing
             return GetBundle<T>().CastSettings<T>();
         }
 
-        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA = false)
         {
             var bundle = GetBundle<AmbientOcclusion>();
             var renderer = bundle.CastRenderer<AmbientOcclusionRenderer>().GetMultiScaleVO();
             renderer.SetResources(m_Resources);
-            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert);
+            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert, isMSAA);
         }
 
         internal void OverrideSettings(List<PostProcessEffectSettings> baseSettings, float interpFactor)
@@ -569,6 +579,11 @@ namespace UnityEngine.Rendering.PostProcessing
             context.antialiasing = antialiasingMode;
             context.temporalAntialiasing = temporalAntialiasing;
             context.logHistogram = m_LogHistogram;
+
+#if UNITY_2018_2_OR_NEWER
+            context.physicalCamera = context.camera.usePhysicalProperties;
+#endif
+
             SetLegacyCameraFlags(context);
 
             // Prepare debug overlay
