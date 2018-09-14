@@ -14,7 +14,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// recommended on mobile platforms.
         /// </summary>
         [FormerlySerializedAs("mobileOptimized")]
-        [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
+        [Tooltip("Boost performances by lowering the effect quality. This setting is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
         public bool fastMode = false;
 
         /// <summary>

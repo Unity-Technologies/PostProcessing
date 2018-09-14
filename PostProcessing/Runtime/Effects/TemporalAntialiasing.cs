@@ -13,7 +13,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// in crisper but more aliased output, while larger values result in more stable but
         /// blurrier output.
         /// </summary>
-        [Tooltip("The diameter (in texels) inside which jitter samples are spread. Smaller values result in crisper but more aliased output, while larger values result in more stable but blurrier output.")]
+        [Tooltip("The diameter (in texels) inside which jitter samples are spread. Smaller values result in crisper but more aliased output, while larger values result in more stable, but blurrier, output.")]
         [Range(0.1f, 1f)]
         public float jitterSpread = 0.75f;
 

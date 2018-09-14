@@ -36,19 +36,19 @@ namespace UnityEngine.Rendering.PostProcessing
         /// find a stable average luminance. Values outside of this range will be discarded and wont
         /// contribute to the average luminance.
         /// </summary>
-        [MinMax(1f, 99f), DisplayName("Filtering (%)"), Tooltip("Filters the bright & dark part of the histogram when computing the average luminance to avoid very dark pixels & very bright pixels from contributing to the auto exposure. Unit is in percent.")]
+        [MinMax(1f, 99f), DisplayName("Filtering (%)"), Tooltip("Filters the bright and dark parts of the histogram when computing the average luminance. This is to avoid very dark pixels and very bright pixels from contributing to the auto exposure. Unit is in percent.")]
         public Vector2Parameter filtering = new Vector2Parameter { value = new Vector2(50f, 95f) };
 
         /// <summary>
         /// Minimum average luminance to consider for auto exposure (in EV).
         /// </summary>
-        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure (in EV).")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure. Unit is EV.")]
         public FloatParameter minLuminance = new FloatParameter { value = 0f };
 
         /// <summary>
         /// Maximum average luminance to consider for auto exposure (in EV).
         /// </summary>
-        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure (in EV).")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure. Unit is EV.")]
         public FloatParameter maxLuminance = new FloatParameter { value = 0f };
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// The strength (or visibility) of the Grain effect on screen. Higher values mean more visible grain.
         /// </summary>
-        [Range(0f, 1f), Tooltip("Grain strength. Higher means more visible grain.")]
+        [Range(0f, 1f), Tooltip("Grain strength. Higher values mean more visible grain.")]
         public FloatParameter intensity = new FloatParameter { value = 0f };
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas.
         /// </summary>
-        [Range(0f, 1f), DisplayName("Luminance Contribution"), Tooltip("Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas.")]
+        [Range(0f, 1f), DisplayName("Luminance Contribution"), Tooltip("Controls the noise response curve based on scene luminance. Lower values mean less noise in dark areas.")]
         public FloatParameter lumContrib = new FloatParameter { value = 0.8f };
         
         /// <inheritdoc />

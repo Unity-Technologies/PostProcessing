@@ -13,7 +13,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// A texture used for custom fringing color (it will use a default one when <c>null</c>).
         /// </summary>
-        [Tooltip("Shift the hue of chromatic aberrations.")]
+        [Tooltip("Shifts the hue of chromatic aberrations.")]
         public TextureParameter spectralLut = new TextureParameter { value = null };
 
         /// <summary>

@@ -55,7 +55,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// The quality preset to use for rendering. Use <see cref="ScreenSpaceReflectionPreset.Custom"/>
         /// to tweak settings.
         /// </summary>
-        [Tooltip("Choose a quality preset, or use \"Custom\" to fine tune it. Don't use a preset higher than \"Medium\" if you care about performances on consoles.")]
+        [Tooltip("Choose a quality preset, or use \"Custom\" to create your own custom preset. Don't use a preset higher than \"Medium\" if you desire good performance on consoles.")]
         public ScreenSpaceReflectionPresetParameter preset = new ScreenSpaceReflectionPresetParameter { value = ScreenSpaceReflectionPreset.Medium };
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Changes the size of the internal buffer. Downsample it to maximize performances or
         /// supersample it to get slow but higher quality results.
         /// </summary>
-        [Tooltip("Changes the size of the SSR buffer. Downsample it to maximize performances or supersample it to get slow but higher quality results.")]
+        [Tooltip("Changes the size of the SSR buffer. Downsample it to maximize performances or supersample it for higher quality results with reduced performance.")]
         public ScreenSpaceReflectionResolutionParameter resolution = new ScreenSpaceReflectionResolutionParameter { value = ScreenSpaceReflectionResolution.Downsampled };
 
         /// <summary>
