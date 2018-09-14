@@ -32,14 +32,18 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_Bins / (float)m_ThreadX), 1, 1);
 
             // Get a log histogram
-            kernel = compute.FindKernel("KEyeHistogram");
+            bool isSinglePassStereoInstancedEnabled = RuntimeUtilities.isVREnabled && RuntimeUtilities.isSinglePassStereoInstancedEnabled;
+            if(isSinglePassStereoInstancedEnabled)
+                kernel = compute.FindKernel("KEyeHistogram_VR_SPI");
+            else
+                kernel = compute.FindKernel("KEyeHistogram");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", context.source);
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
             cmd.DispatchCompute(compute, kernel,
                 Mathf.CeilToInt(scaleOffsetRes.z / 2f / m_ThreadX),
                 Mathf.CeilToInt(scaleOffsetRes.w / 2f / m_ThreadY),
-                1
+                isSinglePassStereoInstancedEnabled ? 2 : 1
             );
 
             cmd.EndSample("LogHistogram");

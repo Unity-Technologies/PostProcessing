@@ -9,7 +9,7 @@
 #include "ExposureHistogram.hlsl"
 
 RWStructuredBuffer<uint> _HistogramBuffer;
-Texture2D<float4> _Source;
+SCREENSPACE_TEXTURE(_Source);
 SamplerState sampler_LinearClamp;
 
 CBUFFER_START(Params)
@@ -18,18 +18,24 @@ CBUFFER_END
 
 groupshared uint gs_histogram[HISTOGRAM_BINS];
 
-#pragma kernel KEyeHistogram
+#pragma kernel KEyeHistogram MAIN=KEyeHistogram
+#pragma kernel KEyeHistogram_VR_SPI STEREO_INSTANCING_ON=1 MAIN=KEyeHistogram_VR_SPI
 
 #ifdef DISABLE_COMPUTE_SHADERS
 
 TRIVIAL_COMPUTE_KERNEL(KEyeHistogram)
+TRIVIAL_COMPUTE_KERNEL(KEyeHistogram_VR_SPI)
 TRIVIAL_COMPUTE_KERNEL(KEyeHistogramClear)
 
 #else
 
 [numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_THREAD_Y, 1)]
-void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThreadId : SV_GroupThreadID)
+void MAIN(uint3 dispatchThreadId : SV_DispatchThreadID, uint2 groupThreadId : SV_GroupThreadID)
 {
+    #if defined(STEREO_INSTANCING_ON)
+        unity_StereoEyeIndex = dispatchThreadId.z;
+    #endif
+    
     // Pretty straightforward implementation of histogram gathering using atomic ops.
     // I tried a few methods (no atomic ops / heavy LDS leveraging) but this one turned out to be
     // the fastest on desktop (Nvidia - Kepler/Maxwell) and PS4. Still need to try it on GCN/desktop
@@ -41,7 +47,7 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
     if (localThreadId < HISTOGRAM_BINS)
         gs_histogram[localThreadId] = 0u;
 
-    float2 ipos = float2(dispatchThreadId) * 2.0;
+    float2 ipos = float2(dispatchThreadId.xy) * 2.0;
 
     GroupMemoryBarrierWithGroupSync();
 
@@ -61,7 +67,7 @@ void KEyeHistogram(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupThre
         }
         #endif
 
-        float3 color = _Source.SampleLevel(sampler_LinearClamp, sspos, 0.0).xyz; // Bilinear downsample 2x
+        float3 color = SAMPLE_SCREENSPACE_TEXTURE_LOD(_Source, sampler_LinearClamp, sspos, 0.0).xyz; // Bilinear downsample 2x
         float luminance = Luminance(color);
         float logLuminance = GetHistogramBinFromLuminance(luminance, _ScaleOffsetRes.xy);
         uint idx = (uint)(logLuminance * (HISTOGRAM_BINS - 1u));
