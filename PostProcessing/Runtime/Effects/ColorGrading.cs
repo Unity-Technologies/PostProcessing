@@ -139,7 +139,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when <see cref="Tonemapper.Custom"/> is active.
         /// </remarks>
-        [DisplayName("Shoulder Length"), Min(0f), Tooltip("Affects how many F-stops (exposure value) to add to the dynamic range of the curve.")]
+        [DisplayName("Shoulder Length"), Min(0f), Tooltip("Affects how many F-stops (EV) to add to the dynamic range of the curve.")]
         public FloatParameter toneCurveShoulderLength = new FloatParameter { value = 0.5f };
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <remarks>
         /// This is only used when working with <see cref="GradingMode.HighDefinitionRange"/>.
         /// </remarks>
-        [DisplayName("Post-exposure (exposure value)"), Tooltip("Adjusts the overall exposure of the scene in exposure value units. This is applied after the HDR effect and right before tonemapping so it won't affect previous effects in the chain.")]
+        [DisplayName("Post-exposure (EV)"), Tooltip("Adjusts the overall exposure of the scene in EV units. This is applied after the HDR effect and right before tonemapping so it won't affect previous effects in the chain.")]
         public FloatParameter postExposure = new FloatParameter { value = 0f }; // HDR only
 
         /// <summary>

@@ -42,13 +42,13 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Minimum average luminance to consider for auto exposure (in EV).
         /// </summary>
-        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Minimum (exposure value)"), Tooltip("Minimum average luminance to consider for auto exposure. Unit is exposure value.")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Minimum (EV)"), Tooltip("Minimum average luminance to consider for auto exposure. Unit is EV.")]
         public FloatParameter minLuminance = new FloatParameter { value = 0f };
 
         /// <summary>
         /// Maximum average luminance to consider for auto exposure (in EV).
         /// </summary>
-        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (exposure value)"), Tooltip("Maximum average luminance to consider for auto exposure. Unit is exposure value.")]
+        [Range(LogHistogram.rangeMin, LogHistogram.rangeMax), DisplayName("Maximum (EV)"), Tooltip("Maximum average luminance to consider for auto exposure. Unit is EV.")]
         public FloatParameter maxLuminance = new FloatParameter { value = 0f };
 
         /// <summary>
