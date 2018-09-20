@@ -115,7 +115,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // Determine the iteration count
             int s = Mathf.Max(tw, th);
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
-            int logs_i = Mathf.FloorToInt(logs);
+            int logs_i = Mathf.FloorToInt(logs) - ((context.stereoActive && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both)) ? 2 : 0); // Don't downsample as much for a double-wide texture
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
             float sampleScale = 0.5f + logs - logs_i;
             sheet.properties.SetFloat(ShaderIDs.SampleScale, sampleScale);
