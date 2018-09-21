@@ -277,7 +277,7 @@ half3 ApplyLut2d(sampler2D tex, half3 uvw, half3 scaleOffset)
     uvw.z *= scaleOffset.z;
     half shift = floor(uvw.z);
     uvw.xy = uvw.xy * scaleOffset.z * scaleOffset.xy + scaleOffset.xy * 0.5;
-    uvw.x += shift * scaleOffset.y;
+    uvw.x += (float)shift * scaleOffset.y;
     uvw.xyz = lerp(tex2D(tex, uvw.xy).rgb, tex2D(tex, uvw.xy + half2(scaleOffset.y, 0)).rgb, uvw.z - shift);
     return uvw;
 }
