@@ -116,13 +116,10 @@ namespace UnityEngine.Rendering.PostProcessing
             bool singlePassDoubleWide = (context.stereoActive && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
             int s = Mathf.Max(tw, th);
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
-            int logs_i = Mathf.FloorToInt(logs) - (singlePassDoubleWide ? 2 : 0); // Don't downsample as much for a double-wide texture
+            int logs_i = Mathf.FloorToInt(logs); 
             int iterations = Mathf.Clamp(logs_i, 1, k_MaxPyramidSize);
             float sampleScale = 0.5f + logs - logs_i;
-            float sampleScaleX = (singlePassDoubleWide ? sampleScale * 0.5f : sampleScale);
-            Vector4 sampleScaleVec = new Vector4(sampleScaleX, sampleScale, sampleScaleX, sampleScale);
-            sheet.properties.SetVector(ShaderIDs.SampleScale, sampleScaleVec);
-            //sheet.properties.SetFloat(ShaderIDs.SampleScale, sampleScale);
+            sheet.properties.SetFloat(ShaderIDs.SampleScale, sampleScale);
 
             // Prefiltering parameters
             float lthresh = Mathf.GammaToLinearSpace(settings.threshold.value);
