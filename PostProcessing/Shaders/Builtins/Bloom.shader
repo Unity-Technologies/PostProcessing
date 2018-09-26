@@ -11,7 +11,7 @@ Shader "Hidden/PostProcessing/Bloom"
         TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
 
         float4 _MainTex_TexelSize;
-        float _SampleScale;
+        float4 _SampleScale;
         float4 _ColorIntensity;
         float4 _Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
         float4 _Params; // x: clamp, yzw: unused
