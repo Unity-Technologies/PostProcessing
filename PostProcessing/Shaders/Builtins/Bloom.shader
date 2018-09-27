@@ -31,7 +31,7 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragPrefilter13(VaryingsDefault i) : SV_Target
         {
             half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-            return Prefilter(SafeHDR(color), i.texcoord);
+			return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
@@ -46,7 +46,7 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragDownsample13(VaryingsDefault i) : SV_Target
         {
             half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-            return color;
+			return color;
         }
 
         half4 FragDownsample4(VaryingsDefault i) : SV_Target
@@ -67,13 +67,13 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
             half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return Combine(bloom, i.texcoordStereo);
+			return Combine(bloom, i.texcoordStereo);
         }
 
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
             half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return Combine(bloom, i.texcoordStereo);
+			return Combine(bloom, i.texcoordStereo);
         }
 
         // ----------------------------------------------------------------------------------------

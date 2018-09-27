@@ -111,9 +111,10 @@ namespace UnityEngine.Rendering.PostProcessing
             // fillrate limited platforms
             int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
             int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
+            bool singlePassDoubleWide = (context.stereoActive && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
+            int tw_stereo = singlePassDoubleWide ? tw * 2 : tw; 
 
             // Determine the iteration count
-            bool singlePassDoubleWide = (context.stereoActive && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
             int s = Mathf.Max(tw, th);
             float logs = Mathf.Log(s, 2f) + Mathf.Min(settings.diffusion.value, 10f) - 10f;
             int logs_i = Mathf.FloorToInt(logs); 
@@ -141,12 +142,13 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? (int)Pass.Prefilter13 + qualityOffset
                     : (int)Pass.Downsample13 + qualityOffset;
 
-                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
-                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
                 cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
 
                 lastDown = mipDown;
-                tw = Mathf.Max(tw / 2, 1);
+                tw_stereo = (singlePassDoubleWide && ((tw_stereo / 2) % 2 > 0)) ? 1 + tw_stereo / 2 : tw_stereo / 2;
+                tw_stereo = Mathf.Max(tw_stereo, 1);
                 th = Mathf.Max(th / 2, 1);
             }
 

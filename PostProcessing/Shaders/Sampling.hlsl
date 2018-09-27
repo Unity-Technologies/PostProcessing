@@ -36,7 +36,7 @@ half4 DownsampleBox13Tap(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texe
     o += (F + G + L + K) * div.y;
     o += (G + H + M + L) * div.y;
 
-    return o;
+	return o;
 }
 
 // Standard box filtering
@@ -71,7 +71,7 @@ half4 UpsampleTent(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize,
     s += SAMPLE_TEXTURE2D(tex, samplerTex, UnityStereoTransformScreenSpaceTex(uv + d.wy)) * 2.0;
     s += SAMPLE_TEXTURE2D(tex, samplerTex, UnityStereoTransformScreenSpaceTex(uv + d.xy));
 
-    return s * (1.0 / 16.0);
+	return s * (1.0 / 16.0);
 }
 
 // Standard box filtering

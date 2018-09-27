@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Compilation issue with Unity 2019.1.
 - Screen-space reflection memory leak.
+- Bloom flicker in single-pass double-wide stereo rendering
 
 ## [2.0.12-preview]
 
