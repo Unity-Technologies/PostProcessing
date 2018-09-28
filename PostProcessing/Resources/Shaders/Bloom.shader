@@ -53,8 +53,8 @@ Shader "Hidden/Post FX/Bloom"
         struct VaryingsMultitex
         {
             float4 pos : SV_POSITION;
-            float2 uvMain : TEXCOORD0;
-            float2 uvBase : TEXCOORD1;
+            NOPERSPECTIVE float2 uvMain : TEXCOORD0;
+            NOPERSPECTIVE float2 uvBase : TEXCOORD1;
         };
 
         VaryingsMultitex VertMultitex(AttributesDefault v)

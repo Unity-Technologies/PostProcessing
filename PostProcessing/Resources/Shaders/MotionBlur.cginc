@@ -52,8 +52,8 @@ half _History4Weight;
 struct VaryingsMultitex
 {
     float4 pos : SV_POSITION;
-    float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+    NOPERSPECTIVE float2 uv0 : TEXCOORD0;
+    NOPERSPECTIVE float2 uv1 : TEXCOORD1;
 };
 
 VaryingsMultitex VertMultitex(AttributesDefault v)

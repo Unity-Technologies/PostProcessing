@@ -74,10 +74,10 @@ Shader "Hidden/Post FX/Uber Shader"
         struct VaryingsFlipped
         {
             float4 pos : SV_POSITION;
-            float2 uv : TEXCOORD0;
-            float2 uvSPR : TEXCOORD1; // Single Pass Stereo UVs
-            float2 uvFlipped : TEXCOORD2; // Flipped UVs (DX/MSAA/Forward)
-            float2 uvFlippedSPR : TEXCOORD3; // Single Pass Stereo flipped UVs
+            NOPERSPECTIVE float2 uv : TEXCOORD0;
+            NOPERSPECTIVE float2 uvSPR : TEXCOORD1; // Single Pass Stereo UVs
+            NOPERSPECTIVE float2 uvFlipped : TEXCOORD2; // Flipped UVs (DX/MSAA/Forward)
+            NOPERSPECTIVE float2 uvFlippedSPR : TEXCOORD3; // Single Pass Stereo flipped UVs
         };
 
         VaryingsFlipped VertUber(AttributesDefault v)

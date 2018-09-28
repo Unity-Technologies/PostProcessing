@@ -131,7 +131,7 @@ Shader "Hidden/Post FX/Eye Adaptation"
         struct VaryingsEditorHisto
         {
             float4 pos : SV_POSITION;
-            float2 uv : TEXCOORD0;
+            NOPERSPECTIVE float2 uv : TEXCOORD0;
             float maxValue : TEXCOORD1;
             float avgLuminance : TEXCOORD2;
         };

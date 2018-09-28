@@ -8,6 +8,16 @@
 
 #define MOBILE_OR_CONSOLE (defined(SHADER_API_MOBILE) || defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_WIIU) || defined(SHADER_API_SWITCH))
 
+#define USE_NOPERSPECTIVE 1
+
+#ifndef NOPERSPECTIVE
+#  if defined(USE_NOPERSPECTIVE) && (USE_NOPERSPECTIVE)
+#    define NOPERSPECTIVE noperspective
+#  else
+#    define NOPERSPECTIVE
+#  endif
+#endif
+
 #if defined(SHADER_API_PSSL)
 // No support for sampler2D_half on PS4 in 5.4
 #define sampler2D_half sampler2D_float
@@ -31,14 +41,14 @@ float4 _MainTex_ST;
 struct AttributesDefault
 {
     float4 vertex : POSITION;
-    float4 texcoord : TEXCOORD0;
+    NOPERSPECTIVE float4 texcoord : TEXCOORD0;
 };
 
 struct VaryingsDefault
 {
     float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
-    float2 uvSPR : TEXCOORD1; // Single Pass Stereo UVs
+    NOPERSPECTIVE float2 uv : TEXCOORD0;
+    NOPERSPECTIVE float2 uvSPR : TEXCOORD1; // Single Pass Stereo UVs
 };
 
 VaryingsDefault VertDefault(AttributesDefault v)

@@ -12,7 +12,7 @@ Shader "Hidden/Post FX/Blit"
 
         struct Varyings
         {
-            float2 uv : TEXCOORD0;
+            NOPERSPECTIVE float2 uv : TEXCOORD0;
             float4 vertex : SV_POSITION;
         };
 
