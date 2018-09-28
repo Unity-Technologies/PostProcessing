@@ -10,6 +10,7 @@ namespace UnityEditor.PostProcessing
 
         ComputeShader m_ComputeShader;
         ComputeBuffer m_Buffer;
+        int m_ThreadGroupSize;
         Material m_Material;
         RenderTexture m_WaveformTexture;
         Rect m_MonitorAreaRect;
@@ -17,6 +18,10 @@ namespace UnityEditor.PostProcessing
         public WaveformMonitor()
         {
             m_ComputeShader = EditorResources.Load<ComputeShader>("Monitors/WaveformCompute.compute");
+
+            // Limited thread group size on MacOS with Metal (monitors are Editor-only so don't affect ios/Android limits)
+            bool isMacOSMetal = Application.platform == RuntimePlatform.OSXEditor && SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Metal;
+            m_ThreadGroupSize = isMacOSMetal ? 192 : 384;
         }
 
         public override void Dispose()
@@ -249,14 +254,14 @@ namespace UnityEditor.PostProcessing
 
             int kernel = cs.FindKernel("KWaveformClear");
             cs.SetBuffer(kernel, "_Waveform", m_Buffer);
-            cs.Dispatch(kernel, source.width, 1, 1);
+            cs.Dispatch(kernel, source.width, Mathf.CeilToInt(source.height / (float)m_ThreadGroupSize), 1);
 
             kernel = cs.FindKernel("KWaveform");
             cs.SetBuffer(kernel, "_Waveform", m_Buffer);
             cs.SetTexture(kernel, "_Source", source);
             cs.SetInt("_IsLinear", GraphicsUtils.isLinearColorSpace ? 1 : 0);
             cs.SetVector("_Channels", channels);
-            cs.Dispatch(kernel, source.width, 1, 1);
+            cs.Dispatch(kernel, source.width, Mathf.CeilToInt(source.height / (float)m_ThreadGroupSize), 1);
 
             if (m_WaveformTexture == null || m_WaveformTexture.width != source.width || m_WaveformTexture.height != source.height)
             {

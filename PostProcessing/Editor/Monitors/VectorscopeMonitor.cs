@@ -10,6 +10,7 @@ namespace UnityEditor.PostProcessing
 
         ComputeShader m_ComputeShader;
         ComputeBuffer m_Buffer;
+        int m_ThreadGroupSize;
         Material m_Material;
         RenderTexture m_VectorscopeTexture;
         Rect m_MonitorAreaRect;
@@ -17,6 +18,10 @@ namespace UnityEditor.PostProcessing
         public VectorscopeMonitor()
         {
             m_ComputeShader = EditorResources.Load<ComputeShader>("Monitors/VectorscopeCompute.compute");
+
+            // Limited thread group size on MacOS with Metal (monitors are Editor-only so don't affect ios/Android limits)
+            bool isMacOSMetal = Application.platform == RuntimePlatform.OSXEditor && SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Metal;
+            m_ThreadGroupSize = isMacOSMetal ? 16 : 32;
         }
 
         public override void Dispose()
@@ -211,14 +216,14 @@ namespace UnityEditor.PostProcessing
             int kernel = cs.FindKernel("KVectorscopeClear");
             cs.SetBuffer(kernel, "_Vectorscope", m_Buffer);
             cs.SetVector("_Res", new Vector4(source.width, source.height, 0f, 0f));
-            cs.Dispatch(kernel, Mathf.CeilToInt(source.width / 32f), Mathf.CeilToInt(source.height / 32f), 1);
+            cs.Dispatch(kernel, Mathf.CeilToInt(source.width /  (float)m_ThreadGroupSize), Mathf.CeilToInt(source.height / (float)m_ThreadGroupSize), 1);
 
             kernel = cs.FindKernel("KVectorscope");
             cs.SetBuffer(kernel, "_Vectorscope", m_Buffer);
             cs.SetTexture(kernel, "_Source", source);
             cs.SetInt("_IsLinear", GraphicsUtils.isLinearColorSpace ? 1 : 0);
             cs.SetVector("_Res", new Vector4(source.width, source.height, 0f, 0f));
-            cs.Dispatch(kernel, Mathf.CeilToInt(source.width / 32f), Mathf.CeilToInt(source.height / 32f), 1);
+            cs.Dispatch(kernel, Mathf.CeilToInt(source.width / (float)m_ThreadGroupSize), Mathf.CeilToInt(source.height / (float)m_ThreadGroupSize), 1);
 
             if (m_VectorscopeTexture == null || m_VectorscopeTexture.width != source.width || m_VectorscopeTexture.height != source.height)
             {

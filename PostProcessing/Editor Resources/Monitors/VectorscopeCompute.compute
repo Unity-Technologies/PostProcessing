@@ -8,7 +8,12 @@ CBUFFER_START (Params)
     float4 _Res;
 CBUFFER_END
 
-#define GROUP_SIZE 32
+// Limited thread group size on MacOS with Metal (monitors are Editor-only so don't affect ios/Android limits)
+#if defined SHADER_API_METAL
+    #define GROUP_SIZE 16
+#else
+    #define GROUP_SIZE 32
+#endif
 
 float3 RgbToYUV(float3 c)
 {
