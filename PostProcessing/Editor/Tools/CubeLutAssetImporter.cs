@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -116,7 +117,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 for (int j = 0; j < 3; j++)
                 {
                     float d;
-                    if (!float.TryParse(row[j], out d))
+                    if (!float.TryParse(row[j], NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out d))
                     {
                         Debug.LogError("Invalid data on line " + i);
                         break;
@@ -202,7 +203,7 @@ namespace UnityEditor.Rendering.PostProcessing
             for (int j = 0; j < 3; j++)
             {
                 float d;
-                if (!float.TryParse(domainStrs[j], out d))
+                if (!float.TryParse(domainStrs[j], NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out d))
                 {
                     Debug.LogError("Invalid data on line " + i);
                     return false;

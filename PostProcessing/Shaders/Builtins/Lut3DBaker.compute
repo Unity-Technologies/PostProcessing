@@ -151,14 +151,7 @@ void Eval(uint3 id)
     }
 }
 
-#ifdef SHADER_API_GLES3
-    #define GROUP_SIZE_XY 8
-    #define GROUP_SIZE_Z 2
-#else
-    #define GROUP_SIZE_XY 8
-    #define GROUP_SIZE_Z 8
-#endif
-
+#define GROUP_SIZE 4
 
 #ifdef DISABLE_COMPUTE_SHADERS
 
@@ -169,16 +162,16 @@ TRIVIAL_COMPUTE_KERNEL(KGenLut3D_CustomTonemap)
 
 #else
 
-[numthreads(GROUP_SIZE_XY, GROUP_SIZE_XY, GROUP_SIZE_Z)]
+[numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KGenLut3D_NoTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
 
-[numthreads(GROUP_SIZE_XY, GROUP_SIZE_XY, GROUP_SIZE_Z)]
+[numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KGenLut3D_AcesTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
 
-[numthreads(GROUP_SIZE_XY, GROUP_SIZE_XY, GROUP_SIZE_Z)]
+[numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KGenLut3D_NeutralTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
 
-[numthreads(GROUP_SIZE_XY, GROUP_SIZE_XY, GROUP_SIZE_Z)]
+[numthreads(GROUP_SIZE, GROUP_SIZE, GROUP_SIZE)]
 void KGenLut3D_CustomTonemap(uint3 id : SV_DispatchThreadID) { Eval(id); }
 
 #endif // DISABLE_COMPUTE_SHADERS
