@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bloom flicker in single-pass double-wide stereo rendering.
 - Right eye bloom offset in single-pass double-wide stereo rendering.
 - If any parent of PostProcessingVolume has non-identity scale the Gizmo is rendered incorrectly.
+- Cleanup error when going back'n'forth between Builtins & Scriptable pipelines.
 
 ## [2.0.13-preview]
 
