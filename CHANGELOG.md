@@ -6,13 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.0.14-preview]
 
+### Fixed
+- Bloom flicker in single-pass double-wide stereo rendering.
+- Right eye bloom offset in single-pass double-wide stereo rendering.
+
 ## [2.0.13-preview]
 
 ### Fixed
 - Compilation issue with Unity 2019.1.
 - Screen-space reflection memory leak.
-- Bloom flicker in single-pass double-wide stereo rendering
-- Right eye bloom offset in single-pass double-wide stereo rendering
 
 ## [2.0.12-preview]
 
