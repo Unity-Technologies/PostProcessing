@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - If any parent of PostProcessingVolume has non-identity scale the Gizmo is rendered incorrectly.
 - Cleanup error when going back'n'forth between Builtins & Scriptable pipelines.
 
+### Changed
+- Use `ExecuteAlways` in 2018.3+ for better compatibility with "Prefab Mode".
+
 ## [2.0.13-preview]
 
 ### Fixed

@@ -1,6 +1,10 @@
 namespace UnityEngine.Rendering.PostProcessing
 {
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
     [ExecuteInEditMode]
+#endif
     [AddComponentMenu("Rendering/Post-process Debug", 1002)]
     public sealed class PostProcessDebug : MonoBehaviour
     {

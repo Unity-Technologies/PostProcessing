@@ -12,7 +12,12 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 
     // TODO: XMLDoc everything (?)
-    [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
+    [ExecuteInEditMode]
+#endif
+    [DisallowMultipleComponent, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", 1000)]
     [RequireComponent(typeof(Camera))]
     public sealed class PostProcessLayer : MonoBehaviour

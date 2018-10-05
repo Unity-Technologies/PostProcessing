@@ -51,7 +51,11 @@ namespace UnityEngine.Rendering.PostProcessing
     // modification on both Classic and Scriptable Render Pipelines.
     //
 
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
     [ExecuteInEditMode]
+#endif
     [AddComponentMenu("Rendering/Post-process Volume", 1001)]
     public sealed class PostProcessVolume : MonoBehaviour
     {
