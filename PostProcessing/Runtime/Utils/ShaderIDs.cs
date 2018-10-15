@@ -132,6 +132,7 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int Grain_Params2                   = Shader.PropertyToID("_Grain_Params2");
         internal static readonly int GrainTex                        = Shader.PropertyToID("_GrainTex");
         internal static readonly int Phase                           = Shader.PropertyToID("_Phase");
+        internal static readonly int GrainNoiseParameters            = Shader.PropertyToID("_NoiseParameters");
 
         internal static readonly int LumaInAlpha                     = Shader.PropertyToID("_LumaInAlpha");
 
