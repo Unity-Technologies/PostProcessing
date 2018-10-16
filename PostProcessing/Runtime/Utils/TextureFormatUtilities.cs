@@ -87,7 +87,7 @@ namespace UnityEngine.Rendering.PostProcessing
                         continue;
 
                     bool supported = SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)format);
-                    s_SupportedRenderTextureFormats.Add((int)format, supported);
+                    s_SupportedRenderTextureFormats[(int)format] = supported;
                 }
             }
 
@@ -105,7 +105,7 @@ namespace UnityEngine.Rendering.PostProcessing
                         continue;
 
                     bool supported = SystemInfo.SupportsTextureFormat((TextureFormat)format);
-                    s_SupportedTextureFormats.Add((int)format, supported);
+                    s_SupportedTextureFormats[(int)format] = supported;
                 }
             }
         }

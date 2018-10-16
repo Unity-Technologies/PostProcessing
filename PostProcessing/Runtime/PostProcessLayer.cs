@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Assertions;
@@ -12,7 +12,12 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif
 
     // TODO: XMLDoc everything (?)
-    [DisallowMultipleComponent, ExecuteInEditMode, ImageEffectAllowedInSceneView]
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
+    [ExecuteInEditMode]
+#endif
+    [DisallowMultipleComponent, ImageEffectAllowedInSceneView]
     [AddComponentMenu("Rendering/Post-process Layer", 1000)]
     [RequireComponent(typeof(Camera))]
     public sealed class PostProcessLayer : MonoBehaviour
@@ -229,12 +234,18 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void OnDisable()
         {
-            if (!RuntimeUtilities.scriptableRenderPipelineActive)
+            // Have to check for null camera in case the user is doing back'n'forth between SRP and
+            // legacy
+            if (m_Camera != null)
             {
-                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
-                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
-                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
-                m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
+                if (m_LegacyCmdBufferBeforeReflections != null)
+                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
+                if (m_LegacyCmdBufferBeforeLighting != null)
+                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
+                if (m_LegacyCmdBufferOpaque != null)
+                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
+                if (m_LegacyCmdBuffer != null)
+                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
             }
 
             temporalAntialiasing.Release();

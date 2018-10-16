@@ -182,9 +182,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Command.SetComputeTextureParam(compute, kernel, "_Output", rt);
                 m_Command.SetComputeTextureParam(compute, kernel, "_From", from);
 
-                int groupSizeXY = Mathf.CeilToInt(size / 8f);
-                int groupSizeZ = Mathf.CeilToInt(size / 8f);
-                m_Command.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
+                int groupSize = Mathf.CeilToInt(size / 4f);
+                m_Command.DispatchCompute(compute, kernel, groupSize, groupSize, groupSize);
                 return rt;
             }
 

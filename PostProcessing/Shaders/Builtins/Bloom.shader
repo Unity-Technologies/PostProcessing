@@ -11,7 +11,7 @@ Shader "Hidden/PostProcessing/Bloom"
         TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
 
         float4 _MainTex_TexelSize;
-        float _SampleScale;
+        float  _SampleScale;
         float4 _ColorIntensity;
         float4 _Threshold; // x: threshold value (linear), y: threshold - knee, z: knee * 2, w: 0.25 / knee
         float4 _Params; // x: clamp, yzw: unused
@@ -31,14 +31,14 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragPrefilter13(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 color = DownsampleBox13Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox13Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
             return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 color = DownsampleBox4Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox4Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
             return Prefilter(SafeHDR(color), i.texcoord);
         }
 
@@ -48,14 +48,14 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragDownsample13(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 color = DownsampleBox13Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox13Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
             return color;
         }
 
         half4 FragDownsample4(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 color = DownsampleBox4Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
+            half4 color = DownsampleBox4Tap(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
             return color;
         }
 
@@ -71,14 +71,14 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize.xy), _SampleScale);
             return Combine(bloom, i.texcoordStereo);
         }
 
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleBox(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleBox(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
             return Combine(bloom, i.texcoordStereo);
         }
 
@@ -95,14 +95,14 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragDebugOverlayTent(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize.xy), _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 
         half4 FragDebugOverlayBox(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleBox(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
+            half4 bloom = UpsampleBox(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 

@@ -54,7 +54,7 @@ half4 DownsampleBox4Tap(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, fl
 }
 
 // 9-tap bilinear upsampler (tent filter)
-half4 UpsampleTent(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, float2 texelSize, float sampleScale)
+half4 UpsampleTent(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, float2 texelSize, float4 sampleScale)
 {
     float4 d = texelSize.xyxy * float4(1.0, 1.0, -1.0, 0.0) * sampleScale;
 
@@ -75,7 +75,7 @@ half4 UpsampleTent(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, float2 
 }
 
 // Standard box filtering
-half4 UpsampleBox(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, float2 texelSize, float sampleScale)
+half4 UpsampleBox(SCREENSPACE_TEXTURE_ARGS(tex, samplerTex), float2 uv, float2 texelSize, float4 sampleScale)
 {
     float4 d = texelSize.xyxy * float4(-1.0, -1.0, 1.0, 1.0) * (sampleScale * 0.5);
 
