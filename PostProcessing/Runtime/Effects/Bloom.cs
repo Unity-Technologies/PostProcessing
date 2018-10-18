@@ -111,7 +111,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // fillrate limited platforms
             int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
             int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
-            bool singlePassDoubleWide = (context.stereoActive && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
+            bool singlePassDoubleWide = (context.stereoActive && (context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass) && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
             int tw_stereo = singlePassDoubleWide ? tw * 2 : tw; 
 
             // Determine the iteration count

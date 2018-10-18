@@ -663,67 +663,97 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do a NaN killing pass if needed
             int lastTarget = -1;
-            if (stopNaNPropagation && !m_NaNKilled)
+            int eyes = 1;
+            if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                eyes = 2;
+            RenderTargetIdentifier cameraTexture = context.source;
+            
+            for (int eye = 0; eye < eyes; eye++)
             {
-                lastTarget = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
-                cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
-                context.source = lastTarget;
-                m_NaNKilled = true;
-            }
+                bool preparedStereoSource = false;
 
-            // Do temporal anti-aliasing first
-            if (context.IsTemporalAntialiasingActive())
-            {
-                if (!RuntimeUtilities.scriptableRenderPipelineActive)
+                if (stopNaNPropagation && !m_NaNKilled)
                 {
-                    if (context.stereoActive)
+                    lastTarget = m_TargetPool.Get();
+                    context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
+                    if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
                     {
-                        // We only need to configure all of this once for stereo, during OnPreCull
-                        if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
-                            temporalAntialiasing.ConfigureStereoJitteredProjectionMatrices(context);
+                        cmd.BlitFullscreenTriangleFromTexArray(context.source, lastTarget, RuntimeUtilities.copyFromTexArraySheet, 1, false, eye);
+                        preparedStereoSource = true;
                     }
                     else
-                    {
-                        temporalAntialiasing.ConfigureJitteredProjectionMatrix(context);
-                    }
+                        cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
+                    context.source = lastTarget;
+                    m_NaNKilled = true;
                 }
 
-                var taaTarget = m_TargetPool.Get();
-                var finalDestination = context.destination;
-                context.GetScreenSpaceTemporaryRT(cmd, taaTarget, 0, context.sourceFormat);
-                context.destination = taaTarget;
-                temporalAntialiasing.Render(context);
-                context.source = taaTarget;
-                context.destination = finalDestination;
+                if (!preparedStereoSource && eyes > 1)
+                {
+                    lastTarget = m_TargetPool.Get();
+                    context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
+                    if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                    {
+                        cmd.BlitFullscreenTriangleFromTexArray(context.source, lastTarget, RuntimeUtilities.copyFromTexArraySheet, 1, false, eye);
+                        preparedStereoSource = true;
+                    }
+                    context.source = lastTarget;
+                }
 
-                if (lastTarget > -1)
-                    cmd.ReleaseTemporaryRT(lastTarget);
+                // Do temporal anti-aliasing first
+                if (context.IsTemporalAntialiasingActive())
+                {
+                    if (!RuntimeUtilities.scriptableRenderPipelineActive)
+                    {
+                        if (context.stereoActive)
+                        {
+                            // We only need to configure all of this once for stereo, during OnPreCull
+                            if (context.camera.stereoActiveEye != Camera.MonoOrStereoscopicEye.Right)
+                                temporalAntialiasing.ConfigureStereoJitteredProjectionMatrices(context);
+                        }
+                        else
+                        {
+                            temporalAntialiasing.ConfigureJitteredProjectionMatrix(context);
+                        }
+                    }
 
-                lastTarget = taaTarget;
+                    var taaTarget = m_TargetPool.Get();
+                    var finalDestination = context.destination;
+                    context.GetScreenSpaceTemporaryRT(cmd, taaTarget, 0, context.sourceFormat);
+                    context.destination = taaTarget;
+                    temporalAntialiasing.Render(context);
+                    context.source = taaTarget;
+                    context.destination = finalDestination;
+
+                    if (lastTarget > -1)
+                        cmd.ReleaseTemporaryRT(lastTarget);
+
+                    lastTarget = taaTarget;
+                }
+
+                bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
+                bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
+                bool needsFinalPass = (hasAfterStackEffects
+                    || (antialiasingMode == Antialiasing.FastApproximateAntialiasing) || (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported()))
+                    && !breakBeforeColorGrading;
+
+                // Right before the builtin stack
+                if (hasBeforeStackEffects)
+                    lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
+
+                // Builtin stack
+                lastTarget = RenderBuiltins(context, !needsFinalPass, lastTarget, eye);
+
+                // After the builtin stack but before the final pass (before FXAA & Dithering)
+                if (hasAfterStackEffects)
+                    lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
+
+                // And close with the final pass
+                if (needsFinalPass)
+                    RenderFinalPass(context, lastTarget, eye);
+
+                if (context.stereoActive)
+                    context.source = cameraTexture;
             }
-
-            bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
-            bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
-            bool needsFinalPass = (hasAfterStackEffects
-                || (antialiasingMode == Antialiasing.FastApproximateAntialiasing) || (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported()))
-                && !breakBeforeColorGrading;
-
-            // Right before the builtin stack
-            if (hasBeforeStackEffects)
-                lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
-
-            // Builtin stack
-            lastTarget = RenderBuiltins(context, !needsFinalPass, lastTarget);
-
-            // After the builtin stack but before the final pass (before FXAA & Dithering)
-            if (hasAfterStackEffects)
-                lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
-
-            // And close with the final pass
-            if (needsFinalPass)
-                RenderFinalPass(context, lastTarget);
-
             // Render debug monitors & overlay if requested
             debugLayer.RenderSpecialOverlays(context);
             debugLayer.RenderMonitors(context);
@@ -824,7 +854,7 @@ namespace UnityEngine.Rendering.PostProcessing
             properties.SetVector(ShaderIDs.UVTransform, SystemInfo.graphicsUVStartsAtTop ? new Vector4(1.0f, -1.0f, 0.0f, 1.0f) : new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
         }
 
-        int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1)
+        int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1, int eye = -1)
         {
             var uberSheet = context.propertySheets.Get(context.resources.shaders.uber);
             uberSheet.ClearKeywords();
@@ -832,6 +862,9 @@ namespace UnityEngine.Rendering.PostProcessing
             context.uberSheet = uberSheet;
             context.autoExposureTexture = RuntimeUtilities.whiteTexture;
             context.bloomBufferNameID = -1;
+
+            if (isFinalPass && context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                uberSheet.EnableKeyword("STEREO_INSTANCING_ENABLED");
 
             var cmd = context.command;
             cmd.BeginSample("BuiltinStack");
@@ -888,8 +921,14 @@ namespace UnityEngine.Rendering.PostProcessing
                 ApplyDefaultFlip(uberSheet.properties);
             }
 
-            cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
-
+            if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+            {
+                uberSheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
+            }
+            else
+                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
+               
             context.source = context.destination;
             context.destination = finalDestination;
 
@@ -904,7 +943,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         // This pass will have to be disabled for HDR screen output as it's an LDR pass
-        void RenderFinalPass(PostProcessRenderContext context, int releaseTargetAfterUse = -1)
+        void RenderFinalPass(PostProcessRenderContext context, int releaseTargetAfterUse = -1, int eye = -1)
         {
             var cmd = context.command;
             cmd.BeginSample("FinalPass");
@@ -912,7 +951,16 @@ namespace UnityEngine.Rendering.PostProcessing
             if (breakBeforeColorGrading)
             {
                 var sheet = context.propertySheets.Get(context.resources.shaders.discardAlpha);
-                cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                    sheet.EnableKeyword("STEREO_INSTANCING_ENABLED");
+
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                {
+                    sheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                    cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, sheet, 0, false, eye);
+                }
+                else
+                    cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
             }
             else
             {
@@ -921,6 +969,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 uberSheet.properties.Clear();
                 context.uberSheet = uberSheet;
                 int tempTarget = -1;
+
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                    uberSheet.EnableKeyword("STEREO_INSTANCING_ENABLED");
 
                 if (antialiasingMode == Antialiasing.FastApproximateAntialiasing)
                 {
@@ -946,7 +997,13 @@ namespace UnityEngine.Rendering.PostProcessing
                 dithering.Render(context);
 
                 ApplyFlip(context, uberSheet.properties);
-                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
+                {
+                    uberSheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                    cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
+                }
+                else
+                    cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
                 if (tempTarget > -1)
                     cmd.ReleaseTemporaryRT(tempTarget);

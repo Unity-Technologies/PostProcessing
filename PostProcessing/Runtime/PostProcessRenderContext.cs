@@ -47,6 +47,11 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
                     stereoActive = true;
+                    
+                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
+                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
+                    else
+                        stereoRenderingMode = StereoRenderingMode.SinglePass;
                 }
                 else
 #endif
@@ -110,6 +115,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
+
+        public enum StereoRenderingMode
+        {
+            MultiPass = 0,
+            SinglePass,
+            SinglePassInstanced,
+            SinglePassMultiview
+        }
+
+        public StereoRenderingMode stereoRenderingMode { get; private set; }
 
         // Pixel dimensions of logical screen size
         public int screenWidth { get; private set; }
@@ -238,6 +253,10 @@ namespace UnityEngine.Rendering.PostProcessing
             if (heightOverride > 0)
                 desc.height = heightOverride;
 
+            //intermediates in VR are unchanged
+            if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
+               desc.dimension = Rendering.TextureDimension.Tex2D;
+          
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
             int actualWidth = width;
