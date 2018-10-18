@@ -663,12 +663,9 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Do a NaN killing pass if needed
             int lastTarget = -1;
-            int eyes = 1;
-            if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
-                eyes = 2;
             RenderTargetIdentifier cameraTexture = context.source;
             
-            for (int eye = 0; eye < eyes; eye++)
+            for (int eye = 0; eye < context.numberOfEyes; eye++)
             {
                 bool preparedStereoSource = false;
 
@@ -687,7 +684,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     m_NaNKilled = true;
                 }
 
-                if (!preparedStereoSource && eyes > 1)
+                if (!preparedStereoSource && context.numberOfEyes > 1)
                 {
                     lastTarget = m_TargetPool.Get();
                     context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);

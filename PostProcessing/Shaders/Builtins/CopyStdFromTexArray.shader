@@ -1,5 +1,6 @@
 Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 {
+    //Blit from texture array slice
 
     Properties
     {
@@ -7,6 +8,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
     }
 
     CGINCLUDE
+        #pragma target 3.5
 
         struct Attributes
         {
@@ -77,7 +79,6 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
     {
         Cull Off ZWrite Off ZTest Always
 
-        // 0 - Copy
         Pass
         {
             CGPROGRAM
@@ -88,7 +89,6 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
             ENDCG
         }
 
-        // 1 - Copy + NaN killer
         Pass
         {
             CGPROGRAM

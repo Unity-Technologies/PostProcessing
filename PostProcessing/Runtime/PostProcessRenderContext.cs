@@ -52,6 +52,11 @@ namespace UnityEngine.Rendering.PostProcessing
                         stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
                     else
                         stereoRenderingMode = StereoRenderingMode.SinglePass;
+
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
+                        numberOfEyes = 2;
+                    else
+                        numberOfEyes = 1; //currently, double-wide still issues two drawcalls
                 }
                 else
 #endif
@@ -66,6 +71,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = width;
                     screenHeight = height;
                     stereoActive = false;
+                    numberOfEyes = 1;
                 }
             }
         }
@@ -115,6 +121,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
+
+        public int numberOfEyes { get; private set; }
 
         public enum StereoRenderingMode
         {
