@@ -4,7 +4,26 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.16-preview]
+
+### Fixed
+- Grain shader compilation errors on some mobile GPUs.
+
+## [2.0.15-preview]
+
+### Fixed
+- Warning on `[ShaderIncludePath]` in 2018.3+.
+
 ## [2.0.14-preview]
+
+### Fixed
+- Bloom flicker in single-pass double-wide stereo rendering.
+- Right eye bloom offset in single-pass double-wide stereo rendering.
+- If any parent of PostProcessingVolume has non-identity scale the Gizmo is rendered incorrectly.
+- Cleanup error when going back'n'forth between Builtins & Scriptable pipelines.
+
+### Changed
+- Use `ExecuteAlways` in 2018.3+ for better compatibility with "Prefab Mode".
 
 ## [2.0.13-preview]
 
