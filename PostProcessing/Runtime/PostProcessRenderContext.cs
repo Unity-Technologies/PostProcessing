@@ -47,12 +47,12 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
                     stereoActive = true;
-                    
+                    stereoRenderingMode = StereoRenderingMode.SinglePass;
+
+#if UNITY_STANDALONE || UNITY_EDITOR
                     if (xrDesc.dimension == TextureDimension.Tex2DArray)
                         stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
-                    else
-                        stereoRenderingMode = StereoRenderingMode.SinglePass;
-
+#endif
                     if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
                         numberOfEyes = 2;
                     else
