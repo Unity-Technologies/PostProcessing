@@ -71,7 +71,7 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize.xy), _SampleScale);
+            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
             return Combine(bloom, i.texcoordStereo);
         }
 
@@ -95,7 +95,7 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragDebugOverlayTent(VaryingsDefault i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize.xy), _SampleScale);
+            half4 bloom = UpsampleTent(SCREENSPACE_TEXTURE_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 
