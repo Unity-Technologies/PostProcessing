@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Grain shader compilation errors on some mobile GPUs.
+- Compilation issue with Unity 2019.1+.
 
 ## [2.0.15-preview]
 
