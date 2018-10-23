@@ -264,11 +264,19 @@ float2 TransformTriangleVertexToUV(float2 vertex)
     #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_ARRAY_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE(tex, sampler, uv) SAMPLE_TEXTURE2D_ARRAY(tex, sampler, uv.xy, (float)unity_StereoEyeIndex)
     #define SAMPLE_SCREENSPACE_TEXTURE_LOD(tex, sampler, uv, lod) SAMPLE_TEXTURE2D_ARRAY_LOD(tex, sampler, uv.xy, (float)unity_StereoEyeIndex, lod)
+    #define SAMPLE_SCREENSPACE_TEXTURE_LOD_OFF(tex, sampler, uv, lod, offset) SAMPLE_TEXTURE2D_ARRAY_LOD_OFF(tex, sampler, uv.xy, (float)unity_StereoEyeIndex, lod, offset)
 
     #define GATHER_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)       GATHER_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
     #define GATHER_RED_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)   GATHER_RED_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
     #define GATHER_GREEN_SCREENSPACE_TEXTURE(textureName, samplerName, coord2) GATHER_GREEN_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
     #define GATHER_BLUE_SCREENSPACE_TEXTURE(textureName, samplerName, coord2)  GATHER_BLUE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+    #define GATHER_ALPHA_SCREENSPACE_TEXTURE(textureName, samplerName, coord2) GATHER_ALPHA_TEXTURE2D_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex)
+
+    #define GATHER_SCREENSPACE_TEXTURE_OFF(textureName, samplerName, coord2)       GATHER_TEXTURE2D_ARRAY_OFF(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, offset)
+    #define GATHER_RED_SCREENSPACE_TEXTURE_OFF(textureName, samplerName, coord2)   GATHER_RED_TEXTURE2D_ARRAY_OFF(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, offset)
+    #define GATHER_GREEN_SCREENSPACE_TEXTURE_OFF(textureName, samplerName, coord2) GATHER_GREEN_TEXTURE2D_ARRAY_OFF(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, offset)
+    #define GATHER_BLUE_SCREENSPACE_TEXTURE_OFF(textureName, samplerName, coord2)  GATHER_BLUE_TEXTURE2D_ARRAY_OFF(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, offset)
+    #define GATHER_ALPHA_SCREENSPACE_TEXTURE_OFF(textureName, samplerName, coord2) GATHER_ALPHA_TEXTURE2D_ARRAY_OFF(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, offset)
 
     #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE(textureName, samplerName, coord2) SAMPLE_DEPTH_TEXTURE_ARRAY(textureName, samplerName, coord2, (float)unity_StereoEyeIndex).r
     #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE_LOD(textureName, samplerName, coord2, lod) SAMPLE_DEPTH_TEXTURE_ARRAY_LOD(textureName, samplerName, coord2, (float)unity_StereoEyeIndex, lod).r
@@ -280,11 +288,19 @@ float2 TransformTriangleVertexToUV(float2 vertex)
     #define SCREENSPACE_TEXTURE_SAMPLER(textureName, samplerName) TEXTURE2D_SAMPLER2D(textureName, samplerName)
     #define SAMPLE_SCREENSPACE_TEXTURE SAMPLE_TEXTURE2D
     #define SAMPLE_SCREENSPACE_TEXTURE_LOD SAMPLE_TEXTURE2D_LOD
+    #define SAMPLE_SCREENSPACE_TEXTURE_LOD_OFF SAMPLE_TEXTURE2D_LOD_OFF
 
     #define GATHER_SCREENSPACE_TEXTURE GATHER_TEXTURE2D
     #define GATHER_RED_SCREENSPACE_TEXTURE GATHER_RED_TEXTURE2D
     #define GATHER_GREEN_SCREENSPACE_TEXTURE GATHER_GREEN_TEXTURE2D
     #define GATHER_BLUE_SCREENSPACE_TEXTURE GATHER_BLUE_TEXTURE2D
+    #define GATHER_ALPHA_SCREENSPACE_TEXTURE GATHER_ALPHA_TEXTURE2D
+
+    #define GATHER_SCREENSPACE_TEXTURE_OFF GATHER_TEXTURE2D_OFF
+    #define GATHER_RED_SCREENSPACE_TEXTURE_OFF GATHER_RED_TEXTURE2D_OFF
+    #define GATHER_GREEN_SCREENSPACE_TEXTURE_OFF GATHER_GREEN_TEXTURE2D_OFF
+    #define GATHER_BLUE_SCREENSPACE_TEXTURE_OFF GATHER_BLUE_TEXTURE2D_OFF
+    #define GATHER_ALPHA_SCREENSPACE_TEXTURE_OFF GATHER_ALPHA_TEXTURE2D_OFF
 
     #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE SAMPLE_DEPTH_TEXTURE
     #define SAMPLE_DEPTH_SCREENSPACE_TEXTURE_LOD SAMPLE_DEPTH_TEXTURE_LOD

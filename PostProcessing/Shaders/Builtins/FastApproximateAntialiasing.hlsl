@@ -687,20 +687,20 @@ API PORTING
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_4 == 1)
 #define FxaaInt2 int2
-struct FxaaTex { SamplerState smpl; Texture2D tex; };
-#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
-#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
+struct FxaaTex { SamplerState smpl; SCREENSPACE_TEXTURE(tex); };
+#define FxaaTexTop(t, p) SAMPLE_SCREENSPACE_TEXTURE_LOD(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
+#define FxaaTexOff(t, p, o, r) SAMPLE_SCREENSPACE_TEXTURE_LOD_OFF(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
 #endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_5 == 1)
 #define FxaaInt2 int2
-struct FxaaTex { SamplerState smpl; Texture2D tex; };
-#define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
-#define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
-#define FxaaTexAlpha4(t, p) t.tex.GatherAlpha(t.smpl, UnityStereoTransformScreenSpaceTex(p))
-#define FxaaTexOffAlpha4(t, p, o) t.tex.GatherAlpha(t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
-#define FxaaTexGreen4(t, p) t.tex.GatherGreen(t.smpl, UnityStereoTransformScreenSpaceTex(p))
-#define FxaaTexOffGreen4(t, p, o) t.tex.GatherGreen(t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
+struct FxaaTex { SamplerState smpl; SCREENSPACE_TEXTURE(tex); };
+#define FxaaTexTop(t, p) SAMPLE_SCREENSPACE_TEXTURE_LOD(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0)
+#define FxaaTexOff(t, p, o, r) SAMPLE_SCREENSPACE_TEXTURE_LOD_OFF(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), 0.0, o)
+#define FxaaTexAlpha4(t, p) GATHER_ALPHA_SCREENSPACE_TEXTURE(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p))
+#define FxaaTexOffAlpha4(t, p, o) GATHER_ALPHA_SCREENSPACE_TEXTURE_OFF(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
+#define FxaaTexGreen4(t, p) GATHER_GREEN_SCREENSPACE_TEXTURE(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p))
+#define FxaaTexOffGreen4(t, p, o) GATHER_GREEN_SCREENSPACE_TEXTURE_OFF(t.tex, t.smpl, UnityStereoTransformScreenSpaceTex(p), o)
 #endif
 
 
