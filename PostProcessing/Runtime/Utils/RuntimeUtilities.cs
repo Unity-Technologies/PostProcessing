@@ -352,7 +352,6 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
             cmd.SetGlobalInt(ShaderIDs.DepthSlice, depthSlice);
-            //cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             cmd.SetRenderTarget(destination, 0, CubemapFace.Unknown, -1);
 
             if (clear)
@@ -361,19 +360,6 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
-        public static void BlitFullscreenTriangleToTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false)
-        {
-
-            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            //SetRenderTarget(Rendering.RenderTargetIdentifier color, Rendering.RenderTargetIdentifier depth, 
-            //int mipLevel, CubemapFace cubemapFace, int depthSlice);
-            cmd.SetRenderTarget(destination, 0, 0, CubemapFace.Unknown, -1);
-
-            if (clear)
-                cmd.ClearRenderTarget(true, true, Color.clear);
-
-            cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
-        }
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);

@@ -1,7 +1,7 @@
 Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 {
     //Blit from texture array slice. Similar to CopyStd but with texture array as source
-    // and sampling from texture array. Having separate shader is cleaner than multiple #if in the code.
+    //and sampling from texture array. Having separate shader is cleaner than multiple #if in the code.
 
     Properties
     {
@@ -22,20 +22,20 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
             float3 texcoord : TEXCOORD0;
         };
 
-		Texture2DArray _MainTex;
-		SamplerState sampler_MainTex;
-		int _DepthSlice;
+        Texture2DArray _MainTex;
+        SamplerState sampler_MainTex;
+        int _DepthSlice;
 
-		float2 TransformTriangleVertexToUV(float2 vertex)
-		{
-			float2 uv = (vertex + 1.0) * 0.5;
-			return uv;
-		}
+        float2 TransformTriangleVertexToUV(float2 vertex)
+        {
+            float2 uv = (vertex + 1.0) * 0.5;
+            return uv;
+        }
 
         Varyings Vert(Attributes v)
         {
             Varyings o;
-			o.vertex = float4(v.vertex.xy, 0.0, 1.0);
+            o.vertex = float4(v.vertex.xy, 0.0, 1.0);
             o.texcoord.xy = TransformTriangleVertexToUV(v.vertex.xy);
 
             #if UNITY_UV_STARTS_AT_TOP
@@ -48,7 +48,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 
         float4 Frag(Varyings i) : SV_Target
         {
-			float4 color = _MainTex.Sample(sampler_MainTex, i.texcoord);
+            float4 color = _MainTex.Sample(sampler_MainTex, i.texcoord);
             return color;
         }
 
@@ -64,7 +64,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 
         float4 FragKillNaN(Varyings i) : SV_Target
         {
-			float4 color = _MainTex.Sample(sampler_MainTex, i.texcoord);
+            float4 color = _MainTex.Sample(sampler_MainTex, i.texcoord);
 
             if (AnyIsNan(color))
             {
