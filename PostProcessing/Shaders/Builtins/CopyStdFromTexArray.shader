@@ -1,6 +1,7 @@
 Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 {
-    //Blit from texture array slice
+    //Blit from texture array slice. Similar to CopyStd but with texture array as source
+    // and sampling from texture array. Having separate shader is cleaner than multiple #if in the code.
 
     Properties
     {
@@ -79,6 +80,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
     {
         Cull Off ZWrite Off ZTest Always
 
+        // 0 - Copy
         Pass
         {
             CGPROGRAM
@@ -89,6 +91,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
             ENDCG
         }
 
+        // 0 - Copy + NaN killer
         Pass
         {
             CGPROGRAM
