@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.0.17-preview]
 
+### Fixed
+- First pass at improving VR support.
+
 ## [2.0.16-preview]
 
 ### Fixed
