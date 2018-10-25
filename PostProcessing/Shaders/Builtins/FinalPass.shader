@@ -4,6 +4,7 @@ Shader "Hidden/PostProcessing/FinalPass"
 
         #pragma multi_compile __ FXAA FXAA_LOW
         #pragma multi_compile __ FXAA_KEEP_ALPHA
+        #pragma multi_compile __ STEREO_INSTANCING_ENABLED
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "Dithering.hlsl"

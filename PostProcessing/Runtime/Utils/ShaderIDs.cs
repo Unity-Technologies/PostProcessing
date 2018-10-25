@@ -152,5 +152,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int RenderViewportScaleFactor       = Shader.PropertyToID("_RenderViewportScaleFactor");
 
         internal static readonly int UVTransform                     = Shader.PropertyToID("_UVTransform");
+        internal static readonly int DepthSlice                      = Shader.PropertyToID("_DepthSlice");
     }
 }

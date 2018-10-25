@@ -230,6 +230,25 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        static Material s_CopyFromTexArrayMaterial;
+        public static Material copyFromTexArrayMaterial
+        {
+            get
+            {
+                if (s_CopyFromTexArrayMaterial != null)
+                    return s_CopyFromTexArrayMaterial;
+
+                var shader = Shader.Find("Hidden/PostProcessing/CopyStdFromTexArray");
+                s_CopyFromTexArrayMaterial = new Material(shader)
+                {
+                    name = "PostProcess - CopyFromTexArray",
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+
+                return s_CopyFromTexArrayMaterial;
+            }
+        }
+
         static PropertySheet s_CopySheet;
         public static PropertySheet copySheet
         {
@@ -239,6 +258,18 @@ namespace UnityEngine.Rendering.PostProcessing
                     s_CopySheet = new PropertySheet(copyMaterial);
 
                 return s_CopySheet;
+            }
+        }
+
+        static PropertySheet s_CopyFromTexArraySheet;
+        public static PropertySheet copyFromTexArraySheet
+        {
+            get
+            {
+                if (s_CopyFromTexArraySheet == null)
+                    s_CopyFromTexArraySheet = new PropertySheet(copyFromTexArrayMaterial);
+
+                return s_CopyFromTexArraySheet;
             }
         }
 
@@ -303,6 +334,30 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
             #endif
+        }
+
+        public static void BlitFullscreenTriangleFromTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
+        {
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            cmd.SetGlobalInt(ShaderIDs.DepthSlice, depthSlice);
+            cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
+            cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
+        }
+
+        public static void BlitFullscreenTriangleToTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
+        {
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            cmd.SetGlobalInt(ShaderIDs.DepthSlice, depthSlice);
+            cmd.SetRenderTarget(destination, 0, CubemapFace.Unknown, -1);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
+            cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false)
