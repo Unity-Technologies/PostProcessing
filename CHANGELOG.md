@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - First pass at improving VR support.
+- Assert on Invalid LDR Lookup Texture size; added a check in the inspector for the user.
 
 ## [2.0.16-preview]
 
