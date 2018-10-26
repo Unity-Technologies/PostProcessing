@@ -923,9 +923,11 @@ namespace UnityEngine.Rendering.PostProcessing
                 uberSheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
                 cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
             }
+            else if (isFinalPass)
+                cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0, false, context.camera.pixelRect);
             else
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
-               
+
             context.source = context.destination;
             context.destination = finalDestination;
 
@@ -1000,7 +1002,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
                 }
                 else
-                    cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
+                    cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0, false, context.camera.pixelRect);
 
                 if (tempTarget > -1)
                     cmd.ReleaseTemporaryRT(tempTarget);

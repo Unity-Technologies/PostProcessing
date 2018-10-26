@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - First pass at improving VR support.
+- Camera viewport wasn't working properly when outputting directly to the backbuffer.
 
 ## [2.0.16-preview]
 
