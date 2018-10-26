@@ -12,15 +12,15 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         #define _MainTexSampler sampler_MainTex
     #endif
 
-        TEXTURE2D_SAMPLER2D(_MainTex, _MainTexSampler);
+        SCREENSPACE_TEXTURE_SAMPLER(_MainTex, _MainTexSampler);
         float4 _MainTex_TexelSize;
 
-        TEXTURE2D_SAMPLER2D(_HistoryTex, sampler_HistoryTex);
+        SCREENSPACE_TEXTURE_SAMPLER(_HistoryTex, sampler_HistoryTex);
 
-        TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
+        SCREENSPACE_TEXTURE_SAMPLER(_CameraDepthTexture, sampler_CameraDepthTexture);
         float4 _CameraDepthTexture_TexelSize;
 
-        TEXTURE2D_SAMPLER2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture);
+        SCREENSPACE_TEXTURE_SAMPLER(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture);
 
         float2 _Jitter;
         float4 _FinalBlendParameters; // x: static, y: dynamic, z: motion amplification
@@ -31,10 +31,10 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             const float2 k = _CameraDepthTexture_TexelSize.xy;
 
             const float4 neighborhood = float4(
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv - k)),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(k.x, -k.y))),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(-k.x, k.y))),
-                SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + k))
+                SAMPLE_DEPTH_SCREENSPACE_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv - k)),
+                SAMPLE_DEPTH_SCREENSPACE_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(k.x, -k.y))),
+                SAMPLE_DEPTH_SCREENSPACE_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + float2(-k.x, k.y))),
+                SAMPLE_DEPTH_SCREENSPACE_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoClamp(uv + k))
             );
 
         #if defined(UNITY_REVERSED_Z)
@@ -43,7 +43,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             #define COMPARE_DEPTH(a, b) step(a, b)
         #endif
 
-            float3 result = float3(0.0, 0.0, SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv));
+            float3 result = float3(0.0, 0.0, SAMPLE_DEPTH_SCREENSPACE_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, uv));
             result = lerp(result, float3(-1.0, -1.0, neighborhood.x), COMPARE_DEPTH(neighborhood.x, result.z));
             result = lerp(result, float3( 1.0, -1.0, neighborhood.y), COMPARE_DEPTH(neighborhood.y, result.z));
             result = lerp(result, float3(-1.0,  1.0, neighborhood.z), COMPARE_DEPTH(neighborhood.z, result.z));
@@ -78,10 +78,10 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             const float2 k = _MainTex_TexelSize.xy;
             float2 uv = UnityStereoClamp(texcoord - _Jitter);
 
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, uv);
+            float4 color = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, _MainTexSampler, uv);
 
-            float4 topLeft = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv - k * 0.5));
-            float4 bottomRight = SAMPLE_TEXTURE2D(_MainTex, _MainTexSampler, UnityStereoClamp(uv + k * 0.5));
+            float4 topLeft = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, _MainTexSampler, UnityStereoClamp(uv - k * 0.5));
+            float4 bottomRight = SAMPLE_SCREENSPACE_TEXTURE(_MainTex, _MainTexSampler, UnityStereoClamp(uv + k * 0.5));
 
             float4 corners = 4.0 * (topLeft + bottomRight) - 2.0 * color;
 
@@ -92,7 +92,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             // Tonemap color and history samples
             float4 average = (corners + color) * 0.142857;
 
-            float4 history = SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(texcoord - motion));
+            float4 history = SAMPLE_SCREENSPACE_TEXTURE(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(texcoord - motion));
 
             float motionLength = length(motion);
             float2 luma = float2(Luminance(average), Luminance(color));
@@ -122,18 +122,20 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
         OutputSolver FragSolverDilate(VaryingsDefault i)
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             float2 closest = GetClosestFragment(i.texcoordStereo);
-            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
+            float2 motion = SAMPLE_SCREENSPACE_TEXTURE(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, closest).xy;
             return Solve(motion, i.texcoordStereo);
         }
 
         OutputSolver FragSolverNoDilate(VaryingsDefault i)
         {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             // Don't dilate in ortho !
-            float2 motion = SAMPLE_TEXTURE2D(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoordStereo).xy;
+            float2 motion = SAMPLE_SCREENSPACE_TEXTURE(_CameraMotionVectorsTexture, sampler_CameraMotionVectorsTexture, i.texcoordStereo).xy;
             return Solve(motion, i.texcoordStereo);
         }
-
+ 
     ENDHLSL
 
     SubShader

@@ -202,10 +202,13 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
 
             // TODO: Account for different possible RenderViewportScale value from previous frame...
-
+ 
             int pass = context.camera.orthographic ? (int)Pass.SolverNoDilate : (int)Pass.SolverDilate;
-            m_Mrt[0] = context.destination;
-            m_Mrt[1] = historyWrite;
+            int depthSlice = (RuntimeUtilities.isVREnabled && RuntimeUtilities.isSinglePassStereoInstancedEnabled)
+                ? -1
+                : 0;
+            m_Mrt[0] = new RenderTargetIdentifier(context.destination, 0,  CubemapFace.Unknown, depthSlice);
+            m_Mrt[1] = new RenderTargetIdentifier(historyWrite, 0,  CubemapFace.Unknown, depthSlice);
 
             cmd.BlitFullscreenTriangle(context.source, m_Mrt, context.source, sheet, pass);
             cmd.EndSample("TemporalAntialiasing");
