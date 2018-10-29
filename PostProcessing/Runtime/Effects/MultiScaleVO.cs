@@ -142,7 +142,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return new Vector3(m_Widths[(int)mip], m_Heights[(int)mip], 16);
         }
 
-        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
             // Base size
             m_Widths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
@@ -157,51 +157,77 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Allocate temporary textures
-            PushAllocCommands(cmd);
+            PushAllocCommands(cmd, isMSAA);
 
             // Render logic
-            PushDownsampleCommands(cmd, camera, depthMap);
+            PushDownsampleCommands(cmd, camera, depthMap, isMSAA);
 
             float tanHalfFovH = CalculateTanHalfFovHeight(camera);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH, isMSAA);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH, isMSAA);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH, isMSAA);
 
-            PushUpsampleCommands(cmd, ShaderIDs.LowDepth4, ShaderIDs.Occlusion4, ShaderIDs.LowDepth3,   ShaderIDs.Occlusion3, ShaderIDs.Combined3, GetSize(MipLevel.L4), GetSize(MipLevel.L3));
-            PushUpsampleCommands(cmd, ShaderIDs.LowDepth3, ShaderIDs.Combined3,  ShaderIDs.LowDepth2,   ShaderIDs.Occlusion2, ShaderIDs.Combined2, GetSize(MipLevel.L3), GetSize(MipLevel.L2));
-            PushUpsampleCommands(cmd, ShaderIDs.LowDepth2, ShaderIDs.Combined2,  ShaderIDs.LowDepth1,   ShaderIDs.Occlusion1, ShaderIDs.Combined1, GetSize(MipLevel.L2), GetSize(MipLevel.L1));
-            PushUpsampleCommands(cmd, ShaderIDs.LowDepth1, ShaderIDs.Combined1,  ShaderIDs.LinearDepth, null,                 destination,         GetSize(MipLevel.L1), GetSize(MipLevel.Original), invert);
+            PushUpsampleCommands(cmd, ShaderIDs.LowDepth4, ShaderIDs.Occlusion4, ShaderIDs.LowDepth3,   ShaderIDs.Occlusion3, ShaderIDs.Combined3, GetSize(MipLevel.L4), GetSize(MipLevel.L3), isMSAA);
+            PushUpsampleCommands(cmd, ShaderIDs.LowDepth3, ShaderIDs.Combined3,  ShaderIDs.LowDepth2,   ShaderIDs.Occlusion2, ShaderIDs.Combined2, GetSize(MipLevel.L3), GetSize(MipLevel.L2), isMSAA);
+            PushUpsampleCommands(cmd, ShaderIDs.LowDepth2, ShaderIDs.Combined2,  ShaderIDs.LowDepth1,   ShaderIDs.Occlusion1, ShaderIDs.Combined1, GetSize(MipLevel.L2), GetSize(MipLevel.L1), isMSAA);
+            PushUpsampleCommands(cmd, ShaderIDs.LowDepth1, ShaderIDs.Combined1,  ShaderIDs.LinearDepth, null,                 destination,         GetSize(MipLevel.L1), GetSize(MipLevel.Original), isMSAA, invert);
 
             // Cleanup
             PushReleaseCommands(cmd);
         }
 
-        void PushAllocCommands(CommandBuffer cmd)
+        void PushAllocCommands(CommandBuffer cmd, bool isMSAA)
         {
-            Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RHalf, true);
+            if(isMSAA)
+            {
+                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RGHalf, true);
 
-            Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RFloat, true);
-            Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RFloat, true);
-            Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RFloat, true);
-            Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RGFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RGFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RGFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RGFloat, true);
 
-            AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RHalf, true);
-            AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RHalf, true);
-            AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RHalf, true);
-            AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RGHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RGHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RGHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RGHalf, true);
 
-            Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.R8, true);
-            Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.R8, true);
-            Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.R8, true);
-            Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.RG16, true);
 
-            Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.R8, true);
-            Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.R8, true);
-            Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.RG16, true);
+            }
+            else
+            {
+                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RHalf, true);
+
+                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RFloat, true);
+
+                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RHalf, true);
+
+                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.R8, true);
+
+                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.R8, true);
+            }
         }
 
-        void PushDownsampleCommands(CommandBuffer cmd, Camera camera, RenderTargetIdentifier? depthMap)
+        void PushDownsampleCommands(CommandBuffer cmd, Camera camera, RenderTargetIdentifier? depthMap, bool isMSAA)
         {
             RenderTargetIdentifier depthMapId;
             bool needDepthMapRelease = false;
@@ -229,7 +255,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // 1st downsampling pass.
             var cs = m_Resources.computeShaders.multiScaleAODownsample1;
-            int kernel = cs.FindKernel("main");
+            int kernel = cs.FindKernel(isMSAA ? "MultiScaleVODownsample1_MSAA" : "MultiScaleVODownsample1");
 
             cmd.SetComputeTextureParam(cs, kernel, "LinearZ", ShaderIDs.LinearDepth);
             cmd.SetComputeTextureParam(cs, kernel, "DS2x", ShaderIDs.LowDepth1);
@@ -246,7 +272,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // 2nd downsampling pass.
             cs = m_Resources.computeShaders.multiScaleAODownsample2;
-            kernel = cs.FindKernel("main");
+            kernel = isMSAA ? cs.FindKernel("MultiScaleVODownsample2_MSAA") : cs.FindKernel("MultiScaleVODownsample2");
 
             cmd.SetComputeTextureParam(cs, kernel, "DS4x", ShaderIDs.LowDepth2);
             cmd.SetComputeTextureParam(cs, kernel, "DS8x", ShaderIDs.LowDepth3);
@@ -257,7 +283,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DispatchCompute(cs, kernel, m_Widths[(int)MipLevel.L6], m_Heights[(int)MipLevel.L6], 1);
         }
 
-        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH)
+        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH, bool isMSAA)
         {
             // Here we compute multipliers that convert the center depth value into (the reciprocal
             // of) sphere thicknesses at each sample location. This assumes a maximum sample radius
@@ -325,7 +351,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Set the arguments for the render kernel.
             var cs = m_Resources.computeShaders.multiScaleAORender;
-            int kernel = cs.FindKernel("main_interleaved");
+            int kernel = isMSAA ? cs.FindKernel("MultiScaleVORender_MSAA_interleaved") : cs.FindKernel("MultiScaleVORender_interleaved");
 
             cmd.SetComputeFloatParams(cs, "gInvThicknessTable", m_InvThicknessTable);
             cmd.SetComputeFloatParams(cs, "gSampleWeightTable", m_SampleWeightTable);
@@ -346,14 +372,25 @@ namespace UnityEngine.Rendering.PostProcessing
             );
         }
 
-        void PushUpsampleCommands(CommandBuffer cmd, int lowResDepth, int interleavedAO, int highResDepth, int? highResAO, RenderTargetIdentifier dest, Vector3 lowResDepthSize, Vector2 highResDepthSize, bool invert = false)
+        void PushUpsampleCommands(CommandBuffer cmd, int lowResDepth, int interleavedAO, int highResDepth, int? highResAO, RenderTargetIdentifier dest, Vector3 lowResDepthSize, Vector2 highResDepthSize, bool isMSAA, bool invert = false)
         {
             var cs = m_Resources.computeShaders.multiScaleAOUpsample;
-            int kernel = cs.FindKernel(highResAO == null
-                ? invert
-                    ? "main_invert"
-                    : "main"
-                : "main_blendout");
+            int kernel = 0;
+            if (!isMSAA)
+            {
+                kernel = cs.FindKernel(highResAO == null ? invert
+                    ? "MultiScaleVOUpSample_invert"
+                    : "MultiScaleVOUpSample"
+                    : "MultiScaleVOUpSample_blendout");
+            }
+            else
+            {
+                kernel = cs.FindKernel(highResAO == null ? invert
+                ? "MultiScaleVOUpSample_MSAA_invert"
+                : "MultiScaleVOUpSample_MSAA"
+                : "MultiScaleVOUpSample_MSAA_blendout");
+            }
+
 
             float stepSize = 1920f / lowResDepthSize.x;
             float bTolerance = 1f - Mathf.Pow(10f, m_Settings.blurTolerance.value) * stepSize;
@@ -452,10 +489,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 );
             }
 
-            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false);
+            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false, false);
             PushDebug(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_AmbientOnlyAO);
-            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward);
+            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward, RenderBufferLoadAction.Load);
             cmd.EndSample("Ambient Occlusion");
         }
 
@@ -466,7 +503,7 @@ namespace UnityEngine.Rendering.PostProcessing
             SetResources(context.resources);
             PreparePropertySheet(context);
             CheckAOTexture(context);
-            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false);
+            GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false, false);
             PushDebug(context);
             cmd.EndSample("Ambient Occlusion Render");
         }
@@ -503,7 +540,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return DepthTextureMode.None;
         }
 
-        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
         }
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -23,7 +23,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
-#if !UNITY_SWITCH
+#if !UNITY_SWITCH && ENABLE_VR
                 if (m_Camera.stereoEnabled)
                 {
 #if UNITY_2017_2_OR_NEWER
@@ -47,6 +47,16 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
                     stereoActive = true;
+                    stereoRenderingMode = StereoRenderingMode.SinglePass;
+
+#if UNITY_STANDALONE || UNITY_EDITOR
+                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
+                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
+#endif
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
+                        numberOfEyes = 2;
+                    else
+                        numberOfEyes = 1; //currently, double-wide still issues two drawcalls
                 }
                 else
 #endif
@@ -61,6 +71,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = width;
                     screenHeight = height;
                     stereoActive = false;
+                    numberOfEyes = 1;
                 }
             }
         }
@@ -111,6 +122,18 @@ namespace UnityEngine.Rendering.PostProcessing
         // Current active rendering eye (for XR)
         public int xrActiveEye { get; private set; }
 
+        public int numberOfEyes { get; private set; }
+
+        public enum StereoRenderingMode
+        {
+            MultiPass = 0,
+            SinglePass,
+            SinglePassInstanced,
+            SinglePassMultiview
+        }
+
+        public StereoRenderingMode stereoRenderingMode { get; private set; }
+
         // Pixel dimensions of logical screen size
         public int screenWidth { get; private set; }
 
@@ -134,7 +157,9 @@ namespace UnityEngine.Rendering.PostProcessing
         internal Texture logLut;
         internal AutoExposure autoExposure;
         internal int bloomBufferNameID;
-
+#if UNITY_2018_2_OR_NEWER
+        internal bool physicalCamera;
+#endif
         public void Reset()
         {
             m_Camera = null;
@@ -144,7 +169,9 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2017_2_OR_NEWER
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
 #endif
-
+#if UNITY_2018_2_OR_NEWER
+            physicalCamera = false;
+#endif
             stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
             screenWidth = 0;
@@ -234,6 +261,10 @@ namespace UnityEngine.Rendering.PostProcessing
             if (heightOverride > 0)
                 desc.height = heightOverride;
 
+            //intermediates in VR are unchanged
+            if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
+               desc.dimension = Rendering.TextureDimension.Tex2D;
+          
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
             int actualWidth = width;

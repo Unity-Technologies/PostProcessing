@@ -367,6 +367,11 @@ namespace UnityEditor.Rendering.PostProcessing
                     if (!valid)
                         EditorUtilities.DrawFixMeBox("Invalid LUT import settings.", () => SetLutImportSettings(importer));
                 }
+
+                if (lut.width != lut.height * lut.height)
+                {
+                    EditorGUILayout.HelpBox("The Lookup Texture size is invalid. Width should be Height * Height.", MessageType.Error);
+                }
             }
         }
 

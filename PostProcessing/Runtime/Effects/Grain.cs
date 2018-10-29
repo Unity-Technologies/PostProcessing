@@ -71,6 +71,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var sheet = context.propertySheets.Get(context.resources.shaders.grainBaker);
             sheet.properties.Clear();
             sheet.properties.SetFloat(ShaderIDs.Phase, time % 10f);
+            sheet.properties.SetVector(ShaderIDs.GrainNoiseParameters, new Vector3(12.9898f, 78.233f, 43758.5453f));
 
             context.command.BeginSample("GrainLookup");
             context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_GrainLookupRT, sheet, settings.colored.value ? 1 : 0);
