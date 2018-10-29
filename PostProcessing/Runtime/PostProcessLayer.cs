@@ -140,7 +140,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Camera = GetComponent<Camera>();
 
-#if !UNITY_2018_3_OR_NEWER // OnRenderImage (bewlow) implies forceIntoRenderTexture
+#if !UNITY_2019_1_OR_NEWER // OnRenderImage (bewlow) implies forceIntoRenderTexture
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
 #endif
 
@@ -154,7 +154,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
 
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
         // We always use a CommandBuffer to blit to the final render target
         // OnRenderImage is used only to avoid the automatic blit from the RenderTexture of Camera.forceIntoRenderTexture to the actual target
         [ImageEffectUsesCommandBuffer]
