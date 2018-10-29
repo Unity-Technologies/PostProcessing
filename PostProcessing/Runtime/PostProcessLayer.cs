@@ -341,7 +341,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
         {
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
             if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
                 return true;
             if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
@@ -497,7 +497,7 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             context.destination = cameraTarget;
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
             if (finalBlitToCameraTarget)
             {
                 if (m_Camera.targetTexture)
