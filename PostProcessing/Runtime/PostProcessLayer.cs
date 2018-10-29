@@ -140,7 +140,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             m_Camera = GetComponent<Camera>();
 
-#if !UNITY_2019_1_OR_NEWER // OnRenderImage (bewlow) implies forceIntoRenderTexture
+#if !UNITY_2019_1_OR_NEWER // OnRenderImage (below) implies forceIntoRenderTexture
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
 #endif
 
