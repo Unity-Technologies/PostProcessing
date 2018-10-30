@@ -497,8 +497,9 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             context.destination = cameraTarget;
+
 #if UNITY_2019_1_OR_NEWER
-            if (finalBlitToCameraTarget)
+            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive)
             {
                 if (m_Camera.targetTexture)
                 {
