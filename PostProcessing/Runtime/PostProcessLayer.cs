@@ -34,6 +34,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public Transform volumeTrigger;
         public LayerMask volumeLayer;
         public bool stopNaNPropagation = true;
+        public bool finalBlitToCameraTarget = true;
 
         // Builtins / hardcoded effects that don't benefit from volume blending
         public Antialiasing antialiasingMode = Antialiasing.None;
@@ -140,15 +141,33 @@ namespace UnityEngine.Rendering.PostProcessing
             m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
             m_Camera = GetComponent<Camera>();
+
+#if !UNITY_2019_1_OR_NEWER // OnRenderImage (below) implies forceIntoRenderTexture
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
+#endif
+
             m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
-
+               
             // Internal context used if no SRP is set
             m_CurrentContext = new PostProcessRenderContext();
         }
+
+
+#if UNITY_2019_1_OR_NEWER
+        // We always use a CommandBuffer to blit to the final render target
+        // OnRenderImage is used only to avoid the automatic blit from the RenderTexture of Camera.forceIntoRenderTexture to the actual target
+        [ImageEffectUsesCommandBuffer]
+        void OnRenderImage(RenderTexture src, RenderTexture dst)
+        {
+            if (finalBlitToCameraTarget)
+                RenderTexture.active = dst; // silence warning
+            else
+                Graphics.Blit(src, dst);
+        }
+#endif
 
         public void Init(PostProcessResources resources)
         {
@@ -322,6 +341,40 @@ namespace UnityEngine.Rendering.PostProcessing
             BuildCommandBuffers();
         }
 
+        static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
+        {
+#if UNITY_2019_1_OR_NEWER
+            if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
+                return true;
+            if (RuntimeUtilities.scriptableRenderPipelineActive) // Should never be called from SRP
+                return true;
+              
+            return false;
+#else
+            return true;
+#endif
+        }
+
+        void UpdateSrcDstForOpaqueOnly(ref int src, ref int dst, PostProcessRenderContext context, RenderTargetIdentifier cameraTarget, int opaqueOnlyEffectsRemaining)
+        {
+            if (src > -1)
+                context.command.ReleaseTemporaryRT(src);
+
+            context.source = context.destination;
+            src = dst;
+
+            if (opaqueOnlyEffectsRemaining == 1)
+            {
+                context.destination = cameraTarget;
+            }
+            else
+            {
+                dst = m_TargetPool.Get();
+                context.destination = dst;
+                context.GetScreenSpaceTemporaryRT(context.command, dst, 0, context.sourceFormat);
+            }
+        }
+
         void BuildCommandBuffers()
         {
             var context = m_CurrentContext;
@@ -394,65 +447,80 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 var cmd = m_LegacyCmdBufferOpaque;
                 context.command = cmd;
+                context.source = cameraTarget;
+                context.destination = cameraTarget;
+                int srcTarget = -1;
+                int dstTarget = -1;
 
-                // We need to use the internal Blit method to copy the camera target or it'll fail
-                // on tiled GPU as it won't be able to resolve
-                int tempTarget0 = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(cmd, tempTarget0, 0, sourceFormat);
-                cmd.BuiltinBlit(cameraTarget, tempTarget0, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
-                context.source = tempTarget0;
+                UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects + 1); // + 1 for blit
 
-                int tempTarget1 = -1;
-
-                if (opaqueOnlyEffects > 1)
+                if (RequiresInitialBlit(m_Camera, context) || opaqueOnlyEffects == 1)
                 {
-                    tempTarget1 = m_TargetPool.Get();
-                    context.GetScreenSpaceTemporaryRT(cmd, tempTarget1, 0, sourceFormat);
-                    context.destination = tempTarget1;
+                    cmd.BuiltinBlit(context.source, context.destination, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
+                    UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
-                else context.destination = cameraTarget;
-
+ 
                 if (isScreenSpaceReflectionsActive)
                 {
                     ssrRenderer.Render(context);
                     opaqueOnlyEffects--;
-                    var prevSource = context.source;
-                    context.source = context.destination;
-                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                    UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
 
                 if (isFogActive)
                 {
                     fog.Render(context);
                     opaqueOnlyEffects--;
-                    var prevSource = context.source;
-                    context.source = context.destination;
-                    context.destination = opaqueOnlyEffects == 1 ? cameraTarget : prevSource;
+                    UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
 
                 if (hasCustomOpaqueOnlyEffects)
                     RenderOpaqueOnly(context);
 
-                if (opaqueOnlyEffects > 1)
-                    cmd.ReleaseTemporaryRT(tempTarget1);
+                cmd.ReleaseTemporaryRT(srcTarget);
+            }
+            
+            // Post-transparency stack
+            int tempRt = -1;
+            bool forceNanKillPass = (!m_NaNKilled && stopNaNPropagation && RuntimeUtilities.isFloatingPointFormat(sourceFormat));
+            if (RequiresInitialBlit(m_Camera, context) || forceNanKillPass)
+            {
+                tempRt = m_TargetPool.Get();
+                context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
+                m_LegacyCmdBuffer.BuiltinBlit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
+                if (!m_NaNKilled)
+                    m_NaNKilled = stopNaNPropagation;
 
-                cmd.ReleaseTemporaryRT(tempTarget0);
+                context.source = tempRt;
+            }
+            else
+            {
+                context.source = cameraTarget;
             }
 
-            // Post-transparency stack
-            // Same as before, first blit needs to use the builtin Blit command to properly handle
-            // tiled GPUs
-            int tempRt = m_TargetPool.Get();
-            context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
-            m_LegacyCmdBuffer.BuiltinBlit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
-            if (!m_NaNKilled)
-                m_NaNKilled = stopNaNPropagation;
+            context.destination = cameraTarget;
+
+#if UNITY_2019_1_OR_NEWER
+            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive)
+            {
+                if (m_Camera.targetTexture)
+                {
+                    context.destination = m_Camera.targetTexture.colorBuffer;
+                }
+                else
+                {
+                    context.flip = true;
+                    context.destination = Display.main.colorBuffer;
+                }
+            } 
+#endif
 
             context.command = m_LegacyCmdBuffer;
-            context.source = tempRt;
-            context.destination = cameraTarget;
+
             Render(context);
-            m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
+
+            if (tempRt > -1)
+                m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
         }
 
         void OnPostRender()
