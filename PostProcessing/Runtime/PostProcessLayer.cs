@@ -52,7 +52,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // UI states
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
-#pragma warning enable 169
+#pragma warning restore 169
 
         // Will stop applying post-processing effects just before color grading is applied
         // Currently used to export to exr without color grading
