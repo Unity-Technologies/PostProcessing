@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - First pass at improving VR support.
 - Assert on Invalid LDR Lookup Texture size; added a check in the inspector for the user.
 - Improved performance on Unity 2019.1+ by avoiding unnecessary blits if no other image effect is active.
+- Use new ASTC enums on unity 2019.1+.
 
 ## [2.0.16-preview]
 
