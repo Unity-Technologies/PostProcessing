@@ -282,7 +282,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // One of them is null, blend to/from a default value is applicable
             {
-
                 if (defaultState == TextureParameterDefault.Lut2D)
                 {
                     int size = from != null ? from.height : to.height;
@@ -312,6 +311,13 @@ namespace UnityEngine.Rendering.PostProcessing
                         Texture defaultTexture = RuntimeUtilities.GetLutStrip(size);
                         if (from == null) from = defaultTexture;
                         if (to == null) to = defaultTexture;
+
+                        // Fail safe in case the lut size is incorrect
+                        if (from.width != to.width || from.height != to.height)
+                        {
+                            value = null;
+                            return;
+                        }
 
                         value = TextureLerper.instance.Lerp(from, to, t);
                         // All done, return

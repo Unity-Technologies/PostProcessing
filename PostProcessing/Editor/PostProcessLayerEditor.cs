@@ -15,6 +15,7 @@ namespace UnityEditor.Rendering.PostProcessing
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
         SerializedProperty m_StopNaNPropagation;
+        SerializedProperty m_DirectToCameraTarget;
         SerializedProperty m_VolumeTrigger;
         SerializedProperty m_VolumeLayer;
 
@@ -54,6 +55,7 @@ namespace UnityEditor.Rendering.PostProcessing
         void OnEnable()
         {
             m_StopNaNPropagation = FindProperty(x => x.stopNaNPropagation);
+            m_DirectToCameraTarget = FindProperty(x => x.finalBlitToCameraTarget);
             m_VolumeTrigger = FindProperty(x => x.volumeTrigger);
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
 
@@ -94,6 +96,12 @@ namespace UnityEditor.Rendering.PostProcessing
             DoFog(camera);
 
             EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms."));
+
+#if UNITY_2019_1_OR_NEWER
+            if (!RuntimeUtilities.scriptableRenderPipelineActive)
+                EditorGUILayout.PropertyField(m_DirectToCameraTarget, EditorUtilities.GetContent("Directly to Camera Target|Use the final blit to the camera render target for postprocessing. This has less overhead but breaks compatibility with legacy image effect that use OnRenderImage."));
+#endif
+
             EditorGUILayout.Space();
 
             DoToolkit();

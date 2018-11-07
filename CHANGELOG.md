@@ -4,11 +4,16 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.18-preview]
+- Camera viewport wasn't working properly when outputting directly to the backbuffer.
+
 ## [2.0.17-preview]
 
 ### Fixed
 - First pass at improving VR support.
-- Camera viewport wasn't working properly when outputting directly to the backbuffer.
+- Assert on Invalid LDR Lookup Texture size; added a check in the inspector for the user.
+- Improved performance on Unity 2019.1+ by avoiding unnecessary blits if no other image effect is active.
+- Use new ASTC enums on unity 2019.1+.
 
 ## [2.0.16-preview]
 

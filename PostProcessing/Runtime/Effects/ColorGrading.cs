@@ -427,7 +427,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.command.BeginSample("LdrColorGradingLut2D");
 
                 var userLut = settings.ldrLut.value;
-                if (userLut == null)
+                if (userLut == null || userLut.width != userLut.height * userLut.height)
                 {
                     context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
                 }
