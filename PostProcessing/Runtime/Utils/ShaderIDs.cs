@@ -153,5 +153,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal static readonly int UVTransform                     = Shader.PropertyToID("_UVTransform");
         internal static readonly int DepthSlice                      = Shader.PropertyToID("_DepthSlice");
+        internal static readonly int UVScaleOffset                   = Shader.PropertyToID("_UVScaleOffset");
+        internal static readonly int PosScaleOffset                  = Shader.PropertyToID("_PosScaleOffset");
     }
 }

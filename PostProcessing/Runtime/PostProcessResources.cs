@@ -16,6 +16,7 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader copy;
             public Shader copyStd;
             public Shader copyStdFromTexArray;
+            public Shader copyStdFromDoubleWide;
             public Shader discardAlpha;
             public Shader depthOfField;
             public Shader finalPass;
