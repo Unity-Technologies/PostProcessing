@@ -26,6 +26,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_TaaSharpness;
         SerializedProperty m_TaaStationaryBlending;
         SerializedProperty m_TaaMotionBlending;
+        SerializedProperty m_TaaReconstructionFilter;
         SerializedProperty m_SmaaQuality;
         SerializedProperty m_FxaaFastMode;
         SerializedProperty m_FxaaKeepAlpha;
@@ -62,6 +63,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
 
             m_AntialiasingMode = FindProperty(x => x.antialiasingMode);
+            m_TaaReconstructionFilter = FindProperty(x => x.temporalAntialiasing.reconstructionFilter);
             m_TaaJitterSpread = FindProperty(x => x.temporalAntialiasing.jitterSpread);
             m_TaaSharpness = FindProperty(x => x.temporalAntialiasing.sharpness);
             m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
@@ -163,6 +165,7 @@ namespace UnityEditor.Rendering.PostProcessing
                         EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
                     #endif
 
+                    EditorGUILayout.PropertyField(m_TaaReconstructionFilter);
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
                     EditorGUILayout.PropertyField(m_TaaMotionBlending);

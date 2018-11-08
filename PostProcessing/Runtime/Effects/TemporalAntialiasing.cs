@@ -41,6 +41,25 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 0.99f)]
         public float motionBlending = 0.85f;
 
+        public enum ReconstructionFilter
+        {
+            Unity = 0,
+            Gaussian,
+            BlackmanHarris,
+            DodgsonQuadratic,
+            Mitchell,
+            Roubidoux,
+            CatmullRom,
+            Lanczos2,
+            Lanczos3,
+            Lanczos4,
+            Lanczos5
+        }
+
+        [Tooltip("The filter function used for de-jittering the current frame's data. Sorted softest to sharpest, and loosely least expensive to most expensive.")]
+        public ReconstructionFilter reconstructionFilter;
+        private int reconstructionFilterShaderID = Shader.PropertyToID("_ReconstructionFilter");
+
         // For custom jittered matrices - use at your own risks
         public Func<Camera, Vector2, Matrix4x4> jitteredMatrixFunc;
 
@@ -220,6 +239,8 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.Sharpness, sharpness);
             sheet.properties.SetVector(ShaderIDs.FinalBlendParameters, new Vector4(stationaryBlending, motionBlending, kMotionAmplification, 0f));
             sheet.properties.SetTexture(ShaderIDs.HistoryTex, historyRead);
+
+            sheet.properties.SetInt(reconstructionFilterShaderID, (int)reconstructionFilter);
 
             // TODO: Account for different possible RenderViewportScale value from previous frame...
 
