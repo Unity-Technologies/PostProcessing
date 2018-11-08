@@ -56,11 +56,13 @@ class PostProcessingTests : IPrebuildSetup
         var bloom = profile.AddSettings<Bloom>();
         Assert.IsNotNull(bloom);
 
-        var exists = profile.TryGetSettings(out Bloom outBloom);
+        Bloom outBloom;
+        var exists = profile.TryGetSettings(out outBloom);
         Assert.IsTrue(exists);
         Assert.IsNotNull(outBloom);
 
-        exists = profile.TryGetSettings(out ChromaticAberration outChroma);
+        ChromaticAberration outChroma;
+        exists = profile.TryGetSettings(out outChroma);
         Assert.IsFalse(exists);
         Assert.IsNull(outChroma);
 

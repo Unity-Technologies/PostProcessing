@@ -348,7 +348,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BlitFullscreenTriangleFromTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            cmd.SetGlobalInt(ShaderIDs.DepthSlice, depthSlice);
+            cmd.SetGlobalFloat(ShaderIDs.DepthSlice, depthSlice);
             cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
             if (clear)
@@ -360,7 +360,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public static void BlitFullscreenTriangleToTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
-            cmd.SetGlobalInt(ShaderIDs.DepthSlice, depthSlice);
+            cmd.SetGlobalFloat(ShaderIDs.DepthSlice, depthSlice);
             cmd.SetRenderTarget(destination, 0, CubemapFace.Unknown, -1);
 
             if (clear)

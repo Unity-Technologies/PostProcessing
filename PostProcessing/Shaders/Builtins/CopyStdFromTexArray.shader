@@ -24,7 +24,7 @@ Shader "Hidden/PostProcessing/CopyStdFromTexArray"
 
         Texture2DArray _MainTex;
         SamplerState sampler_MainTex;
-        int _DepthSlice;
+        float _DepthSlice;
 
         float2 TransformTriangleVertexToUV(float2 vertex)
         {

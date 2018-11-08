@@ -15,7 +15,9 @@ namespace UnityEditor.Rendering.PostProcessing
     public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
         SerializedProperty m_StopNaNPropagation;
+#pragma warning disable 414
         SerializedProperty m_DirectToCameraTarget;
+#pragma warning restore 414
         SerializedProperty m_VolumeTrigger;
         SerializedProperty m_VolumeLayer;
 
