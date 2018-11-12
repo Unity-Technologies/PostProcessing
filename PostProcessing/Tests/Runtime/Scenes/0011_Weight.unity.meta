@@ -1,5 +1,7 @@
 fileFormatVersion: 2
-guid: 065d744ec5f28314bb8d1cb87a2acea8
+guid: 03eea41fac5e7e548b03e8f0b664afea
+labels:
+- ExcludeGfxTests
 DefaultImporter:
   externalObjects: {}
   userData: 

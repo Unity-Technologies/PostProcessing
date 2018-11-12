@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -32,12 +33,15 @@ class PostProcessingTests : IPrebuildSetup
 #if UNITY_EDITOR
         Debug.Log("Adding scenes to build settings...");
 
-        var scenes = new EditorBuildSettingsScene[s_Scenes.Count];
+        var scenes = EditorBuildSettings.scenes.ToList();
 
         for (int i = 0; i < s_Scenes.Count; i++)
-            scenes[i] = new EditorBuildSettingsScene(s_Scenes[i], true);
+        {
+            if (!scenes.Exists(x => x.path == s_Scenes[i]))
+                scenes.Add(new EditorBuildSettingsScene(s_Scenes[i], true));
+        }
 
-        EditorBuildSettings.scenes = scenes;
+        EditorBuildSettings.scenes = scenes.ToArray();
 #endif
     }
 
