@@ -397,7 +397,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             context.command = m_LegacyCmdBufferOpaque;
             TextureLerper.instance.BeginFrame(context);
-            UpdateSettingsIfNeeded(context);
+            UpdateVolumeSystem(context.camera, context.command);
 
             // Lighting & opaque-only effects
             var aoBundle = GetBundle<AmbientOcclusion>();
@@ -677,13 +677,13 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentContext = context;
         }
 
-        void UpdateSettingsIfNeeded(PostProcessRenderContext context)
+        public void UpdateVolumeSystem(Camera cam, CommandBuffer cmd)
         {
             if (m_SettingsUpdateNeeded)
             {
-                context.command.BeginSample("VolumeBlending");
-                PostProcessManager.instance.UpdateSettings(this, context.camera);
-                context.command.EndSample("VolumeBlending");
+                cmd.BeginSample("VolumeBlending");
+                PostProcessManager.instance.UpdateSettings(this, cam);
+                cmd.EndSample("VolumeBlending");
                 m_TargetPool.Reset();
 
                 // TODO: fix me once VR support is in SRP
@@ -707,7 +707,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Update & override layer settings first (volume blending), will only be done once per
             // frame, either here or in Render() if there isn't any opaque-only effect to render.
-            UpdateSettingsIfNeeded(context);
+            // TODO: should be removed, keeping this here for older SRPs
+            UpdateVolumeSystem(context.camera, context.command);
 
             RenderList(sortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
         }
@@ -731,7 +732,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
             // Update & override layer settings first (volume blending) if the opaque only pass
             // hasn't been called this frame.
-            UpdateSettingsIfNeeded(context);
+            // TODO: should be removed, keeping this here for older SRPs
+            UpdateVolumeSystem(context.camera, context.command);
 
             // Do a NaN killing pass if needed
             int lastTarget = -1;
