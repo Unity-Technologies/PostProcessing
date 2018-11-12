@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Compatibility fixes for 2017.1 to 2017.4.
 - Post-processing wouldn't work when loaded from an asset bundle.
 
+### Changed
+- Scriptable Render Pipelines should now call `PostProcessLayer.UpdateVolumeSystem(Camera, CommandBuffer)` at the beginning of the frame.
+
 ## [2.0.17-preview]
 
 ### Fixed
