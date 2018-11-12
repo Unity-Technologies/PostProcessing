@@ -1,4 +1,4 @@
-﻿// Because this framework is supposed to work with the legacy render pipelines AND scriptable render
+// Because this framework is supposed to work with the legacy render pipelines AND scriptable render
 // pipelines we can't use Unity's shader libraries (some scriptable pipelines come with their own
 // shader lib). So here goes a minimal shader lib only used for post-processing to ensure good
 // compatibility with all pipelines.
@@ -276,7 +276,7 @@ struct VaryingsDefault
 };
 
 #if STEREO_INSTANCING_ENABLED
-int _DepthSlice;
+float _DepthSlice;
 #endif
 
 VaryingsDefault VertDefault(AttributesDefault v)
@@ -312,7 +312,7 @@ VaryingsDefault VertUVTransform(AttributesDefault v)
     o.texcoord = TransformTriangleVertexToUV(v.vertex.xy) * _UVTransform.xy + _UVTransform.zw;
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
 #if STEREO_INSTANCING_ENABLED
-    o.stereoTargetEyeIndex = _DepthSlice;
+    o.stereoTargetEyeIndex = (uint)_DepthSlice;
 #endif
     return o;
 }

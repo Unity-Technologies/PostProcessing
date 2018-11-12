@@ -1023,7 +1023,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
             {
-                uberSheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                uberSheet.properties.SetFloat(ShaderIDs.DepthSlice, eye);
                 cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
             }
             else if (isFinalPass && context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
@@ -1062,7 +1062,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
                 {
-                    sheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                    sheet.properties.SetFloat(ShaderIDs.DepthSlice, eye);
                     cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, sheet, 0, false, eye);
                 }
                 else if (context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
@@ -1109,7 +1109,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 ApplyFlip(context, uberSheet.properties);
                 if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
                 {
-                    uberSheet.properties.SetInt(ShaderIDs.DepthSlice, eye);
+                    uberSheet.properties.SetFloat(ShaderIDs.DepthSlice, eye);
                     cmd.BlitFullscreenTriangleToTexArray(context.source, context.destination, uberSheet, 0, false, eye);
                 }
                 else if (context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
