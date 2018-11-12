@@ -12,6 +12,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Sheets = new Dictionary<Shader, PropertySheet>();
         }
 
+        [Obsolete("Use PropertySheet.Get(Shader) with a direct reference to the Shader instead.")]
         public PropertySheet Get(string shaderName)
         {
             var shader = Shader.Find(shaderName);

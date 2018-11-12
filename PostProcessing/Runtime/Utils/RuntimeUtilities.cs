@@ -167,6 +167,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Rendering
 
+        internal static PostProcessResources s_Resources;
+
         static Mesh s_FullscreenTriangle;
         public static Mesh fullscreenTriangle
         {
@@ -200,7 +202,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (s_CopyStdMaterial != null)
                     return s_CopyStdMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/CopyStd");
+                Assert.IsNotNull(s_Resources);
+                var shader = s_Resources.shaders.copyStd;
                 s_CopyStdMaterial = new Material(shader)
                 {
                     name = "PostProcess - CopyStd",
@@ -219,7 +222,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (s_CopyStdFromDoubleWideMaterial != null)
                     return s_CopyStdFromDoubleWideMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/CopyStdFromDoubleWide");
+                Assert.IsNotNull(s_Resources);
+                var shader = s_Resources.shaders.copyStdFromDoubleWide;
                 s_CopyStdFromDoubleWideMaterial = new Material(shader)
                 {
                     name = "PostProcess - CopyStdFromDoubleWide",
@@ -238,7 +242,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (s_CopyMaterial != null)
                     return s_CopyMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/Copy");
+                Assert.IsNotNull(s_Resources);
+                var shader = s_Resources.shaders.copy;
                 s_CopyMaterial = new Material(shader)
                 {
                     name = "PostProcess - Copy",
@@ -257,7 +262,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 if (s_CopyFromTexArrayMaterial != null)
                     return s_CopyFromTexArrayMaterial;
 
-                var shader = Shader.Find("Hidden/PostProcessing/CopyStdFromTexArray");
+                Assert.IsNotNull(s_Resources);
+                var shader = s_Resources.shaders.copyStdFromTexArray;
                 s_CopyFromTexArrayMaterial = new Material(shader)
                 {
                     name = "PostProcess - CopyFromTexArray",

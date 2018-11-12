@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Camera viewport wasn't working properly when outputting directly to the backbuffer.
 - More improvements to VR support.
 - Compatibility fixes for 2017.1 to 2017.4.
+- Post-processing wouldn't work when loaded from an asset bundle.
 
 ## [2.0.17-preview]
 
