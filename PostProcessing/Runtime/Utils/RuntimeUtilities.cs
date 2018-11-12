@@ -211,6 +211,25 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        static Material s_CopyStdFromDoubleWideMaterial;
+        public static Material copyStdFromDoubleWideMaterial
+        {
+            get
+            {
+                if (s_CopyStdFromDoubleWideMaterial != null)
+                    return s_CopyStdFromDoubleWideMaterial;
+
+                var shader = Shader.Find("Hidden/PostProcessing/CopyStdFromDoubleWide");
+                s_CopyStdFromDoubleWideMaterial = new Material(shader)
+                {
+                    name = "PostProcess - CopyStdFromDoubleWide",
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+
+                return s_CopyStdFromDoubleWideMaterial;
+            }
+        }
+
         static Material s_CopyMaterial;
         public static Material copyMaterial
         {
@@ -343,6 +362,27 @@ namespace UnityEngine.Rendering.PostProcessing
 
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
             #endif
+        }
+
+        public static void BlitFullscreenTriangleFromDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, Material material, int pass, int eye)
+        {
+            Vector4 uvScaleOffset = new Vector4(0.5f, 1.0f, 0, 0);
+
+            if (eye == 1)
+                uvScaleOffset.z = 0.5f;
+            cmd.SetGlobalVector(ShaderIDs.UVScaleOffset, uvScaleOffset);
+            cmd.BuiltinBlit(source, destination, material, pass);
+        }
+
+        public static void BlitFullscreenTriangleToDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, int eye)
+        {
+            Vector4 posScaleOffset = new Vector4(0.5f, 1.0f, -0.5f, 0);
+
+            if (eye == 1)
+                posScaleOffset.z = 0.5f;
+            propertySheet.EnableKeyword("STEREO_DOUBLEWIDE_TARGET");
+            propertySheet.properties.SetVector(ShaderIDs.PosScaleOffset, posScaleOffset);
+            cmd.BlitFullscreenTriangle(source, destination, propertySheet, 0);
         }
 
         public static void BlitFullscreenTriangleFromTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)

@@ -28,6 +28,30 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
 #if UNITY_2017_2_OR_NEWER
                     var xrDesc = XRSettings.eyeTextureDesc;
+                    stereoRenderingMode = StereoRenderingMode.SinglePass;
+
+#if UNITY_STANDALONE || UNITY_EDITOR
+                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
+                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
+#endif
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
+                        numberOfEyes = 2;
+
+#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                    {
+                        numberOfEyes = 2;
+                        xrDesc.width /= 2;
+                        xrDesc.vrUsage = VRTextureUsage.None;
+                    }
+#else
+                    //before 2019.1 double-wide still issues two drawcalls
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                    {
+                        numberOfEyes = 1;
+                    }
+#endif
+
                     width = xrDesc.width;
                     height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
@@ -46,17 +70,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
-                    stereoActive = true;
-                    stereoRenderingMode = StereoRenderingMode.SinglePass;
 
-#if UNITY_STANDALONE || UNITY_EDITOR
-                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
-                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
+#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                        screenWidth /= 2;
 #endif
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
-                        numberOfEyes = 2;
-                    else
-                        numberOfEyes = 1; //currently, double-wide still issues two drawcalls
+                    stereoActive = true;
+
                 }
                 else
 #endif
