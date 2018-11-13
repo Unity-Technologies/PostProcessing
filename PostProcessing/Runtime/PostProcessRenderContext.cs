@@ -174,9 +174,14 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public int xrActiveEye { get; private set; }
 
-        // Pixel dimensions of logical screen size
+        /// <summary>
+        /// The number of eyes for XR outputs.
+        /// </summary>
         public int numberOfEyes { get; private set; }
 
+        /// <summary>
+        /// Available XR rendering modes.
+        /// </summary>
         public enum StereoRenderingMode
         {
             MultiPass = 0,
@@ -185,6 +190,9 @@ namespace UnityEngine.Rendering.PostProcessing
             SinglePassMultiview
         }
 
+        /// <summary>
+        /// The current rendering mode for XR.
+        /// </summary>
         public StereoRenderingMode stereoRenderingMode { get; private set; }
 
         /// <summary>

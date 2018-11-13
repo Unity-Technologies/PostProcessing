@@ -779,6 +779,13 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentContext = context;
         }
 
+        /// <summary>
+        /// Updates the state of the volume system. This should be called before any other
+        /// post-processing method when running in a scriptable render pipeline. You don't need to
+        /// call this method when running in one of the builtin pipelines.
+        /// </summary>
+        /// <param name="cam">The currently rendering camera.</param>
+        /// <param name="cmd">A command buffer to fill.</param>
         public void UpdateVolumeSystem(Camera cam, CommandBuffer cmd)
         {
             if (m_SettingsUpdateNeeded)
@@ -797,9 +804,12 @@ namespace UnityEngine.Rendering.PostProcessing
             m_SettingsUpdateNeeded = false;
         }
 
-        // Renders before-transparent effects.
-        // Make sure you check `HasOpaqueOnlyEffects()` before calling this method as it won't
-        // automatically blit source into destination if no opaque effects are active.
+        /// <summary>
+        /// Renders effects in the <see cref="PostProcessEvent.BeforeTransparent"/> bucket. You
+        /// should call <see cref="HasOpaqueOnlyEffects"/> before calling this method as it won't
+        /// automatically blit source into destination if no opaque-only effect is active.
+        /// </summary>
+        /// <param name="context">The current post-processing context.</param>
         public void RenderOpaqueOnly(PostProcessRenderContext context)
         {
             if (RuntimeUtilities.scriptableRenderPipelineActive)
@@ -815,15 +825,10 @@ namespace UnityEngine.Rendering.PostProcessing
             RenderList(sortedBundles[PostProcessEvent.BeforeTransparent], context, "OpaqueOnly");
         }
 
-        // Renders everything not opaque-only
-        //
-        // Current order of operation is as following:
-        //     1. Pre-stack
-        //     2. Built-in stack
-        //     3. Post-stack
-        //     4. Built-in final pass
-        //
-        // Final pass should be skipped when outputting to a HDR display.
+        /// <summary>
+        /// Renders all effects not in the <see cref="PostProcessEvent.BeforeTransparent"/> bucket.
+        /// </summary>
+        /// <param name="context">The current post-processing context.</param>
         public void Render(PostProcessRenderContext context)
         {
             if (RuntimeUtilities.scriptableRenderPipelineActive)

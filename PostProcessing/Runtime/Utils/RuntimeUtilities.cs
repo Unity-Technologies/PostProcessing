@@ -277,6 +277,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Material s_CopyStdFromDoubleWideMaterial;
+
+        /// <summary>
+        /// A double-wide copy material to use with VR and the builtin pipelines.
+        /// </summary>
         public static Material copyStdFromDoubleWideMaterial
         {
             get
@@ -321,6 +325,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static Material s_CopyFromTexArrayMaterial;
+
+        /// <summary>
+        /// A copy material with a texture array slice as a source for the builtin pipelines.
+        /// </summary>
         public static Material copyFromTexArrayMaterial
         {
             get
@@ -357,6 +365,10 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         static PropertySheet s_CopyFromTexArraySheet;
+
+        /// <summary>
+        /// A pre-configured <see cref="PropertySheet"/> for <see cref="copyFromTexArrayMaterial"/>.
+        /// </summary>
         public static PropertySheet copyFromTexArraySheet
         {
             get
@@ -415,6 +427,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="source">The source render target</param>
         /// <param name="destination">The destination render target</param>
         /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false, Rect? viewport = null)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -438,6 +451,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="loadAction">The load action for this blit</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction, Rect? viewport = null)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -466,6 +480,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, Rect? viewport = null)
         {
             #if UNITY_2018_2_OR_NEWER
@@ -484,6 +499,15 @@ namespace UnityEngine.Rendering.PostProcessing
             #endif
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle from a double-wide source.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="material">The material to use for the blit</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="eye">The target eye</param>
         public static void BlitFullscreenTriangleFromDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, Material material, int pass, int eye)
         {
             Vector4 uvScaleOffset = new Vector4(0.5f, 1.0f, 0, 0);
@@ -494,6 +518,15 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BuiltinBlit(source, destination, material, pass);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle to a double-wide destination.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="eye">The target eye</param>
         public static void BlitFullscreenTriangleToDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, int eye)
         {
             Vector4 posScaleOffset = new Vector4(0.5f, 1.0f, -0.5f, 0);
@@ -505,6 +538,16 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BlitFullscreenTriangle(source, destination, propertySheet, 0);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source texture array</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="depthSlice">The slice to use for the texture array</param>
         public static void BlitFullscreenTriangleFromTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -527,6 +570,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="depthSlice">The array slice to consider as a source</param>
         public static void BlitFullscreenTriangleToTexArray(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, int depthSlice = -1)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -539,6 +583,17 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DrawMesh(fullscreenTriangle, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
+        /// <summary>
+        /// Blits a fullscreen triangle using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="depth">The depth render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false, Rect? viewport = null)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
@@ -571,6 +626,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
         public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier[] destinations, RenderTargetIdentifier depth, PropertySheet propertySheet, int pass, bool clear = false, Rect? viewport = null)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);

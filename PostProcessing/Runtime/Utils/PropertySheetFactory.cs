@@ -26,6 +26,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         /// <param name="shaderName">The name of the shader to retrieve a sheet for</param>
         /// <returns>A sheet for the given shader</returns>
+        /// <remarks>
+        /// This method will not work when loading post-processing from an asset bundle. For this
+        /// reason it is recommended to use <see cref="Get(Shader)"/> instead.
+        /// </remarks>
         /// <exception cref="ArgumentException">Thrown if the shader is invalid</exception>
         [Obsolete("Use PropertySheet.Get(Shader) with a direct reference to the Shader instead.")]
         public PropertySheet Get(string shaderName)
