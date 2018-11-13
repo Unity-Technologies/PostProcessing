@@ -7,7 +7,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    public sealed class EffectListEditor
+    sealed class EffectListEditor
     {
         public PostProcessProfile asset { get; private set; }
         Editor m_BaseEditor;

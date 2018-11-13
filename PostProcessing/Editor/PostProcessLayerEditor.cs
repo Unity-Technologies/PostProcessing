@@ -12,7 +12,7 @@ namespace UnityEditor.Rendering.PostProcessing
     using EXRFlags = Texture2D.EXRFlags;
 
     [CanEditMultipleObjects, CustomEditor(typeof(PostProcessLayer))]
-    public sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
+    sealed class PostProcessLayerEditor : BaseEditor<PostProcessLayer>
     {
         SerializedProperty m_StopNaNPropagation;
 #pragma warning disable 414

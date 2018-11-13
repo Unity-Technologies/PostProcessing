@@ -5,6 +5,10 @@ using UnityEngine.Assertions;
 namespace UnityEngine.Rendering.PostProcessing
 {
     // Temporary code dump until the texture format refactor goes into trunk...
+
+    /// <summary>
+    /// A set of utilities to deal with texture formats.
+    /// </summary>
     public static class TextureFormatUtilities
     {
         static Dictionary<int, RenderTextureFormat> s_FormatAliasMap;
@@ -126,6 +130,11 @@ namespace UnityEngine.Rendering.PostProcessing
             return attributes != null && attributes.Length > 0;
         }
 
+        /// <summary>
+        /// Returns a <see cref="RenderTextureFormat"/> compatible with the given texture's format.
+        /// </summary>
+        /// <param name="texture">A texture to get a compatible format from</param>
+        /// <returns>A compatible render texture format</returns>
         public static RenderTextureFormat GetUncompressedRenderTextureFormat(Texture texture)
         {
             Assert.IsNotNull(texture);
