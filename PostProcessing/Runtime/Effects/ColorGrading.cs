@@ -470,8 +470,6 @@ namespace UnityEngine.Rendering.PostProcessing
                         break;
                 }
 
-                int groupSizeXY = Mathf.CeilToInt(k_Lut3DSize / 8f);
-                int groupSizeZ = Mathf.CeilToInt(k_Lut3DSize / (RuntimeUtilities.isAndroidOpenGL ? 2f : 8f));
                 var cmd = context.command;
                 cmd.SetComputeTextureParam(compute, kernel, "_Output", m_InternalLogLut);
                 cmd.SetComputeVectorParam(compute, "_Size", new Vector4(k_Lut3DSize, 1f / (k_Lut3DSize - 1f), 0f, 0f));
@@ -523,7 +521,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 // Generate the lut
                 context.command.BeginSample("HdrColorGradingLut3D");
-                cmd.DispatchCompute(compute, kernel, groupSizeXY, groupSizeXY, groupSizeZ);
+                int groupSize = Mathf.CeilToInt(k_Lut3DSize / 4f);
+                cmd.DispatchCompute(compute, kernel, groupSize, groupSize, groupSize);
                 context.command.EndSample("HdrColorGradingLut3D");
             }
 
@@ -661,7 +660,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.command.BeginSample("LdrColorGradingLut2D");
 
                 var userLut = settings.ldrLut.value;
-                if (userLut == null)
+                if (userLut == null || userLut.width != userLut.height * userLut.height)
                 {
                     context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_InternalLdrLut, lutSheet, (int)Pass.LutGenLDRFromScratch);
                 }

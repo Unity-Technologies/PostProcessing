@@ -27,6 +27,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="shaderName">The name of the shader to retrieve a sheet for</param>
         /// <returns>A sheet for the given shader</returns>
         /// <exception cref="ArgumentException">Thrown if the shader is invalid</exception>
+        [Obsolete("Use PropertySheet.Get(Shader) with a direct reference to the Shader instead.")]
         public PropertySheet Get(string shaderName)
         {
             var shader = Shader.Find(shaderName);

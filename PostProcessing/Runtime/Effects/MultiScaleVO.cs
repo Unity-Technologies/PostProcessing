@@ -540,7 +540,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return DepthTextureMode.None;
         }
 
-        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert)
+        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
         }
 

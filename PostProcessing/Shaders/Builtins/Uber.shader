@@ -11,6 +11,9 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ FINALPASS
+        #pragma multi_compile __ STEREO_INSTANCING_ENABLED
+        #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET
+
 
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"

@@ -6,7 +6,11 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <remarks>
     /// These utilities can be used at runtime to debug on device.
     /// </remarks>
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
     [ExecuteInEditMode]
+#endif
     [AddComponentMenu("Rendering/Post-process Debug", 1002)]
     public sealed class PostProcessDebug : MonoBehaviour
     {

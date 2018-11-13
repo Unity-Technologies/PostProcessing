@@ -28,11 +28,35 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
-#if !UNITY_SWITCH
+#if !UNITY_SWITCH && ENABLE_VR
                 if (m_Camera.stereoEnabled)
                 {
 #if UNITY_2017_2_OR_NEWER
                     var xrDesc = XRSettings.eyeTextureDesc;
+                    stereoRenderingMode = StereoRenderingMode.SinglePass;
+
+#if UNITY_STANDALONE || UNITY_EDITOR
+                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
+                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
+#endif
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
+                        numberOfEyes = 2;
+
+#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                    {
+                        numberOfEyes = 2;
+                        xrDesc.width /= 2;
+                        xrDesc.vrUsage = VRTextureUsage.None;
+                    }
+#else
+                    //before 2019.1 double-wide still issues two drawcalls
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                    {
+                        numberOfEyes = 1;
+                    }
+#endif
+
                     width = xrDesc.width;
                     height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
@@ -51,7 +75,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
+
+#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+                        screenWidth /= 2;
+#endif
                     stereoActive = true;
+
                 }
                 else
 #endif
@@ -66,6 +96,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = width;
                     screenHeight = height;
                     stereoActive = false;
+                    numberOfEyes = 1;
                 }
             }
         }
@@ -142,6 +173,19 @@ namespace UnityEngine.Rendering.PostProcessing
         /// The current active rendering eye (for XR).
         /// </summary>
         public int xrActiveEye { get; private set; }
+
+        // Pixel dimensions of logical screen size
+        public int numberOfEyes { get; private set; }
+
+        public enum StereoRenderingMode
+        {
+            MultiPass = 0,
+            SinglePass,
+            SinglePassInstanced,
+            SinglePassMultiview
+        }
+
+        public StereoRenderingMode stereoRenderingMode { get; private set; }
 
         /// <summary>
         /// The width of the logical screen size.
@@ -316,6 +360,10 @@ namespace UnityEngine.Rendering.PostProcessing
             if (heightOverride > 0)
                 desc.height = heightOverride;
 
+            //intermediates in VR are unchanged
+            if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
+               desc.dimension = Rendering.TextureDimension.Tex2D;
+          
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
             int actualWidth = width;
