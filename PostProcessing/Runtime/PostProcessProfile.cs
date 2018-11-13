@@ -12,7 +12,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// A list of all settings stored in this profile.
         /// </summary>
-        [Tooltip("A list of all effects currently set in the stack.")]
+        [Tooltip("A list of all settings currently stored in this profile.")]
         public List<PostProcessEffectSettings> settings = new List<PostProcessEffectSettings>();
 
         // Editor only, doesn't have any use outside of it
