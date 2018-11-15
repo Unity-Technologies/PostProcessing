@@ -1,3 +1,5 @@
+# Manipulating the Stack
+
 ## Quick Volumes
 
 While working on a game you'll often need to push effect overrides on the stack for time-based events or temporary states. You could dynamically create a global volume on the scene, create a profile, create a few overrides, put them into the profile and assign the profile to the volume but that's not very practical.
@@ -43,9 +45,9 @@ public class VignettePulse : MonoBehaviour
         m_Vignette.intensity.value = Mathf.Sin(Time.realtimeSinceStartup);
     }
 
-    void Destroy()
+    void OnDestroy()
     {
-        RuntimeUtilities.DestroyVolume(m_Volume, true);
+        RuntimeUtilities.DestroyVolume(m_Volume, true, true);
     }
 }
 ```
@@ -82,7 +84,7 @@ public class VignettePulse : MonoBehaviour
             .Append(DOTween.To(() => volume.weight, x => volume.weight = x, 0f, 1f))
             .OnComplete(() =>
             {
-                RuntimeUtilities.DestroyVolume(volume, true);
+                RuntimeUtilities.DestroyVolume(volume, true, true);
                 Destroy(this);
             });
     }

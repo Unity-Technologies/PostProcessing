@@ -1,8 +1,12 @@
+# Ambient Occlusion
+
 The **Ambient Occlusion** post-processing effect approximates [Ambient Occlusion](http://en.wikipedia.org/wiki/Ambient_occlusion) in real time as a full-screen post-processing effect. It darkens creases, holes, intersections and surfaces that are close to each other. In real life, such areas tend to block out or occlude ambient light, hence they appear darker.
 
 Note that the **Ambient Occlusion** effect is quite expensive in terms of processing time and generally should only be used on desktop or console hardware. Its cost depends purely on screen resolution and the effects parameters and does not depend on scene complexity as true ambient occlusion would.
 
-> **TODO:** before/after screenshot
+
+![](images/screenshot-ao.jpg)
+
 
 The effect comes with two modes:
 
@@ -13,7 +17,9 @@ The effect comes with two modes:
 
 This is a standard implementation of ambient obscurance that works on non modern platforms. If you target a compute-enabled platform we recommend that you use the **Multi-scale Volumetric Occlusion** mode instead.
 
-![Scalable Ambient Obscurance](images/ssao-1.png)
+
+![](images/ssao-1.png)
+
 
 ### Properties
 
@@ -44,7 +50,9 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 This is a more modern version of ambient occlusion heavily optimized for consoles and desktop platforms. It generally looks better and runs faster than the other mode on these platforms but requires compute shader support.
 
-![Multi-scale Volumetric Occlusion](images/ssao-2.png)
+
+![](images/ssao-2.png)
+
 
 ### Properties
 

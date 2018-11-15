@@ -1,8 +1,14 @@
+# Lens Distortion
+
 This effect simulates the shape of a lens by distorting or undistorting the final rendered picture.
 
-> **TODO:** before/after screenshot
 
-![Lens Distortion](images/lensdistortion.png)
+![](images/screenshot-distortion.jpg)
+
+
+
+![](images/lensdistortion.png)
+
 
 ### Properties
 

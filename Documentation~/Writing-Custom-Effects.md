@@ -1,3 +1,5 @@
+# Writing Custom Effects
+
 This framework allows you to write custom post-processing effects and plug them to the stack without having to modify the codebase. Of course, all effects written against the framework will work out-of-the-box with volume blending, and unless you need loop-dependent features they'll also automatically work with upcoming  [Scriptable Render Pipelines](https://github.com/Unity-Technologies/ScriptableRenderLoop)!
 
 Let's write a very simple grayscale effect to show it off.
@@ -125,7 +127,7 @@ Shader "Hidden/Custom/Grayscale"
 {
     HLSLINCLUDE
 
-        #include "PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float _Blend;

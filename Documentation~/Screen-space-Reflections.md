@@ -1,12 +1,18 @@
+# Screen-space Reflection 
+
 **Screen-space Reflection** is a technique for reusing screen-space data to calculate reflections. It is commonly used to create more subtle reflections such as on wet floor surfaces or in puddles. Because it fully works in screen-space it can only reflect what's currently on the screen (no backface reflection, no object living outside of the screen).
 
 **Screen-space Reflection** is an expensive technique, but when used correctly can give great results. It is only available in the [deferred rendering path](https://docs.unity3d.com/Manual/RenderTech-DeferredShading.html) as it relies on the Normals G-Buffer.
 
 The current implementation of **Screen-space reflections** in Unity is tuned for performance over quality to make it usable in production on current-gen consoles and desktop computers. Be aware that this technique isn't meant to be used to get perfectly smooth reflections, you should use probes or planar reflections of that. This effect is also great at acting as a specular occlusion effect by limiting the amount of specular light leaking.
 
-> **TODO:** before/after screenshot
 
-![Screen Space Reflections](images/ssr.png)
+![](images/screenshot-ssr.jpg)
+
+
+
+![](images/ssr.png)
+
 
 ### Properties
 

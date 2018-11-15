@@ -1,12 +1,16 @@
+# Color Grading
+
 Color grading is the process of altering or correcting the color and luminance of the final image. You can think of it like applying filters in software like Instagram.
 
-> **TODO:** before/after screenshot
+
+![](images/screenshot-grading.jpg)
+
 
 The **Color Grading** effect comes with three modes:
 
 - **Low Definition Range:** this mode is aimed at lower-end platforms but it can be used on any platform. Grading is applied to the final rendered frame clamped in a [0,1] range and stored in a standard LUT.
 - **High Definition Range:** this mode is aimed at platforms that support HDR rendering. All the color operations will be applied in HDR and stored into a 3D log-encoded LUT to ensure a sufficient range coverage and precision (Alexa LogC El1000).
-- **External:** this mode allows you to provide a custom 3D LUT authored in an external software. **TODO:** tutorial
+- **External:** this mode allows you to provide a custom 3D LUT authored in an external software.
 
 ### Requirements
 
@@ -16,7 +20,9 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 ## Global Settings
 
-![Color Grading - Global Settings](images/grading-1.png)
+
+![](images/grading-1.png)
+
 
 > **Note:** these are only available for the **Low Definition Range** and **External** modes.
 
@@ -40,7 +46,9 @@ The **High Definition Range** mode comes with 4 tonemapping operators:
 - **ACES**: uses a close approximation of the reference [ACES](http://www.oscars.org/science-technology/sci-tech-projects/aces) tonemapper for a more filmic look. Because of that, it is more contrasted than **Neutral** and has an effect on actual color hue & saturation. Note that if you enable this tonemapper all the grading operations will be done in the ACES color spaces for optimal precision and results.
 - **Custom:** a fully parametric tonemapper.
 
-![Color Grading - Tonemapping](images/grading-2.png)
+
+![](images/grading-2.png)
+
 
 > **Note**: these are only available for the **High Definition Range** mode.
 
@@ -59,7 +67,9 @@ The **High Definition Range** mode comes with 4 tonemapping operators:
 
 ## White Balance
 
-![Color Grading - White Balance](images/grading-3.png)
+
+![](images/grading-3.png)
+
 
 ### Properties
 
@@ -70,7 +80,9 @@ The **High Definition Range** mode comes with 4 tonemapping operators:
 
 ## Tone
 
-![Color Grading - Tone](images/grading-4.png)
+
+![](images/grading-4.png)
+
 
 ### Properties
 
@@ -87,7 +99,9 @@ The **High Definition Range** mode comes with 4 tonemapping operators:
 
 This is used to modify the influence of each input color channel on the overall mix of the output channel. For example, increasing the influence of the green channel on the overall mix of the red channel will adjust all areas of the image containing green (including neutral/monochrome) to become more reddish in hue.
 
-![Color Grading - Channel Mixer](images/grading-5.png)
+
+![](images/grading-5.png)
+
 
 ### Properties
 
@@ -104,7 +118,9 @@ The trackballs are used to perform three-way color grading. Adjusting the positi
 
 > **Note:** you can right-click a trackball to reset it to its default value. You can also change the trackballs sensitivity by going to `Edit -> Preferences -> PostProcessing`.
 
-![Color Grading - Trackballs](images/grading-6.png)
+
+![](images/grading-6.png)
+
 
 ### Properties
 
@@ -122,7 +138,9 @@ Grading curves are an advanced way to adjust specific ranges in hue, saturation 
 
 These curves, also called `Master`, `Red`, `Green` and `Blue` affect the selected input channels intensity across the whole image. The X axis of the graph represents input intensity and the Y axis represents output intensity for the selected channel. This can be used to further adjust the appearance of basic attributes such as contrast and brightness.
 
-![Color Grading - YRGB](images/grading-11.png)
+
+![](images/grading-11.png)
+
 
 >  **Note:** these curves are only available with the **Low Definition Range** mode.
 
@@ -130,22 +148,29 @@ These curves, also called `Master`, `Red`, `Green` and `Blue` affect the selecte
 
 Used to shift hues within specific ranges. This curve shifts the input hue (X axis) according to the output hue (Y axis). This can be used to fine tune hues of specific ranges or perform color replacement.
 
-![Color Grading - Hue vs Hue](images/grading-7.png)
+
+![](images/grading-7.png)
+
 
 ### Hue vs Sat
 
 Used to adjust saturation of hues within specific ranges. This curve adjusts saturation (Y axis) according to the input hue (X axis). This can be used to tone down particularly bright areas or create artistic effects such as monochromatic except a single dominant color.
 
-![Color Grading - Hue vs Sat](images/grading-8.png)
+
+![](images/grading-8.png)
+
 
 ### Sat vs Sat
 
 Used to adjust saturation of areas of certain saturation. This curve adjusts saturation (Y axis) according to the input saturation (X axis). This can be used to fine tune saturation adjustments made with settings from the **Tone** section.
 
-![Color Grading - Sat vs Sat](images/grading-9.png)
+
+![](images/grading-9.png)
+
 
 ### Lum vs Sat
 
 Used to adjust saturation of areas of certain luminance. This curve adjusts saturation (Y axis) according to the input luminance (X axis). This can be used to desaturate areas of darkness to provide an interesting visual contrast.
 
-![Color Grading - Lum vs Sat](images/grading-10.png)
+
+![](images/grading-10.png)

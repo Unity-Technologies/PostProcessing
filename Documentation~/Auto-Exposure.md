@@ -1,12 +1,14 @@
+# Auto Exposure
+
 In ocular physiology, adaptation is the ability of the eye to adjust to various levels of darkness and light. The human eye can function from very dark to very bright levels of light. However, in any given moment of time, the eye can only sense a contrast ratio of roughly one millionth of the total range. What enables the wider reach is that the eye adapts its definition of what is black.
 
 This effect dynamically adjusts the exposure of the image according to the range of brightness levels it contains. The adjustment takes place gradually over a period of time, so the player can be briefly dazzled by bright outdoor light when, say, emerging from a dark tunnel. Equally, when moving from a bright scene to a dark one, the “eye” takes some time to adjust.
 
 Internally, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram, and as such the effect, requires [Compute shader](https://docs.unity3d.com/Manual/ComputeShaders.html) support.
 
-> **TODO:** before/after screenshot
 
-![Auto Exposure](images/autoexposure.png)
+![](images/autoexposure.png)
+
 
 ### Properties
 
