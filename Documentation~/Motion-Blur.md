@@ -1,8 +1,15 @@
+# Motion Blur
+
 **Motion Blur** is a common post-processing effect that simulates the blurring of an image when objects filmed by a camera are moving faster than the camera’s exposure time. This can be caused by rapidly moving objects or a long exposure time. **Motion Blur** is used to subtle effect in most types of games but exaggerated in some genres, such as racing games.
 
-> **TODO:** before/after screenshot
 
-![Motion Blur](images/motionblur.png)
+![](images/screenshot-motionblur.jpg)
+<br><em>Motion blur on a camera that rotates very fast</em>
+
+
+
+![](images/motionblur.png)
+
 
 ### Properties
 

@@ -1,10 +1,16 @@
+# Bloom
+
 **Bloom** is an effect used to reproduce an imaging artifact of real-world cameras. The effect produces fringes of light extending from the borders of bright areas in an image, contributing to the illusion of an extremely bright light overwhelming the camera or eye capturing the scene.
 
 **Lens Dirt** applies a fullscreen layer of smudges or dust to diffract the Bloom effect. This is commonly used in modern first person shooters.
 
-> **TODO:** before/after screenshot
 
-![Bloom](images/bloom.png)
+![](images/screenshot-bloom.jpg)
+
+
+
+![](images/bloom.png)
+
 
 ### Properties
 
@@ -15,6 +21,7 @@
 | Intensity        | Strength of the Bloom filter.                                |
 | Threshold        | Filters out pixels under this level of brightness. This value is expressed in gamma-space. |
 | Soft Knee        | Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold). |
+| Clamp            | Clamps pixels to control the bloom amount. This value is expressed in gamma-space. |
 | Diffusion        | Changes extent of veiling effects in a screen resolution-independent fashion. |
 | Anamorphic Ratio | Emulates the effect of an anamorphic lens by scaling the bloom vertically (in range [-1,0]) or horizontally (in range [0,1]). |
 | Color            | Tint of the Bloom filter.                                    |

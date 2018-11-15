@@ -1,10 +1,16 @@
+# Deferred Fog
+
 Fog is the effect of overlaying a color onto objects dependent on the distance from the camera. This is used to simulate fog or mist in outdoor environments and is also typically used to hide clipping of objects when a camera’s far clip plane has been moved forward for performance.
 
 The Fog effect creates a screen-space fog based on the camera’s [depth texture](https://docs.unity3d.com/Manual/SL-DepthTextures.html). It supports Linear, Exponential and Exponential Squared fog types. Fog settings should be set in the **Scene** tab of the **Lighting** window.
 
-> **TODO:** before/after screenshot
 
-![Deferred Fog](images/deferredfog.png)
+![](images/screenshot-fog.jpg)
+
+
+
+![](images/deferredfog.png)
+
 
 ### Properties
 

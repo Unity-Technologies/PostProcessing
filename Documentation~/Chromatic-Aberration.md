@@ -1,10 +1,16 @@
+# Chromatic Aberration
+
 In photography, chromatic aberration is an effect resulting from a camera’s lens failing to converge all colors to the same point. It appears as “fringes” of color along boundaries that separate dark and bright parts of the image.
 
 The **Chromatic Aberration** effect is used to replicate this camera defect, it is also often used to artistic effect such as part of camera impact or intoxication effects. This implementation provides support for red/blue and green/purple fringing as well as user defined color fringing via an input texture.
 
-> **TODO:** before/after screenshot
 
-![Chromatic Aberration](images/chroma.png)
+![](images/screenshot-chroma.jpg)
+
+
+
+![](images/chroma.png)
+
 
 ### Properties
 

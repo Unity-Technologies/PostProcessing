@@ -1,8 +1,14 @@
+# Depth of Field
+
 **Depth of Field** is a common post-processing effect that simulates the focus properties of a camera lens. In real life, a camera can only focus sharply on an object at a specific distance; objects nearer or farther from the camera will be somewhat out of focus. The blurring not only gives a visual cue about an object’s distance but also introduces Bokeh which is the term for pleasing visual artifacts that appear around bright areas of the image as they fall out of focus.
 
-> **TODO:** before/after screenshot
 
-![Depth of Field](images/dof.png)
+![](images/screenshot-dof.jpg)
+
+
+
+![](images/dof.png)
+
 
 ### Properties
 

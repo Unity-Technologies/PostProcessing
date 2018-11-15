@@ -1,8 +1,12 @@
+# Anti-aliasing
+
 The **Anti-aliasing** effect offers a set of algorithms designed to prevent aliasing and give a smoother appearance to graphics. Aliasing is an effect where lines appear jagged or have a “staircase” appearance (as displayed in the left-hand image below). This can happen if the graphics output device does not have a high enough resolution to display a straight line.
 
 **Anti-aliasing** reduces the prominence of these jagged lines by surrounding them with intermediate shades of color. Although this reduces the jagged appearance of the lines, it also makes them blurrier.
 
-> **TODO:** before/after screenshot
+
+![](images/screenshot-antialiasing.jpg)
+
 
 The Anti-aliasing algorithms are image-based. This is very useful when traditional multisampling (as used in the Editor’s [Quality settings](https://docs.unity3d.com/Manual/class-QualitySettings.html)) is not properly supported or when working with specular-heavy PBR materials.
 
@@ -18,7 +22,9 @@ They are set per-camera on the **Post-process Layer** component.
 
 **FXAA** is the cheapest technique and is recommended for mobile and other platforms that don’t support motion vectors, which are required for **TAA**.
 
-![Fast Approximate Anti-aliasing](images/aa-1.png)
+
+![](images/aa-1.png)
+
 
 ### Properties
 
@@ -41,7 +47,9 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 **SMAA** is a higher quality anti-aliasing effect than **FXAA** but it's also slower. Depending on the art-style of your game it can work as well as **TAA** while avoiding some of the shortcomings of this technique.
 
-![Subpixel Morphological Anti-aliasing](images/aa-2.png)
+
+![](images/aa-2.png)
+
 
 ### Properties
 
@@ -67,7 +75,9 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 **TAA** is a more advanced anti-aliasing technique where frames are accumulated over time in a history buffer to be used to smooth edges more effectively. It is substantially better at smoothing edges in motion but requires motion vectors and is more expensive than **FXAA**. Due to this it is recommended for desktop and console platforms.
 
-![Temporal Anti-aliasing](images/aa-3.png)
+
+![](images/aa-3.png)
+
 
 ### Properties
 

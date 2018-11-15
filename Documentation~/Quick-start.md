@@ -1,15 +1,18 @@
+# Quick-start
 > **Note:** if you created a project using one of the template that includes Post-processing then you don't need to go through most of these steps although we recommend you read them to understand how everything works.
 
 ## Post-process Layer
 
 The first thing you need to enable post-processing on a camera is to add the `Component -> Rendering -> Post-process Layer` component to it.
 
-![Quickstart 1](images/quickstart-1.png)
+
+![](images/quickstart-1.png)
+
 
 The first section describes **Volume blending** settings for this camera:
 
-- **Trigger:** by default the camera itself will be assigned to it. This is transform that will be drive the volume blending feature. In some cases you may want to use a transform other than the camera, e.g. for a top down game you'll want the player character to drive the blending instead of the actual camera transform.
-- **Layer:** a mask of layers to consider for volume blending. It allows you to do volume filtering and is especially useful to optimize volume traversal. You should always have your volumes in dedicated layers instead of the default one for best performances. By default it's set to `Nothing` so don't forget to change it or local volumes won't have any effect.
+- **Trigger:** by default the camera itself will be assigned to it. This is transform that will be drive the volume blending feature. In some cases you may want to use a transform other than the camera, e.g. for a top down game you'll want the player character to drive the blending instead of the actual camera transform. Setting this field to `None` will disable local volumes for this layer (global ones will still work).
+- **Layer:** a mask of layers to consider for volume blending. It allows you to do volume filtering and is especially useful to optimize volume traversal. You should always have your volumes in dedicated layers instead of the default one for best performances. By default it's set to `Nothing` so don't forget to change it or volumes won't have any effect. For more information on layers and their use in Unity please refer to [this manual page](https://docs.unity3d.com/Manual/Layers.html).
 
 Next comes **Anti-aliasing** which has to be setup per-camera. The benefit of doing it that way instead of having a global setting in the project is that you can optimize your cameras to only use anti-aliasing when needed. For instance, your main camera could be using **Temporal Anti-aliasing** but a secondary one used to render a security camera would only require **FXAA**. More information about anti-aliasing is available on the [dedicated effect page](https://github.com/Unity-Technologies/PostProcessing/wiki/Anti-aliasing).
 
@@ -35,7 +38,9 @@ The way post-processing works in this framework is by using local & global volum
 
 The **Post-process Volume** component can be added to any game object, the camera itself included. But it's generally a good idea to create a dedicated object for each volume. Let's start by creating a global **Post-process Volume**. Create an empty game object and add the component to it (`Component -> Rendering -> Pöst-process Volume`) or use `GameObject -> 3D Object -> Post-process Volume`. Don't forget to add it to a layer that's being used by the mask set in the **Post-process Layer** component you added to your camera.
 
-![Quickstart 2](images/quickstart-2.png)
+
+![](images/quickstart-2.png)
+
 
 By default it's completely empty. Volumes come with two modes:
 
@@ -52,7 +57,9 @@ We also need a to create a profile for this volume (or re-use an existing one). 
 
 We can now start adding effect overrides to the stack.
 
-![Quickstart 3](images/quickstart-3.png)
+
+![](images/quickstart-3.png)
+
 
 The anatomy of an effect is as follow:
 
