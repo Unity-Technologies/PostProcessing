@@ -2,18 +2,6 @@ Shader "Hidden/PostProcessing/Uber"
 {
     HLSLINCLUDE
 
-        #pragma target 3.0
-
-        #pragma multi_compile __ DISTORT
-        #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
-        #pragma multi_compile __ BLOOM BLOOM_LOW
-        #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-        #pragma multi_compile __ VIGNETTE
-        #pragma multi_compile __ GRAIN
-        #pragma multi_compile __ FINALPASS
-        #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
-
-
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
@@ -273,11 +261,51 @@ Shader "Hidden/PostProcessing/Uber"
         {
             HLSLPROGRAM
 
+				#pragma target 3.0
+
+				#pragma exclude_renderers gles
+
+				#pragma multi_compile __ DISTORT
+				#pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
+				#pragma multi_compile __ BLOOM BLOOM_LOW
+				#pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
+				#pragma multi_compile __ VIGNETTE
+				#pragma multi_compile __ GRAIN
+				#pragma multi_compile __ FINALPASS
+				#pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
+
                 #pragma vertex VertUVTransform
                 #pragma fragment FragUber
 
             ENDHLSL
         }
-
     }
+
+	SubShader
+	{
+		Cull Off ZWrite Off ZTest Always
+
+		Pass
+		{
+			HLSLPROGRAM
+
+				#pragma target 3.0
+
+				#pragma only_renderers gles
+
+				#pragma multi_compile __ DISTORT
+				#pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
+				#pragma multi_compile __ BLOOM BLOOM_LOW
+				#pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D // not supported by OpenGL ES 2.0: COLOR_GRADING_HDR_3D
+				#pragma multi_compile __ VIGNETTE
+				#pragma multi_compile __ GRAIN
+				#pragma multi_compile __ FINALPASS
+				#pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET // not supported by OpenGL ES 2.0: STEREO_INSTANCING_ENABLED
+
+				#pragma vertex VertUVTransform
+				#pragma fragment FragUber
+
+			ENDHLSL
+		}
+	}
 }
