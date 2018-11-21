@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.TestTools;
 using UnityEngine.SceneManagement;
@@ -16,6 +17,8 @@ class PostProcessingTests : IPrebuildSetup
     const float k_Epsilon = 1e-4f;
 
     static List<string> s_Scenes;
+
+    CommandBuffer m_DummyCmd;
 
     static PostProcessingTests()
     {
@@ -43,6 +46,19 @@ class PostProcessingTests : IPrebuildSetup
 
         EditorBuildSettings.scenes = scenes.ToArray();
 #endif
+    }
+
+    [SetUp]
+    public void Init()
+    {
+        m_DummyCmd = new CommandBuffer();
+    }
+
+    [TearDown]
+    public void Cleanup()
+    {
+        m_DummyCmd.Release();
+        m_DummyCmd = null;
     }
 
     static PostProcessLayer GrabPostProcessLayer()
@@ -94,6 +110,8 @@ class PostProcessingTests : IPrebuildSetup
 
         yield return null; // Skip a frame
 
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
+
         var vignette = ppLayer.GetSettings<Vignette>();
         Assert.AreEqual(1f, vignette.intensity.value, k_Epsilon);
         Assert.IsTrue(vignette.rounded.value);
@@ -111,6 +129,8 @@ class PostProcessingTests : IPrebuildSetup
 
         yield return null; // Skip a frame
 
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
+
         var vignette = ppLayer.GetSettings<Vignette>();
         Assert.AreEqual(Color.red, vignette.color.value);
     }
@@ -126,6 +146,8 @@ class PostProcessingTests : IPrebuildSetup
         ppLayer.volumeLayer = -1;
 
         yield return null; // Skip a frame
+
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
 
         var vignette = ppLayer.GetSettings<Vignette>();
         Assert.AreEqual(0.5f, vignette.color.value.r, k_Epsilon);
@@ -143,6 +165,8 @@ class PostProcessingTests : IPrebuildSetup
 
         yield return null; // Skip a frame
 
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
+
         var vignette = ppLayer.GetSettings<Vignette>();
         Assert.AreEqual(0.75f, vignette.color.value.r, k_Epsilon);
     }
@@ -158,6 +182,8 @@ class PostProcessingTests : IPrebuildSetup
         ppLayer.volumeLayer = -1;
 
         yield return null; // Skip a frame
+
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
 
         var volume = PostProcessManager.instance.GetHighestPriorityVolume(ppLayer);
         Assert.IsNotNull(volume);
@@ -175,6 +201,8 @@ class PostProcessingTests : IPrebuildSetup
         ppLayer.volumeLayer = -1;
 
         yield return null; // Skip a frame
+
+        ppLayer.UpdateVolumeSystem(ppLayer.GetComponent<Camera>(), m_DummyCmd);
 
         var results = new List<PostProcessVolume>();
         PostProcessManager.instance.GetActiveVolumes(ppLayer, results, true, true);
