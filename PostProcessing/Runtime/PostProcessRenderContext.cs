@@ -42,7 +42,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
                         numberOfEyes = 2;
 
-#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+#if UNITY_2019_1_OR_NEWER
                     if (stereoRenderingMode == StereoRenderingMode.SinglePass)
                     {
                         numberOfEyes = 2;
@@ -76,7 +76,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
 
-#if UNITY_2019_1_OR_NEWER && XR_POSTPROCESSING_INTERFACE
+#if UNITY_2019_1_OR_NEWER
                     if (stereoRenderingMode == StereoRenderingMode.SinglePass)
                         screenWidth /= 2;
 #endif
