@@ -1,6 +1,6 @@
 {
     "name": "com.unity.postprocessing",
-    "version": "2.0.18",
+    "version": "2.0.19",
     "displayName": "Post-processing",
     "unity": "2018.1",
     "description": "The post-processing stack (v2) comes with a collection of effects and image filters you can apply to your cameras to improve the visuals of your games.",
