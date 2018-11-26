@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2018-11-26
+
+### Changed
+- Minor version bump following the release of 2018.3 and verified compatibility with 2019.1.
+
 ## [2.0.20] - 2018-11-22
 
 ### Fixed
