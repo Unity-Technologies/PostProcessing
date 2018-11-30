@@ -72,7 +72,9 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             
             var sheet = context.uberSheet;
-            sheet.EnableKeyword(settings.fastMode
+            bool fastMode = settings.fastMode || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2;
+
+            sheet.EnableKeyword(fastMode
                 ? "CHROMATIC_ABERRATION_LOW"
                 : "CHROMATIC_ABERRATION"
             );
