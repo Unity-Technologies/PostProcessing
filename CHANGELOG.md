@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.1.1] - 2018-xx-xx
 
+### Fixed
+- Optimized volume texture blending.
+
 ### Changed
 - Chromatic aberration is now forced to "fast mode" when running on GLES2.0 platforms due to compatibility issues.
 
