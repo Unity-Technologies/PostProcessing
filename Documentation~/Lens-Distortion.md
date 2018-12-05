@@ -3,7 +3,7 @@
 This effect simulates the shape of a lens by distorting or undistorting the final rendered picture.
 
 
-![](images/screenshot-distortion.jpg)
+![](images/screenshot-distortion.png)
 
 
 

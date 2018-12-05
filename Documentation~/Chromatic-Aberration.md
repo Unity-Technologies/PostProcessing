@@ -5,7 +5,7 @@ In photography, chromatic aberration is an effect resulting from a camera’s le
 The **Chromatic Aberration** effect is used to replicate this camera defect, it is also often used to artistic effect such as part of camera impact or intoxication effects. This implementation provides support for red/blue and green/purple fringing as well as user defined color fringing via an input texture.
 
 
-![](images/screenshot-chroma.jpg)
+![](images/screenshot-chroma.png)
 
 
 

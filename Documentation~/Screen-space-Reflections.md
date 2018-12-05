@@ -7,7 +7,7 @@
 The current implementation of **Screen-space reflections** in Unity is tuned for performance over quality to make it usable in production on current-gen consoles and desktop computers. Be aware that this technique isn't meant to be used to get perfectly smooth reflections, you should use probes or planar reflections of that. This effect is also great at acting as a specular occlusion effect by limiting the amount of specular light leaking.
 
 
-![](images/screenshot-ssr.jpg)
+![](images/screenshot-ssr.png)
 
 
 

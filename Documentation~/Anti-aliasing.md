@@ -5,7 +5,7 @@ The **Anti-aliasing** effect offers a set of algorithms designed to prevent alia
 **Anti-aliasing** reduces the prominence of these jagged lines by surrounding them with intermediate shades of color. Although this reduces the jagged appearance of the lines, it also makes them blurrier.
 
 
-![](images/screenshot-antialiasing.jpg)
+![](images/screenshot-antialiasing.png)
 
 
 The Anti-aliasing algorithms are image-based. This is very useful when traditional multisampling (as used in the Editor’s [Quality settings](https://docs.unity3d.com/Manual/class-QualitySettings.html)) is not properly supported or when working with specular-heavy PBR materials.

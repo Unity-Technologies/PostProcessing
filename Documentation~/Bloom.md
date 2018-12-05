@@ -5,7 +5,7 @@
 **Lens Dirt** applies a fullscreen layer of smudges or dust to diffract the Bloom effect. This is commonly used in modern first person shooters.
 
 
-![](images/screenshot-bloom.jpg)
+![](images/screenshot-bloom.png)
 
 
 

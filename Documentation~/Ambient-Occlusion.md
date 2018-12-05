@@ -5,7 +5,7 @@ The **Ambient Occlusion** post-processing effect approximates [Ambient Occlusion
 Note that the **Ambient Occlusion** effect is quite expensive in terms of processing time and generally should only be used on desktop or console hardware. Its cost depends purely on screen resolution and the effects parameters and does not depend on scene complexity as true ambient occlusion would.
 
 
-![](images/screenshot-ao.jpg)
+![](images/screenshot-ao.png)
 
 
 The effect comes with two modes:

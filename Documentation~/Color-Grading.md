@@ -3,7 +3,7 @@
 Color grading is the process of altering or correcting the color and luminance of the final image. You can think of it like applying filters in software like Instagram.
 
 
-![](images/screenshot-grading.jpg)
+![](images/screenshot-grading.png)
 
 
 The **Color Grading** effect comes with three modes:

@@ -5,7 +5,7 @@ Fog is the effect of overlaying a color onto objects dependent on the distance f
 The Fog effect creates a screen-space fog based on the camera’s [depth texture](https://docs.unity3d.com/Manual/SL-DepthTextures.html). It supports Linear, Exponential and Exponential Squared fog types. Fog settings should be set in the **Scene** tab of the **Lighting** window.
 
 
-![](images/screenshot-fog.jpg)
+![](images/screenshot-fog.png)
 
 
 

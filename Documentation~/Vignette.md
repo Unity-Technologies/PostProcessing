@@ -3,7 +3,7 @@
 In Photography, vignetting is the term used for the darkening and/or desaturating towards the edges of an image compared to the center. This is usually caused by thick or stacked filters, secondary lenses, and improper lens hoods. It is also often used for artistic effect, such as to draw focus to the center of an image.
 
 
-![](images/screenshot-vignette.jpg)
+![](images/screenshot-vignette.png)
 
 
 The Vignette effect in the post-processing stack comes in 2 modes:
