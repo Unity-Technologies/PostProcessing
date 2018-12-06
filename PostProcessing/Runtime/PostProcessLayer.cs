@@ -862,7 +862,12 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     lastTarget = m_TargetPool.Get();
                     context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
-                    if (context.stereoActive && context.numberOfEyes > 1)
+                    if (!context.stereoActive && context.nonStereoSourceIsTexArray && context.camera.cameraType == CameraType.Game)
+                    {
+                        cmd.BlitFullscreenTriangleFromTexArray(context.source, lastTarget, RuntimeUtilities.copyFromTexArraySheet, 1, false, eye);
+                        preparedStereoSource = true;
+                    }
+                    else if (context.stereoActive && context.numberOfEyes > 1)
                     {
                         if (context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
                         {

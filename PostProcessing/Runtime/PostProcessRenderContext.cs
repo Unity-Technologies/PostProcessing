@@ -112,6 +112,8 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public RenderTargetIdentifier source { get; set; }
 
+        public bool nonStereoSourceIsTexArray { get; set; }
+
         /// <summary>
         /// The destination target for this pass (can't be the same as <see cref="source"/>).
         /// </summary>
