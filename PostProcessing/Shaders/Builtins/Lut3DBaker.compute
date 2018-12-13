@@ -147,7 +147,7 @@ void Eval(uint3 id)
         // Color grade & tonemap
         float3 graded = ColorGrade(colorLutSpace);
 
-        _Output[id] = float4(graded, 1.0);
+        _Output[id] = float4(max(graded, 0.0), 1.0);
     }
 }
 

@@ -179,7 +179,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         {
             float3 colorLutSpace = GetLutStripValue(i.texcoord, _Lut2D_Params);
             float3 graded = ColorGradeHDR(colorLutSpace);
-            return float4(graded, 1.0);
+            return float4(max(graded, 0.0), 1.0);
         }
 
     ENDHLSL
