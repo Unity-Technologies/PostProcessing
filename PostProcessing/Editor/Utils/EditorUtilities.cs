@@ -7,6 +7,9 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
+    /// <summary>
+    /// A set of editor utilities used in post-processing editors.
+    /// </summary>
     public static class EditorUtilities
     {
         static Dictionary<string, GUIContent> s_GUIContentCache;
@@ -14,6 +17,9 @@ namespace UnityEditor.Rendering.PostProcessing
 
         static PostProcessEffectSettings s_ClipboardContent;
 
+        /// <summary>
+        /// Returns <c>true</c> if the current target is a console, <c>false</c> otherwise.
+        /// </summary>
         public static bool isTargetingConsoles
         {
             get
@@ -25,6 +31,9 @@ namespace UnityEditor.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if the current target is a mobile, <c>false</c> otherwise.
+        /// </summary>
         public static bool isTargetingMobiles
         {
             get
@@ -33,12 +42,21 @@ namespace UnityEditor.Rendering.PostProcessing
                 return t == BuildTarget.Android
                     || t == BuildTarget.iOS
                     || t == BuildTarget.tvOS
+#if !UNITY_2018_2_OR_NEWER
                     || t == BuildTarget.Tizen
+#endif
+#if !UNITY_2018_3_OR_NEWER
                     || t == BuildTarget.N3DS
-                    || t == BuildTarget.PSP2;
+                    || t == BuildTarget.PSP2          
+#endif
+                    ;
             }
         }
 
+        /// <summary>
+        /// Returns <c>true</c> if the current target is a console or a mobile, <c>false</c>
+        /// otherwise.
+        /// </summary>
         public static bool isTargetingConsolesOrMobiles
         {
             get { return isTargetingConsoles || isTargetingMobiles; }
@@ -86,6 +104,13 @@ namespace UnityEditor.Rendering.PostProcessing
                 : decorator;
         }
 
+        /// <summary>
+        /// Gets a <see cref="GUIContent"/> for the given label and tooltip. These are recycled
+        /// internally and help reduce the garbage collector pressure in the editor.
+        /// </summary>
+        /// <param name="textAndTooltip">The label and tooltip separated by a <c>|</c>
+        /// character</param>
+        /// <returns>A recycled <see cref="GUIContent"/></returns>
         public static GUIContent GetContent(string textAndTooltip)
         {
             if (string.IsNullOrEmpty(textAndTooltip))
@@ -107,6 +132,11 @@ namespace UnityEditor.Rendering.PostProcessing
             return content;
         }
 
+        /// <summary>
+        /// Draws a UI box with a description and a "Fix Me" button next to it.
+        /// </summary>
+        /// <param name="text">The description</param>
+        /// <param name="action">The action to execute when the button is clicked</param>
         public static void DrawFixMeBox(string text, Action action)
         {
             Assert.IsNotNull(action);
@@ -126,6 +156,9 @@ namespace UnityEditor.Rendering.PostProcessing
             GUILayout.Space(11);
         }
 
+        /// <summary>
+        /// Draws a horizontal split line.
+        /// </summary>
         public static void DrawSplitter()
         {
             var rect = GUILayoutUtility.GetRect(1f, 1f);
@@ -137,25 +170,29 @@ namespace UnityEditor.Rendering.PostProcessing
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            EditorGUI.DrawRect(rect, !EditorGUIUtility.isProSkin
-                ? new Color(0.6f, 0.6f, 0.6f, 1.333f)
-                : new Color(0.12f, 0.12f, 0.12f, 1.333f));
+            EditorGUI.DrawRect(rect, Styling.splitter);
         }
 
+        /// <summary>
+        /// Draws a toggle using the "override checkbox" style.
+        /// </summary>
+        /// <param name="rect">The position and size of the toggle</param>
+        /// <param name="property">The override state property for the toggle</param>
         public static void DrawOverrideCheckbox(Rect rect, SerializedProperty property)
         {
-            var oldColor = GUI.color;
-            GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.75f);
             property.boolValue = GUI.Toggle(rect, property.boolValue, GetContent("|Override this setting for this volume."), Styling.smallTickbox);
-            GUI.color = oldColor;
         }
 
+        /// <summary>
+        /// Draws a header label.
+        /// </summary>
+        /// <param name="title">The label to display as a header</param>
         public static void DrawHeaderLabel(string title)
         {
-            EditorGUILayout.LabelField(title, Styling.labelHeader);
+            EditorGUILayout.LabelField(title, Styling.headerLabel);
         }
 
-        public static bool DrawHeader(string title, bool state)
+        internal static bool DrawHeader(string title, bool state)
         {
             var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
 
@@ -173,13 +210,12 @@ namespace UnityEditor.Rendering.PostProcessing
             backgroundRect.width += 4f;
 
             // Background
-            float backgroundTint = EditorGUIUtility.isProSkin ? 0.1f : 1f;
-            EditorGUI.DrawRect(backgroundRect, new Color(backgroundTint, backgroundTint, backgroundTint, 0.2f));
+            EditorGUI.DrawRect(backgroundRect, Styling.headerBackground);
 
             // Title
             EditorGUI.LabelField(labelRect, GetContent(title), EditorStyles.boldLabel);
 
-            // Active checkbox
+            // Foldout
             state = GUI.Toggle(foldoutRect, state, GUIContent.none, EditorStyles.foldout);
 
             var e = Event.current;
@@ -192,7 +228,7 @@ namespace UnityEditor.Rendering.PostProcessing
             return state;
         }
 
-        public static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, PostProcessEffectSettings target, Action resetAction, Action removeAction)
+        internal static bool DrawHeader(string title, SerializedProperty group, SerializedProperty activeField, PostProcessEffectSettings target, Action resetAction, Action removeAction)
         {
             Assert.IsNotNull(group);
             Assert.IsNotNull(activeField);
@@ -201,18 +237,21 @@ namespace UnityEditor.Rendering.PostProcessing
             var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
 
             var labelRect = backgroundRect;
-            labelRect.xMin += 16f;
+            labelRect.xMin += 32f;
             labelRect.xMax -= 20f;
 
+            var foldoutRect = backgroundRect;
+            foldoutRect.y += 1f;
+            foldoutRect.width = 13f;
+            foldoutRect.height = 13f;
+
             var toggleRect = backgroundRect;
+            toggleRect.x += 16f;
             toggleRect.y += 2f;
             toggleRect.width = 13f;
             toggleRect.height = 13f;
 
-            var menuIcon = EditorGUIUtility.isProSkin
-                ? Styling.paneOptionsIconDark
-                : Styling.paneOptionsIconLight;
-
+            var menuIcon = Styling.paneOptionsIcon;
             var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y + 4f, menuIcon.width, menuIcon.height);
 
             // Background rect should be full-width
@@ -220,12 +259,16 @@ namespace UnityEditor.Rendering.PostProcessing
             backgroundRect.width += 4f;
 
             // Background
-            float backgroundTint = EditorGUIUtility.isProSkin ? 0.1f : 1f;
-            EditorGUI.DrawRect(backgroundRect, new Color(backgroundTint, backgroundTint, backgroundTint, 0.2f));
+            EditorGUI.DrawRect(backgroundRect, Styling.headerBackground);
 
             // Title
             using (new EditorGUI.DisabledScope(!activeField.boolValue))
                 EditorGUI.LabelField(labelRect, GetContent(title), EditorStyles.boldLabel);
+
+            // foldout
+            group.serializedObject.Update();
+            group.isExpanded = GUI.Toggle(foldoutRect, group.isExpanded, GUIContent.none, EditorStyles.foldout);
+            group.serializedObject.ApplyModifiedProperties();
 
             // Active checkbox
             activeField.serializedObject.Update();

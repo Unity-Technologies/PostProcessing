@@ -19,15 +19,19 @@
     #include "API/D3D12.hlsl"
 #elif defined(SHADER_API_D3D9) || defined(SHADER_API_D3D11_9X)
     #include "API/D3D9.hlsl"
-#elif defined(SHADER_API_VULKAN) || defined(SHADER_API_SWITCH)
+#elif defined(SHADER_API_VULKAN)
     #include "API/Vulkan.hlsl"
+#elif defined(SHADER_API_SWITCH)
+    #include "API/Switch.hlsl"
 #elif defined(SHADER_API_METAL)
     #include "API/Metal.hlsl"
+#elif defined(SHADER_API_PSP2)
+    #include "API/PSP2.hlsl"
 #else
     #include "API/OpenGL.hlsl"
 #endif
 
-#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH)
+#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH) || defined(SHADER_API_PSP2)
     #define SHADER_API_CONSOLE
 #endif
 
@@ -266,7 +270,14 @@ struct VaryingsDefault
     float4 vertex : SV_POSITION;
     float2 texcoord : TEXCOORD0;
     float2 texcoordStereo : TEXCOORD1;
+#if STEREO_INSTANCING_ENABLED
+    uint stereoTargetEyeIndex : SV_RenderTargetArrayIndex;
+#endif
 };
+
+#if STEREO_INSTANCING_ENABLED
+float _DepthSlice;
+#endif
 
 VaryingsDefault VertDefault(AttributesDefault v)
 {
@@ -285,12 +296,24 @@ VaryingsDefault VertDefault(AttributesDefault v)
 
 float4 _UVTransform; // xy: scale, wz: translate
 
+#if STEREO_DOUBLEWIDE_TARGET
+float4 _PosScaleOffset; // xy: scale, wz: offset
+#endif
+
 VaryingsDefault VertUVTransform(AttributesDefault v)
 {
     VaryingsDefault o;
+
+#if STEREO_DOUBLEWIDE_TARGET
+    o.vertex = float4(v.vertex.xy * _PosScaleOffset.xy + _PosScaleOffset.zw, 0.0, 1.0);
+#else
     o.vertex = float4(v.vertex.xy, 0.0, 1.0);
+#endif
     o.texcoord = TransformTriangleVertexToUV(v.vertex.xy) * _UVTransform.xy + _UVTransform.zw;
     o.texcoordStereo = TransformStereoScreenSpaceTex(o.texcoord, 1.0);
+#if STEREO_INSTANCING_ENABLED
+    o.stereoTargetEyeIndex = (uint)_DepthSlice;
+#endif
     return o;
 }
 

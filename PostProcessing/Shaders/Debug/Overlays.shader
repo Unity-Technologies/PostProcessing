@@ -5,7 +5,6 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #pragma target 3.0
-        #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
@@ -25,6 +24,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         float4 FragDepth(VaryingsDefault i) : SV_Target
         {
             float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo, 0);
+            d = lerp(d, Linear01Depth(d), _Params.x);
 
         //#if !UNITY_COLORSPACE_GAMMA
         //    d = SRGBToLinear(d);
@@ -103,6 +103,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragMotionVectors(VaryingsDefault i) : SV_Target
         {
+#if UNITY_CAN_READ_POSITION_IN_FRAGMENT_PROGRAM
             float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
             float2 mv = SampleMotionVectors(i.texcoord);
 
@@ -159,6 +160,10 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         #endif
 
             return float4(color.rgb + d.xxx, 1.0);
+#else
+            // Reading vertex SV_POSITION in a fragment shader is not supported by this platform so just return solid color.
+            return float4(1.0f, 0.0f, 1.0f, 1.0f);
+#endif
         }
 
         // -----------------------------------------------------------------------------

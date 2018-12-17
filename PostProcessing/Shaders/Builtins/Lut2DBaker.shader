@@ -42,7 +42,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
             colorLinear = LiftGammaGainHDR(colorLinear, _Lift, _InvGamma, _Gain);
 
             // Do NOT feed negative values to RgbToHsv or they'll wrap around
-            colorLinear = max(0.0, colorLinear);
+            colorLinear = max((float3)0.0, colorLinear);
 
             float3 hsv = RgbToHsv(colorLinear);
 
@@ -179,7 +179,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         {
             float3 colorLutSpace = GetLutStripValue(i.texcoord, _Lut2D_Params);
             float3 graded = ColorGradeHDR(colorLutSpace);
-            return float4(graded, 1.0);
+            return float4(max(graded, 0.0), 1.0);
         }
 
     ENDHLSL

@@ -1,5 +1,5 @@
 {
-    "name": "com.unity.postprocessing.Runtime",
+    "name": "Unity.Postprocessing.Runtime",
     "references": [],
     "optionalUnityReferences": [],
     "includePlatforms": [],

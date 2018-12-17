@@ -454,9 +454,7 @@ float3 AcesTonemap(float3 aces)
 //
 half3 ApplyLut3D(TEXTURE3D_ARGS(tex, samplerTex), float3 uvw, float2 scaleOffset)
 {
-    float shift = floor(uvw.z);
-    uvw.xy = uvw.xy * scaleOffset.y * scaleOffset.xx + scaleOffset.xx * 0.5;
-    uvw.x += shift * scaleOffset.x;
+    uvw.xyz = uvw.xyz * scaleOffset.yyy * scaleOffset.xxx + scaleOffset.xxx * 0.5;
     return SAMPLE_TEXTURE3D(tex, samplerTex, uvw).rgb;
 }
 

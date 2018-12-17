@@ -1,22 +1,53 @@
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// This component holds a set of debugging utilities related to post-processing.
+    /// </summary>
+    /// <remarks>
+    /// These utilities can be used at runtime to debug on device.
+    /// </remarks>
+#if UNITY_2018_3_OR_NEWER
+    [ExecuteAlways]
+#else
     [ExecuteInEditMode]
+#endif
     [AddComponentMenu("Rendering/Post-process Debug", 1002)]
     public sealed class PostProcessDebug : MonoBehaviour
     {
+        /// <summary>
+        /// A reference to a <see cref="PostProcessLayer"/> to debug.
+        /// </summary>
         public PostProcessLayer postProcessLayer;
         PostProcessLayer m_PreviousPostProcessLayer;
 
+        /// <summary>
+        /// Holds settings for the light meter.
+        /// </summary>
         public bool lightMeter;
+
+        /// <summary>
+        /// Holds settings for the histogram.
+        /// </summary>
         public bool histogram;
+
+        /// <summary>
+        /// Holds settings for the waveform.
+        /// </summary>
         public bool waveform;
+
+        /// <summary>
+        /// Holds settings for the vectorscope.
+        /// </summary>
         public bool vectorscope;
 
+        /// <summary>
+        /// The currently set overlay.
+        /// </summary>
         public DebugOverlay debugOverlay = DebugOverlay.None;
 
         Camera m_CurrentCamera;
         CommandBuffer m_CmdAfterEverything;
-        
+
         void OnEnable()
         {
             m_CmdAfterEverything = new CommandBuffer { name = "Post-processing Debug Overlay" };
@@ -41,7 +72,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentCamera = null;
             m_PreviousPostProcessLayer = null;
         }
-        
+
 #if !UNITY_EDITOR
         void Update()
         {
@@ -102,6 +133,9 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             if (postProcessLayer == null || !postProcessLayer.enabled)
                 return;
+
+            // Some SRPs don't unbind render targets and leave them as-is
+            RenderTexture.active = null;
 
             var rect = new Rect(5, 5, 0, 0);
             var debugLayer = postProcessLayer.debugLayer;

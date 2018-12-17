@@ -2,6 +2,9 @@ using System;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// This class holds settings for the Fog effect with the deferred rendering path.
+    /// </summary>
     [Serializable]
     [PostProcess(typeof(FogRenderer), "Unity/Fog")]
     public sealed class Fog : PostProcessEffectSettings
