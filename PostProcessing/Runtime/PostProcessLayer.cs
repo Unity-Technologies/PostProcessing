@@ -745,8 +745,17 @@ namespace UnityEngine.Rendering.PostProcessing
 
             foreach (var item in list)
             {
-                if (item.bundle.settings.IsEnabledAndSupported(context))
+                bool enabledAndSupported = item.bundle.settings.IsEnabledAndSupported(context);
+
+                if (context.isSceneView)
+                {
+                    if (item.bundle.attribute.allowInSceneView && enabledAndSupported)
+                        return true;
+                }
+                else if (enabledAndSupported)
+                {
                     return true;
+                }
             }
 
             return false;
