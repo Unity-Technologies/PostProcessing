@@ -164,7 +164,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
         // Brent Burley: Filtering in PRMan
         // https://web.archive.org/web/20080908072950/http://www.renderman.org/RMR/st/PRMan_Filtering/Filtering_In_PRMan.html
         // https://www.mathworks.com/help/signal/ref/blackmanharris.html?requestedDomain=www.mathworks.com
-        float WeightBlackmanHarris(const in float x) 
+        float WeightBlackmanHarris(const in float x)
         {
             const float WIDTH = 3.3f;
             const float HALF_WIDTH = 0.5f * WIDTH;
@@ -224,32 +224,41 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             // down the sample location to get the exact center of our starting texel. The starting texel will be at
             // location [1, 1] in the grid, where [0, 0] is the top left corner.
             float2 uvPixels = uv * resolution;
-            float2 centerPosition = floor(uvPixels - 0.5) + 0.5;
+            float2 texPos0 = floor(uvPixels - 0.5) + 0.5;
+
 
             // Compute the fractional offset from our starting texel to our original sample location, which we'll
             // feed into the Catmull-Rom spline function to get our filter weights.
-            float2 a = uvPixels - centerPosition;
-            float2 a2 = a * a;
-            float2 a3 = a * a2;
+            float2 f = uvPixels - texPos0;
+
+            float c = sharpness;
+            float b = c * -2.0f + 1.0f;
 
             // Compute the weights using the fractional offset that we calculated earlier.
             // These equations are pre-expanded based on our knowledge of where the texels will be located,
             // which lets us avoid having to evaluate a piece-wise function.
-            float2 b = -sharpness * a3 + 2.0 * sharpness * a2 - sharpness * a;
-            float2 c = (2.0 - sharpness) * a3 - (3.0 - sharpness) * a2 + 1.0;
-            float2 d = sharpness * (a3 - a2);
-            float2 e = -(2.0 - sharpness) * a3 + (3.0 - 2.0 * sharpness) * a2 + sharpness * a;
+            float2 w_1 = (-1.0f / 6.0f * b - c) * pow(f + 1.0f, 3.0f) + (b + 5.0f * c) * pow(f + 1.0f, 2.0f) + (-2.0f * b - 8.0f * c) * (f + 1.0f) + (4.0f / 3.0f * b + 4.0f * c);
+            float2 w0 = (2.0f - 3.0f / 2.0f * b - c) * pow(f, 3.0f) + (-3.0f + 2.0f * b + c) * pow(f, 2.0f) + (1.0f - b / 3.0f);
+            float2 w1 = (2.0f - 3.0f / 2.0f * b - c) * pow(1.0f - f, 3.0f) + (-3.0f + 2.0f * b + c) * pow(1.0f - f, 2.0f) + (1.0f - b / 3.0f);
+            float2 w2 = (-1.0f / 6.0f * b - c) * pow(2.0f - f, 3.0f) + (b + 5.0f * c) * pow(2.0f - f, 2.0f) + (-2.0f * b - 8.0f * c) * (2.0f - f) + (4.0f / 3.0f * b + 4.0f * c);
 
             // Work out weighting factors and sampling offsets that will let us use bilinear filtering to
             // simultaneously evaluate the middle 2 samples from the 4x4 grid.
-            resWeights[0] = b;
-            resWeights[1] = c + e;
-            resWeights[2] = d;
+            float2 w01 = w0 + w1;
+            float2 offset01 = w1 / w01;
 
             // Compute the final UV coordinates we'll use for sampling the texture
-            resUVs[0] = centerPosition * inverseResolution - inverseResolution;
-            resUVs[1] = inverseResolution * (centerPosition + e / resWeights[1]);
-            resUVs[2] = (centerPosition + 2.0) * inverseResolution;
+            float2 texPos_1 = texPos0 - 1;
+            float2 texPos2 = texPos0 + 2;
+            float2 texPos01 = texPos0 + offset01;
+
+            resUVs[0] = texPos_1 * inverseResolution;
+            resUVs[1] = texPos01 * inverseResolution;
+            resUVs[2] = texPos2 * inverseResolution;
+
+            resWeights[0] = w_1;
+            resWeights[1] = w01;
+            resWeights[2] = w2;
         }
 
         float4 SampleTextureCatmullRom(in Texture2D<float4> tex, in SamplerState linearSampler, in float2 uv, in float2 texSize)
