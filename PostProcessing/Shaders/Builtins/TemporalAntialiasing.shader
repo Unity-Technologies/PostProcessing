@@ -226,7 +226,6 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
             float2 uvPixels = uv * resolution;
             float2 texPos0 = floor(uvPixels - 0.5) + 0.5;
 
-
             // Compute the fractional offset from our starting texel to our original sample location, which we'll
             // feed into the Catmull-Rom spline function to get our filter weights.
             float2 f = uvPixels - texPos0;
@@ -437,7 +436,7 @@ Shader "Hidden/PostProcessing/TemporalAntialiasing"
 
             float2 bicubicUVs[3];
             float2 bicubicWeights[3];
-            ComputeBicubicUVsAndWeights(bicubicUVs, bicubicWeights, 0.5f * _Sharpness * (1.0f / 3.0f), texcoord - motion, 1.0f / _MainTex_TexelSize.xy, _MainTex_TexelSize.xy);
+            ComputeBicubicUVsAndWeights(bicubicUVs, bicubicWeights, _Sharpness * (0.5f / 3.0f), texcoord - motion, 1.0f / _MainTex_TexelSize.xy, _MainTex_TexelSize.xy);
 
             float4 history = 0.0f;
             history += SAMPLE_TEXTURE2D(_HistoryTex, sampler_HistoryTex, UnityStereoClamp(float2(bicubicUVs[0].x, bicubicUVs[0].y))) * bicubicWeights[0].x * bicubicWeights[0].y;
