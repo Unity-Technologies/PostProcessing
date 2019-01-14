@@ -1082,6 +1082,8 @@ namespace UnityEngine.Rendering.PostProcessing
             context.uberSheet = uberSheet;
             context.autoExposureTexture = RuntimeUtilities.whiteTexture;
             context.bloomBufferNameID = -1;
+            context.sunShaftsBufferNameID = -1;
+            context.tiltShiftBufferNameID = -1;
 
             if (isFinalPass && context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced)
                 uberSheet.EnableKeyword("STEREO_INSTANCING_ENABLED");
@@ -1124,6 +1126,8 @@ namespace UnityEngine.Rendering.PostProcessing
             RenderEffect<LensDistortion>(context);
             RenderEffect<ChromaticAberration>(context);
             RenderEffect<Bloom>(context);
+            RenderEffect<SunShafts>(context);
+            RenderEffect<TiltShift>(context);
             RenderEffect<Vignette>(context);
             RenderEffect<Grain>(context);
 
@@ -1162,6 +1166,8 @@ namespace UnityEngine.Rendering.PostProcessing
             if (motionBlurTarget > -1) cmd.ReleaseTemporaryRT(motionBlurTarget);
             if (depthOfFieldTarget > -1) cmd.ReleaseTemporaryRT(depthOfFieldTarget);
             if (context.bloomBufferNameID > -1) cmd.ReleaseTemporaryRT(context.bloomBufferNameID);
+            if (context.sunShaftsBufferNameID > -1) cmd.ReleaseTemporaryRT(context.sunShaftsBufferNameID);
+            if (context.tiltShiftBufferNameID > -1) cmd.ReleaseTemporaryRT(context.tiltShiftBufferNameID);
 
             cmd.EndSample("BuiltinStack");
 

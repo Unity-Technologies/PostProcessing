@@ -7,16 +7,18 @@ Shader "Hidden/PostProcessing/Uber"
         #pragma multi_compile __ DISTORT
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
         #pragma multi_compile __ BLOOM BLOOM_LOW
+        #pragma multi_compile __ SUNSHAFTS_SCREEN SUNSHAFTS_ADD
+        #pragma multi_compile __ TILTSHIFT
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ FINALPASS
         // the following keywords are handled in API specific SubShaders below
         // #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
         // #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
-        
+
         #pragma vertex VertUVTransform
         #pragma fragment FragUber
-    
+
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "../Sampling.hlsl"
@@ -39,22 +41,25 @@ Shader "Hidden/PostProcessing/Uber"
         half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: dirt intensity
         half3 _Bloom_Color;
 
+        // SunShafts
+        TEXTURE2D_SAMPLER2D(_SunShaftTex, sampler_SunShaftTex);
+        uniform half4 _SunColor;
+
+        // TiltShift
+        TEXTURE2D_SAMPLER2D(_TiltShiftTex, sampler_TiltShiftTex);
+
         // Chromatic aberration
         TEXTURE2D_SAMPLER2D(_ChromaticAberration_SpectralLut, sampler_ChromaticAberration_SpectralLut);
         half _ChromaticAberration_Amount;
 
         // Color grading
-    #if COLOR_GRADING_HDR_3D
-
+        #if COLOR_GRADING_HDR_3D
         TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
         float2 _Lut3D_Params;
-
-    #else
-
+        #else
         TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
         float3 _Lut2D_Params;
-
-    #endif
+        #endif
 
         half _PostExposure; // EV (exp2)
 
@@ -133,6 +138,25 @@ Shader "Hidden/PostProcessing/Uber"
             #else
             {
                 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uvStereoDistorted);
+            }
+            #endif
+
+            #if SUNSHAFTS_SCREEN || SUNSHAFTS_ADD
+            {
+                half4 sunShaft = SAMPLE_TEXTURE2D(_SunShaftTex, sampler_SunShaftTex, uvStereoDistorted);
+                half4 depthMask = saturate(sunShaft * _SunColor);
+                #if SUNSHAFTS_SCREEN
+                color = 1.0f - (1.0f - color) * (1.0f - depthMask);
+                #else
+                color = color + depthMask;
+                #endif
+            }
+            #endif
+
+            #if TILTSHIFT
+            {
+                float4 blurred = SAMPLE_TEXTURE2D(_TiltShiftTex, sampler_TiltShiftTex, uvStereoDistorted);
+                color = lerp(color, blurred, saturate(blurred.a));
             }
             #endif
 
@@ -297,7 +321,7 @@ Shader "Hidden/PostProcessing/Uber"
             ENDHLSL
         }
     }
-    
+
     SubShader
     {
         Cull Off ZWrite Off ZTest Always

@@ -12,6 +12,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Serializable]
         public sealed class Shaders
         {
+            public Shader globalFog;
+            public Shader sunShafts;
+            public Shader tiltShift;
             public Shader bloom;
             public Shader copy;
             public Shader copyStd;

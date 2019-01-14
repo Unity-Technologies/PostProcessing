@@ -230,6 +230,8 @@ namespace UnityEngine.Rendering.PostProcessing
         internal Texture logLut;
         internal AutoExposure autoExposure;
         internal int bloomBufferNameID;
+        internal int sunShaftsBufferNameID;
+        internal int tiltShiftBufferNameID;
 #if UNITY_2018_2_OR_NEWER
         internal bool physicalCamera;
 #endif
@@ -274,6 +276,8 @@ namespace UnityEngine.Rendering.PostProcessing
             logLut = null;
             autoExposure = null;
             bloomBufferNameID = -1;
+            sunShaftsBufferNameID = -1;
+            tiltShiftBufferNameID = -1;
 
             if (userData == null)
                 userData = new Dictionary<string, object>();

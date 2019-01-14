@@ -155,5 +155,27 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int DepthSlice                      = Shader.PropertyToID("_DepthSlice");
         internal static readonly int UVScaleOffset                   = Shader.PropertyToID("_UVScaleOffset");
         internal static readonly int PosScaleOffset                  = Shader.PropertyToID("_PosScaleOffset");
+
+        internal static readonly int BlurSize                        = Shader.PropertyToID("_BlurSize");
+        internal static readonly int BlurArea                        = Shader.PropertyToID("_BlurArea");
+        internal static readonly int TiltShiftTex                    = Shader.PropertyToID("_TiltShiftTex");
+        internal static readonly int TiltShiftBuffer                 = Shader.PropertyToID("_TiltShiftBuffer");
+
+        internal static readonly int BlurRadius4                     = Shader.PropertyToID("_BlurRadius4");
+        internal static readonly int SunPosition                     = Shader.PropertyToID("_SunPosition");
+        internal static readonly int SunThreshold                    = Shader.PropertyToID("_SunThreshold");
+        internal static readonly int ScreenResultion                 = Shader.PropertyToID("_ScreenResultion");
+        internal static readonly int LrDepthBuffer                   = Shader.PropertyToID("_LrDepthBuffer");
+        internal static readonly int LrColorB                        = Shader.PropertyToID("_LrColorB");
+        internal static readonly int SunColor                        = Shader.PropertyToID("_SunColor");
+        internal static readonly int SunShaftTex                     = Shader.PropertyToID("_SunShaftTex");
+
+        internal static readonly int FrustumCornersWS                = Shader.PropertyToID("_FrustumCornersWS");
+        internal static readonly int CameraWS                        = Shader.PropertyToID("_CameraWS");
+        internal static readonly int HeightParams                    = Shader.PropertyToID("_HeightParams");
+        internal static readonly int DistanceParams                  = Shader.PropertyToID("_DistanceParams");
+        internal static readonly int SceneFogParams                  = Shader.PropertyToID("_SceneFogParams");
+        internal static readonly int SceneFogMode                    = Shader.PropertyToID("_SceneFogMode");
+
     }
 }

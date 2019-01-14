@@ -3,8 +3,9 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -89,6 +90,9 @@ MonoBehaviour:
     area: {fileID: 2800000, guid: 73ec4ae984a0a0f44a2be737e41a6f2f, type: 3}
     search: {fileID: 2800000, guid: d99701099481a2f489610e977df6dcbc, type: 3}
   shaders:
+    globalFog: {fileID: 4800000, guid: 55b89d6aa0ec507478c7ced30c6dee04, type: 3}
+    sunShafts: {fileID: 4800000, guid: 69e095a6054f4a64487d9b7cd517f61a, type: 3}
+    tiltShift: {fileID: 4800000, guid: 551fc44ebb67ccc479277894fbefaed5, type: 3}
     bloom: {fileID: 4800000, guid: c1e1d3119c6fd4646aea0b4b74cacc1a, type: 3}
     copy: {fileID: 4800000, guid: cdbdb71de5f9c454b980f6d0e87f0afb, type: 3}
     copyStd: {fileID: 4800000, guid: 4bf4cff0d0bac3d43894e2e8839feb40, type: 3}

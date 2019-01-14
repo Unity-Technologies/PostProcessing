@@ -251,6 +251,36 @@ namespace UnityEngine.Rendering.PostProcessing
                 return s_FullscreenTriangle;
             }
         }
+        
+        static Mesh s_FullscreenQuad;
+
+        /// <summary>
+        /// A fullscreen Quad mesh.
+        /// </summary>
+        public static Mesh fullscreenQuad
+        {
+            get
+            {
+                if (s_FullscreenQuad != null)
+                    return s_FullscreenQuad;
+
+                s_FullscreenQuad = new Mesh { name = "Fullscreen Triangle" };
+
+                // Because we have to support older platforms (GLES2/3, DX9 etc) we can't do all of
+                // this directly in the vertex shader using vertex ids :(
+                s_FullscreenQuad.SetVertices(new List<Vector3>
+                {
+                    new Vector3(-1f, -1f, 0f),
+                    new Vector3(-1f, 1f, 0f),
+                    new Vector3(1f, 1f, 0f),
+                    new Vector3(1f, -1f, 0f),
+                });
+                s_FullscreenQuad.SetIndices(new[] { 0, 1, 2, 0, 2, 3 }, MeshTopology.Triangles, 0, false);
+                s_FullscreenQuad.UploadMeshData(false);
+
+                return s_FullscreenQuad;
+            }
+        }
 
         static Material s_CopyStdMaterial;
 
@@ -418,6 +448,64 @@ namespace UnityEngine.Rendering.PostProcessing
             #else
             cmd.SetRenderTarget(color, depth);
             #endif
+        }
+
+
+        /// <summary>
+        /// Blits a fullscreen Quad using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="clear">Should the destination target be cleared?</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
+        public static void BlitFullscreenQuad(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, Rect? viewport = null)
+        {
+#if UNITY_2018_2_OR_NEWER
+            cmd.BlitFullscreenQuad(source, destination, propertySheet, pass, clear ? RenderBufferLoadAction.Clear : RenderBufferLoadAction.DontCare, viewport);
+#else
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+            cmd.SetRenderTargetWithLoadStoreAction(destination, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+
+            if (viewport != null)
+                cmd.SetViewport(viewport.Value);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
+            cmd.DrawMesh(fullscreenQuad, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
+#endif
+        }
+
+        /// <summary>
+        /// Blits a fullscreen Quad using a given material.
+        /// </summary>
+        /// <param name="cmd">The command buffer to use</param>
+        /// <param name="source">The source render target</param>
+        /// <param name="destination">The destination render target</param>
+        /// <param name="propertySheet">The property sheet to use</param>
+        /// <param name="pass">The pass from the material to use</param>
+        /// <param name="loadAction">The load action for this blit</param>
+        /// <param name="viewport">An optional viewport to consider for the blit</param>
+        public static void BlitFullscreenQuad(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction, Rect? viewport = null)
+        {
+            cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
+#if UNITY_2018_2_OR_NEWER
+            bool clear = (loadAction == RenderBufferLoadAction.Clear);
+#else
+            bool clear = false;
+#endif
+            cmd.SetRenderTargetWithLoadStoreAction(destination, clear ? RenderBufferLoadAction.DontCare : loadAction, RenderBufferStoreAction.Store);
+
+            if (viewport != null)
+                cmd.SetViewport(viewport.Value);
+
+            if (clear)
+                cmd.ClearRenderTarget(true, true, Color.clear);
+
+            cmd.DrawMesh(fullscreenQuad, Matrix4x4.identity, propertySheet.material, 0, pass, propertySheet.properties);
         }
 
         /// <summary>
