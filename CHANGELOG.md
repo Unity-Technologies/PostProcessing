@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Color grading would output negative values in some cases and break rendering on some platforms.
 - Custom effects with `allowInSceneView` set to `false` could make the scene view flicker to black.
+- R8_SRGB error in 2019.1 when Depth of Field and Temporal Anti-aliasing are enabled at the same time.
 
 ## [2.1.2] - 2018-12-05
 
