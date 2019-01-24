@@ -149,8 +149,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                // TODO: The CoCCalculation CoCTex uses RenderTextureReadWrite.Linear, why isn't this?
-                rt = context.GetScreenSpaceTemporaryRT(0, format);
+                rt = context.GetScreenSpaceTemporaryRT(0, format, RenderTextureReadWrite.Linear);
                 rt.name = "CoC History, Eye: " + eye + ", ID: " + id;
                 rt.filterMode = FilterMode.Bilinear;
                 rt.Create();
