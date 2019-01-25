@@ -1,18 +1,25 @@
 #ifndef UNITY_POSTFX_EXPOSURE_HISTOGRAM
 #define UNITY_POSTFX_EXPOSURE_HISTOGRAM
 
-// Optimal values for PS4/GCN
-// Using a group size of 32x32 seems to be a bit faster on Kepler/Maxwell
-// Don't forget to update 'AutoExposureRenderer.cs' if you change these values !
+// Don't forget to update 'LogHistogram.cs' if you change these values !
 #define HISTOGRAM_BINS          128
 #define HISTOGRAM_TEXELS        HISTOGRAM_BINS / 4
-#if SHADER_API_GLES3
-    #define HISTOGRAM_THREAD_X      16
-    #define HISTOGRAM_THREAD_Y      8
+
+#if SHADER_API_GLES3 || SHADER_API_METAL
+    #define HISTOGRAM_THREAD_X              8
+    #define HISTOGRAM_THREAD_Y              8
+    #define HISTOGRAM_REDUCTION_THREAD_X    8
+    #define HISTOGRAM_REDUCTION_THREAD_Y    8
+    #define HISTOGRAM_REDUCTION_ALT_PATH    1
 #else
-    #define HISTOGRAM_THREAD_X      16
-    #define HISTOGRAM_THREAD_Y      16
+    #define HISTOGRAM_THREAD_X              16
+    #define HISTOGRAM_THREAD_Y              16
+    #define HISTOGRAM_REDUCTION_THREAD_X    HISTOGRAM_THREAD_X
+    #define HISTOGRAM_REDUCTION_THREAD_Y    HISTOGRAM_BINS / HISTOGRAM_THREAD_Y
+    #define HISTOGRAM_REDUCTION_ALT_PATH    0
 #endif
+
+#define HISTOGRAM_REDUCTION_BINS HISTOGRAM_REDUCTION_THREAD_X * HISTOGRAM_REDUCTION_THREAD_Y
 
 float GetHistogramBinFromLuminance(float value, float2 scaleOffset)
 {

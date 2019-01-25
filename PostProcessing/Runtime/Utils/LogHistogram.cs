@@ -7,20 +7,15 @@ namespace UnityEngine.Rendering.PostProcessing
         
         // Don't forget to update 'ExposureHistogram.hlsl' if you change these values !
         const int k_Bins = 128;
-        int m_ThreadX;
-        int m_ThreadY;
 
         public ComputeBuffer data { get; private set; }
 
         public void Generate(PostProcessRenderContext context)
         {
             if (data == null)
-            {
-                m_ThreadX = 16;
-                m_ThreadY = RuntimeUtilities.isAndroidOpenGL ? 8 : 16;
                 data = new ComputeBuffer(k_Bins, sizeof(uint));
-            }
-            
+
+            uint threadX, threadY, threadZ;
             var scaleOffsetRes = GetHistogramScaleOffsetRes(context);
             var compute = context.resources.computeShaders.exposureHistogram;
             var cmd = context.command;
@@ -29,16 +24,19 @@ namespace UnityEngine.Rendering.PostProcessing
             // Clear the buffer on every frame as we use it to accumulate luminance values on each frame
             int kernel = compute.FindKernel("KEyeHistogramClear");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", data);
-            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_Bins / (float)m_ThreadX), 1, 1);
+            compute.GetKernelThreadGroupSizes(kernel, out threadX, out threadY, out threadZ);
+            cmd.DispatchCompute(compute, kernel, Mathf.CeilToInt(k_Bins / (float)threadX), 1, 1);
 
             // Get a log histogram
             kernel = compute.FindKernel("KEyeHistogram");
             cmd.SetComputeBufferParam(compute, kernel, "_HistogramBuffer", data);
             cmd.SetComputeTextureParam(compute, kernel, "_Source", context.source);
             cmd.SetComputeVectorParam(compute, "_ScaleOffsetRes", scaleOffsetRes);
+
+            compute.GetKernelThreadGroupSizes(kernel, out threadX, out threadY, out threadZ);
             cmd.DispatchCompute(compute, kernel,
-                Mathf.CeilToInt(scaleOffsetRes.z / 2f / m_ThreadX),
-                Mathf.CeilToInt(scaleOffsetRes.w / 2f / m_ThreadY),
+                Mathf.CeilToInt(scaleOffsetRes.z / 2f / threadX),
+                Mathf.CeilToInt(scaleOffsetRes.w / 2f / threadY),
                 1
             );
 

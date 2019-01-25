@@ -17,7 +17,7 @@ CBUFFER_START(Params)
     float4 _ScaleOffsetRes; // x: scale, y: offset, w: histogram pass width, h: histogram pass height
 CBUFFER_END
 
-groupshared uint gs_pyramid[HISTOGRAM_BINS];
+groupshared uint gs_pyramid[HISTOGRAM_REDUCTION_BINS];
 
 float GetExposureMultiplier(float avgLuminance)
 {
@@ -42,17 +42,22 @@ TRIVIAL_COMPUTE_KERNEL(MAIN)
 
 #else
 
-[numthreads(HISTOGRAM_THREAD_X, HISTOGRAM_BINS / HISTOGRAM_THREAD_X, 1)]
+[numthreads(HISTOGRAM_REDUCTION_THREAD_X, HISTOGRAM_REDUCTION_THREAD_Y, 1)]
 void MAIN(uint2 groupThreadId : SV_GroupThreadID)
 {
-    const uint thread_id = groupThreadId.y * HISTOGRAM_THREAD_X + groupThreadId.x;
+#if HISTOGRAM_REDUCTION_ALT_PATH
+    const uint thread_id = groupThreadId.y * HISTOGRAM_REDUCTION_THREAD_X + groupThreadId.x;
+    gs_pyramid[thread_id] = max(_HistogramBuffer[thread_id], _HistogramBuffer[thread_id + HISTOGRAM_REDUCTION_BINS]);
+#else
+    const uint thread_id = groupThreadId.y * HISTOGRAM_REDUCTION_THREAD_X + groupThreadId.x;
     gs_pyramid[thread_id] = _HistogramBuffer[thread_id];
+#endif
 
     GroupMemoryBarrierWithGroupSync();
 
     // Parallel reduction to find the max value
     UNITY_UNROLL
-    for (uint i = HISTOGRAM_BINS >> 1u; i > 0u; i >>= 1u)
+    for (uint i = HISTOGRAM_REDUCTION_BINS >> 1u; i > 0u; i >>= 1u)
     {
         if (thread_id < i)
             gs_pyramid[thread_id] = max(gs_pyramid[thread_id], gs_pyramid[thread_id + i]);
