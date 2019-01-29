@@ -114,11 +114,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
-#pragma warning disable 169
+#if UNITY_EDITOR
         // UI states
         [SerializeField] bool m_ShowToolkit;
         [SerializeField] bool m_ShowCustomSorter;
-#pragma warning restore 169
+#endif
 
         /// <summary>
         /// If <c>true</c>, it will stop applying post-processing effects just before color grading
