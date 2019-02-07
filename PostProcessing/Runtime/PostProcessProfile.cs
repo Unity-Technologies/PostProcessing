@@ -157,6 +157,22 @@ namespace UnityEngine.Rendering.PostProcessing
 
             return null;
         }
+        /// <summary>
+        /// Returns settings for a given effect type.
+        /// </summary>
+        /// <param name="type">A type of <see cref="PostProcessEffectSettings"/></param>
+        /// <returns>The instance created from the given type</returns>
+        /// <seealso cref="PostProcessEffectSettings"/>
+        public PostProcessEffectSettings GetSetting(Type type)
+        {
+            foreach (var setting in settings)
+            {
+                if (setting.GetType() == type)
+                    return setting;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Gets settings for a given effect type.
