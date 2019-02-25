@@ -99,7 +99,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
-                #pragma exclude_renderers gles vulkan
+                #pragma exclude_renderers gles vulkan switch
 
                 #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 5.0
@@ -115,7 +115,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
-                #pragma exclude_renderers gles vulkan
+                #pragma exclude_renderers gles vulkan switch
 
                 #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 3.0
@@ -147,7 +147,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
-                #pragma only_renderers gles vulkan
+                #pragma only_renderers gles vulkan switch
 
                 #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET //not supporting STEREO_INSTANCING_ENABLED
             ENDHLSL
