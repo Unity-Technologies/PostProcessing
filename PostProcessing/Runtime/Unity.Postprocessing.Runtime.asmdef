@@ -3,5 +3,12 @@
     "references": [],
     "optionalUnityReferences": [],
     "includePlatforms": [],
-    "excludePlatforms": []
+    "excludePlatforms": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.lightweight",
+            "expression": "1.0.0",
+            "define": "LWRP_1_0_0_OR_NEWER"
+        }
+    ]
 }

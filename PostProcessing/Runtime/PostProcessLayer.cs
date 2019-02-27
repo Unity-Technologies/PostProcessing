@@ -1150,8 +1150,10 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 cmd.BlitFullscreenTriangleToDoubleWide(context.source, context.destination, uberSheet, 0, eye);
             }
+#if LWRP_1_0_0_OR_NEWER
             else if (isFinalPass)
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0, false, context.camera.pixelRect);
+#endif
             else
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 
