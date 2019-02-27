@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Shader compilation errors with OpenGL ES2 and Switch.
+- Proper viewport support on Builtin render pipelines.
 
 ## [2.1.3] - 2019-01-30
 
