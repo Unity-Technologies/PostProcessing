@@ -161,7 +161,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override void Render(PostProcessRenderContext context)
         {
-            var colorFormat = RenderTextureFormat.DefaultHDR;
+            var colorFormat = context.sourceFormat;
             var cocFormat = SelectFormat(RenderTextureFormat.R8, RenderTextureFormat.RHalf);
 
             // Avoid using R8 on OSX with Metal. #896121, https://goo.gl/MgKqu6
