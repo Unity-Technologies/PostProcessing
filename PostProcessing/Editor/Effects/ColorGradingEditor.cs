@@ -21,6 +21,9 @@ namespace UnityEditor.Rendering.PostProcessing
             new GUIContent("Lum Vs Sat")
         };
 
+        SerializedParameterOverride m_IsExportSubstanceLutRequested;
+        SerializedParameterOverride m_ExportSubstanceLutFilePath;
+
         SerializedParameterOverride m_ExternalLut;
 
         SerializedParameterOverride m_Tonemapper;
@@ -96,6 +99,9 @@ namespace UnityEditor.Rendering.PostProcessing
 
         public override void OnEnable()
         {
+            m_IsExportSubstanceLutRequested = FindParameterOverride(x => x.isExportSubstanceLutRequested);
+            m_ExportSubstanceLutFilePath = FindParameterOverride(x => x.exportSubstanceLutFilePath);
+
             m_GradingMode = FindParameterOverride(x => x.gradingMode);
 
             m_ExternalLut = FindParameterOverride(x => x.externalLut);
@@ -240,6 +246,25 @@ namespace UnityEditor.Rendering.PostProcessing
 
         void DoStandardModeGUI(bool hdr)
         {
+            EditorGUILayout.Space();
+
+            // m_IsExportSubstanceLutRequested.Set
+            // m_ExportSubstanceLutFilePath.value = "";
+            // if (GUILayout.Button("Export Look Up Table For Substance"))
+            // {
+            //     // ExportLutForSubstance();
+
+            //     string substanceLutPath = EditorUtility.SaveFilePanel("Save Substance LUT As", "", "untitled_substance_lut", ".exr");
+            //     if (substanceLutPath.Length > 0)
+            //     {
+            //         m_IsExportSubstanceLutRequested.value = 1;
+            //         m_ExportSubstanceLutFilePath.value = substanceLutPath;
+            //     }
+            // }
+
+            PropertyField(m_IsExportSubstanceLutRequested);
+            PropertyField(m_ExportSubstanceLutFilePath);
+
             if (!hdr)
             {
                 PropertyField(m_LdrLut);

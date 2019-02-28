@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Windows;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
@@ -70,6 +71,9 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class TonemapperParameter : ParameterOverride<Tonemapper> {}
 
+    [Serializable]
+    public sealed class StringParameter : ParameterOverride<String> {}
+
     /// <summary>
     /// This class holds settings for the Color Grading effect.
     /// </summary>
@@ -78,6 +82,9 @@ namespace UnityEngine.Rendering.PostProcessing
     [PostProcess(typeof(ColorGradingRenderer), "Unity/Color Grading")]
     public sealed class ColorGrading : PostProcessEffectSettings
     {
+        public IntParameter isExportSubstanceLutRequested = new IntParameter { value = 0 };
+        public StringParameter exportSubstanceLutFilePath = new StringParameter { value = "" };
+
         /// <summary>
         /// The grading mode to use.
         /// </summary>
@@ -225,7 +232,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         /// <summary>
         /// Adjusts the overall exposure of the scene in EV units. This is applied after HDR effect
-        /// and right before tonemapping so it won’t affect previous effects in the chain.
+        /// and right before tonemapping so it wonï¿½t affect previous effects in the chain.
         /// </summary>
         /// <remarks>
         /// This is only used when working with <see cref="GradingMode.HighDefinitionRange"/>.
@@ -534,6 +541,47 @@ namespace UnityEngine.Rendering.PostProcessing
             uberSheet.properties.SetFloat(ShaderIDs.PostExposure, RuntimeUtilities.Exp2(settings.postExposure.value));
 
             context.logLut = lut;
+
+            if (settings.isExportSubstanceLutRequested.value > 0)
+            {
+                var format = RenderTextureFormat.ARGBHalf;//GetLutFormat();
+                const int width = 2048;
+                const int height = 128;
+                RenderTexture lutSubstanceRT = new RenderTexture(width, height, 0, format, RenderTextureReadWrite.Linear)
+                {
+                    name = "Color Grading Log Lut Substance Layout",
+                    dimension = TextureDimension.Tex2D,
+                    hideFlags = HideFlags.DontSave,
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                    anisoLevel = 0,
+                    enableRandomWrite = true,
+                    autoGenerateMips = false,
+                    useMipMap = false
+                };
+
+                var sheet = context.propertySheets.Get(Shader.Find("Hidden/PostProcessing/Editor/SubstanceLutGenerate"));
+                sheet.properties.SetTexture("_Lut3D", lut);
+                sheet.properties.SetVector(ShaderIDs.Lut3D_Params, new Vector2(1f / lut.width, lut.width - 1f));
+                sheet.properties.SetVector("_ScreenParams", new Vector4(width, height, 1.0f / (float)width, 1.0f / (float)height));
+                context.command.BlitFullscreenTriangle(BuiltinRenderTextureType.None, lutSubstanceRT, sheet, 0);
+
+                Graphics.ExecuteCommandBuffer(context.command);
+                context.command.Clear();
+
+                RenderTexture activePrevious = RenderTexture.active;
+                RenderTexture.active = lutSubstanceRT;
+                Texture2D lutSubstanceTexture = new Texture2D(width, height, TextureFormat.RGBAHalf, false);
+                lutSubstanceTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                RenderTexture.active = activePrevious;
+
+                byte[] bytes = lutSubstanceTexture.EncodeToEXR(Texture2D.EXRFlags.None);
+                File.WriteAllBytes(settings.exportSubstanceLutFilePath.value, bytes);
+
+                Object.DestroyImmediate(lutSubstanceRT);
+                Object.DestroyImmediate(lutSubstanceTexture);
+            }
+
         }
 
         // HDR color pipeline is rendered to a 2D strip lut (works on HDR platforms without compute
