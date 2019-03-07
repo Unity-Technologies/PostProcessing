@@ -1,5 +1,7 @@
 using System;
 
+using UnityEngine.Experimental.Rendering;
+
 namespace UnityEngine.Rendering.PostProcessing
 {
     /// <summary>
@@ -779,19 +781,25 @@ namespace UnityEngine.Rendering.PostProcessing
             return m_GradingCurves;
         }
 
+        static bool IsRenderTextureFormatSupportedForLinearFiltering(RenderTextureFormat format)
+        {
+            var gFormat = GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Linear);
+            return SystemInfo.IsFormatSupported(gFormat, FormatUsage.Linear);
+        }
+
         static RenderTextureFormat GetLutFormat()
         {
             // Use ARGBHalf if possible, fallback on ARGB2101010 and ARGB32 otherwise
             var format = RenderTextureFormat.ARGBHalf;
 
-            if (!format.IsSupported())
+            if (!IsRenderTextureFormatSupportedForLinearFiltering(format))
             {
                 format = RenderTextureFormat.ARGB2101010;
 
                 // Note that using a log lut in ARGB32 is a *very* bad idea but we need it for
                 // compatibility reasons (else if a platform doesn't support one of the previous
                 // format it'll output a black screen, or worse will segfault on the user).
-                if (!format.IsSupported())
+                if (!IsRenderTextureFormatSupportedForLinearFiltering(format))
                     format = RenderTextureFormat.ARGB32;
             }
 
