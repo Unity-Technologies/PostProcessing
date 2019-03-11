@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - LDR Color grading in gamma mode no longer produces banding artifacts on Mali GPUs on OpenGL ES2.
+- Gamma mode no longer darken the screen with LWRP.
 
 ## [2.1.4] - 2019-02-27
 
