@@ -227,7 +227,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         /// <summary>
         /// Adjusts the overall exposure of the scene in EV units. This is applied after HDR effect
-        /// and right before tonemapping so it won’t affect previous effects in the chain.
+        /// and right before tonemapping so it won't affect previous effects in the chain.
         /// </summary>
         /// <remarks>
         /// This is only used when working with <see cref="GradingMode.HighDefinitionRange"/>.
@@ -783,8 +783,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool IsRenderTextureFormatSupportedForLinearFiltering(RenderTextureFormat format)
         {
+#if UNITY_2019_1_OR_NEWER
             var gFormat = GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Linear);
             return SystemInfo.IsFormatSupported(gFormat, FormatUsage.Linear);
+#else
+            // No good/fast way to test it on pre-2019.1
+            return format.IsSupported();
+#endif
         }
 
         static RenderTextureFormat GetLutFormat()
