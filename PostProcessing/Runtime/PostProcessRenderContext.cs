@@ -341,8 +341,12 @@ namespace UnityEngine.Rendering.PostProcessing
                 modifiedDesc.colorFormat = colorFormat;
 
 #if UNITY_2019_1_OR_NEWER
-            // Reversed behavior in 2019.1 when RenderTextureFormat.Default is set...
-            modifiedDesc.sRGB = readWrite == RenderTextureReadWrite.Linear;
+            if (readWrite == RenderTextureReadWrite.sRGB)
+                modifiedDesc.sRGB = true;
+            else if (readWrite == RenderTextureReadWrite.Linear)
+                modifiedDesc.sRGB = false;
+            else if (readWrite == RenderTextureReadWrite.Default)
+                modifiedDesc.sRGB = QualitySettings.activeColorSpace != ColorSpace.Gamma;
 #else
             modifiedDesc.sRGB = readWrite != RenderTextureReadWrite.Linear;
 #endif
