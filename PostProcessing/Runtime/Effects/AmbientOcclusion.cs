@@ -207,6 +207,9 @@ namespace UnityEngine.Rendering.PostProcessing
         void Release();
     }
 
+#if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
+#endif
     internal sealed class AmbientOcclusionRenderer : PostProcessEffectRenderer<AmbientOcclusion>
     {
         IAmbientOcclusionMethod[] m_Methods;

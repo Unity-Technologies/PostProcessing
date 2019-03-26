@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2019-03-26
+
+### Fixed
+- Post-processing would crash if "Managed Stripping Level" was set to Medium or High.
+
 ## [2.1.5] - 2019-03-25
 
 ### Fixed
