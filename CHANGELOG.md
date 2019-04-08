@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Post-processing would crash if "Managed Stripping Level" was set to Medium or High.
 - Serialization warnings on build.
+- Removed unwanted garbage collection.
 
 ## [2.1.5] - 2019-03-25
 
