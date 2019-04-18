@@ -4,11 +4,34 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.1.3] - 2018-xx-xx
+## [2.1.7] - 2019-XX-XX
+
+## [2.1.6] - 2019-04-11
+
+### Fixed
+- Post-processing would crash if "Managed Stripping Level" was set to Medium or High.
+- Serialization warnings on build.
+- Removed unwanted garbage collection.
+
+## [2.1.5] - 2019-03-25
+
+### Fixed
+- LDR Color grading in gamma mode no longer produces banding artifacts on Mali GPUs on OpenGL ES2.
+- Gamma mode no longer darken the screen with LWRP.
+
+## [2.1.4] - 2019-02-27
+
+### Fixed
+- Shader compilation errors with OpenGL ES2 and Switch.
+- Proper viewport support on Builtin render pipelines.
+
+## [2.1.3] - 2019-01-30
 
 ### Fixed
 - Color grading would output negative values in some cases and break rendering on some platforms.
 - Custom effects with `allowInSceneView` set to `false` could make the scene view flicker to black.
+- R8_SRGB error in 2019.1 when Depth of Field and Temporal Anti-aliasing are enabled at the same time.
+- Auto-exposure compute shader on Metal/iOS.
 
 ## [2.1.2] - 2018-12-05
 

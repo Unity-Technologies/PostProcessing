@@ -115,11 +115,18 @@ namespace UnityEngine.Rendering.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
-#pragma warning disable 169
         // UI states
-        [SerializeField] bool m_ShowToolkit;
-        [SerializeField] bool m_ShowCustomSorter;
-#pragma warning restore 169
+#if UNITY_2017_1_OR_NEWER
+        [UnityEngine.Scripting.Preserve]
+#endif
+        [SerializeField]
+        bool m_ShowToolkit;
+
+#if UNITY_2017_1_OR_NEWER
+        [UnityEngine.Scripting.Preserve]
+#endif
+        [SerializeField]
+        bool m_ShowCustomSorter;
 
         /// <summary>
         /// If <c>true</c>, it will stop applying post-processing effects just before color grading
@@ -1159,8 +1166,10 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 cmd.BlitFullscreenTriangleToDoubleWide(context.source, context.destination, uberSheet, 0, eye);
             }
+#if LWRP_1_0_0_OR_NEWER
             else if (isFinalPass)
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0, false, context.camera.pixelRect);
+#endif
             else
                 cmd.BlitFullscreenTriangle(context.source, context.destination, uberSheet, 0);
 

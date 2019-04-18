@@ -4,8 +4,10 @@ Shader "Hidden/PostProcessing/FinalPass"
 
         #pragma multi_compile __ FXAA FXAA_LOW
         #pragma multi_compile __ FXAA_KEEP_ALPHA
-        #pragma multi_compile __ STEREO_INSTANCING_ENABLED
-        #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET
+
+        #pragma vertex VertUVTransform
+        #pragma fragment Frag
+
         #include "../StdLib.hlsl"
         #include "../Colors.hlsl"
         #include "Dithering.hlsl"
@@ -97,9 +99,9 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
+                #pragma exclude_renderers gles vulkan switch
 
-                #pragma vertex VertUVTransform
-                #pragma fragment Frag
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 5.0
 
             ENDHLSL
@@ -113,11 +115,41 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
+                #pragma exclude_renderers gles vulkan switch
 
-                #pragma vertex VertUVTransform
-                #pragma fragment Frag
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 3.0
 
+            ENDHLSL
+        }
+    }
+
+    SubShader
+    {
+        Cull Off ZWrite Off ZTest Always
+
+        Pass
+        {
+            HLSLPROGRAM
+                #pragma only_renderers gles
+
+                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
+                #pragma target es3.0
+
+            ENDHLSL
+        }
+    }
+
+    SubShader
+    {
+        Cull Off ZWrite Off ZTest Always
+
+        Pass
+        {
+            HLSLPROGRAM
+                #pragma only_renderers gles vulkan switch
+
+                #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET //not supporting STEREO_INSTANCING_ENABLED
             ENDHLSL
         }
     }

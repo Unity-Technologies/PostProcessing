@@ -275,7 +275,7 @@ Shader "Hidden/PostProcessing/Uber"
         Pass
         {
             HLSLPROGRAM
-                #pragma exclude_renderers gles vulkan
+                #pragma exclude_renderers gles vulkan switch
 
                 #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
                 #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
@@ -290,7 +290,7 @@ Shader "Hidden/PostProcessing/Uber"
         Pass
         {
             HLSLPROGRAM
-                #pragma only_renderers vulkan
+                #pragma only_renderers vulkan switch
 
                 #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
                 #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET // disabled for Vulkan because of shader compiler issues in older Unity versions: STEREO_INSTANCING_ENABLED

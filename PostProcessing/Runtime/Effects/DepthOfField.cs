@@ -77,6 +77,9 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+#if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
+#endif
     // TODO: Doesn't play nice with alpha propagation, see if it can be fixed without killing performances
     internal sealed class DepthOfFieldRenderer : PostProcessEffectRenderer<DepthOfField>
     {
@@ -149,8 +152,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 RenderTexture.ReleaseTemporary(rt);
 
-                // TODO: The CoCCalculation CoCTex uses RenderTextureReadWrite.Linear, why isn't this?
-                rt = context.GetScreenSpaceTemporaryRT(0, format);
+                rt = context.GetScreenSpaceTemporaryRT(0, format, RenderTextureReadWrite.Linear);
                 rt.name = "CoC History, Eye: " + eye + ", ID: " + id;
                 rt.filterMode = FilterMode.Bilinear;
                 rt.Create();
@@ -162,7 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override void Render(PostProcessRenderContext context)
         {
-            var colorFormat = RenderTextureFormat.DefaultHDR;
+            var colorFormat = context.sourceFormat;
             var cocFormat = SelectFormat(RenderTextureFormat.R8, RenderTextureFormat.RHalf);
 
             // Avoid using R8 on OSX with Metal. #896121, https://goo.gl/MgKqu6

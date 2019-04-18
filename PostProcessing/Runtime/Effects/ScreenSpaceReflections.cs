@@ -111,6 +111,9 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+#if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
+#endif
     internal sealed class ScreenSpaceReflectionsRenderer : PostProcessEffectRenderer<ScreenSpaceReflections>
     {
         RenderTexture m_Resolve;
@@ -148,9 +151,9 @@ namespace UnityEngine.Rendering.PostProcessing
             return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
         }
 
-        internal void CheckRT(ref RenderTexture rt, int width, int height, RenderTextureFormat format, FilterMode filterMode, bool useMipMap)
+        internal void CheckRT(ref RenderTexture rt, int width, int height, FilterMode filterMode, bool useMipMap)
         {
-            if (rt == null || !rt.IsCreated() || rt.width != width || rt.height != height || rt.format != format)
+            if (rt == null || !rt.IsCreated() || rt.width != width || rt.height != height)
             {
                 if (rt != null)
                 {
@@ -158,7 +161,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     RuntimeUtilities.Destroy(rt);
                 }
 
-                rt = new RenderTexture(width, height, 0, format)
+                rt = new RenderTexture(width, height, 0, RuntimeUtilities.defaultHDRRenderTextureFormat)
                 {
                     filterMode = filterMode,
                     useMipMap = useMipMap,
@@ -200,7 +203,7 @@ namespace UnityEngine.Rendering.PostProcessing
             int lodCount = Mathf.FloorToInt(Mathf.Log(size, 2f) - 3f);
             lodCount = Mathf.Min(lodCount, kMaxLods);
 
-            CheckRT(ref m_Resolve, size, size, context.sourceFormat, FilterMode.Trilinear, true);
+            CheckRT(ref m_Resolve, size, size, FilterMode.Trilinear, true);
 
             var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
@@ -231,7 +234,7 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             else
             {
-                CheckRT(ref m_History, size, size, context.sourceFormat, FilterMode.Bilinear, false);
+                CheckRT(ref m_History, size, size, FilterMode.Bilinear, false);
 
                 if (m_ResetHistory)
                 {

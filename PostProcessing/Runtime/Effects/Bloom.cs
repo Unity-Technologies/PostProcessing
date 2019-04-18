@@ -93,6 +93,9 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
+#if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
+#endif
     internal sealed class BloomRenderer : PostProcessEffectRenderer<Bloom>
     {
         enum Pass

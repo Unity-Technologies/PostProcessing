@@ -5,6 +5,9 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <summary>
     /// This class holds settings for the Fog effect with the deferred rendering path.
     /// </summary>
+#if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
+#endif
     [Serializable]
     [PostProcess(typeof(FogRenderer), "Unity/Fog")]
     public sealed class Fog : PostProcessEffectSettings

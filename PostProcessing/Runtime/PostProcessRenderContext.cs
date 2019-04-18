@@ -340,7 +340,16 @@ namespace UnityEngine.Rendering.PostProcessing
             if (colorFormat != RenderTextureFormat.Default)
                 modifiedDesc.colorFormat = colorFormat;
 
+#if UNITY_2019_1_OR_NEWER
+            if (readWrite == RenderTextureReadWrite.sRGB)
+                modifiedDesc.sRGB = true;
+            else if (readWrite == RenderTextureReadWrite.Linear)
+                modifiedDesc.sRGB = false;
+            else if (readWrite == RenderTextureReadWrite.Default)
+                modifiedDesc.sRGB = QualitySettings.activeColorSpace != ColorSpace.Gamma;
+#else
             modifiedDesc.sRGB = readWrite != RenderTextureReadWrite.Linear;
+#endif
 
             return modifiedDesc;
         }

@@ -6,6 +6,7 @@ namespace UnityEngine.Rendering.PostProcessing
     // TODO: Fix VR support
 
 #if UNITY_2017_1_OR_NEWER
+    [UnityEngine.Scripting.Preserve]
     [Serializable]
     internal sealed class MultiScaleVO : IAmbientOcclusionMethod
     {
