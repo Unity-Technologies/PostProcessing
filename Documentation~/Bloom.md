@@ -1,12 +1,8 @@
 # Bloom
 
-**Bloom** is an effect used to reproduce an imaging artifact of real-world cameras. The effect produces fringes of light extending from the borders of bright areas in an image, contributing to the illusion of an extremely bright light overwhelming the camera or eye capturing the scene.
+The **Bloom** effect creates fringes of light extending from the borders of bright areas in an image, contributing to the illusion of an extremely bright light overwhelming the Camera.
 
-**Lens Dirt** applies a fullscreen layer of smudges or dust to diffract the Bloom effect. This is commonly used in modern first person shooters.
-
-
-![](images/screenshot-bloom.png)
-
+You can also use **Lens Dirt** to apply a full-screen layer of smudges or dust to diffract the Bloom effect.
 
 
 ![](images/bloom.png)
@@ -18,31 +14,31 @@
 
 | Property         | Function                                                     |
 | :---------------- | :------------------------------------------------------------ |
-| Intensity        | Strength of the Bloom filter.                                |
-| Threshold        | Filters out pixels under this level of brightness. This value is expressed in gamma-space. |
-| Soft Knee        | Makes transition between under/over-threshold gradual (0 = hard threshold, 1 = soft threshold). |
-| Clamp            | Clamps pixels to control the bloom amount. This value is expressed in gamma-space. |
-| Diffusion        | Changes extent of veiling effects in a screen resolution-independent fashion. |
-| Anamorphic Ratio | Emulates the effect of an anamorphic lens by scaling the bloom vertically (in range [-1,0]) or horizontally (in range [0,1]). |
-| Color            | Tint of the Bloom filter.                                    |
-| Fast Mode        | Boost performances by lowering the effect quality.           |
+| Intensity        | Set the strength of the **Bloom** filter.                                |
+| Threshold        | Set the level of brightness to filter out pixels under this level. This value is expressed in gamma-space. |
+| Soft Knee        | Set the gradual threshold for transitions between under/over-threshold (0 = hard threshold, 1 = soft threshold). |
+| Clamp            | Set the value for clamping pixels to control the **Bloom** amount. This value is expressed in gamma-space. |
+| Diffusion        | Set the extent of veiling effects in a screen resolution-independent fashion. |
+| Anamorphic Ratio | Set the ratio to scale the **Bloom** vertically (in range [-1,0]) or horizontally (in range [0,1]). This emulates the effect of an anamorphic lens. |
+| Color            | Select the color of the tint of the **Bloom** filter.                                    |
+| Fast Mode        | Enable this checkbox to boost performance by lowering the **Bloom** effect quality.           |
 
 **Dirtiness** settings:
 
 | Property  | Function                                              |
 | --------- | ----------------------------------------------------- |
-| Texture   | Dirtiness texture to add smudges or dust to the lens. |
-| Intensity | Amount of lens dirtiness.                             |
+| Texture   | Select a Dirtiness texture to add smudges or dust to the lens. |
+| Intensity | Set the amount of lens dirtiness.                             |
 
 ### Details
 
-With properly exposed HDR scenes, `Threshold` should be set to ~1 so that only pixels with values above 1 leak into surrounding objects. You’ll probably want to drop this value when working in LDR or the effect won’t be visible.
+With properly exposed HDR scenes, the `Threshold` should be set to ~1 so that only pixels with values above 1 leak into surrounding objects. Drop this value when working in LDR or the effect won’t be visible.
 
-### Performances
+### Performance
 
-Lowering the `Diffusion` parameter will make the effect faster. The further away `Anamorphic Ratio` is from 0, the slower it will be. On mobile and low-end platforms it is recommended to enable `Fast Mode` as it gives a significant boost in performances.
+Lowering the `Diffusion` parameter will make the effect faster. The further away `Anamorphic Ratio` is from 0, the slower it will be. Enable `Fast Mode` if you are developing for mobile or low-end platforms to get a significant boost in performance.
 
-Finally, smaller lens dirt textures will result is faster lookup and blending across volumes.
+Smaller lens dirt textures will result in faster lookup and blending across volumes.
 
 ### Requirements
 
