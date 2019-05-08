@@ -78,8 +78,7 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 | Property            | Function                                                     |
 | :------------------- | :------------------------------------------------------------ |
 | Jitter Spread       | Set the diameter (in texels) in which jitter samples are spread. Smaller values result in crisper but a more aliased output. Larger values result in more stable but blurrier output. |
-| Stationary Blending | Set the blend coefficient for stationary fragments. This setting 
-controls the percentage of history sample blended into final color for fragments with minimal active motion. |
+| Stationary Blending | Set the blend coefficient for stationary fragments. This setting controls the percentage of history sample blended into final color for fragments with minimal active motion. |
 | Motion Blending     | Set the blending coefficient for moving fragments. This setting controls the percentage of history sample blended into the final color for fragments with significant active motion. |
 | Sharpness           | Set the sharpneess to alleviate the slight loss of details in high frequency regions which can be caused by TAA. |
 
