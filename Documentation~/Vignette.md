@@ -19,7 +19,7 @@ Classic mode has parametric controls for the position, shape and intensity of th
 ### Properties
 
 | Property   | Function                                                 |
-| -------------- | ------------------------------------------------------------ |
+| :-------------- | :------------------------------------------------------------ |
 | Color      | Set the color of the Vignette.      |
 | Center     | Set the Vignette center point (screen center is [0.5,0.5]). |
 | Intensity  | Set the amount of vignetting on screen.                              |
