@@ -1,11 +1,6 @@
 # Lens Distortion
 
-This effect simulates the shape of a lens by distorting or undistorting the final rendered picture.
-
-
-![](images/screenshot-distortion.png)
-
-
+The **Lens Distortion** effect simulates the shape of a real-world camera lens by distorting or undistorting the final rendered picture.
 
 ![](images/lensdistortion.png)
 
@@ -14,12 +9,12 @@ This effect simulates the shape of a lens by distorting or undistorting the fina
 
 | Property     | Function                                                     |
 | :------------ | :------------------------------------------------------------ |
-| Intensity    | Total distortion amount.                                     |
-| X Multiplier | Intensity multiplier on X axis. Set it to 0 to disable distortion on this axis. |
-| Y Multiplier | Intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis. |
-| Center X     | Distortion center point (X axis).                            |
-| Center Y     | Distortion center point (Y axis).                            |
-| Scale        | Global screen scaling.                                       |
+| Intensity    | Set the value for the total distortion amount.                                     |
+| X Multiplier | Set the Intensity multiplier on X axis. Set it to 0 to disable distortion on this axis. |
+| Y Multiplier | Set the Intensity multiplier on Y axis. Set it to 0 to disable distortion on this axis. |
+| Center X     | Set the Distortion center point (X axis).                            |
+| Center Y     | Set the Distortion center point (Y axis).                            |
+| Scale        | Set the value for global screen scaling.                                       |
 
 ### Known issues and limitations
 
