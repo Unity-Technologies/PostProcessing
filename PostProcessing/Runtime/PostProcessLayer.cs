@@ -383,11 +383,26 @@ namespace UnityEngine.Rendering.PostProcessing
             if (m_Camera == null || m_CurrentContext == null)
                 InitLegacy();
 
+            // Postprocessing does tweak load/store actions when it uses render targets.
+            // But when using builtin render pipeline, Camera will silently apply viewport when setting render target,
+            //   meaning that Postprocessing might think that it is rendering to fullscreen RT
+            //   and use LoadAction.DontCare freely, which will ruin the RT if we are using viewport.
+            // It should actually check for having tiled architecture but this is not exposed to script,
+            // so we are checking for mobile as a good substitute
+            if(Application.isMobilePlatform)
+            {
+                Rect r = m_Camera.rect;
+                if(Mathf.Abs(r.x) > 1e-6f || Mathf.Abs(r.y) > 1e-6f || Mathf.Abs(1.0f - r.width) > 1e-6f || Mathf.Abs(1.0f - r.height) > 1e-6f)
+                {
+                    Debug.LogWarning("When used with builtin render pipeline, Postprocessing package expects to be used on a fullscreen Camera.\nPlease note that using Camera viewport may result in visual artefacts or some things not working.", m_Camera);
+                }
+            }
+
             // Resets the projection matrix from previous frame in case TAA was enabled.
             // We also need to force reset the non-jittered projection matrix here as it's not done
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
             // is switched off and the FOV or any other camera property changes.
- 
+
 #if UNITY_2018_2_OR_NEWER
             if (!m_Camera.usePhysicalProperties)
 #endif
