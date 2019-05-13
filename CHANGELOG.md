@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Viewport handling wasn't working correctly when FXAA or SMAA were used with builtin pipelines.
 - Depth of Field could end up fully blurry depending on the project setup.
+- Reloading an asset bundle that has references to post-processing was broken.
 
 ### Changed
 - Warning for mobiles about using post-processing with non-fullscreen cameras.

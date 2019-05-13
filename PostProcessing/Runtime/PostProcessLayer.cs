@@ -785,7 +785,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void SetupContext(PostProcessRenderContext context)
         {
-            RuntimeUtilities.s_Resources = m_Resources;
+            RuntimeUtilities.UpdateResources(m_Resources);
 
             m_IsRenderingInSceneView = context.camera.cameraType == CameraType.SceneView;
             context.isSceneView = m_IsRenderingInSceneView;
