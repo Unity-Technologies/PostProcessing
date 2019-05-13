@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Viewport handling wasn't working correctly when FXAA or SMAA were used with builtin pipelines.
 
+### Changed
+- Warning for mobiles about using post-processing with non-fullscreen cameras.
+
 ## [2.1.6] - 2019-04-11
 
 ### Fixed
