@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.1.7] - 2019-XX-XX
 
+### Added
+- Excluded VR code for Stadia platform support
+
 ### Fixed
 - Viewport handling wasn't working correctly when FXAA or SMAA were used with builtin pipelines.
 - Depth of Field could end up fully blurry depending on the project setup.
