@@ -1,6 +1,6 @@
 # Motion Blur
 
-The **Motion Blur** effect blurs an image when GameObjects are moving faster than the camera’s exposure time. FOr more information on the Motion Blur effect, see the [Motion Blur](https://docs.unity3d.com/Manual/PostProcessing-MotionBlur.html) documentation in the Unity manual.
+The **Motion Blur** effect blurs an image when GameObjects are moving faster than the camera’s exposure time. For more information on the Motion Blur effect, see the [Motion Blur](https://docs.unity3d.com/Manual/PostProcessing-MotionBlur.html) documentation in the Unity manual.
 
 
 ![](images/motionblur.png)
