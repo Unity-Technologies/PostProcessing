@@ -75,7 +75,13 @@ namespace UnityEngine.Rendering.PostProcessing
         /// avoid post-processing artifacts cause by broken data in the scene.
         /// </summary>
         public bool stopNaNPropagation = true;
-        public bool finalBlitToCameraTarget = true;
+
+        /// <summary>
+        /// If <c>true</c>, it will render straight to the backbuffer and save the final blit done
+        /// by the engine. This has less overhead and will improve performance on lower-end platforms
+        /// (like mobiles) but breaks compatibility with legacy image effect that use OnRenderImage.
+        /// </summary>
+        public bool finalBlitToCameraTarget = false;
 
         /// <summary>
         /// The anti-aliasing method to use for this camera. By default it's set to <c>None</c>.
