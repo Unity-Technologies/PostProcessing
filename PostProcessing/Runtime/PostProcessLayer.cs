@@ -164,6 +164,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public Dictionary<PostProcessEvent, List<SerializedBundleRef>> sortedBundles { get; private set; }
 
+        public DepthTextureMode cameraDepthFlags { get; private set; }
+
         // We need to keep track of bundle initialization because for some obscure reason, on
         // assembly reload a MonoBehavior's Editor OnEnable will be called BEFORE the MonoBehavior's
         // own OnEnable... So we'll use it to pre-init bundles if the layer inspector is opened and
@@ -717,7 +719,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // scriptable render pipelines.
         void SetLegacyCameraFlags(PostProcessRenderContext context)
         {
-            var flags = context.camera.depthTextureMode;
+            var flags = DepthTextureMode.None;
 
             foreach (var bundle in m_Bundles)
             {
@@ -735,7 +737,8 @@ namespace UnityEngine.Rendering.PostProcessing
             if (debugLayer.debugOverlay != DebugOverlay.None)
                 flags |= debugLayer.GetCameraFlags();
 
-            context.camera.depthTextureMode = flags;
+            context.camera.depthTextureMode |= flags;
+            cameraDepthFlags = flags;
         }
 
         /// <summary>
