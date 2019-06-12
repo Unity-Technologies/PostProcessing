@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Warning for mobiles about using post-processing with non-fullscreen cameras.
 - Directly to Camera Target on the PostProcessLayer component is now disabled by default.
+- The framework now uses its own random number generator instead of the default Unity one.
 
 ## [2.1.6] - 2019-04-11
 
