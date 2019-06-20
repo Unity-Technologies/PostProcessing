@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// The base abstract class for all effect renderer types. If you're writing your own effect you

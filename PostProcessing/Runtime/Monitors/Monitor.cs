@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     public enum MonitorType
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Convolution kernel size for the Depth of Field effect.
@@ -38,7 +38,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Depth of Field effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(DepthOfFieldRenderer), "Unity/Depth of Field", false)]
+    [PostProcess(typeof(DepthOfFieldRenderer), "EffectHall/Depth of Field", false)]
     public sealed class DepthOfField : PostProcessEffectSettings
     {
         /// <summary>
@@ -198,25 +198,6 @@ namespace UnityEngine.Rendering.PostProcessing
             context.GetScreenSpaceTemporaryRT(cmd, ShaderIDs.CoCTex, 0, cocFormat, RenderTextureReadWrite.Linear);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, ShaderIDs.CoCTex, sheet, (int)Pass.CoCCalculation);
 
-            // CoC temporal filter pass when TAA is enabled
-            if (context.IsTemporalAntialiasingActive())
-            {
-                float motionBlending = context.temporalAntialiasing.motionBlending;
-                float blend = m_ResetHistory ? 0f : motionBlending; // Handles first frame blending
-                var jitter = context.temporalAntialiasing.jitter;
-
-                sheet.properties.SetVector(ShaderIDs.TaaParams, new Vector3(jitter.x, jitter.y, blend));
-
-                int pp = m_HistoryPingPong[context.xrActiveEye];
-                var historyRead = CheckHistory(context.xrActiveEye, ++pp % 2, context, cocFormat);
-                var historyWrite = CheckHistory(context.xrActiveEye, ++pp % 2, context, cocFormat);
-                m_HistoryPingPong[context.xrActiveEye] = ++pp % 2;
-
-                cmd.BlitFullscreenTriangle(historyRead, historyWrite, sheet, (int)Pass.CoCTemporalFilter);
-                cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
-                cmd.SetGlobalTexture(ShaderIDs.CoCTex, historyWrite);
-            }
-
             // Downsampling and prefiltering pass
             context.GetScreenSpaceTemporaryRT(cmd, ShaderIDs.DepthOfFieldTex, 0, colorFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, context.width / 2, context.height / 2);
             cmd.BlitFullscreenTriangle(context.source, ShaderIDs.DepthOfFieldTex, sheet, (int)Pass.DownsampleAndPrefilter);
@@ -237,8 +218,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Combine);
             cmd.ReleaseTemporaryRT(ShaderIDs.DepthOfFieldTex);
 
-            if (!context.IsTemporalAntialiasingActive())
-                cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
+            cmd.ReleaseTemporaryRT(ShaderIDs.CoCTex);
 
             cmd.EndSample("DepthOfField");
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// Tells a <see cref="AttributeDecorator"/> class which inspector attribute it's a decorator

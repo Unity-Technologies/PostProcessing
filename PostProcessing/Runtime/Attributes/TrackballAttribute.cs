@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Use this attribute to draw a trackball in the inspector.

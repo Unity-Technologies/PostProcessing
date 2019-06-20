@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine.Experimental.Rendering;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Color grading modes.
@@ -77,7 +77,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// </summary>
     // TODO: Could use some refactoring, too much duplicated code here
     [Serializable]
-    [PostProcess(typeof(ColorGradingRenderer), "Unity/Color Grading")]
+    [PostProcess(typeof(ColorGradingRenderer), "EffectHall/Color Grading")]
     public sealed class ColorGrading : PostProcessEffectSettings
     {
         /// <summary>

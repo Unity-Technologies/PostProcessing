@@ -1,12 +1,12 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This class holds settings for the Lens Distortion effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(LensDistortionRenderer), "Unity/Lens Distortion")]
+    [PostProcess(typeof(LensDistortionRenderer), "EffectHall/Lens Distortion")]
     public sealed class LensDistortion : PostProcessEffectSettings
     {
         /// <summary>

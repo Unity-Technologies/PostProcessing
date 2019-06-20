@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// The post-processing stack is entirely built around the use of <see cref="CommandBuffer"/>

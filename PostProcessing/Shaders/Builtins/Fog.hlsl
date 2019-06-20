@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_FOG
-#define UNITY_POSTFX_FOG
+#ifndef UNITY_PPSM_FOG
+#define UNITY_PPSM_FOG
 
 half4 _FogColor;
 float3 _FogParams;
@@ -29,4 +29,4 @@ float ComputeFogDistance(float depth)
     return dist;
 }
 
-#endif // UNITY_POSTFX_FOG
+#endif // UNITY_PPSM_FOG

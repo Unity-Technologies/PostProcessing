@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     //
     // Here's a quick look at the architecture of this framework and how it's integrated into Unity
@@ -214,7 +214,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 return;
             
 #if UNITY_EDITOR
-            // Can't access the UnityEditor.Rendering.PostProcessing namespace from here, so
+            // Can't access the UnityEditor.Rendering.PPSMobile namespace from here, so
             // we'll get the preferred color manually
             unchecked
             {

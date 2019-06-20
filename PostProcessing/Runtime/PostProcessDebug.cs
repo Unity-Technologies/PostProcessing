@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This component holds a set of debugging utilities related to post-processing.

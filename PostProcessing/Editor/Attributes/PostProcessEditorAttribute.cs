@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// Tells a <see cref="PostProcessEffectEditor{T}"/> class which run-time type it's an editor

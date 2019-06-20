@@ -1,12 +1,12 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This class holds settings for the Motion Blur effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(MotionBlurRenderer), "Unity/Motion Blur", false)]
+    [PostProcess(typeof(MotionBlurRenderer), "EffectHall/Motion Blur", false)]
     public sealed class MotionBlur : PostProcessEffectSettings
     {
         /// <summary>

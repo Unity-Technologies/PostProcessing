@@ -1,6 +1,6 @@
-﻿using UnityEngine.Rendering.PostProcessing;
+﻿using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [PostProcessEditor(typeof(ChromaticAberration))]
     internal sealed class ChromaticAberrationEditor : PostProcessEffectEditor<ChromaticAberration>
@@ -24,7 +24,7 @@ namespace UnityEditor.Rendering.PostProcessing
             PropertyField(m_Intensity);
             PropertyField(m_FastMode);
 
-            if (m_FastMode.overrideState.boolValue && !m_FastMode.value.boolValue && EditorUtilities.isTargetingConsolesOrMobiles)
+            if (m_FastMode.overrideState.boolValue && !m_FastMode.value.boolValue && EditorUtilities.isTargetingMobiles)
                 EditorGUILayout.HelpBox("For performance reasons it is recommended to use Fast Mode on mobile and console platforms.", MessageType.Warning);
         }
     }

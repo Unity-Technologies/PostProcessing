@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_AMBIENT_OCCLUSION
-#define UNITY_POSTFX_AMBIENT_OCCLUSION
+#ifndef UNITY_PPSM_AMBIENT_OCCLUSION
+#define UNITY_PPSM_AMBIENT_OCCLUSION
 
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
@@ -425,4 +425,4 @@ float4 FragDebugOverlay(VaryingsDefault i) : SV_Target
     return float4(1.0 - ao.xxx, 1.0);
 }
 
-#endif // UNITY_POSTFX_AMBIENT_OCCLUSION
+#endif // UNITY_PPSM_AMBIENT_OCCLUSION

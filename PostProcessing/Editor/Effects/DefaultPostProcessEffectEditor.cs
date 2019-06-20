@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// A default effect editor that gathers all parameters and list them vertically in the

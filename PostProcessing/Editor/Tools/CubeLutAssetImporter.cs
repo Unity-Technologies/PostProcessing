@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     sealed class CubeLutAssetImporter : AssetPostprocessor
     {

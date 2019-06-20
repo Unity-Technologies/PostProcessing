@@ -1,4 +1,4 @@
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// A set of utilities to manipulate color values.

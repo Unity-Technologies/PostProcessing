@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     // CUBE lut specs:
     // http://wwwimages.adobe.com/content/dam/Adobe/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf
@@ -13,7 +13,7 @@ namespace UnityEditor.Rendering.PostProcessing
         const int kVersion = 1;
         const int kSize = 33;
 
-#if POSTFX_DEBUG_MENUS
+#if PPSM_DEBUG_MENUS
         [MenuItem("Tools/Post-processing/Create Utility Luts")]
 #endif
         static void CreateLuts()

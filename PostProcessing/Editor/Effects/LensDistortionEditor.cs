@@ -1,6 +1,6 @@
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [PostProcessEditor(typeof(LensDistortion))]
     internal sealed class LensDistortionEditor : DefaultPostProcessEffectEditor

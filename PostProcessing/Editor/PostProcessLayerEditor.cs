@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 using UnityEditorInternal;
 using System.IO;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     using SerializedBundleRef = PostProcessLayer.SerializedBundleRef;
     using EXRFlags = Texture2D.EXRFlags;
@@ -22,12 +22,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_VolumeLayer;
 
         SerializedProperty m_AntialiasingMode;
-        SerializedProperty m_TaaJitterSpread;
-        SerializedProperty m_TaaSharpness;
-        SerializedProperty m_TaaStationaryBlending;
-        SerializedProperty m_TaaMotionBlending;
         SerializedProperty m_SmaaQuality;
-        SerializedProperty m_FxaaFastMode;
         SerializedProperty m_FxaaKeepAlpha;
 
         SerializedProperty m_FogEnabled;
@@ -41,9 +36,7 @@ namespace UnityEditor.Rendering.PostProcessing
         static GUIContent[] s_AntialiasingMethodNames =
         {
             new GUIContent("No Anti-aliasing"),
-            new GUIContent("Fast Approximate Anti-aliasing (FXAA)"),
-            new GUIContent("Subpixel Morphological Anti-aliasing (SMAA)"),
-            new GUIContent("Temporal Anti-aliasing (TAA)")
+            new GUIContent("Fast Approximate Anti-aliasing (FXAA)")
         };
 
         enum ExportMode
@@ -62,12 +55,6 @@ namespace UnityEditor.Rendering.PostProcessing
             m_VolumeLayer = FindProperty(x => x.volumeLayer);
 
             m_AntialiasingMode = FindProperty(x => x.antialiasingMode);
-            m_TaaJitterSpread = FindProperty(x => x.temporalAntialiasing.jitterSpread);
-            m_TaaSharpness = FindProperty(x => x.temporalAntialiasing.sharpness);
-            m_TaaStationaryBlending = FindProperty(x => x.temporalAntialiasing.stationaryBlending);
-            m_TaaMotionBlending = FindProperty(x => x.temporalAntialiasing.motionBlending);
-            m_SmaaQuality = FindProperty(x => x.subpixelMorphologicalAntialiasing.quality);
-            m_FxaaFastMode = FindProperty(x => x.fastApproximateAntialiasing.fastMode);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
             m_FogEnabled = FindProperty(x => x.fog.enabled);
@@ -156,35 +143,9 @@ namespace UnityEditor.Rendering.PostProcessing
             {
                 m_AntialiasingMode.intValue = EditorGUILayout.Popup(EditorUtilities.GetContent("Mode|The anti-aliasing method to use. FXAA is fast but low quality. SMAA works well for non-HDR scenes. TAA is a bit slower but higher quality and works well with HDR."), m_AntialiasingMode.intValue, s_AntialiasingMethodNames);
 
-                if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.TemporalAntialiasing)
+                if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {
-                    #if !UNITY_2017_3_OR_NEWER
-                    if (RuntimeUtilities.isSinglePassStereoSelected)
-                        EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
-                    #endif
-
-                    EditorGUILayout.PropertyField(m_TaaJitterSpread);
-                    EditorGUILayout.PropertyField(m_TaaStationaryBlending);
-                    EditorGUILayout.PropertyField(m_TaaMotionBlending);
-                    EditorGUILayout.PropertyField(m_TaaSharpness);
-                }
-                else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing)
-                {
-                    if (RuntimeUtilities.isSinglePassStereoSelected)
-                        EditorGUILayout.HelpBox("SMAA doesn't work with Single-pass stereo rendering.", MessageType.Warning);
-
-                    EditorGUILayout.PropertyField(m_SmaaQuality);
-
-                    if (m_SmaaQuality.intValue != (int)SubpixelMorphologicalAntialiasing.Quality.Low && EditorUtilities.isTargetingConsolesOrMobiles)
-                        EditorGUILayout.HelpBox("For performance reasons it is recommended to use Low Quality on mobile and console platforms.", MessageType.Warning);
-                }
-                else if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
-                {
-                    EditorGUILayout.PropertyField(m_FxaaFastMode);
                     EditorGUILayout.PropertyField(m_FxaaKeepAlpha);
-
-                    if (!m_FxaaFastMode.boolValue && EditorUtilities.isTargetingConsolesOrMobiles)
-                        EditorGUILayout.HelpBox("For performance reasons it is recommended to use Fast Mode on mobile and console platforms.", MessageType.Warning);
                 }
             }
             EditorGUI.indentLevel--;
@@ -371,7 +332,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             var lastActive = RenderTexture.active;
             var lastTargetSet = camera.targetTexture;
-            var lastPostFXState = m_Target.enabled;
+            var lastPPSMState = m_Target.enabled;
             var lastBreakColorGradingState = m_Target.breakBeforeColorGrading;
 
             if (mode == ExportMode.DisablePost)
@@ -385,7 +346,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
             EditorUtility.DisplayProgressBar("Export EXR", "Reading...", 0.25f);
 
-            m_Target.enabled = lastPostFXState;
+            m_Target.enabled = lastPPSMState;
             m_Target.breakBeforeColorGrading = lastBreakColorGradingState;
 
             if (mode == ExportMode.BreakBeforeColorGradingLog)

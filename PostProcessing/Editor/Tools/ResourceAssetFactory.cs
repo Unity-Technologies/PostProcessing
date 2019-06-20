@@ -1,11 +1,11 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     static class ResourceAssetFactory
     {
-#if POSTFX_DEBUG_MENUS
+#if PPSM_DEBUG_MENUS
         [MenuItem("Tools/Post-processing/Create Resources Asset")]
 #endif
         static void CreateAsset()

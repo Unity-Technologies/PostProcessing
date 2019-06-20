@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Ambient occlusion modes.
@@ -68,7 +68,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Ambient Occlusion effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(AmbientOcclusionRenderer), "Unity/Ambient Occlusion")]
+    [PostProcess(typeof(AmbientOcclusionRenderer), "EffectHall/Ambient Occlusion")]
     public sealed class AmbientOcclusion : PostProcessEffectSettings
     {
         // Shared parameters

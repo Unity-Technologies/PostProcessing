@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This class holds settings for the Vectorscope monitor.

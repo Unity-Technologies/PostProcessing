@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// A wrapper used for <see cref="ParameterOverride{T}"/> serialization and easy access to the

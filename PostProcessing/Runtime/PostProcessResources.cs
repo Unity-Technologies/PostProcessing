@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This asset is used to store references to shaders and other resources we might need at
@@ -22,8 +22,6 @@ namespace UnityEngine.Rendering.PostProcessing
             public Shader finalPass;
             public Shader grainBaker;
             public Shader motionBlur;
-            public Shader temporalAntialiasing;
-            public Shader subpixelMorphologicalAntialiasing;
             public Shader texture2dLerp;
             public Shader uber;
             public Shader lut2DBaker;

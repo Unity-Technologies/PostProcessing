@@ -1,13 +1,13 @@
 using System;
 using UnityEngine.Serialization;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This class holds settings for the Chromatic Aberration effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(ChromaticAberrationRenderer), "Unity/Chromatic Aberration")]
+    [PostProcess(typeof(ChromaticAberrationRenderer), "EffectHall/Chromatic Aberration")]
     public sealed class ChromaticAberration : PostProcessEffectSettings
     {
         /// <summary>

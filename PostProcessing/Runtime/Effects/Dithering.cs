@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Assertions;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
 #if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
@@ -17,7 +17,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var blueNoise = context.resources.blueNoise64;
             Assert.IsTrue(blueNoise != null && blueNoise.Length > 0);
 
-        #if POSTFX_DEBUG_STATIC_DITHERING // Used by QA for automated testing
+        #if PPSM_DEBUG_STATIC_DITHERING // Used by QA for automated testing
             m_NoiseTextureIndex = 0;
             float rndOffsetX = 0f;
             float rndOffsetY = 0f;

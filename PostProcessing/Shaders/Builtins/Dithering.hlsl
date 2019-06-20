@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_DITHERING
-#define UNITY_POSTFX_DITHERING
+#ifndef UNITY_PPSM_DITHERING
+#define UNITY_PPSM_DITHERING
 
 TEXTURE2D_SAMPLER2D(_DitheringTex, sampler_DitheringTex);
 float4 _Dithering_Coords;
@@ -20,4 +20,4 @@ float3 Dither(float3 color, float2 uv)
     return color;
 }
 
-#endif // UNITY_POSTFX_DITHERING
+#endif // UNITY_PPSM_DITHERING

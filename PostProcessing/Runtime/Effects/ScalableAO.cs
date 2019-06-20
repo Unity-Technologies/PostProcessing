@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     // Scalable ambient obscurance
 #if UNITY_2017_1_OR_NEWER

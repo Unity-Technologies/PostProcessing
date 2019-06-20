@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [InitializeOnLoad]
     sealed class DefineSetter

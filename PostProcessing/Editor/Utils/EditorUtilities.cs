@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// A set of editor utilities used in post-processing editors.
@@ -16,20 +16,6 @@ namespace UnityEditor.Rendering.PostProcessing
         static Dictionary<Type, AttributeDecorator> s_AttributeDecorators;
 
         static PostProcessEffectSettings s_ClipboardContent;
-
-        /// <summary>
-        /// Returns <c>true</c> if the current target is a console, <c>false</c> otherwise.
-        /// </summary>
-        public static bool isTargetingConsoles
-        {
-            get
-            {
-                var t = EditorUserBuildSettings.activeBuildTarget;
-                return t == BuildTarget.PS4
-                    || t == BuildTarget.XboxOne
-                    || t == BuildTarget.Switch;
-            }
-        }
 
         /// <summary>
         /// Returns <c>true</c> if the current target is a mobile, <c>false</c> otherwise.
@@ -51,15 +37,6 @@ namespace UnityEditor.Rendering.PostProcessing
 #endif
                     ;
             }
-        }
-
-        /// <summary>
-        /// Returns <c>true</c> if the current target is a console or a mobile, <c>false</c>
-        /// otherwise.
-        /// </summary>
-        public static bool isTargetingConsolesOrMobiles
-        {
-            get { return isTargetingConsoles || isTargetingMobiles; }
         }
 
         static EditorUtilities()

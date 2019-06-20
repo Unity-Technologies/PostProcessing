@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEditor.ProjectWindowCallback;
 using System.IO;
 using UnityEngine.SceneManagement;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// An utility class to help the creation of new post-processing profile assets.

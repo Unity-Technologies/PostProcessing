@@ -1,9 +1,10 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// The base abstract class for all parameter override types.
+    /// 重写参数
     /// </summary>
     /// <seealso cref="ParameterOverride{T}"/>
     public abstract class ParameterOverride

@@ -1,12 +1,12 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// This class holds settings for the Grain effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(GrainRenderer), "Unity/Grain")]
+    [PostProcess(typeof(GrainRenderer), "EffectHall/Grain")]
     public sealed class Grain : PostProcessEffectSettings
     {
         /// <summary>
@@ -41,7 +41,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
-#if POSTFX_DEBUG_STATIC_GRAIN
+#if PPSM_DEBUG_STATIC_GRAIN
     #pragma warning disable 414
 #endif
 #if UNITY_2017_1_OR_NEWER
@@ -56,7 +56,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override void Render(PostProcessRenderContext context)
         {
-#if POSTFX_DEBUG_STATIC_GRAIN
+#if PPSM_DEBUG_STATIC_GRAIN
             // Chosen by a fair dice roll
             float time = 0.4f;
             float rndOffsetX = 0f;
@@ -119,7 +119,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
     
-#if POSTFX_DEBUG_STATIC_GRAIN
+#if PPSM_DEBUG_STATIC_GRAIN
     #pragma warning restore 414
 #endif
 }

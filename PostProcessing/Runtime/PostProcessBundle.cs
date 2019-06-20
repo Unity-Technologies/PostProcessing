@@ -1,8 +1,11 @@
 using System;
 using UnityEngine.Assertions;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
+    /// <summary>
+    /// 后期效果束，把设置与渲染器放在一起
+    /// </summary>
     public sealed class PostProcessBundle
     {
         public PostProcessAttribute attribute { get; private set; }

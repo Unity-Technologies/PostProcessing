@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_DEPTH_OF_FIELD
-#define UNITY_POSTFX_DEPTH_OF_FIELD
+#ifndef UNITY_PPSM_DEPTH_OF_FIELD
+#define UNITY_PPSM_DEPTH_OF_FIELD
 
 #include "../StdLib.hlsl"
 #include "../Colors.hlsl"
@@ -268,4 +268,4 @@ half4 FragDebugOverlay(VaryingsDefault i) : SV_Target
     return half4(rgb, 1.0);
 }
 
-#endif // UNITY_POSTFX_DEPTH_OF_FIELD
+#endif // UNITY_PPSM_DEPTH_OF_FIELD

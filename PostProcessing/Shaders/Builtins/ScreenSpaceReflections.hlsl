@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_SSR
-#define UNITY_POSTFX_SSR
+#ifndef UNITY_PPSM_SSR
+#define UNITY_PPSM_SSR
 
 #include "UnityCG.cginc"
 #include "UnityPBSLighting.cginc"
@@ -327,14 +327,8 @@ float4 FragReproject(VaryingsDefault i) : SV_Target
         _MainTex.SampleLevel(sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + float2( k.x, k.y)), 0)
     );
 
-    // PS4 INTRINSIC_MINMAX3
-    #if SHADER_API_PSSL
-        float4 minimum = min3(min3(min3(min3(top[0], top[1], top[2]), top[3], bottom[0]), bottom[1], bottom[2]), bottom[3], color);
-        float4 maximum = max3(max3(max3(max3(top[0], top[1], top[2]), top[3], bottom[0]), bottom[1], bottom[2]), bottom[3], color);
-    #else
-        float4 minimum = min(min(min(min(min(min(min(min(top[0], top[1]), top[2]), top[3]), bottom[0]), bottom[1]), bottom[2]), bottom[3]), color);
-        float4 maximum = max(max(max(max(max(max(max(max(top[0], top[1]), top[2]), top[3]), bottom[0]), bottom[1]), bottom[2]), bottom[3]), color);
-    #endif
+    float4 minimum = min(min(min(min(min(min(min(min(top[0], top[1]), top[2]), top[3]), bottom[0]), bottom[1]), bottom[2]), bottom[3]), color);
+    float4 maximum = max(max(max(max(max(max(max(max(top[0], top[1]), top[2]), top[3]), bottom[0]), bottom[1]), bottom[2]), bottom[3]), color);
 
     float4 history = _History.SampleLevel(sampler_History, UnityStereoTransformScreenSpaceTex(uv), 0);
     history = clamp(history, minimum, maximum);
@@ -402,4 +396,4 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     return color;
 }
 
-#endif // UNITY_POSTFX_SSR
+#endif // UNITY_PPSM_SSR

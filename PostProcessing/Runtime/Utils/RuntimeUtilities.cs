@@ -10,7 +10,7 @@ using UnityEngine.Assertions;
 using UnityEditor;
 #endif
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     using SceneManagement;
     using UnityObject = UnityEngine.Object;
@@ -781,10 +781,6 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_EDITOR
                 return isSinglePassStereoSelected && Application.isPlaying;
-#elif !ENABLE_VR
-                return false;
-#elif UNITY_2017_2_OR_NEWER
-                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
                 return false;
 #endif
@@ -800,12 +796,8 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_EDITOR
                 return UnityEditor.PlayerSettings.virtualRealitySupported;
-#elif UNITY_XBOXONE || !ENABLE_VR
+#else
                 return false;
-#elif UNITY_2017_2_OR_NEWER
-                return UnityEngine.XR.XRSettings.enabled;
-#elif UNITY_5_6_OR_NEWER
-                return UnityEngine.VR.VRSettings.enabled;
 #endif
             }
         }
@@ -826,7 +818,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-#if UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IPHONE || UNITY_EDITOR
                 RenderTextureFormat format = RenderTextureFormat.RGB111110Float;
 #if UNITY_EDITOR
                 var target = EditorUserBuildSettings.activeBuildTarget;
@@ -835,7 +827,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #endif // UNITY_EDITOR
                 if (format.IsSupported())
                     return format;
-#endif // UNITY_ANDROID || UNITY_IPHONE || UNITY_TVOS || UNITY_SWITCH || UNITY_EDITOR
+#endif // UNITY_ANDROID || UNITY_IPHONE || UNITY_EDITOR
                 return RenderTextureFormat.DefaultHDR;
             }
         }
@@ -892,7 +884,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // TODO: Is there more proper way to determine this? What about SRPs?
             var gtype = SystemInfo.graphicsDeviceType;
             return camera.actualRenderingPath == RenderingPath.DeferredShading &&
-                (gtype == GraphicsDeviceType.Direct3D11 || gtype == GraphicsDeviceType.Direct3D12 || gtype == GraphicsDeviceType.XboxOne);
+                (gtype == GraphicsDeviceType.Direct3D11 || gtype == GraphicsDeviceType.Direct3D12);
         }
 
         /// <summary>
@@ -938,18 +930,6 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return layer != null
                 && layer.enabled;
-        }
-
-        /// <summary>
-        /// Checks if temporal anti-aliasing is active on a given post-process layer.
-        /// </summary>
-        /// <param name="layer">The layer to check</param>
-        /// <returns><c>true</c> if temporal anti-aliasing is active, <c>false</c> otherwise</returns>
-        public static bool IsTemporalAntialiasingActive(PostProcessLayer layer)
-        {
-            return IsPostProcessingActive(layer)
-                && layer.antialiasingMode == PostProcessLayer.Antialiasing.TemporalAntialiasing
-                && layer.temporalAntialiasing.IsSupported();
         }
 
         /// <summary>

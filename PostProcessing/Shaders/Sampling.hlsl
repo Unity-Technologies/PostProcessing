@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_SAMPLING
-#define UNITY_POSTFX_SAMPLING
+#ifndef UNITY_PPSM_SAMPLING
+#define UNITY_PPSM_SAMPLING
 
 #include "StdLib.hlsl"
 
@@ -88,4 +88,4 @@ half4 UpsampleBox(TEXTURE2D_ARGS(tex, samplerTex), float2 uv, float2 texelSize, 
     return s * (1.0 / 4.0);
 }
 
-#endif // UNITY_POSTFX_SAMPLING
+#endif // UNITY_PPSM_SAMPLING

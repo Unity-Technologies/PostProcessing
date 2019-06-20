@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// This class is used to draw the user interface in the inspector for all the settings
@@ -57,7 +57,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_EditorTypes = new Dictionary<Type, Type>();
             m_Editors = new List<PostProcessEffectBaseEditor>();
 
-            // Gets the list of all available postfx editors
+            // Gets the list of all available PPSM editors
             var editorTypes = RuntimeUtilities.GetAllAssemblyTypes()
                                 .Where(
                                     t => t.IsSubclassOf(typeof(PostProcessEffectBaseEditor))

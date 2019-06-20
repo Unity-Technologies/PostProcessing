@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Assertions;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Screen-space Reflections quality presets.
@@ -48,7 +48,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Screen-space Reflections effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(ScreenSpaceReflectionsRenderer), "Unity/Screen-space reflections")]
+    [PostProcess(typeof(ScreenSpaceReflectionsRenderer), "EffectHall/Screen-space reflections")]
     public sealed class ScreenSpaceReflections : PostProcessEffectSettings
     {
         /// <summary>

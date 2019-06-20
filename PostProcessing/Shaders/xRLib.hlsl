@@ -1,7 +1,7 @@
 // VR/AR/xR lib
 
-#ifndef UNITY_POSTFX_XRLIB
-#define UNITY_POSTFX_XRLIB
+#ifndef UNITY_PPSM_XRLIB
+#define UNITY_PPSM_XRLIB
 
 #if defined(UNITY_SINGLE_PASS_STEREO)
 CBUFFER_START(UnityStereoGlobals)
@@ -95,4 +95,4 @@ float4 UnityStereoAdjustedTexelSize(float4 texelSize)
 }
 #endif
 
-#endif // UNITY_POSTFX_XRLIB
+#endif // UNITY_PPSM_XRLIB

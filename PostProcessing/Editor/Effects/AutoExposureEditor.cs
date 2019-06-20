@@ -1,7 +1,7 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [PostProcessEditor(typeof(AutoExposure))]
     internal sealed class AutoExposureEditor : PostProcessEffectEditor<AutoExposure>

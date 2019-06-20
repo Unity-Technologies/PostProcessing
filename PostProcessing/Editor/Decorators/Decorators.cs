@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [Decorator(typeof(RangeAttribute))]
     internal sealed class RangeDecorator : AttributeDecorator
@@ -26,12 +26,12 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
 
-    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PPSMobile.MinAttribute))]
     internal sealed class MinDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (UnityEngine.Rendering.PostProcessing.MinAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PPSMobile.MinAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {
@@ -51,12 +51,12 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
 
-    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MaxAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PPSMobile.MaxAttribute))]
     internal sealed class MaxDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (UnityEngine.Rendering.PostProcessing.MaxAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PPSMobile.MaxAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {
@@ -76,12 +76,12 @@ namespace UnityEditor.Rendering.PostProcessing
         }
     }
 
-    [Decorator(typeof(UnityEngine.Rendering.PostProcessing.MinMaxAttribute))]
+    [Decorator(typeof(UnityEngine.Rendering.PPSMobile.MinMaxAttribute))]
     internal sealed class MinMaxDecorator : AttributeDecorator
     {
         public override bool OnGUI(SerializedProperty property, SerializedProperty overrideState, GUIContent title, Attribute attribute)
         {
-            var attr = (UnityEngine.Rendering.PostProcessing.MinMaxAttribute)attribute;
+            var attr = (UnityEngine.Rendering.PPSMobile.MinMaxAttribute)attribute;
 
             if (property.propertyType == SerializedPropertyType.Float)
             {

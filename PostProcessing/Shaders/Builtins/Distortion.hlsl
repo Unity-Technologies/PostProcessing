@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_DISTORTION
-#define UNITY_POSTFX_DISTORTION
+#ifndef UNITY_PPSM_DISTORTION
+#define UNITY_PPSM_DISTORTION
 
 float4 _Distortion_Amount;
 float4 _Distortion_CenterScale;
@@ -31,4 +31,4 @@ float2 Distort(float2 uv)
     return uv;
 }
 
-#endif // UNITY_POSTFX_DISTORTION
+#endif // UNITY_PPSM_DISTORTION

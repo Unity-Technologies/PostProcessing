@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Serialization;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     // For now and by popular request, this bloom effect is geared toward artists so they have full
     // control over how it looks at the expense of physical correctness.
@@ -11,7 +11,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Bloom effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(BloomRenderer), "Unity/Bloom")]
+    [PostProcess(typeof(BloomRenderer), "EffectHall/Bloom")]
     public sealed class Bloom : PostProcessEffectSettings
     {
         /// <summary>
@@ -154,8 +154,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // fillrate limited platforms
             int tw = Mathf.FloorToInt(context.screenWidth / (2f - rw));
             int th = Mathf.FloorToInt(context.screenHeight / (2f - rh));
-            bool singlePassDoubleWide = (context.stereoActive && (context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass) && (context.camera.stereoTargetEye == StereoTargetEyeMask.Both));
-            int tw_stereo = singlePassDoubleWide ? tw * 2 : tw; 
+            int tw_temp = tw; 
 
             // Determine the iteration count
             int s = Mathf.Max(tw, th);
@@ -185,13 +184,13 @@ namespace UnityEngine.Rendering.PostProcessing
                     ? (int)Pass.Prefilter13 + qualityOffset
                     : (int)Pass.Downsample13 + qualityOffset;
 
-                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
-                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_temp, th);
+                context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_temp, th);
                 cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
 
                 lastDown = mipDown;
-                tw_stereo = (singlePassDoubleWide && ((tw_stereo / 2) % 2 > 0)) ? 1 + tw_stereo / 2 : tw_stereo / 2;
-                tw_stereo = Mathf.Max(tw_stereo, 1);
+                tw_temp = tw_temp / 2;
+                tw_temp = Mathf.Max(tw_temp, 1);
                 th = Mathf.Max(th / 2, 1);
             }
 

@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_COLOR
-#define UNITY_POSTFX_COLOR
+#ifndef UNITY_PPSM_COLOR
+#define UNITY_PPSM_COLOR
 
 #include "StdLib.hlsl"
 #include "ACES.hlsl"
@@ -413,7 +413,7 @@ float3 AcesTonemap(float3 aces)
     acescg = lerp(dot(acescg, AP1_RGB2Y).xxx, acescg, RRT_SAT_FACTOR.xxx);
 
     // Luminance fitting of *RRT.a1.0.3 + ODT.Academy.RGBmonitor_100nits_dim.a1.0.3*.
-    // https://github.com/colour-science/colour-unity/blob/master/Assets/Colour/Notebooks/CIECAM02_Unity.ipynb
+    // https://github.com/colour-science/colour-EffectHall/blob/master/Assets/Colour/Notebooks/CIECAM02_Unity.ipynb
     // RMSE: 0.0012846272106
     const float a = 278.5085;
     const float b = 10.7772;
@@ -647,4 +647,4 @@ float3 ChannelMixer(float3 c, float3 red, float3 green, float3 blue)
     );
 }
 
-#endif // UNITY_POSTFX_COLOR
+#endif // UNITY_PPSM_COLOR

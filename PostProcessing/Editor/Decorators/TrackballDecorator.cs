@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     [Decorator(typeof(TrackballAttribute))]
     internal sealed class TrackballDecorator : AttributeDecorator

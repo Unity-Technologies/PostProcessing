@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_DISK_KERNELS
-#define UNITY_POSTFX_DISK_KERNELS
+#ifndef UNITY_PPSM_DISK_KERNELS
+#define UNITY_PPSM_DISK_KERNELS
 
 #if !defined(KERNEL_SMALL) && !defined(KERNEL_MEDIUM) && \
     !defined(KERNEL_LARGE) && !defined(KERNEL_VERYLARGE)
@@ -201,4 +201,4 @@ static const float2 kDiskKernel[kSampleCount] = {
 
 #endif
 
-#endif // UNITY_POSTFX_DISK_KERNELS
+#endif // UNITY_PPSM_DISK_KERNELS

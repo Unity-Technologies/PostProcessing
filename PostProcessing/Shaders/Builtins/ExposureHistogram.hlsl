@@ -1,5 +1,5 @@
-#ifndef UNITY_POSTFX_EXPOSURE_HISTOGRAM
-#define UNITY_POSTFX_EXPOSURE_HISTOGRAM
+#ifndef UNITY_PPSM_EXPOSURE_HISTOGRAM
+#define UNITY_PPSM_EXPOSURE_HISTOGRAM
 
 // Don't forget to update 'LogHistogram.cs' if you change these values !
 #define HISTOGRAM_BINS          128
@@ -92,4 +92,4 @@ float GetAverageLuminance(StructuredBuffer<uint> buffer, float4 params, float ma
     return clamp(filter.x / max(filter.y, EPSILON), params.z, params.w);
 }
 
-#endif // UNITY_POSTFX_EXPOSURE_HISTOGRAM
+#endif // UNITY_PPSM_EXPOSURE_HISTOGRAM

@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// Eye adaptation modes.
@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Auto Exposure effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(AutoExposureRenderer), "Unity/Auto Exposure")]
+    [PostProcess(typeof(AutoExposureRenderer), "EffectHall/Auto Exposure")]
     public sealed class AutoExposure : PostProcessEffectSettings
     {
         /// <summary>

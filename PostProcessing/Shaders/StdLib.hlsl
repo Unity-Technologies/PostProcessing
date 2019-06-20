@@ -3,17 +3,13 @@
 // shader lib). So here goes a minimal shader lib only used for post-processing to ensure good
 // compatibility with all pipelines.
 
-#ifndef UNITY_POSTFX_STDLIB
-#define UNITY_POSTFX_STDLIB
+#ifndef UNITY_PPSM_STDLIB
+#define UNITY_PPSM_STDLIB
 
 // -----------------------------------------------------------------------------
 // API macros
 
-#if defined(SHADER_API_PSSL)
-    #include "API/PSSL.hlsl"
-#elif defined(SHADER_API_XBOXONE)
-    #include "API/XboxOne.hlsl"
-#elif defined(SHADER_API_D3D11)
+#if defined(SHADER_API_D3D11)
     #include "API/D3D11.hlsl"
 #elif defined(SHADER_API_D3D12)
     #include "API/D3D12.hlsl"
@@ -21,18 +17,10 @@
     #include "API/D3D9.hlsl"
 #elif defined(SHADER_API_VULKAN)
     #include "API/Vulkan.hlsl"
-#elif defined(SHADER_API_SWITCH)
-    #include "API/Switch.hlsl"
 #elif defined(SHADER_API_METAL)
     #include "API/Metal.hlsl"
-#elif defined(SHADER_API_PSP2)
-    #include "API/PSP2.hlsl"
 #else
     #include "API/OpenGL.hlsl"
-#endif
-
-#if defined(SHADER_API_PSSL) || defined(SHADER_API_XBOXONE) || defined(SHADER_API_SWITCH) || defined(SHADER_API_PSP2)
-    #define SHADER_API_CONSOLE
 #endif
 
 // -----------------------------------------------------------------------------
@@ -57,7 +45,7 @@
 // -----------------------------------------------------------------------------
 // Compatibility functions
 
-#if (SHADER_TARGET < 50 && !defined(SHADER_API_PSSL))
+#if (SHADER_TARGET < 50)
 float rcp(float value)
 {
     return 1.0 / value;
@@ -319,4 +307,4 @@ VaryingsDefault VertUVTransform(AttributesDefault v)
 
 #define TRANSFORM_TEX(tex,name) (tex.xy * name##_ST.xy + name##_ST.zw)
 
-#endif // UNITY_POSTFX_STDLIB
+#endif // UNITY_PPSM_STDLIB

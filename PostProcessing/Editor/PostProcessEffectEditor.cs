@@ -1,8 +1,8 @@
 using System;
 using System.Linq.Expressions;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PPSMobile;
 
-namespace UnityEditor.Rendering.PostProcessing
+namespace UnityEditor.Rendering.PPSMobile
 {
     /// <summary>
     /// The class to inherit from when designing custom effect editors.

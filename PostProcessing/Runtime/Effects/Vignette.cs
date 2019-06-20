@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
     /// <summary>
     /// A list of available render modes for the Vignette effect.
@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// This class holds settings for the Vignette effect.
     /// </summary>
     [Serializable]
-    [PostProcess(typeof(VignetteRenderer), "Unity/Vignette")]
+    [PostProcess(typeof(VignetteRenderer), "EffectHall/Vignette")]
     public sealed class Vignette : PostProcessEffectSettings
     {
         /// <summary>

@@ -1,13 +1,7 @@
 using System.Collections.Generic;
 
-namespace UnityEngine.Rendering.PostProcessing
+namespace UnityEngine.Rendering.PPSMobile
 {
-#if UNITY_2017_2_OR_NEWER && ENABLE_VR
-    using XRSettings = UnityEngine.XR.XRSettings;
-#elif UNITY_5_6_OR_NEWER && ENABLE_VR
-    using XRSettings = UnityEngine.VR.VRSettings;
-#endif
-
     /// <summary>
     /// A context object passed around all post-processing effects in a frame.
     /// </summary>
@@ -28,76 +22,16 @@ namespace UnityEngine.Rendering.PostProcessing
             {
                 m_Camera = value;
 
-#if !UNITY_SWITCH && ENABLE_VR
-                if (m_Camera.stereoEnabled)
-                {
-#if UNITY_2017_2_OR_NEWER
-                    var xrDesc = XRSettings.eyeTextureDesc;
-                    stereoRenderingMode = StereoRenderingMode.SinglePass;
-
-#if UNITY_STANDALONE || UNITY_EDITOR
-                    if (xrDesc.dimension == TextureDimension.Tex2DArray)
-                        stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
-#endif
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
-                        numberOfEyes = 2;
-
-#if UNITY_2019_1_OR_NEWER
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                    {
-                        numberOfEyes = 2;
-                        xrDesc.width /= 2;
-                        xrDesc.vrUsage = VRTextureUsage.None;
-                    }
-#else
-                    //before 2019.1 double-wide still issues two drawcalls
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                    {
-                        numberOfEyes = 1;
-                    }
-#endif
-
-                    width = xrDesc.width;
-                    height = xrDesc.height;
-                    m_sourceDescriptor = xrDesc;
-#else
-                    // Single-pass is only supported with 2017.2+ because
-                    // that is when XRSettings.eyeTextureDesc is available.
-                    // Without it, we don't have a robust method of determining
-                    // if we are in single-pass.  Users can just double the width
-                    // here if they KNOW they are using single-pass.
-                    width = XRSettings.eyeTextureWidth;
-                    height = XRSettings.eyeTextureHeight;
-#endif
-
-                    if (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
-                        xrActiveEye = (int)Camera.StereoscopicEye.Right;
-
-                    screenWidth = XRSettings.eyeTextureWidth;
-                    screenHeight = XRSettings.eyeTextureHeight;
-
-#if UNITY_2019_1_OR_NEWER
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                        screenWidth /= 2;
-#endif
-                    stereoActive = true;
-
-                }
-                else
-#endif
-                {
-                    width = m_Camera.pixelWidth;
-                    height = m_Camera.pixelHeight;
+                width = m_Camera.pixelWidth;
+                height = m_Camera.pixelHeight;
 
 #if UNITY_2017_2_OR_NEWER
-                    m_sourceDescriptor.width = width;
-                    m_sourceDescriptor.height = height;
+                m_sourceDescriptor.width = width;
+                m_sourceDescriptor.height = height;
 #endif
-                    screenWidth = width;
-                    screenHeight = height;
-                    stereoActive = false;
-                    numberOfEyes = 1;
-                }
+                screenWidth = width;
+                screenHeight = height;
+                numberOfEyes = 1;
             }
         }
 
@@ -164,10 +98,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public int height { get; private set; }
 
-        /// <summary>
-        /// Is stereo rendering active?
-        /// </summary>
-        public bool stereoActive { get; private set; }
 
         /// <summary>
         /// The current active rendering eye (for XR).
@@ -215,13 +145,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public PostProcessLayer.Antialiasing antialiasing { get; internal set; }
 
-        /// <summary>
-        /// A reference to the temporal anti-aliasing settings for the rendering layer. This is
-        /// mostly used to grab the jitter vector and other TAA-related values when an effect needs
-        /// to do temporal reprojection.
-        /// </summary>
-        public TemporalAntialiasing temporalAntialiasing { get; internal set; }
-
         // Internal values used for builtin effects
         // Beware, these may not have been set before a specific builtin effect has been executed
         internal PropertySheet uberSheet;
@@ -251,7 +174,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2018_2_OR_NEWER
             physicalCamera = false;
 #endif
-            stereoActive = false;
             xrActiveEye = (int)Camera.StereoscopicEye.Left;
             screenWidth = 0;
             screenHeight = 0;
@@ -267,7 +189,6 @@ namespace UnityEngine.Rendering.PostProcessing
             debugLayer = null;
             isSceneView = false;
             antialiasing = PostProcessLayer.Antialiasing.None;
-            temporalAntialiasing = null;
 
             uberSheet = null;
             autoExposureTexture = null;
@@ -279,18 +200,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 userData = new Dictionary<string, object>();
 
             userData.Clear();
-        }
-
-        /// <summary>
-        /// Checks if temporal anti-aliasing is supported and enabled.
-        /// </summary>
-        /// <returns><c>true</c> if temporal anti-aliasing is supported and enabled, <c>false</c>
-        /// otherwise</returns>
-        public bool IsTemporalAntialiasingActive()
-        {
-            return antialiasing == PostProcessLayer.Antialiasing.TemporalAntialiasing
-                && !isSceneView
-                && temporalAntialiasing.IsSupported();
         }
 
         /// <summary>
@@ -376,10 +285,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 desc.width = widthOverride;
             if (heightOverride > 0)
                 desc.height = heightOverride;
-
-            //intermediates in VR are unchanged
-            if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
-               desc.dimension = Rendering.TextureDimension.Tex2D;
           
             cmd.GetTemporaryRT(nameID, desc, filter);
 #else
