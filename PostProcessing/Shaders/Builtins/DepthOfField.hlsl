@@ -27,7 +27,7 @@ half3 _TaaParams; // Jitter.x, Jitter.y, Blending
 // CoC calculation
 half4 FragCoC(VaryingsDefault i) : SV_Target
 {
-    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord));
     half coc = (depth - _Distance) * _LensCoeff / max(depth, 1e-5);
     return saturate(coc * 0.5 * _RcpMaxCoC + 0.5);
 }
@@ -84,9 +84,9 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 #if UNITY_GATHER_SUPPORTED
 
     // Sample source colors
-    half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
-    half4 c_g = GATHER_GREEN_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
-    half4 c_b = GATHER_BLUE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 c_r = GATHER_RED_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    half4 c_g = GATHER_GREEN_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    half4 c_b = GATHER_BLUE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
     half3 c0 = half3(c_r.x, c_g.x, c_b.x);
     half3 c1 = half3(c_r.y, c_g.y, c_b.y);
@@ -94,7 +94,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
     half3 c3 = half3(c_r.w, c_g.w, c_b.w);
 
     // Sample CoCs
-    half4 cocs = GATHER_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoordStereo) * 2.0 - 1.0;
+    half4 cocs = GATHER_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord) * 2.0 - 1.0;
     half coc0 = cocs.x;
     half coc1 = cocs.y;
     half coc2 = cocs.z;
@@ -150,7 +150,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 // Bokeh filter with disk-shaped kernels
 half4 FragBlur(VaryingsDefault i) : SV_Target
 {
-    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 samp0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
     half4 bgAcc = 0.0; // Background: far field bokeh
     half4 fgAcc = 0.0; // Foreground: near field bokeh
@@ -217,14 +217,14 @@ half4 FragPostBlur(VaryingsDefault i) : SV_Target
 // Combine with source
 half4 FragCombine(VaryingsDefault i) : SV_Target
 {
-    half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoordStereo);
-    half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoordStereo).r;
+    half4 dof = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
+    half coc = SAMPLE_TEXTURE2D(_CoCTex, sampler_CoCTex, i.texcoord).r;
     coc = (coc - 0.5) * 2.0 * _MaxCoC;
 
     // Convert CoC to far field alpha value.
     float ffa = smoothstep(_MainTex_TexelSize.y * 2.0, _MainTex_TexelSize.y * 4.0, coc);
 
-    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
 #if defined(UNITY_COLORSPACE_GAMMA)
     color = SRGBToLinear(color);
@@ -245,11 +245,11 @@ half4 FragCombine(VaryingsDefault i) : SV_Target
 // Debug overlay
 half4 FragDebugOverlay(VaryingsDefault i) : SV_Target
 {
-    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+    half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
 
     // Calculate the radiuses of CoC.
-    half4 src = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoordStereo);
-    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
+    half4 src = SAMPLE_TEXTURE2D(_DepthOfFieldTex, sampler_DepthOfFieldTex, i.texcoord);
+    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord));
     float coc = (depth - _Distance) * _LensCoeff / depth;
     coc *= 80;
 

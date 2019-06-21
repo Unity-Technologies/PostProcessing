@@ -15,17 +15,7 @@ namespace UnityEngine.Rendering.PPSMobile
         /// <summary>
         /// Medium filter.
         /// </summary>
-        Medium,
-
-        /// <summary>
-        /// Large filter.
-        /// </summary>
-        Large,
-
-        /// <summary>
-        /// Very large filter.
-        /// </summary>
-        VeryLarge
+        Medium
     }
 
     /// <summary>
@@ -67,7 +57,7 @@ namespace UnityEngine.Rendering.PPSMobile
         /// time is required).
         /// </summary>
         [DisplayName("Max Blur Size"), Tooltip("Convolution kernel size of the bokeh filter, which determines the maximum radius of bokeh. It also affects performances (the larger the kernel is, the longer the GPU time is required).")]
-        public KernelSizeParameter kernelSize = new KernelSizeParameter { value = KernelSize.Medium };
+        public KernelSizeParameter kernelSize = new KernelSizeParameter { value = KernelSize.Small };
 
         /// <inheritdoc />
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
@@ -99,10 +89,8 @@ namespace UnityEngine.Rendering.PPSMobile
 
         // Ping-pong between two history textures as we can't read & write the same target in the
         // same pass
-        const int k_NumEyes = 2;
         const int k_NumCoCHistoryTextures = 2;
-        readonly RenderTexture[][] m_CoCHistoryTextures = new RenderTexture[k_NumEyes][];
-        int[] m_HistoryPingPong = new int[k_NumEyes];
+        readonly RenderTexture[] m_CoCHistoryTextures;
 
         // Height of the 35mm full-frame format (36mm x 24mm)
         // TODO: Should be set by a physical camera
@@ -110,11 +98,7 @@ namespace UnityEngine.Rendering.PPSMobile
 
         public DepthOfFieldRenderer()
         {
-            for (int eye = 0; eye < k_NumEyes; eye++)
-            {
-                m_CoCHistoryTextures[eye] = new RenderTexture[k_NumCoCHistoryTextures];
-                m_HistoryPingPong[eye] = 0;
-            }
+            m_CoCHistoryTextures = new RenderTexture[k_NumCoCHistoryTextures];
         }
 
         public override DepthTextureMode GetCameraFlags()
@@ -144,19 +128,19 @@ namespace UnityEngine.Rendering.PPSMobile
             return Mathf.Min(0.05f, radiusInPixels / screenHeight);
         }
 
-        RenderTexture CheckHistory(int eye, int id, PostProcessRenderContext context, RenderTextureFormat format)
+        RenderTexture CheckHistory(int id, PostProcessRenderContext context, RenderTextureFormat format)
         {
-            var rt = m_CoCHistoryTextures[eye][id];
+            var rt = m_CoCHistoryTextures[id];
 
             if (m_ResetHistory || rt == null || !rt.IsCreated() || rt.width != context.width || rt.height != context.height)
             {
                 RenderTexture.ReleaseTemporary(rt);
 
                 rt = context.GetScreenSpaceTemporaryRT(0, format, RenderTextureReadWrite.Linear);
-                rt.name = "CoC History, Eye: " + eye + ", ID: " + id;
+                rt.name = "CoC History, ID: " + id;
                 rt.filterMode = FilterMode.Bilinear;
                 rt.Create();
-                m_CoCHistoryTextures[eye][id] = rt;
+                m_CoCHistoryTextures[id] = rt;
             }
 
             return rt;
@@ -227,14 +211,10 @@ namespace UnityEngine.Rendering.PPSMobile
 
         public override void Release()
         {
-            for (int eye = 0; eye < k_NumEyes; eye++)
+            for (int i = 0; i < m_CoCHistoryTextures.Length; i++)
             {
-                for (int i = 0; i < m_CoCHistoryTextures[eye].Length; i++)
-                {
-                    RenderTexture.ReleaseTemporary(m_CoCHistoryTextures[eye][i]);
-                    m_CoCHistoryTextures[eye][i] = null;
-                }
-                m_HistoryPingPong[eye] = 0;
+                RenderTexture.ReleaseTemporary(m_CoCHistoryTextures[i]);
+                m_CoCHistoryTextures[i] = null;
             }
 
             ResetHistory();

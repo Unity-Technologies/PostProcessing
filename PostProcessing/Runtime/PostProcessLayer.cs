@@ -75,11 +75,6 @@ namespace UnityEngine.Rendering.PPSMobile
         /// </summary>
         public FastApproximateAntialiasing fastApproximateAntialiasing;
 
-        /// <summary>
-        /// Fog settings for this camera.
-        /// </summary>
-        public Fog fog;
-
         Dithering dithering;
 
         /// <summary>
@@ -189,8 +184,6 @@ namespace UnityEngine.Rendering.PPSMobile
 
         void InitLegacy()
         {
-            m_LegacyCmdBufferBeforeReflections = new CommandBuffer { name = "Deferred Ambient Occlusion" };
-            m_LegacyCmdBufferBeforeLighting = new CommandBuffer { name = "Deferred Ambient Occlusion" };
             m_LegacyCmdBufferOpaque = new CommandBuffer { name = "Opaque Only Post-processing" };
             m_LegacyCmdBuffer = new CommandBuffer { name = "Post-processing" };
 
@@ -200,8 +193,6 @@ namespace UnityEngine.Rendering.PPSMobile
             m_Camera.forceIntoRenderTexture = true; // Needed when running Forward / LDR / No MSAA
 #endif
 
-            m_Camera.AddCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
-            m_Camera.AddCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
             m_Camera.AddCommandBuffer(CameraEvent.BeforeImageEffects, m_LegacyCmdBuffer);
 
@@ -234,7 +225,6 @@ namespace UnityEngine.Rendering.PPSMobile
 
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
             RuntimeUtilities.CreateIfNull(ref dithering);
-            RuntimeUtilities.CreateIfNull(ref fog);
             RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
@@ -316,10 +306,6 @@ namespace UnityEngine.Rendering.PPSMobile
             // legacy
             if (m_Camera != null)
             {
-                if (m_LegacyCmdBufferBeforeReflections != null)
-                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeReflections, m_LegacyCmdBufferBeforeReflections);
-                if (m_LegacyCmdBufferBeforeLighting != null)
-                    m_Camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, m_LegacyCmdBufferBeforeLighting);
                 if (m_LegacyCmdBufferOpaque != null)
                     m_Camera.RemoveCommandBuffer(CameraEvent.BeforeImageEffectsOpaque, m_LegacyCmdBufferOpaque);
                 if (m_LegacyCmdBuffer != null)
@@ -450,9 +436,6 @@ namespace UnityEngine.Rendering.PPSMobile
             context.camera = m_Camera;
             context.sourceFormat = sourceFormat;
 
-            // TODO: Investigate retaining command buffers on XR multi-pass right eye
-            m_LegacyCmdBufferBeforeReflections.Clear();
-            m_LegacyCmdBufferBeforeLighting.Clear();
             m_LegacyCmdBufferOpaque.Clear();
             m_LegacyCmdBuffer.Clear();
 
@@ -468,42 +451,15 @@ namespace UnityEngine.Rendering.PPSMobile
             var aoRenderer = aoBundle.CastRenderer<AmbientOcclusionRenderer>();
 
             bool aoSupported = aoSettings.IsEnabledAndSupported(context);
-            bool aoAmbientOnly = aoRenderer.IsAmbientOnly(context);
-            bool isAmbientOcclusionDeferred = aoSupported && aoAmbientOnly;
-            bool isAmbientOcclusionOpaque = aoSupported && !aoAmbientOnly;
-
-            var ssrBundle = GetBundle<ScreenSpaceReflections>();
-            var ssrSettings = ssrBundle.settings;
-            var ssrRenderer = ssrBundle.renderer;
-            bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
-
-            // Ambient-only AO is a special case and has to be done in separate command buffers
-            if (isAmbientOcclusionDeferred)
-            {
-                var ao = aoRenderer.Get();
-
-                // Render as soon as possible - should be done async in SRPs when available
-                context.command = m_LegacyCmdBufferBeforeReflections;
-                ao.RenderAmbientOnly(context);
-
-                // Composite with GBuffer right before the lighting pass
-                context.command = m_LegacyCmdBufferBeforeLighting;
-                ao.CompositeAmbientOnly(context);
-            }
-            else if (isAmbientOcclusionOpaque)
+            if (aoSupported)
             {
                 context.command = m_LegacyCmdBufferOpaque;
                 aoRenderer.Get().RenderAfterOpaque(context);
             }
 
-            bool isFogActive = fog.IsEnabledAndSupported(context);
             bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
-            int opaqueOnlyEffects = 0;
-            opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
-            opaqueOnlyEffects += isFogActive ? 1 : 0;
-            opaqueOnlyEffects += hasCustomOpaqueOnlyEffects ? 1 : 0;
+            int opaqueOnlyEffects = hasCustomOpaqueOnlyEffects ? 1 : 0;
 
-            // This works on right eye because it is resolved/populated at runtime
             var cameraTarget = new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
 
             if (opaqueOnlyEffects > 0)
@@ -520,20 +476,6 @@ namespace UnityEngine.Rendering.PPSMobile
                 if (RequiresInitialBlit(m_Camera, context) || opaqueOnlyEffects == 1)
                 {
                     cmd.BuiltinBlit(context.source, context.destination, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
-                    UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
-                }
-
-                if (isScreenSpaceReflectionsActive)
-                {
-                    ssrRenderer.Render(context);
-                    opaqueOnlyEffects--;
-                    UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
-                }
-
-                if (isFogActive)
-                {
-                    fog.Render(context);
-                    opaqueOnlyEffects--;
                     UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
 
@@ -616,25 +558,6 @@ namespace UnityEngine.Rendering.PPSMobile
             return GetBundle<T>().CastSettings<T>();
         }
 
-		/// <summary>
-        /// Utility method to bake a multi-scale volumetric obscurance map for the current camera.
-        /// This will only work if ambient occlusion is active in the scene.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use for rendering steps</param>
-        /// <param name="camera">The camera to render ambient occlusion for</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="depthMap">The depth map to use. If <c>null</c>, it will use the depth map
-        /// from the given camera</param>
-        /// <param name="invert">Should the result be inverted?</param>
-        /// <param name="isMSAA">Should use MSAA?</param>
-        public void BakeMSVOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA = false)
-        {
-            var bundle = GetBundle<AmbientOcclusion>();
-            var renderer = bundle.CastRenderer<AmbientOcclusionRenderer>().GetMultiScaleVO();
-            renderer.SetResources(m_Resources);
-            renderer.GenerateAOMap(cmd, camera, destination, depthMap, invert, isMSAA);
-        }
-
         internal void OverrideSettings(List<PostProcessEffectSettings> baseSettings, float interpFactor)
         {
             // Go through all settings & overriden parameters for the given volume and lerp values
@@ -670,10 +593,6 @@ namespace UnityEngine.Rendering.PPSMobile
                 if (bundle.Value.settings.IsEnabledAndSupported(context))
                     flags |= bundle.Value.renderer.GetCameraFlags();
             }
-
-
-            if (fog.IsEnabledAndSupported(context))
-                flags |= fog.GetCameraFlags();
 
             if (debugLayer.debugOverlay != DebugOverlay.None)
                 flags |= debugLayer.GetCameraFlags();
@@ -824,48 +743,35 @@ namespace UnityEngine.Rendering.PPSMobile
             int lastTarget = -1;
             RenderTargetIdentifier cameraTexture = context.source;
 
-            for (int eye = 0; eye < context.numberOfEyes; eye++)
+            if (stopNaNPropagation && !m_NaNKilled)
             {
-                bool preparedStereoSource = false;
-
-                if (stopNaNPropagation && !m_NaNKilled)
-                {
-                    lastTarget = m_TargetPool.Get();
-                    context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
-                    cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
-                    context.source = lastTarget;
-                    m_NaNKilled = true;
-                }
-
-                if (!preparedStereoSource && context.numberOfEyes > 1)
-                {
-                    lastTarget = m_TargetPool.Get();
-                    context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
-                    context.source = lastTarget;
-                }                
-
-                bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
-                bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
-                bool needsFinalPass = (hasAfterStackEffects
-                    || (antialiasingMode == Antialiasing.FastApproximateAntialiasing))
-                    && !breakBeforeColorGrading;
-
-                // Right before the builtin stack
-                if (hasBeforeStackEffects)
-                    lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
-
-                // Builtin stack
-                lastTarget = RenderBuiltins(context, !needsFinalPass, lastTarget, eye);
-
-                // After the builtin stack but before the final pass (before FXAA & Dithering)
-                if (hasAfterStackEffects)
-                    lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
-
-                // And close with the final pass
-                if (needsFinalPass)
-                    RenderFinalPass(context, lastTarget, eye);
-
+                lastTarget = m_TargetPool.Get();
+                context.GetScreenSpaceTemporaryRT(cmd, lastTarget, 0, context.sourceFormat);
+                cmd.BlitFullscreenTriangle(context.source, lastTarget, RuntimeUtilities.copySheet, 1);
+                context.source = lastTarget;
+                m_NaNKilled = true;
             }
+
+            bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
+            bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
+            bool needsFinalPass = (hasAfterStackEffects
+                || (antialiasingMode == Antialiasing.FastApproximateAntialiasing))
+                && !breakBeforeColorGrading;
+
+            // Right before the builtin stack
+            if (hasBeforeStackEffects)
+                lastTarget = RenderInjectionPoint(PostProcessEvent.BeforeStack, context, "BeforeStack", lastTarget);
+
+            // Builtin stack
+            lastTarget = RenderBuiltins(context, !needsFinalPass, lastTarget);
+
+            // After the builtin stack but before the final pass (before FXAA & Dithering)
+            if (hasAfterStackEffects)
+                lastTarget = RenderInjectionPoint(PostProcessEvent.AfterStack, context, "AfterStack", lastTarget);
+
+            // And close with the final pass
+            if (needsFinalPass)
+                RenderFinalPass(context, lastTarget);
 
             // Render debug monitors & overlay if requested
             debugLayer.RenderSpecialOverlays(context);
@@ -967,7 +873,7 @@ namespace UnityEngine.Rendering.PPSMobile
             properties.SetVector(ShaderIDs.UVTransform, SystemInfo.graphicsUVStartsAtTop ? new Vector4(1.0f, -1.0f, 0.0f, 1.0f) : new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
         }
 
-        int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1, int eye = -1)
+        int RenderBuiltins(PostProcessRenderContext context, bool isFinalPass, int releaseTargetAfterUse = -1)
         {
             var uberSheet = context.propertySheets.Get(context.resources.shaders.uber);
             uberSheet.ClearKeywords();
@@ -1054,7 +960,7 @@ namespace UnityEngine.Rendering.PPSMobile
         }
 
         // This pass will have to be disabled for HDR screen output as it's an LDR pass
-        void RenderFinalPass(PostProcessRenderContext context, int releaseTargetAfterUse = -1, int eye = -1)
+        void RenderFinalPass(PostProcessRenderContext context, int releaseTargetAfterUse = -1)
         {
             var cmd = context.command;
             cmd.BeginSample("FinalPass");

@@ -76,13 +76,13 @@ Shader "Hidden/PostProcessing/FinalPass"
 
                 #if FXAA_KEEP_ALPHA
                 {
-                    color.a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).a;
+                    color.a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).a;
                 }
                 #endif
             }
             #else
             {
-                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+                color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
             }
             #endif
 

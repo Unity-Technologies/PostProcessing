@@ -91,7 +91,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
 
         float4 FragLDRFromScratch(VaryingsDefault i) : SV_Target
         {
-            float3 colorLinear = GetLutStripValue(i.texcoordStereo, _Lut2D_Params);
+            float3 colorLinear = GetLutStripValue(i.texcoord, _Lut2D_Params);
             float3 graded = ColorGradeLDR(colorLinear);
             return float4(graded, 1.0);
         }
@@ -99,7 +99,7 @@ Shader "Hidden/PostProcessing/Lut2DBaker"
         float4 FragLDR(VaryingsDefault i) : SV_Target
         {
             // Note: user luts may not have the same size as the internal one
-            float3 neutralColorLinear = GetLutStripValue(i.texcoordStereo, _Lut2D_Params);
+            float3 neutralColorLinear = GetLutStripValue(i.texcoord, _Lut2D_Params);
             float3 lookup = ApplyLut2D(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), neutralColorLinear, _UserLut2D_Params.xyz);
             float3 colorLinear = lerp(neutralColorLinear, lookup, _UserLut2D_Params.w);
             float3 graded = ColorGradeLDR(colorLinear);

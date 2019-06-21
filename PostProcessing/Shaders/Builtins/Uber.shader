@@ -80,7 +80,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             //>>> Automatically skipped by the shader optimizer when not used
             float2 uvDistorted = Distort(i.texcoord);
-            float2 uvStereoDistorted = Distort(i.texcoordStereo);
+            float2 uvStereoDistorted = Distort(i.texcoord);
             //<<<
 
             half autoExposure = SAMPLE_TEXTURE2D(_AutoExposureTex, sampler_AutoExposureTex, uv).r;
@@ -198,7 +198,7 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if GRAIN
             {
-                half3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoordStereo * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
+                half3 grain = SAMPLE_TEXTURE2D(_GrainTex, sampler_GrainTex, i.texcoord * _Grain_Params2.xy + _Grain_Params2.zw).rgb;
 
                 // Noisiness response curve based on scene luminance
                 float lum = 1.0 - sqrt(Luminance(saturate(color)));

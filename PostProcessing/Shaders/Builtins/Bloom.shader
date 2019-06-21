@@ -67,13 +67,13 @@ Shader "Hidden/PostProcessing/Bloom"
         half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
         {
             half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return Combine(bloom, i.texcoordStereo);
+            return Combine(bloom, i.texcoord);
         }
 
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
             half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return Combine(bloom, i.texcoordStereo);
+            return Combine(bloom, i.texcoord);
         }
 
         // ----------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ Shader "Hidden/PostProcessing/Bloom"
 
         half4 FragDebugOverlayThreshold(VaryingsDefault i) : SV_Target
         {
-            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
             return half4(Prefilter(SafeHDR(color), i.texcoord).rgb, 1.0);
         }
 

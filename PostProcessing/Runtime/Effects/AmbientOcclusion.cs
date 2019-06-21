@@ -12,13 +12,7 @@ namespace UnityEngine.Rendering.PPSMobile
         /// you target a compute-enabled platform we recommend that you use
         /// <see cref="MultiScaleVolumetricObscurance"/> instead.
         /// </summary>
-        ScalableAmbientObscurance,
-
-        /// <summary>
-        /// A modern version of ambient occlusion heavily optimized for consoles and desktop
-        /// platforms.
-        /// </summary>
-        MultiScaleVolumetricObscurance
+        ScalableAmbientObscurance
     }
 
     /// <summary>
@@ -39,17 +33,7 @@ namespace UnityEngine.Rendering.PPSMobile
         /// <summary>
         /// 10 samples + downsampling.
         /// </summary>
-        Medium,
-
-        /// <summary>
-        /// 8 samples.
-        /// </summary>
-        High,
-
-        /// <summary>
-        /// 12 samples.
-        /// </summary>
-        Ultra
+        Medium
     }
 
     /// <summary>
@@ -78,7 +62,7 @@ namespace UnityEngine.Rendering.PPSMobile
         /// </summary>
         [Tooltip("The ambient occlusion method to use. \"Multi Scale Volumetric Obscurance\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
         
-        public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.MultiScaleVolumetricObscurance };
+        public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.ScalableAmbientObscurance };
 
         /// <summary>
         /// The degree of darkness added by ambient occlusion.
@@ -171,29 +155,6 @@ namespace UnityEngine.Rendering.PPSMobile
                           && context.resources.shaders.scalableAO.isSupported;
                 }
             }
-            else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-            {
-#if UNITY_2017_1_OR_NEWER
-                if (context != null)
-                {
-                    state &= context.resources.shaders.multiScaleAO
-                          && context.resources.shaders.multiScaleAO.isSupported
-                          && context.resources.computeShaders.multiScaleAODownsample1
-                          && context.resources.computeShaders.multiScaleAODownsample2
-                          && context.resources.computeShaders.multiScaleAORender
-                          && context.resources.computeShaders.multiScaleAOUpsample;
-                }
-
-                state &= SystemInfo.supportsComputeShaders
-                      && !RuntimeUtilities.isAndroidOpenGL
-                      && RenderTextureFormat.RFloat.IsSupported()
-                      && RenderTextureFormat.RHalf.IsSupported()
-                      && RenderTextureFormat.R8.IsSupported();
-#else
-                state = false;
-#endif
-            }
-
             return state;
         }
     }
@@ -202,8 +163,6 @@ namespace UnityEngine.Rendering.PPSMobile
     {
         DepthTextureMode GetCameraFlags();
         void RenderAfterOpaque(PostProcessRenderContext context);
-        void RenderAmbientOnly(PostProcessRenderContext context);
-        void CompositeAmbientOnly(PostProcessRenderContext context);
         void Release();
     }
 
@@ -221,17 +180,8 @@ namespace UnityEngine.Rendering.PPSMobile
                 m_Methods = new IAmbientOcclusionMethod[]
                 {
                     new ScalableAO(settings),
-                    new MultiScaleVO(settings),
                 };
             }
-        }
-
-        public bool IsAmbientOnly(PostProcessRenderContext context)
-        {
-            var camera = context.camera;
-            return settings.ambientOnly.value
-                && camera.actualRenderingPath == RenderingPath.DeferredShading
-                && camera.allowHDR;
         }
 
         public IAmbientOcclusionMethod Get()
@@ -253,11 +203,6 @@ namespace UnityEngine.Rendering.PPSMobile
         public ScalableAO GetScalableAO()
         {
             return (ScalableAO)m_Methods[(int)AmbientOcclusionMode.ScalableAmbientObscurance];
-        }
-
-        public MultiScaleVO GetMultiScaleVO()
-        {
-            return (MultiScaleVO)m_Methods[(int)AmbientOcclusionMode.MultiScaleVolumetricObscurance];
         }
 
         // Unused

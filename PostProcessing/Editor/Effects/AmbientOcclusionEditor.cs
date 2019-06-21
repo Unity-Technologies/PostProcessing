@@ -9,7 +9,6 @@ namespace UnityEditor.Rendering.PPSMobile
         SerializedParameterOverride m_Mode;
         SerializedParameterOverride m_Intensity;
         SerializedParameterOverride m_Color;
-        SerializedParameterOverride m_AmbientOnly;
         SerializedParameterOverride m_ThicknessModifier;
         SerializedParameterOverride m_DirectLightingStrength;
         SerializedParameterOverride m_Quality;
@@ -20,7 +19,6 @@ namespace UnityEditor.Rendering.PPSMobile
             m_Mode = FindParameterOverride(x => x.mode);
             m_Intensity = FindParameterOverride(x => x.intensity);
             m_Color = FindParameterOverride(x => x.color);
-            m_AmbientOnly = FindParameterOverride(x => x.ambientOnly);
             m_ThicknessModifier = FindParameterOverride(x => x.thicknessModifier);
             m_DirectLightingStrength = FindParameterOverride(x => x.directLightingStrength);
             m_Quality = FindParameterOverride(x => x.quality);
@@ -38,14 +36,6 @@ namespace UnityEditor.Rendering.PPSMobile
                 return;
             }
 
-#if !UNITY_2017_1_OR_NEWER
-            if (aoMode == (int)AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-            {
-                EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires Unity 2017.1 or more.", MessageType.Warning);
-                return;
-            }
-#endif
-
             PropertyField(m_Intensity);
 
             if (aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)
@@ -53,22 +43,8 @@ namespace UnityEditor.Rendering.PPSMobile
                 PropertyField(m_Radius);
                 PropertyField(m_Quality);
             }
-            else if (aoMode == (int)AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-            {
-                if (!SystemInfo.supportsComputeShaders)
-                    EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires compute shader support.", MessageType.Warning);
-
-                PropertyField(m_ThicknessModifier);
-
-                if (RuntimeUtilities.scriptableRenderPipelineActive)
-                    PropertyField(m_DirectLightingStrength);
-            }
-
+            
             PropertyField(m_Color);
-            PropertyField(m_AmbientOnly);
-
-            if (m_AmbientOnly.overrideState.boolValue && m_AmbientOnly.value.boolValue && !RuntimeUtilities.scriptableRenderPipelineActive)
-                EditorGUILayout.HelpBox("Ambient-only only works with cameras rendering in Deferred + HDR", MessageType.Info);
         }
     }
 }

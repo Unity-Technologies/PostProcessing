@@ -23,7 +23,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragDepth(VaryingsDefault i) : SV_Target
         {
-            float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo, 0);
+            float d = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord, 0);
             d = lerp(d, Linear01Depth(d), _Params.x);
 
         //#if !UNITY_COLORSPACE_GAMMA
@@ -39,10 +39,10 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         float4 FragNormals(VaryingsDefault i) : SV_Target
         {
         #if SOURCE_GBUFFER
-            float3 norm = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, i.texcoordStereo).xyz * 2.0 - 1.0;
+            float3 norm = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, i.texcoord).xyz * 2.0 - 1.0;
             float3 n = mul((float3x3)unity_WorldToCamera, norm);
         #else
-            float4 cdn = SAMPLE_TEXTURE2D(_CameraDepthNormalsTexture, sampler_CameraDepthNormalsTexture, i.texcoordStereo);
+            float4 cdn = SAMPLE_TEXTURE2D(_CameraDepthNormalsTexture, sampler_CameraDepthNormalsTexture, i.texcoord);
             float3 n = DecodeViewNormalStereo(cdn) * float3(1.0, 1.0, -1.0);
         #endif
 
@@ -104,7 +104,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
         float4 FragMotionVectors(VaryingsDefault i) : SV_Target
         {
 #if UNITY_CAN_READ_POSITION_IN_FRAGMENT_PROGRAM
-            float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            float3 src = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
             float2 mv = SampleMotionVectors(i.texcoord);
 
             // Background color intensity - keep this low unless you want to make your eyes bleed
@@ -171,7 +171,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragNANTracker(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
             if (AnyIsNan(color))
             {
@@ -203,7 +203,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragDeuteranopia(VaryingsDefault i) : SV_Target
         {
-            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
             color = saturate(color);
 
         #if UNITY_COLORSPACE_GAMMA
@@ -221,7 +221,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragProtanopia(VaryingsDefault i) : SV_Target
         {
-            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
             color = saturate(color);
 
         #if UNITY_COLORSPACE_GAMMA
@@ -239,7 +239,7 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 
         float4 FragTritanopia(VaryingsDefault i) : SV_Target
         {
-            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo).rgb;
+            float3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb;
             color = saturate(color);
 
             float anchor_e0 = 0.05059983 + 0.08585369 + 0.00952420;

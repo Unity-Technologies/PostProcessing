@@ -521,45 +521,6 @@ namespace UnityEngine.Rendering.PPSMobile
         }
 
         /// <summary>
-        /// Blits a fullscreen triangle from a double-wide source.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="material">The material to use for the blit</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="eye">The target eye</param>
-        public static void BlitFullscreenTriangleFromDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, Material material, int pass, int eye)
-        {
-            Vector4 uvScaleOffset = new Vector4(0.5f, 1.0f, 0, 0);
-
-            if (eye == 1)
-                uvScaleOffset.z = 0.5f;
-            cmd.SetGlobalVector(ShaderIDs.UVScaleOffset, uvScaleOffset);
-            cmd.BuiltinBlit(source, destination, material, pass);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle to a double-wide destination.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="eye">The target eye</param>
-        public static void BlitFullscreenTriangleToDoubleWide(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, int eye)
-        {
-            Vector4 posScaleOffset = new Vector4(0.5f, 1.0f, -0.5f, 0);
-
-            if (eye == 1)
-                posScaleOffset.z = 0.5f;
-            propertySheet.EnableKeyword("STEREO_DOUBLEWIDE_TARGET");
-            propertySheet.properties.SetVector(ShaderIDs.PosScaleOffset, posScaleOffset);
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, 0);
-        }
-
-        /// <summary>
         /// Blits a fullscreen triangle using a given material.
         /// </summary>
         /// <param name="cmd">The command buffer to use</param>

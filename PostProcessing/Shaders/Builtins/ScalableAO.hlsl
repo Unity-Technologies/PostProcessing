@@ -248,7 +248,7 @@ float4 FragAO(VaryingsDefault i) : SV_Target
 
     // Apply fog when enabled (forward-only)
 #if (APPLY_FORWARD_FOG)
-    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
+    float d = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoord));
     d = ComputeFogDistance(d);
     ao *= ComputeFog(d);
 #endif
@@ -273,7 +273,7 @@ float4 FragBlur(VaryingsDefault i) : SV_Target
 
     // High quality 7-tap Gaussian with adaptive sampling
 
-    half4 p0  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 p0  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
     half4 p1a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - delta));
     half4 p1b = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + delta));
     half4 p2a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - delta * 2.0));
@@ -282,7 +282,7 @@ float4 FragBlur(VaryingsDefault i) : SV_Target
     half4 p3b = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + delta * 3.2307692308));
 
 #if defined(BLUR_SAMPLE_CENTER_NORMAL)
-    half3 n0 = SampleNormal(i.texcoordStereo);
+    half3 n0 = SampleNormal(i.texcoord);
 #else
     half3 n0 = GetPackedNormal(p0);
 #endif
@@ -309,14 +309,14 @@ float4 FragBlur(VaryingsDefault i) : SV_Target
 #else
 
     // Fater 5-tap Gaussian with linear sampling
-    half4 p0  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+    half4 p0  = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
     half4 p1a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - delta * 1.3846153846));
     half4 p1b = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + delta * 1.3846153846));
     half4 p2a = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord - delta * 3.2307692308));
     half4 p2b = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, UnityStereoTransformScreenSpaceTex(i.texcoord + delta * 3.2307692308));
 
 #if defined(BLUR_SAMPLE_CENTER_NORMAL)
-    half3 n0 = SampleNormal(i.texcoordStereo);
+    half3 n0 = SampleNormal(i.texcoord);
 #else
     half3 n0 = GetPackedNormal(p0);
 #endif

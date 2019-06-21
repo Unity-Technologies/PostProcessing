@@ -78,10 +78,9 @@ namespace UnityEngine.Rendering.PPSMobile
 
             // Material setup
             // Always use a quater-res AO buffer unless High/Ultra quality is set.
-            bool downsampling = (int)m_Settings.quality.value < (int)AmbientOcclusionQuality.High;
             float px = m_Settings.intensity.value;
             float py = m_Settings.radius.value;
-            float pz = downsampling ? 0.5f : 1f;
+            float pz = 0.5f;
             float pw = m_SampleCount[(int)m_Settings.quality.value];
 
             var sheet = m_PropertySheet;
@@ -102,7 +101,7 @@ namespace UnityEngine.Rendering.PPSMobile
             }
 
             // Texture setup
-            int ts = downsampling ? 2 : 1;
+            int ts = 2;
             const RenderTextureFormat kFormat = RenderTextureFormat.ARGB32;
             const RenderTextureReadWrite kRWMode = RenderTextureReadWrite.Linear;
             const FilterMode kFilter = FilterMode.Bilinear;
@@ -140,23 +139,6 @@ namespace UnityEngine.Rendering.PPSMobile
             cmd.SetGlobalTexture(ShaderIDs.SAOcclusionTexture, m_Result);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward, RenderBufferLoadAction.Load);
             cmd.EndSample("Ambient Occlusion");
-        }
-
-        public void RenderAmbientOnly(PostProcessRenderContext context)
-        {
-            var cmd = context.command;
-            cmd.BeginSample("Ambient Occlusion Render");
-            Render(context, cmd, 1);
-            cmd.EndSample("Ambient Occlusion Render");
-        }
-
-        public void CompositeAmbientOnly(PostProcessRenderContext context)
-        {
-            var cmd = context.command;
-            cmd.BeginSample("Ambient Occlusion Composite");
-            cmd.SetGlobalTexture(ShaderIDs.SAOcclusionTexture, m_Result);
-            cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, m_MRT, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionDeferred);
-            cmd.EndSample("Ambient Occlusion Composite");
         }
 
         public void Release()

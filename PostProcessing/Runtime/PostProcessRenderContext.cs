@@ -31,7 +31,6 @@ namespace UnityEngine.Rendering.PPSMobile
 #endif
                 screenWidth = width;
                 screenHeight = height;
-                numberOfEyes = 1;
             }
         }
 
@@ -98,17 +97,6 @@ namespace UnityEngine.Rendering.PPSMobile
         /// </summary>
         public int height { get; private set; }
 
-
-        /// <summary>
-        /// The current active rendering eye (for XR).
-        /// </summary>
-        public int xrActiveEye { get; private set; }
-
-        /// <summary>
-        /// The number of eyes for XR outputs.
-        /// </summary>
-        public int numberOfEyes { get; private set; }
-
         /// <summary>
         /// Available XR rendering modes.
         /// </summary>
@@ -174,7 +162,6 @@ namespace UnityEngine.Rendering.PPSMobile
 #if UNITY_2018_2_OR_NEWER
             physicalCamera = false;
 #endif
-            xrActiveEye = (int)Camera.StereoscopicEye.Left;
             screenWidth = 0;
             screenHeight = 0;
 

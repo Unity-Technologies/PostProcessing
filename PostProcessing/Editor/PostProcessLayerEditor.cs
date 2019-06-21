@@ -22,11 +22,7 @@ namespace UnityEditor.Rendering.PPSMobile
         SerializedProperty m_VolumeLayer;
 
         SerializedProperty m_AntialiasingMode;
-        SerializedProperty m_SmaaQuality;
         SerializedProperty m_FxaaKeepAlpha;
-
-        SerializedProperty m_FogEnabled;
-        SerializedProperty m_FogExcludeSkybox;
 
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
@@ -57,9 +53,6 @@ namespace UnityEditor.Rendering.PPSMobile
             m_AntialiasingMode = FindProperty(x => x.antialiasingMode);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
-            m_FogEnabled = FindProperty(x => x.fog.enabled);
-            m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
-
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
         }
@@ -82,7 +75,6 @@ namespace UnityEditor.Rendering.PPSMobile
 
             DoVolumeBlending();
             DoAntialiasing();
-            DoFog(camera);
 
             EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms."));
 
@@ -146,27 +138,6 @@ namespace UnityEditor.Rendering.PPSMobile
                 if (m_AntialiasingMode.intValue == (int)PostProcessLayer.Antialiasing.FastApproximateAntialiasing)
                 {
                     EditorGUILayout.PropertyField(m_FxaaKeepAlpha);
-                }
-            }
-            EditorGUI.indentLevel--;
-
-            EditorGUILayout.Space();
-        }
-
-        void DoFog(Camera camera)
-        {
-            if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
-                return;
-
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Deferred Fog"), EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-            {
-                EditorGUILayout.PropertyField(m_FogEnabled);
-
-                if (m_FogEnabled.boolValue)
-                {
-                    EditorGUILayout.PropertyField(m_FogExcludeSkybox);
-                    EditorGUILayout.HelpBox("This adds fog compatibility to the deferred rendering path; actual fog settings should be set in the Lighting panel.", MessageType.Info);
                 }
             }
             EditorGUI.indentLevel--;

@@ -30,10 +30,7 @@ namespace UnityEngine.Rendering.PPSMobile
             public Shader waveform;
             public Shader vectorscope;
             public Shader debugOverlays;
-            public Shader deferredFog;
             public Shader scalableAO;
-            public Shader multiScaleAO;
-            public Shader screenSpaceReflections;
 
             public Shaders Clone()
             {

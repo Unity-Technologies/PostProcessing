@@ -8,13 +8,13 @@ Shader "Hidden/PostProcessing/Copy"
 
         float4 Frag(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
             return color;
         }
 
         float4 FragKillNaN(VaryingsDefault i) : SV_Target
         {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoordStereo);
+            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
 
             if (AnyIsNan(color))
             {
