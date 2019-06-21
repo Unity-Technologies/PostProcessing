@@ -1,10 +1,10 @@
 # Auto Exposure
 
-In ocular physiology, adaptation is the ability of the eye to adjust to various levels of darkness and light. The human eye can function from very dark to very bright levels of light. However, in any given moment of time, the eye can only sense a contrast ratio of roughly one millionth of the total range. What enables the wider reach is that the eye adapts its definition of what is black.
+The **Auto Exposure** effect dynamically adjusts the exposure of an image according to the range of brightness levels the image contains. 
 
-This effect dynamically adjusts the exposure of the image according to the range of brightness levels it contains. The adjustment takes place gradually over a period of time, so the player can be briefly dazzled by bright outdoor light when, say, emerging from a dark tunnel. Equally, when moving from a bright scene to a dark one, the “eye” takes some time to adjust.
+For more information on the **Auto Exposure** effect and its use in Unity, see the [Auto Exposure](https://docs.unity3d.com/Manual/PostProcessing-AutoExposure.html) documentation in the Unity manual.
 
-Internally, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram, and as such the effect, requires [Compute shader](https://docs.unity3d.com/Manual/ComputeShaders.html) support.
+In Unity, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram and the **Auto Exposure** effect requires [Compute shader](https://docs.unity3d.com/Manual/ComputeShaders.html) support.
 
 
 ![](images/autoexposure.png)
@@ -16,28 +16,28 @@ Internally, this effect generates a histogram on every frame and filters it to f
 
 | Property              | Function                                                     |
 | :--------------------- | :------------------------------------------------------------ |
-| Filtering             | These values are the lower and upper percentages of the histogram that will be used to find a stable average luminance. Values outside of this range will be discarded and wont contribute to the average luminance. |
-| Minimum               | Minimum average luminance to consider for auto exposure (in EV). |
-| Maximum               | Maximum average luminance to consider for auto exposure (in EV). |
-| Exposure Compensation | Middle-grey value. Use this to compensate the global exposure of the scene. |
+| Filtering             | Set the lower and upper percentages of the histogram that find a stable average luminance. Values outside of this range will be discarded and won't contribute to the average luminance. |
+| Minimum               | Set the minimum average luminance to consider for auto exposure in EV. |
+| Maximum               | Set the maximum average luminance to consider for auto exposure in EV. |
+| Exposure Compensation | Set the middle-grey value to compensate the global exposure of the scene. |
 
 **Adaptation** settings:
 
 | Property   | Function                                                     |
 | :---------- | :------------------------------------------------------------ |
-| Type       | Use Progressive if you want the auto exposure to be animated. Use Fixed otherwise. |
-| Speed Up   | Adaptation speed from a dark to a light environment.         |
-| Speed Down | Adaptation speed from a light to a dark environment.         |
+| Type       | Select the Adaptation type. **Progressive** animates the Auto Exposure. **Fixed** does not animate the Auto Exposure. |
+| Speed Up   | Set the Adaptation speed from a dark to a light environment.         |
+| Speed Down | Set the Adaptation speed from a light to a dark environment.         |
 
 ### Details
 
-Use the `Filtering` range to exclude the darkest and brightest part of the image. To compute an average luminance you generally don’t want very dark and very bright pixels to contribute too much to the result. Values are in percent.
+Use the `Filtering` range to exclude the darkest and brightest part of the image so that very dark and very bright pixels do not contribute to the average luminance. Values are in percent.
 
 `Minimum`/`Maximum` values clamp the computed average luminance into a given range.
 
-You can also set the `Type` to `Fixed` if you don’t need the eye adaptation effect and it will behave like an auto-exposure setting.
+You can set the `Type` to `Fixed` and it will behave like an auto-exposure setting.
 
-It is recommended to use the **Light Meter** [monitor](https://github.com/Unity-Technologies/PostProcessing/wiki/Debugging) when setting up this effect.
+Use the **Light Meter** [monitor](https://github.com/Unity-Technologies/PostProcessing/wiki/Debugging) when setting up this effect.
 
 ### Requirements
 

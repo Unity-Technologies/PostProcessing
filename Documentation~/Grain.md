@@ -1,8 +1,6 @@
 # Grain
 
-Film grain is the random optical texture of photographic film due to the presence of small particles of the metallic silver (or dye clouds for colored films) in the film stock.
-
-The **Grain** effect is based on a coherent gradient noise. It is commonly used to emulate the apparent imperfections of film and often exaggerated in horror themed games.
+The **Grain** effect emulates the effect that real-world cameras produce where small particles in the camera’s film give the image a coarse, unprocessed effect. The **Grain** effect available in Unity is based on a coherent gradient noise. 
 
 
 ![](images/grain.png)
@@ -12,14 +10,14 @@ The **Grain** effect is based on a coherent gradient noise. It is commonly used 
 
 | Property               | Function                                                     |
 | :---------------------- | :------------------------------------------------------------ |
-| Colored                | Enables the use of colored grain.                            |
-| Intensity              | Grain strength. Higher means more visible grain.             |
-| Size                   | Grain particle size.                                         |
-| Luminance Contribution | Controls the noisiness response curve based on scene luminance. Lower values mean less noise in dark areas. |
+| Colored                | Enable the checkbox to use colored grain.                            |
+| Intensity              | Set the value of the **Grain** strength. Higher values show more visible grain.             |
+| Size                   | Set the value of the **Grain** particle size.                                         |
+| Luminance Contribution | Set the value to control the noisiness response curve. This value is based on scene luminance. Lower values mean less noise in dark areas. |
 
-### Performances
+### Performance
 
-Disabling `Colored` will make the effect run faster.
+Disabling `Colored` will make the Grain effect run faster.
 
 ### Requirements
 

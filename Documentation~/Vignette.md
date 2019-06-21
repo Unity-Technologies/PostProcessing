@@ -1,25 +1,16 @@
 # Vignette
 
-In Photography, vignetting is the term used for the darkening and/or desaturating towards the edges of an image compared to the center. This is usually caused by thick or stacked filters, secondary lenses, and improper lens hoods. It is also often used for artistic effect, such as to draw focus to the center of an image.
+The **Vignette** effect darkens the edges of an image, leaving the center of the image brighter. For more information on the Vignette effect, see the [Vignette](https://docs.unity3d.com/Manual/PostProcessing-Vignette.html) documentation in the Unity manual.
 
+The Vignette effect in the post-processing stack has two modes:
 
-![](images/screenshot-vignette.png)
+- [Classic](#classic)
+- [Masked](#masked)
 
-
-The Vignette effect in the post-processing stack comes in 2 modes:
-
-- Classic
-- Masked
-
-### Requirements
-
-- Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
 
 ## Classic
 
-Classic mode offers parametric controls for the position, shape and intensity of the Vignette. This is the most common way to use the effect.
+Classic mode has parametric controls for the position, shape and intensity of the Vignette. This is the most common way to use the effect.
 
 
 ![](images/vignette-1.png)
@@ -28,13 +19,13 @@ Classic mode offers parametric controls for the position, shape and intensity of
 ### Properties
 
 | Property   | Function                                                 |
-| -------------- | ------------------------------------------------------------ |
-| Color      | Vignette color.      |
-| Center     | Sets the vignette center point (screen center is [0.5,0.5]). |
-| Intensity  | Amount of vignetting on screen.                              |
-| Smoothness | Smoothness of the vignette borders.                          |
-| Roundness  | Lower values will make a more squared vignette.              |
-| Rounded    | Should the vignette be perfectly round or be dependent on the current aspect ratio? |
+| :-------------- | :------------------------------------------------------------ |
+| Color      | Set the color of the Vignette.      |
+| Center     | Set the Vignette center point (screen center is [0.5,0.5]). |
+| Intensity  | Set the amount of vignetting on screen.                              |
+| Smoothness | Set the smoothness of the Vignette borders.                          |
+| Roundness  | Set the value to round the Vignette. Lower values will make a more squared vignette.              |
+| Rounded    | Enable this checkbox to make the vignette perfectly round. When disable, the Vignette effect is dependent on the current aspect ratio. |
 
 ## Masked
 
@@ -48,6 +39,12 @@ Masked mode multiplies a custom texture mask over the screen to create a Vignett
 
 | Property  | Function                                            |
 | :------------- | :------------------------------------------------------- |
-| Color     | Vignette color. Use the alpha channel for transparency. |
-| Mask      | A black and white mask to use as a vignette.            |
-| Intensity | Mask opacity.                                           |
+| Color     | Set the color of the Vignette. Use the alpha channel for transparency. |
+| Mask      | Select a black and white mask to use as a vignette.            |
+| Intensity | Set the mask opacity value.                                           |
+
+### Requirements
+
+- Shader Model 3
+
+See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

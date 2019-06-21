@@ -1,13 +1,8 @@
 # Chromatic Aberration
 
-In photography, chromatic aberration is an effect resulting from a camera’s lens failing to converge all colors to the same point. It appears as “fringes” of color along boundaries that separate dark and bright parts of the image.
+The Chromatic Aberration effect mimics the effect a real-world camera produces when its lens fails to join all colors to the same point. Unity provides support for red/blue and green/purple fringing, and you can define fringing colors by using an input texture.
 
-The **Chromatic Aberration** effect is used to replicate this camera defect, it is also often used to artistic effect such as part of camera impact or intoxication effects. This implementation provides support for red/blue and green/purple fringing as well as user defined color fringing via an input texture.
-
-
-![](images/screenshot-chroma.png)
-
-
+For more information on the **Chromatic Aberration** effect, read the documentation on [Chromatic Aberration](https://docs.unity3d.com/Manual/PostProcessing-ChromaticAberration.html) in the Unity manual.
 
 ![](images/chroma.png)
 
@@ -16,9 +11,9 @@ The **Chromatic Aberration** effect is used to replicate this camera defect, it 
 
 | Property     | Function                                                     |
 | :------------ | :------------------------------------------------------------ |
-| Spectral Lut | Texture used for custom fringing color (will use default when empty). |
-| Intensity    | Strength of chromatic aberrations.                           |
-| Fast Mode    | Use a faster variant of the effect for improved performances. |
+| Spectral Lut | Select the texture used for a custom fringing color. When left empty, Unity will use the default texture. |
+| Intensity    | Set the strength of the **Chromatic Aberration** effect.                           |
+| Fast Mode    | Use a faster variant of **Chromatic Aberration** effect for improved performance. |
 
 ### Details
 
@@ -29,15 +24,15 @@ The **Chromatic Aberration** effect is used to replicate this camera defect, it 
 - Green/Purple
 - Purple/Green
 
-You can create custom spectral textures in any image editing software. Their resolution is not constrained but it is recommended that they are as small as possible (such as the 3x1 textures provided).
+You can create custom spectral textures in any image editing software. While the resolution size of spectral textures are not limited, small sizes such as th 3x1 textures provided work best. 
 
-You can achieve a less smooth effect by manually setting the `Filter Mode` of the input texture to `Point (no filter)`.
+You can achieve a rougher effect by manually setting the `Filter Mode` of the input texture to `Point (no filter)`.
 
-### Performances
+### Performance
 
-Performances depend on the `Intensity` value (the higher it is, the slower the render will be as it will need more samples to render smooth chromatic aberrations).
+The performance of the **Chromatic Aberration** effect depends on the `Intensity` value. If the `Intensity` value is set high, the render will be slower as it will need more samples to render smooth chromatic aberrations.
 
-Enabling `Fast Mode` is also recommended whenever possible as it's a lot faster, albeit not as smooth as the regular mode.
+Enabling `Fast Mode` is recommended where possible as it's a lot faster, but not as smooth as the regular mode.
 
 ### Requirements
 

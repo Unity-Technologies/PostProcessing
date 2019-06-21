@@ -1,11 +1,6 @@
 # Motion Blur
 
-**Motion Blur** is a common post-processing effect that simulates the blurring of an image when objects filmed by a camera are moving faster than the camera’s exposure time. This can be caused by rapidly moving objects or a long exposure time. **Motion Blur** is used to subtle effect in most types of games but exaggerated in some genres, such as racing games.
-
-
-![](images/screenshot-motionblur.png)
-<br><em>Motion blur on a camera that rotates very fast</em>
-
+The **Motion Blur** effect blurs an image when GameObjects are moving faster than the camera’s exposure time. For more information on the Motion Blur effect, see the [Motion Blur](https://docs.unity3d.com/Manual/PostProcessing-MotionBlur.html) documentation in the Unity manual.
 
 
 ![](images/motionblur.png)
@@ -15,12 +10,12 @@
 
 | Property      | Function                                                     |
 | :------------- | :------------------------------------------------------------ |
-| Shutter Angle | The angle of the rotary shutter. Larger values give longer exposure therefore a stronger blur effect. |
-| Sample Count  | The amount of sample points, which affects quality and performances. |
+| Shutter Angle | Set the angle of the rotary shutter. Larger values give longer exposure and a stronger blur effect. |
+| Sample Count  | Set the value for the amount of sample points. This affects quality and performance. |
 
-### Performances
+### Performance
 
-Using a lower `Sample Count` will lead to better performances.
+Using a lower `Sample Count` will improve performance.
 
 ### Known issues and limitations
 

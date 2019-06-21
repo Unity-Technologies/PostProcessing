@@ -1,26 +1,20 @@
 # Anti-aliasing
 
-The **Anti-aliasing** effect offers a set of algorithms designed to prevent aliasing and give a smoother appearance to graphics. Aliasing is an effect where lines appear jagged or have a “staircase” appearance (as displayed in the left-hand image below). This can happen if the graphics output device does not have a high enough resolution to display a straight line.
+The **Anti-aliasing** effect gives graphics a smoother appearance. The Anti-aliasing algorithms are image-based, which is useful when support for traditional multisampling is not available, such as the [deferred rendering](https://docs.unity3d.com/Manual/RenderTech-DeferredShading.html) shading path, or **HDR** in the **forward rendering path** in Unity 5.5 or earlier. The Editor’s [Quality settings](https://docs.unity3d.com/Manual/class-QualitySettings.html) window is home to these options. 
 
-**Anti-aliasing** reduces the prominence of these jagged lines by surrounding them with intermediate shades of color. Although this reduces the jagged appearance of the lines, it also makes them blurrier.
+For further information on the **Anti-aliasing** effect, see the [Anti-aliasing](https://docs.unity3d.com/Manual/PostProcessing-Antialiasing.html) documentation in the Unity manual.
 
+The algorithms available in the post-processing stack are:
 
-![](images/screenshot-antialiasing.png)
+- **Fast Approximate Anti-aliasing (FXAA)**; a fast algorithm for mobile and platforms that don’t support motion vectors.
+- **Subpixel Morphological Anti-aliasing (SMAA)**; a high-quality but slower algorithm for mobile and platforms that don’t support motion vectors. 
+- **Temporal Anti-aliasing (TAA)**; an advanced technique which requires motion vectors. Ideal for desktop and console platforms.
 
+They are set per-camera in the **Post-process Layer** component.
 
-The Anti-aliasing algorithms are image-based. This is very useful when traditional multisampling (as used in the Editor’s [Quality settings](https://docs.unity3d.com/Manual/class-QualitySettings.html)) is not properly supported or when working with specular-heavy PBR materials.
+## Fast Approximate Anti-aliasing (FXAA)
 
-The algorithms supplied in the post-processing stack are:
-
-- Fast Approximate Anti-aliasing (FXAA)
-- Subpixel Morphological Anti-aliasing (SMAA)
-- Temporal Anti-aliasing (TAA)
-
-They are set per-camera on the **Post-process Layer** component.
-
-## Fast Approximate Anti-aliasing
-
-**FXAA** is the cheapest technique and is recommended for mobile and other platforms that don’t support motion vectors, which are required for **TAA**.
+**FXAA** is the most efficent technique and is recommended for mobile and other platforms that don’t support motion vectors, which are required for **Temporal Anti-aliasing**.
 
 
 ![](images/aa-1.png)
@@ -30,12 +24,12 @@ They are set per-camera on the **Post-process Layer** component.
 
 | Property   | Function                                                     |
 | :--------- | :----------------------------------------------------------- |
-| Fast Mode  | A slightly lower quality but faster variant of FXAA. Highly recommended on mobile platforms. |
-| Keep Alpha | Toggle this on if you need to keep the alpha channel untouched by post-processing. Else it will use this channel to store internal data used to speed up and improve visual quality. |
+| Fast Mode  | Enable this checkbox for a lower quality but faster variant of FXAA. Recommended for mobile platforms. |
+| Keep Alpha | Enable this checkbox if you need to keep the alpha channel untouched by post-processing. If disabled, Unity will use the alpha channel to store internal data used to speed up and improve visual quality. |
 
-### Performances
+### Performance
 
-`Fast Mode` should be enabled on mobile & Nintendo Switch as it gives a substantial performance boost compared to the regular mode on these platforms. PS4 and Xbox One slightly benefit from it as well but on desktop GPUs it makes no difference and the regular mode should be used for added visual quality.
+Enable `Fast Mode` if you are developing for mobile or Nintendo Switch to get a performance boost. It will also provide a small boost for PlayStation 4 and Xbox One development. `Fast Mode` does not provide any extra benefits for desktop GPUs; regular mode should be used for added visual quality.
 
 ### Requirements
 
@@ -43,9 +37,9 @@ They are set per-camera on the **Post-process Layer** component.
 
 See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
 
-## Subpixel Morphological Anti-aliasing
+## Subpixel Morphological Anti-aliasing (SMAA)
 
-**SMAA** is a higher quality anti-aliasing effect than **FXAA** but it's also slower. Depending on the art-style of your game it can work as well as **TAA** while avoiding some of the shortcomings of this technique.
+**SMAA** is a higher quality anti-aliasing effect than **FXAA** but it's also slower. Depending on the art-style of your game it can work as well as **Temporal Anti-aliasing** while avoiding some of the shortcomings of this technique.
 
 
 ![](images/aa-2.png)
@@ -55,11 +49,11 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 | Property | Function                                         |
 | :-------- | :------------------------------------------------ |
-| Quality  | The overall quality of the anti-aliasing filter. |
+| Quality  | Set the overall quality of the anti-aliasing filter. |
 
-### Performances
+### Performance
 
-Lowering the `Quality` setting will make the effect run faster. Using **SMAA** on mobile platforms isn't recommended.
+Lowering the `Quality` setting makes the effect run faster. Do not use **SMAA** on mobile platforms.
 
 ### Known issues and limitations
 
@@ -73,7 +67,7 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 ## Temporal Anti-aliasing
 
-**TAA** is a more advanced anti-aliasing technique where frames are accumulated over time in a history buffer to be used to smooth edges more effectively. It is substantially better at smoothing edges in motion but requires motion vectors and is more expensive than **FXAA**. Due to this it is recommended for desktop and console platforms.
+**TAA** is an advanced anti-aliasing technique where frames are accumulated over time in a history buffer to be used to smooth edges more effectively. It is substantially better at smoothing edges in motion but requires motion vectors and is more expensive than **FXAA**. It is ideal for desktop and console platforms.
 
 
 ![](images/aa-3.png)
@@ -83,10 +77,10 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 
 | Property            | Function                                                     |
 | :------------------- | :------------------------------------------------------------ |
-| Jitter Spread       | The diameter (in texels) inside which jitter samples are spread. Smaller values result in crisper but more aliased output, whilst larger values result in more stable but blurrier output. |
-| Stationary Blending | The blend coefficient for stationary fragments. Controls the percentage of history sample blended into final color for fragments with minimal active motion. |
-| Motion Blending     | The blending coefficient for moving fragments. Controls the percentage of history sample blended into the final color for fragments with significant active motion. |
-| Sharpness           | TAA can induce a slight loss of details in high frequency regions. Sharpening alleviates this issue. |
+| Jitter Spread       | Set the diameter (in texels) in which jitter samples are spread. Smaller values result in crisper but a more aliased output. Larger values result in more stable but blurrier output. |
+| Stationary Blending | Set the blend coefficient for stationary fragments. This setting controls the percentage of history sample blended into final color for fragments with minimal active motion. |
+| Motion Blending     | Set the blending coefficient for moving fragments. This setting controls the percentage of history sample blended into the final color for fragments with significant active motion. |
+| Sharpness           | Set the sharpneess to alleviate the slight loss of details in high frequency regions which can be caused by TAA. |
 
 ### Known issues and limitations
 

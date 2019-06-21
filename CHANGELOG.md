@@ -4,7 +4,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.1.7] - 2019-XX-XX
+## [2.1.8] - 2019-xx-xx
+
+## [2.1.7] - 2019-06-12
+
+### Added
+- Initial Stadia platform support.
+
+### Fixed
+- Viewport handling wasn't working correctly when FXAA or SMAA were used with builtin pipelines.
+- Depth of Field could end up fully blurry depending on the project setup.
+- Reloading an asset bundle that has references to post-processing was broken.
+
+### Changed
+- Warning for mobiles about using post-processing with non-fullscreen cameras.
+- Directly to Camera Target on the PostProcessLayer component is now disabled by default.
+- The framework now uses its own random number generator instead of the default Unity one.
 
 ## [2.1.6] - 2019-04-11
 

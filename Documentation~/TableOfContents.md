@@ -13,7 +13,7 @@
   * [Grain](Grain)
   * [Lens Distortion](Lens-Distortion)
   * [Motion Blur](Motion-Blur)
-  * [Screen-space Reflections](Screen-space-Reflections)
+  * [Screen Space Reflections](Screen-Space-Reflections)
   * [Vignette](Vignette)
 * Scripting
     * [Manipulating the Stack](Manipulating-the-Stack)

@@ -223,8 +223,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         #region Rendering
 
-        internal static PostProcessResources s_Resources;
-
+        static PostProcessResources s_Resources;
         static Mesh s_FullscreenTriangle;
 
         /// <summary>
@@ -380,6 +379,24 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 return s_CopyFromTexArraySheet;
             }
+        }
+
+        internal static void UpdateResources(PostProcessResources resources)
+        {
+            Destroy(s_CopyMaterial);
+            Destroy(s_CopyStdMaterial);
+            Destroy(s_CopyFromTexArrayMaterial);
+            Destroy(s_CopyStdFromDoubleWideMaterial);
+
+            s_CopyMaterial = null;
+            s_CopyStdMaterial = null;
+            s_CopyFromTexArrayMaterial = null;
+            s_CopyStdFromDoubleWideMaterial = null;
+
+            s_CopySheet = null;
+            s_CopyFromTexArraySheet = null;
+
+            s_Resources = resources;
         }
 
         /// <summary>
@@ -764,7 +781,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_EDITOR
                 return isSinglePassStereoSelected && Application.isPlaying;
-#elif UNITY_SWITCH
+#elif !ENABLE_VR
                 return false;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
@@ -783,7 +800,7 @@ namespace UnityEngine.Rendering.PostProcessing
             {
 #if UNITY_EDITOR
                 return UnityEditor.PlayerSettings.virtualRealitySupported;
-#elif UNITY_XBOXONE || UNITY_SWITCH
+#elif UNITY_XBOXONE || !ENABLE_VR
                 return false;
 #elif UNITY_2017_2_OR_NEWER
                 return UnityEngine.XR.XRSettings.enabled;

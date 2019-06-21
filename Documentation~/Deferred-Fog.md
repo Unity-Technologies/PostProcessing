@@ -1,12 +1,8 @@
 # Deferred Fog
 
-Fog is the effect of overlaying a color onto objects dependent on the distance from the camera. This is used to simulate fog or mist in outdoor environments and is also typically used to hide clipping of objects when a camera’s far clip plane has been moved forward for performance.
+The **Fog** effect overlays a color onto objects depending on how far away they are from the Camera. 
 
-The Fog effect creates a screen-space fog based on the camera’s [depth texture](https://docs.unity3d.com/Manual/SL-DepthTextures.html). It supports Linear, Exponential and Exponential Squared fog types. Fog settings should be set in the **Scene** tab of the **Lighting** window.
-
-
-![](images/screenshot-fog.png)
-
+The **Fog** effect creates a screen-space fog based on the camera’s [depth texture](https://docs.unity3d.com/Manual/SL-DepthTextures.html). It supports Linear, Exponential and Exponential Squared fog types. Fog settings are on the **Scene** tab of the **Lighting** window (menu: **Window > Rendering > Lighting Settings**).
 
 
 ![](images/deferredfog.png)
@@ -16,11 +12,12 @@ The Fog effect creates a screen-space fog based on the camera’s [depth texture
 
 | Property       | Function                          |
 | :-------------- | :--------------------------------- |
-| Exclude Skybox | Should the fog affect the skybox? |
+| Enabled        | Enable this checkbox to turn the **Deferred Fog** effect on.|
+| Exclude Skybox | Enable this checkbox to exclude fog from the [skybox](https://docs.unity3d.com/Manual/class-Skybox.html) |
 
 ### Details
 
-This effect will only show up in your **Post-process Layer** if the camera is set to render with the **Deferred rendering path**. It is enabled by default and adds the support of **Fog** from the **Lighting** panel (which would only work with the **Forward rendering path** otherwise).
+The **Fog** effect only appears in your **Post-process Layer** if the camera is set to render with the **Deferred rendering path**. It is enabled by default and adds the support of **Fog** from the **Lighting** panel (which would otherwise only work with the **Forward rendering path**).
 
 ### Requirements
 

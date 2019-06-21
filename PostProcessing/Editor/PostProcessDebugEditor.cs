@@ -72,6 +72,12 @@ namespace UnityEditor.Rendering.PostProcessing
                     RebuildProperties();
             }
 
+            if (RuntimeUtilities.scriptableRenderPipelineActive)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.HelpBox("A scriptable render pipeline is active, these features might not be available.", MessageType.Info);
+            }
+
             if (m_PostProcessLayer.objectReferenceValue != null)
             {
                 m_LayerObject.Update();
