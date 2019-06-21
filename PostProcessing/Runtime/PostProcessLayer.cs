@@ -109,7 +109,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public Fog fog;
 
 
-        public Dithering dithering;
+        internal Dithering dithering;
 
         /// <summary>
         /// The debug layer is reponsible for rendering debugging information on the screen. It will
