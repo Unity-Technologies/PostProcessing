@@ -100,7 +100,6 @@ namespace UnityEngine.Rendering.PPSMobile
         internal static readonly int Lut3D                           = Shader.PropertyToID("_Lut3D");
         internal static readonly int Lut3D_Params                    = Shader.PropertyToID("_Lut3D_Params");
         internal static readonly int Lut2D_Params                    = Shader.PropertyToID("_Lut2D_Params");
-        internal static readonly int UserLut2D_Params                = Shader.PropertyToID("_UserLut2D_Params");
         internal static readonly int PostExposure                    = Shader.PropertyToID("_PostExposure");
         internal static readonly int ColorBalance                    = Shader.PropertyToID("_ColorBalance");
         internal static readonly int ColorFilter                     = Shader.PropertyToID("_ColorFilter");
@@ -112,7 +111,6 @@ namespace UnityEngine.Rendering.PPSMobile
         internal static readonly int Lift                            = Shader.PropertyToID("_Lift");
         internal static readonly int InvGamma                        = Shader.PropertyToID("_InvGamma");
         internal static readonly int Gain                            = Shader.PropertyToID("_Gain");
-        internal static readonly int Curves                          = Shader.PropertyToID("_Curves");
         internal static readonly int CustomToneCurve                 = Shader.PropertyToID("_CustomToneCurve");
         internal static readonly int ToeSegmentA                     = Shader.PropertyToID("_ToeSegmentA");
         internal static readonly int ToeSegmentB                     = Shader.PropertyToID("_ToeSegmentB");

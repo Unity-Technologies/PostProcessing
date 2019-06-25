@@ -19,6 +19,10 @@ Fork版本说明
 不支持景深的内核大小为大，非常大
 不支持Bloom的非Fast Mode
 不支持Bloom的镜头污迹效果
+不支持Tex3D
+不支持ColorGrading的External模式
+不支持ColorGrading的自定义Lookup Texture
+不支持ColorGrading的Grading Curves
 
 或者说，
 
@@ -34,6 +38,8 @@ Fork版本说明
 
 已优化的后期效果有：
 
+Bloom
+ColorGrading
 
 
 Instructions
