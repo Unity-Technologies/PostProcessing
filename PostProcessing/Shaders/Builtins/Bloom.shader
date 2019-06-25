@@ -17,7 +17,7 @@ Shader "Hidden/PostProcessing/Bloom"
         float4 _Params; // x: clamp, yzw: unused
 
         // ----------------------------------------------------------------------------------------
-        // Prefilter
+        // Prefilter 前置过滤
 
         half4 Prefilter(half4 color, float2 uv)
         {
@@ -28,35 +28,23 @@ Shader "Hidden/PostProcessing/Bloom"
             return color;
         }
 
-        half4 FragPrefilter13(VaryingsDefault i) : SV_Target
-        {
-            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-            return Prefilter(SafeHDR(color), i.texcoord);
-        }
-
         half4 FragPrefilter4(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
+            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return Prefilter(SafeHDR(color), i.texcoord);
         }
 
         // ----------------------------------------------------------------------------------------
-        // Downsample
-
-        half4 FragDownsample13(VaryingsDefault i) : SV_Target
-        {
-            half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-            return color;
-        }
+        // Downsample 下采样
 
         half4 FragDownsample4(VaryingsDefault i) : SV_Target
         {
-            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
+            half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy);
             return color;
         }
 
         // ----------------------------------------------------------------------------------------
-        // Upsample & combine
+        // Upsample & combine 上采样 & 组合
 
         half4 Combine(half4 bloom, float2 uv)
         {
@@ -64,15 +52,9 @@ Shader "Hidden/PostProcessing/Bloom"
             return bloom + color;
         }
 
-        half4 FragUpsampleTent(VaryingsDefault i) : SV_Target
-        {
-            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return Combine(bloom, i.texcoord);
-        }
-
         half4 FragUpsampleBox(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
+            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
             return Combine(bloom, i.texcoord);
         }
 
@@ -85,15 +67,9 @@ Shader "Hidden/PostProcessing/Bloom"
             return half4(Prefilter(SafeHDR(color), i.texcoord).rgb, 1.0);
         }
 
-        half4 FragDebugOverlayTent(VaryingsDefault i) : SV_Target
-        {
-            half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
-            return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
-        }
-
         half4 FragDebugOverlayBox(VaryingsDefault i) : SV_Target
         {
-            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy, _SampleScale);
+            half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, _MainTex_TexelSize.xy, _SampleScale);
             return half4(bloom.rgb * _ColorIntensity.w * _ColorIntensity.rgb, 1.0);
         }
 
@@ -103,18 +79,7 @@ Shader "Hidden/PostProcessing/Bloom"
     {
         Cull Off ZWrite Off ZTest Always
 
-        // 0: Prefilter 13 taps
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment FragPrefilter13
-
-            ENDHLSL
-        }
-
-        // 1: Prefilter 4 taps
+        // 0: Prefilter 4 taps
         Pass
         {
             HLSLPROGRAM
@@ -125,18 +90,7 @@ Shader "Hidden/PostProcessing/Bloom"
             ENDHLSL
         }
 
-        // 2: Downsample 13 taps
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment FragDownsample13
-
-            ENDHLSL
-        }
-
-        // 3: Downsample 4 taps
+        // 1: Downsample 4 taps
         Pass
         {
             HLSLPROGRAM
@@ -147,18 +101,7 @@ Shader "Hidden/PostProcessing/Bloom"
             ENDHLSL
         }
 
-        // 4: Upsample tent filter
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment FragUpsampleTent
-
-            ENDHLSL
-        }
-
-        // 5: Upsample box filter
+        // 2: Upsample box filter
         Pass
         {
             HLSLPROGRAM
@@ -169,7 +112,7 @@ Shader "Hidden/PostProcessing/Bloom"
             ENDHLSL
         }
 
-        // 6: Debug overlay (threshold)
+        // 3: Debug overlay (threshold)
         Pass
         {
             HLSLPROGRAM
@@ -180,18 +123,7 @@ Shader "Hidden/PostProcessing/Bloom"
             ENDHLSL
         }
 
-        // 7: Debug overlay (tent filter)
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment FragDebugOverlayTent
-
-            ENDHLSL
-        }
-
-        // 8: Debug overlay (box filter)
+        // 4: Debug overlay (box filter)
         Pass
         {
             HLSLPROGRAM

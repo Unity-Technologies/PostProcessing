@@ -17,6 +17,8 @@ Fork版本说明
 不支持延迟渲染雾Fog
 不支持屏幕空间反射ScreenSpaceReflections
 不支持景深的内核大小为大，非常大
+不支持Bloom的非Fast Mode
+不支持Bloom的镜头污迹效果
 
 或者说，
 
@@ -26,6 +28,7 @@ Fork版本说明
 支持前向渲染
 支持ScalableAO的Lowest,Low,Medium质量
 支持景深的内核大小为小，中等
+不支持Bloom的Fast Mode
 
 如果有希望支持的功能，可以一起讨论，再做调整。
 

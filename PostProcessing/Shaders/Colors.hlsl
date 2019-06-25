@@ -235,20 +235,26 @@ half Luminance(half4 linearRgba)
     return Luminance(linearRgba.rgb);
 }
 
-//
+// 颜色的平方阈值
+// 亮度为T(threshold),拐点属性值a(kneeValue)非计算后的
 // Quadratic color thresholding
 // curve = (threshold - knee, knee * 2, 0.25 / knee)
-//
 half4 QuadraticThreshold(half4 color, half threshold, half3 curve)
 {
-    // Pixel brightness
+    // Pixel brightness 像素亮度
     half br = Max3(color.r, color.g, color.b);
 
     // Under-threshold part: quadratic curve
+    // br在(1-a)T之下,置为0,之上,二次曲线过渡
+    // br在(1+a)T之下,取为(x-(1-a)T)^2/4aT
+    // br在(1+a)T之上,取为aT
     half rq = clamp(br - curve.x, 0.0, curve.y);
     rq = curve.z * rq * rq;
 
     // Combine and apply the brightness response curve.
+    // 组合并应该br的响应曲线
+    // br在(1+a)T之下,系数取为(x-(1-a)T)^2/4axT
+    // br在(1+a)T之上,系数取为(x-T)/x
     color *= max(rq, br - threshold) / max(br, EPSILON);
 
     return color;

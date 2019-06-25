@@ -381,15 +381,6 @@ namespace UnityEngine.Rendering.PPSMobile
             BuildCommandBuffers();
         }
 
-        void OnPreRender()
-        {
-            // Unused in scriptable render pipelines
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
-                return;
-
-            BuildCommandBuffers();
-        }
-
         static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
         {
 #if UNITY_2019_1_OR_NEWER
@@ -527,14 +518,7 @@ namespace UnityEngine.Rendering.PPSMobile
             if (tempRt > -1)
                 m_LegacyCmdBuffer.ReleaseTemporaryRT(tempRt);
         }
-
-        void OnPostRender()
-        {
-            // Unused in scriptable render pipelines
-            if (RuntimeUtilities.scriptableRenderPipelineActive)
-                return;
-        }
-
+        
         public PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
         {
