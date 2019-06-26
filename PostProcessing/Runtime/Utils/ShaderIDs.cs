@@ -85,11 +85,8 @@ namespace UnityEngine.Rendering.PPSMobile
         internal static readonly int SampleScale                     = Shader.PropertyToID("_SampleScale");
         internal static readonly int Threshold                       = Shader.PropertyToID("_Threshold");
         internal static readonly int ColorIntensity                  = Shader.PropertyToID("_ColorIntensity");
-        internal static readonly int Bloom_DirtTex                   = Shader.PropertyToID("_Bloom_DirtTex");
         internal static readonly int Bloom_Settings                  = Shader.PropertyToID("_Bloom_Settings");
         internal static readonly int Bloom_Color                     = Shader.PropertyToID("_Bloom_Color");
-        internal static readonly int Bloom_DirtTileOffset            = Shader.PropertyToID("_Bloom_DirtTileOffset");
-
         internal static readonly int ChromaticAberration_Amount      = Shader.PropertyToID("_ChromaticAberration_Amount");
         internal static readonly int ChromaticAberration_SpectralLut = Shader.PropertyToID("_ChromaticAberration_SpectralLut");
 

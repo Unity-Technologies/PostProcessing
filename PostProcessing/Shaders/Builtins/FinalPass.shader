@@ -2,7 +2,7 @@ Shader "Hidden/PostProcessing/FinalPass"
 {
     HLSLINCLUDE
 
-        #pragma multi_compile __ FXAA FXAA_LOW
+        #pragma multi_compile __ FXAA_LOW
         #pragma multi_compile __ FXAA_KEEP_ALPHA
 
         #pragma vertex VertUVTransform
@@ -45,7 +45,7 @@ Shader "Hidden/PostProcessing/FinalPass"
             half4 color = 0.0;
 
             // Fast Approximate Anti-aliasing
-            #if FXAA || FXAA_LOW
+            #if FXAA_LOW
             {
                 #if FXAA_HLSL_4 || FXAA_HLSL_5
                     FxaaTex mainTex;
@@ -100,10 +100,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
                 #pragma exclude_renderers gles vulkan switch
-
-                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 5.0
-
             ENDHLSL
         }
     }
@@ -116,10 +113,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
                 #pragma exclude_renderers gles vulkan switch
-
-                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target 3.0
-
             ENDHLSL
         }
     }
@@ -132,10 +126,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         {
             HLSLPROGRAM
                 #pragma only_renderers gles
-
-                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
                 #pragma target es3.0
-
             ENDHLSL
         }
     }
@@ -147,9 +138,7 @@ Shader "Hidden/PostProcessing/FinalPass"
         Pass
         {
             HLSLPROGRAM
-                #pragma only_renderers gles vulkan switch
-
-                #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET //not supporting STEREO_INSTANCING_ENABLED
+                #pragma only_renderers gles vulkan
             ENDHLSL
         }
     }

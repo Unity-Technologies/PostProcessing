@@ -6,13 +6,12 @@ Shader "Hidden/PostProcessing/Uber"
 
         #pragma multi_compile __ DISTORT
         #pragma multi_compile __ CHROMATIC_ABERRATION CHROMATIC_ABERRATION_LOW
-        #pragma multi_compile __ BLOOM BLOOM_LOW
+        #pragma multi_compile __ BLOOM_LOW
         #pragma multi_compile __ VIGNETTE
         #pragma multi_compile __ GRAIN
         #pragma multi_compile __ FINALPASS
         // the following keywords are handled in API specific SubShaders below
-        // #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-        // #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
+        // #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D
         
         #pragma vertex VertUVTransform
         #pragma fragment FragUber
@@ -33,10 +32,8 @@ Shader "Hidden/PostProcessing/Uber"
 
         // Bloom
         TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
-        TEXTURE2D_SAMPLER2D(_Bloom_DirtTex, sampler_Bloom_DirtTex);
         float4 _BloomTex_TexelSize;
-        float4 _Bloom_DirtTileOffset; // xy: tiling, zw: offset
-        half3 _Bloom_Settings; // x: sampleScale, y: intensity, z: dirt intensity
+        half3 _Bloom_Settings; // x: sampleScale, y: intensity
         half3 _Bloom_Color;
 
         // Chromatic aberration
@@ -44,17 +41,8 @@ Shader "Hidden/PostProcessing/Uber"
         half _ChromaticAberration_Amount;
 
         // Color grading
-    #if COLOR_GRADING_HDR_3D
-
-        TEXTURE3D_SAMPLER3D(_Lut3D, sampler_Lut3D);
-        float2 _Lut3D_Params;
-
-    #else
-
         TEXTURE2D_SAMPLER2D(_Lut2D, sampler_Lut2D);
         float3 _Lut2D_Params;
-
-    #endif
 
         half _PostExposure; // EV (exp2)
 
@@ -145,25 +133,13 @@ Shader "Hidden/PostProcessing/Uber"
 
             color.rgb *= autoExposure;
 
-            #if BLOOM || BLOOM_LOW
+            #if BLOOM_LOW
             {
-                #if BLOOM
-                half4 bloom = UpsampleTent(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
-                #else
                 half4 bloom = UpsampleBox(TEXTURE2D_PARAM(_BloomTex, sampler_BloomTex), uvDistorted, _BloomTex_TexelSize.xy, _Bloom_Settings.x);
-                #endif
-
-                // UVs should be Distort(uv * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw)
-                // but considering we use a cover-style scale on the dirt texture the difference
-                // isn't massive so we chose to save a few ALUs here instead in case lens distortion
-                // is active
-                half4 dirt = half4(SAMPLE_TEXTURE2D(_Bloom_DirtTex, sampler_Bloom_DirtTex, uvDistorted * _Bloom_DirtTileOffset.xy + _Bloom_DirtTileOffset.zw).rgb, 0.0);
 
                 // Additive bloom (artist friendly)
                 bloom *= _Bloom_Settings.y;
-                dirt *= _Bloom_Settings.z;
                 color += bloom * half4(_Bloom_Color, 1.0);
-                color += dirt * bloom;
             }
             #endif
 
@@ -208,13 +184,7 @@ Shader "Hidden/PostProcessing/Uber"
             }
             #endif
 
-            #if COLOR_GRADING_HDR_3D
-            {
-                color *= _PostExposure;
-                float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
-                color.rgb = ApplyLut3D(TEXTURE3D_PARAM(_Lut3D, sampler_Lut3D), colorLutSpace, _Lut3D_Params);
-            }
-            #elif COLOR_GRADING_HDR_2D
+            #if COLOR_GRADING_HDR_2D
             {
                 color *= _PostExposure;
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
@@ -276,9 +246,7 @@ Shader "Hidden/PostProcessing/Uber"
         {
             HLSLPROGRAM
                 #pragma exclude_renderers gles vulkan switch
-
-                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-                #pragma multi_compile __ STEREO_INSTANCING_ENABLED STEREO_DOUBLEWIDE_TARGET
+                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D
             ENDHLSL
         }
     }
@@ -290,10 +258,8 @@ Shader "Hidden/PostProcessing/Uber"
         Pass
         {
             HLSLPROGRAM
-                #pragma only_renderers vulkan switch
-
-                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D COLOR_GRADING_HDR_3D
-                #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET // disabled for Vulkan because of shader compiler issues in older Unity versions: STEREO_INSTANCING_ENABLED
+                #pragma only_renderers vulkan
+                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D                
             ENDHLSL
         }
     }
@@ -306,9 +272,7 @@ Shader "Hidden/PostProcessing/Uber"
         {
             HLSLPROGRAM
                 #pragma only_renderers gles
-
-                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D // not supported by OpenGL ES 2.0: COLOR_GRADING_HDR_3D
-                #pragma multi_compile __ STEREO_DOUBLEWIDE_TARGET // not supported by OpenGL ES 2.0: STEREO_INSTANCING_ENABLED
+                #pragma multi_compile __ COLOR_GRADING_LDR_2D COLOR_GRADING_HDR_2D                
             ENDHLSL
         }
     }

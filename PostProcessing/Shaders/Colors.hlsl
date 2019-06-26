@@ -486,7 +486,7 @@ half3 ApplyLut2D(TEXTURE2D_ARGS(tex, samplerTex), float3 uvw, float3 scaleOffset
 //
 // Returns the default value for a given position on a 2D strip-format color lookup table
 // params = (lut_height, 0.5 / lut_width, 0.5 / lut_height, lut_height / lut_height - 1)
-//
+// 返回颜色查找表的2D条形格式被给位置的默认值
 float3 GetLutStripValue(float2 uv, float4 params)
 {
     uv -= params.yz;
