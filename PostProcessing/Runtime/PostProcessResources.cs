@@ -43,15 +43,10 @@ namespace UnityEngine.Rendering.PPSMobile
         {
             public ComputeShader autoExposure;
             public ComputeShader exposureHistogram;
-            public ComputeShader lut3DBaker;
             public ComputeShader texture3dLerp;
             public ComputeShader gammaHistogram;
             public ComputeShader waveform;
             public ComputeShader vectorscope;
-            public ComputeShader multiScaleAODownsample1;
-            public ComputeShader multiScaleAODownsample2;
-            public ComputeShader multiScaleAORender;
-            public ComputeShader multiScaleAOUpsample;
             public ComputeShader gaussianDownsample;
 
             public ComputeShaders Clone()
