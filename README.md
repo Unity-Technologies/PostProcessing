@@ -9,45 +9,50 @@ Fork版本说明
 使用本库只需要拷贝同级目录下的PostProcessing文件夹，并且对非此文件夹下资源只作保留或删除，不再维护。
 
 优势：
+------------
+
 代码简洁 打包量更小 减少因操作导致性能低下 性能优化提升
 
 支持说明：
+------------
 
-不支持SWITCH、PSP、XBOX、TVOS、CONSOLE、PSSL
-不支持VR XR AR等虚拟平台
-不支持SMAA、TAA抗锯齿效果、FXAA常规效果
-不支持延迟渲染
-不支持ScalableAO的High,Ultra质量
-不支持Multi-scale VO
-不支持延迟渲染雾Fog
-不支持屏幕空间反射ScreenSpaceReflections
-不支持景深的内核大小为大，非常大
-不支持Bloom的非Fast Mode
-不支持Bloom的镜头污迹效果
-不支持Tex3D
-不支持ColorGrading的External模式
-不支持ColorGrading的自定义Lookup Texture
-不支持ColorGrading的Grading Curves
+	不支持SWITCH、PSP、XBOX、TVOS、CONSOLE、PSSL
+	不支持VR XR AR等虚拟平台
+	不支持SMAA、TAA抗锯齿效果、FXAA常规效果
+	不支持延迟渲染
+	不支持ScalableAO的High,Ultra质量
+	不支持Multi-scale VO
+	不支持延迟渲染雾Fog
+	不支持屏幕空间反射ScreenSpaceReflections
+	不支持景深的内核大小为大，非常大
+	不支持Bloom的非Fast Mode
+	不支持Bloom的镜头污迹效果
+	不支持Tex3D
+	不支持ColorGrading的External模式
+	不支持ColorGrading的自定义Lookup Texture
+	不支持ColorGrading的Grading Curves
 
 或者说，
 
-支持Android、iOS、Standard、Vulkan、Metal
-支持Compute Shader
-支持FXAA Fast Mode效果
-支持前向渲染
-支持ScalableAO的Lowest,Low,Medium质量
-支持景深的内核大小为小，中等
-不支持Bloom的Fast Mode
+	支持Android、iOS、Standard、Vulkan、Metal
+	支持Compute Shader
+	支持FXAA Fast Mode效果
+	支持前向渲染
+	支持ScalableAO的Lowest,Low,Medium质量
+	支持景深的内核大小为小，中等
+	支持Bloom的Fast Mode
 
-如果有希望支持的功能，可以一起讨论，再做调整。
+~如果有希望支持的功能，可以一起讨论，再做调整。
 
-已优化的后期效果有：
+已对性能优化的后期效果有：
+------------
 
-Bloom
-ColorGrading
+	Bloom
+	ColorGrading
 
 修复问题：
-1. 报错：Assertion failure. Value was Null Expected: Value was not Null
+------------
+	1. 报错：Assertion failure. Value was Null Expected: Value was not Null
 	重新导入某一脚本，使其编译通过即可。
 	
 Instructions
