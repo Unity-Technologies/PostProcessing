@@ -46,7 +46,10 @@ Fork版本说明
 Bloom
 ColorGrading
 
-
+修复问题：
+1. 报错：Assertion failure. Value was Null Expected: Value was not Null
+	重新导入某一脚本，使其编译通过即可。
+	
 Instructions
 ------------
 

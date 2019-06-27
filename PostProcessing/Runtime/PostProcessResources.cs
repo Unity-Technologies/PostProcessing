@@ -55,16 +55,8 @@ namespace UnityEngine.Rendering.PPSMobile
             }
         }
 
-        [Serializable]
-        public sealed class SMAALuts
-        {
-            public Texture2D area;
-            public Texture2D search;
-        }
-
         public Texture2D[] blueNoise64;
         public Texture2D[] blueNoise256;
-        public SMAALuts smaaLuts;
         public Shaders shaders;
         public ComputeShaders computeShaders;
 
