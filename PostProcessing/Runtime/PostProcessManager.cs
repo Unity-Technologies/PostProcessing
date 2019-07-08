@@ -59,7 +59,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [UnityEditor.Callbacks.DidReloadScripts]
         static void OnEditorReload()
         {
-            instance.ReloadBaseTypes();
+            // ctor() will also call ReloadBaseTypes. This "dirty" test will avoid 2 calls of ReloadBaseTypes
+            if (s_Instance == null)
+                s_Instance = new PostProcessManager();
+            else
+                s_Instance.ReloadBaseTypes();
         }
 #endif
 
