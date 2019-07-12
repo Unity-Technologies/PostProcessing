@@ -322,7 +322,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // size usages explicit
 #if UNITY_2017_2_OR_NEWER
         RenderTextureDescriptor m_sourceDescriptor;
-        RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
             var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height,
                                                                                 m_sourceDescriptor.colorFormat, depthBufferBits);
@@ -336,6 +336,11 @@ namespace UnityEngine.Rendering.PostProcessing
             modifiedDesc.autoGenerateMips = m_sourceDescriptor.autoGenerateMips;
             modifiedDesc.enableRandomWrite = m_sourceDescriptor.enableRandomWrite;
             modifiedDesc.shadowSamplingMode = m_sourceDescriptor.shadowSamplingMode;
+
+#if UNITY_2019_1_OR_NEWER     
+            if (m_Camera.allowDynamicResolution)           
+                modifiedDesc.useDynamicScale = true;
+#endif
 
             if (colorFormat != RenderTextureFormat.Default)
                 modifiedDesc.colorFormat = colorFormat;
@@ -380,8 +385,12 @@ namespace UnityEngine.Rendering.PostProcessing
             //intermediates in VR are unchanged
             if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
                desc.dimension = Rendering.TextureDimension.Tex2D;
-          
+            
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, desc, filter);
+#else
+            cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless, m_Camera.allowDynamicResolution);
+#endif
 #else
             int actualWidth = width;
             int actualHeight = height;

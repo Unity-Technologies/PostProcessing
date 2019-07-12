@@ -244,7 +244,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [ImageEffectUsesCommandBuffer]
         void OnRenderImage(RenderTexture src, RenderTexture dst)
         {
-            if (finalBlitToCameraTarget)
+            if (finalBlitToCameraTarget && (m_Camera.allowDynamicResolution && ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0))
                 RenderTexture.active = dst; // silence warning
             else
                 Graphics.Blit(src, dst);
@@ -607,7 +607,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.destination = cameraTarget;
 
 #if UNITY_2019_1_OR_NEWER
-            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive)
+            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive && (!m_Camera.allowDynamicResolution || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0)))
             {
                 if (m_Camera.targetTexture)
                 {

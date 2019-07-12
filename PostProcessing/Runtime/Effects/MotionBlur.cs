@@ -92,27 +92,33 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.RcpMaxBlurRadius, 1f / maxBlurPixels);
 
             int vbuffer = ShaderIDs.VelocityTex;
-            cmd.GetTemporaryRT(vbuffer, context.width, context.height, 0, FilterMode.Point,
-                packedRTFormat, RenderTextureReadWrite.Linear);
+            var rtDesc = context.GetDescriptor(0, packedRTFormat, RenderTextureReadWrite.Linear);
+            cmd.GetTemporaryRT(vbuffer, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, vbuffer, sheet, (int)Pass.VelocitySetup);
 
             // Pass 2 - First TileMax filter (1/2 downsize)
             int tile2 = ShaderIDs.Tile2RT;
-            cmd.GetTemporaryRT(tile2, context.width / 2, context.height / 2, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = context.width / 2;
+            rtDesc.height = context.height / 2;
+            cmd.GetTemporaryRT(tile2, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(vbuffer, tile2, sheet, (int)Pass.TileMax1);
 
             // Pass 3 - Second TileMax filter (1/2 downsize)
             int tile4 = ShaderIDs.Tile4RT;
-            cmd.GetTemporaryRT(tile4, context.width / 4, context.height / 4, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = context.width / 4;
+            rtDesc.height = context.height / 4;
+            cmd.GetTemporaryRT(tile4, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(tile2, tile4, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile2);
 
             // Pass 4 - Third TileMax filter (1/2 downsize)
             int tile8 = ShaderIDs.Tile8RT;
-            cmd.GetTemporaryRT(tile8, context.width / 8, context.height / 8, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = context.width / 8;
+            rtDesc.height = context.height / 8;
+            cmd.GetTemporaryRT(tile8, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(tile4, tile8, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile4);
 
@@ -122,17 +128,21 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.TileMaxLoop, (int)(tileSize / 8f));
 
             int tile = ShaderIDs.TileVRT;
-            cmd.GetTemporaryRT(tile, context.width / tileSize, context.height / tileSize, 0,
-                FilterMode.Point, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = context.width / tileSize;
+            rtDesc.height = context.height / tileSize;
+            cmd.GetTemporaryRT(tile, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(tile8, tile, sheet, (int)Pass.TileMaxV);
             cmd.ReleaseTemporaryRT(tile8);
 
             // Pass 6 - NeighborMax filter
+            rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
             int neighborMax = ShaderIDs.NeighborMaxTex;
             int neighborMaxWidth = context.width / tileSize;
             int neighborMaxHeight = context.height / tileSize;
-            cmd.GetTemporaryRT(neighborMax, neighborMaxWidth, neighborMaxHeight, 0,
-                FilterMode.Point, vectorRTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = neighborMaxWidth;
+            rtDesc.height = neighborMaxHeight; 
+            cmd.GetTemporaryRT(neighborMax, rtDesc, FilterMode.Point);
             cmd.BlitFullscreenTriangle(tile, neighborMax, sheet, (int)Pass.NeighborMax);
             cmd.ReleaseTemporaryRT(tile);
 
