@@ -74,6 +74,9 @@ namespace UnityEngine.Rendering.PostProcessing
             var packedRTFormat = RenderTextureFormat.ARGB2101010.IsSupported()
                 ? RenderTextureFormat.ARGB2101010
                 : RenderTextureFormat.ARGB32;
+#if !UNITY_2019_1_OR_NEWER
+            bool useDynamicRes = context.camera.allowDynamicResolution;
+#endif
 
             var sheet = context.propertySheets.Get(context.resources.shaders.motionBlur);
             cmd.BeginSample("MotionBlur");
@@ -93,7 +96,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
             int vbuffer = ShaderIDs.VelocityTex;
             var rtDesc = context.GetDescriptor(0, packedRTFormat, RenderTextureReadWrite.Linear);
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(vbuffer, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(vbuffer, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, vbuffer, sheet, (int)Pass.VelocitySetup);
 
             // Pass 2 - First TileMax filter (1/2 downsize)
@@ -101,7 +108,11 @@ namespace UnityEngine.Rendering.PostProcessing
             rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = context.width / 2;
             rtDesc.height = context.height / 2;
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(tile2, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(tile2, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(vbuffer, tile2, sheet, (int)Pass.TileMax1);
 
             // Pass 3 - Second TileMax filter (1/2 downsize)
@@ -109,7 +120,11 @@ namespace UnityEngine.Rendering.PostProcessing
             rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = context.width / 4;
             rtDesc.height = context.height / 4;
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(tile4, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(tile4, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(tile2, tile4, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile2);
 
@@ -118,7 +133,11 @@ namespace UnityEngine.Rendering.PostProcessing
             rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = context.width / 8;
             rtDesc.height = context.height / 8;
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(tile8, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(tile8, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(tile4, tile8, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile4);
 
@@ -131,7 +150,11 @@ namespace UnityEngine.Rendering.PostProcessing
             rtDesc = context.GetDescriptor(0, vectorRTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = context.width / tileSize;
             rtDesc.height = context.height / tileSize;
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(tile, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(tile, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(tile8, tile, sheet, (int)Pass.TileMaxV);
             cmd.ReleaseTemporaryRT(tile8);
 
@@ -142,7 +165,11 @@ namespace UnityEngine.Rendering.PostProcessing
             int neighborMaxHeight = context.height / tileSize;
             rtDesc.width = neighborMaxWidth;
             rtDesc.height = neighborMaxHeight; 
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(neighborMax, rtDesc, FilterMode.Point);
+#else
+            cmd.GetTemporaryRT(neighborMax, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+#endif
             cmd.BlitFullscreenTriangle(tile, neighborMax, sheet, (int)Pass.NeighborMax);
             cmd.ReleaseTemporaryRT(tile);
 
