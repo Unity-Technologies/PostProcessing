@@ -162,6 +162,9 @@ namespace UnityEditor.Rendering.PostProcessing
                     if (RuntimeUtilities.isSinglePassStereoSelected)
                         EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
                     #endif
+                    var camera = m_Target.GetComponent<Camera>();
+                    if (camera.allowDynamicResolution)
+                        EditorGUILayout.HelpBox("TAA is not supported with Dynamic Resolution.", MessageType.Warning);
 
                     EditorGUILayout.PropertyField(m_TaaJitterSpread);
                     EditorGUILayout.PropertyField(m_TaaStationaryBlending);
