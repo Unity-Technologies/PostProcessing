@@ -322,6 +322,13 @@ namespace UnityEngine.Rendering.PostProcessing
         // size usages explicit
 #if UNITY_2017_2_OR_NEWER
         RenderTextureDescriptor m_sourceDescriptor;
+        /// <summary>
+        /// Returns a modified copy the RenderTextureDescriptor used by the context object. 
+        /// </summary>
+        /// <param name="depthBufferBits">The number of bits to use for the depth buffer</param>
+        /// <param name="colorFormat">The render texture format</param>
+        /// <param name="readWrite">The color space conversion mode</param>
+        /// <returns>A RenderTextureDescriptor object</returns>
         public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
             var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height,
