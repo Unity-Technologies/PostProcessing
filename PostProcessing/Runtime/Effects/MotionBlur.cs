@@ -60,9 +60,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
         private void CreateTemporaryRT(PostProcessRenderContext context, int nameID, int width, int height, RenderTextureFormat RTFormat)
         {
-#if !UNITY_2019_1_OR_NEWER
-            bool useDynamicRes = context.camera.allowDynamicResolution;
-#endif
             var rtDesc = context.GetDescriptor(0, RTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = width;
             rtDesc.height = height;
@@ -70,7 +67,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, rtDesc, FilterMode.Point);
 #else
-            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, useDynamicRes);
+            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, context.camera.allowDynamicResolution);
 #endif
         }
 
