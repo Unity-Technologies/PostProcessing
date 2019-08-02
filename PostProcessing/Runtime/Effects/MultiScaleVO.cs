@@ -40,8 +40,6 @@ namespace UnityEngine.Rendering.PostProcessing
         readonly float[] m_InvThicknessTable = new float[12];
         readonly float[] m_SampleWeightTable = new float[12];
 
-        readonly int[] m_Widths = new int[7];
-        readonly int[] m_Heights = new int[7];
         // Scaled dimensions used with dynamic resolution
         readonly int[] m_ScaledWidths = new int[7];
         readonly int[] m_ScaledHeights = new int[7];
@@ -148,9 +146,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
-            // Base size          
-            m_Widths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
-            m_Heights[0] = camera.pixelHeight;
+            // Base size
             m_ScaledWidths[0] = camera.scaledPixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
             m_ScaledHeights[0] = camera.scaledPixelHeight;
             
@@ -158,8 +154,6 @@ namespace UnityEngine.Rendering.PostProcessing
             for (int i = 1; i < 7; i++)
             {
                 int div = 1 << i;
-                m_Widths[i]  = (m_Widths[0]  + (div - 1)) / div;
-                m_Heights[i] = (m_Heights[0] + (div - 1)) / div;
                 m_ScaledWidths[i]  = (m_ScaledWidths[0]  + (div - 1)) / div;
                 m_ScaledHeights[i] = (m_ScaledHeights[0] + (div - 1)) / div;
             }
@@ -186,7 +180,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         void PushAllocCommands(CommandBuffer cmd, bool isMSAA)
-        { 
+        {
             if(isMSAA)
             {
                 Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RGHalf, true);
