@@ -237,6 +237,10 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentContext = new PostProcessRenderContext();
         }
 
+        bool DynamicResolutionAllowsFinalBlitToCameraTarget()
+        { 
+            return (!m_Camera.allowDynamicResolution || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0));
+        }
 
 #if UNITY_2019_1_OR_NEWER
         // We always use a CommandBuffer to blit to the final render target
@@ -244,7 +248,7 @@ namespace UnityEngine.Rendering.PostProcessing
         [ImageEffectUsesCommandBuffer]
         void OnRenderImage(RenderTexture src, RenderTexture dst)
         {
-            if (finalBlitToCameraTarget && (m_Camera.allowDynamicResolution && ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0))
+            if (finalBlitToCameraTarget && DynamicResolutionAllowsFinalBlitToCameraTarget())
                 RenderTexture.active = dst; // silence warning
             else
                 Graphics.Blit(src, dst);
@@ -607,7 +611,7 @@ namespace UnityEngine.Rendering.PostProcessing
             context.destination = cameraTarget;
 
 #if UNITY_2019_1_OR_NEWER
-            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive && (!m_Camera.allowDynamicResolution || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0)))
+            if (finalBlitToCameraTarget && !RuntimeUtilities.scriptableRenderPipelineActive && DynamicResolutionAllowsFinalBlitToCameraTarget())
             {
                 if (m_Camera.targetTexture)
                 {
