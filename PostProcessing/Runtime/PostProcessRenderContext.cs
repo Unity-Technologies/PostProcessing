@@ -395,8 +395,10 @@ namespace UnityEngine.Rendering.PostProcessing
             
 #if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, desc, filter);
-#else
+#elif UNITY_2017_3_OR_NEWER
             cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless, m_Camera.allowDynamicResolution);
+#else
+            cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless);
 #endif
 #else
             int actualWidth = width;

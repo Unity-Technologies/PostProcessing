@@ -147,8 +147,13 @@ namespace UnityEngine.Rendering.PostProcessing
         public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
             // Base size
+#if UNITY_2017_3_OR_NEWER
             m_ScaledWidths[0] = camera.scaledPixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
             m_ScaledHeights[0] = camera.scaledPixelHeight;
+#else
+            m_ScaledWidths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            m_ScaledHeights[0] = camera.pixelHeight;       
+#endif
             
             // L1 -> L6 sizes
             for (int i = 1; i < 7; i++)
@@ -452,8 +457,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void CheckAOTexture(PostProcessRenderContext context)
         {
-            if (m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height ||
-                m_AmbientOnlyAO.useDynamicScale != context.camera.allowDynamicResolution)
+            bool AOUpdateNeeded = m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height;
+#if UNITY_2017_3_OR_NEWER                
+            AOUpdateNeeded = AOUpdateNeeded || m_AmbientOnlyAO.useDynamicScale != context.camera.allowDynamicResolution;
+#endif                  
+            if (AOUpdateNeeded)
             {
                 RuntimeUtilities.Destroy(m_AmbientOnlyAO);
 
@@ -462,7 +470,9 @@ namespace UnityEngine.Rendering.PostProcessing
                     hideFlags = HideFlags.DontSave,
                     filterMode = FilterMode.Point,
                     enableRandomWrite = true,
+#if UNITY_2017_3_OR_NEWER
                     useDynamicScale = context.camera.allowDynamicResolution
+#endif
                 };
                 m_AmbientOnlyAO.Create();
             }

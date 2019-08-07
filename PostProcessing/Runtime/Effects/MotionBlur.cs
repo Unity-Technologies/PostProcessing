@@ -60,14 +60,20 @@ namespace UnityEngine.Rendering.PostProcessing
 
         private void CreateTemporaryRT(PostProcessRenderContext context, int nameID, int width, int height, RenderTextureFormat RTFormat)
         {
+            var cmd = context.command;
+#if UNITY_2017_2_OR_NEWER            
             var rtDesc = context.GetDescriptor(0, RTFormat, RenderTextureReadWrite.Linear);
             rtDesc.width = width;
             rtDesc.height = height;
-            var cmd = context.command;
 #if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, rtDesc, FilterMode.Point);
-#else
+#elif UNITY_2017_3_OR_NEWER
             cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, context.camera.allowDynamicResolution);
+#else            
+            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless);
+#endif
+#else
+            cmd.GetTemporaryRT(nameID, width, height, 0, FilterMode.Point, RTFormat, RenderTextureReadWrite.Linear);
 #endif
         }
 

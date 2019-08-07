@@ -237,10 +237,12 @@ namespace UnityEngine.Rendering.PostProcessing
             m_CurrentContext = new PostProcessRenderContext();
         }
 
+#if UNITY_2019_1_OR_NEWER
         bool DynamicResolutionAllowsFinalBlitToCameraTarget()
         { 
             return (!m_Camera.allowDynamicResolution || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0));
         }
+#endif
 
 #if UNITY_2019_1_OR_NEWER
         // We always use a CommandBuffer to blit to the final render target
