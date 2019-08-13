@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.1.8] - 2019-xx-xx
 
+### Added
+- Support for dynamic resolution.
+
 ### Fixed
 - Potential fp16 overflow in Depth of Field that could cause NaN on some platforms.
 - Error with Screen-space Reflections when HDR is disabled.
