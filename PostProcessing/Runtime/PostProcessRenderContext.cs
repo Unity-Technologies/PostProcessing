@@ -322,7 +322,14 @@ namespace UnityEngine.Rendering.PostProcessing
         // size usages explicit
 #if UNITY_2017_2_OR_NEWER
         RenderTextureDescriptor m_sourceDescriptor;
-        RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
+        /// <summary>
+        /// Returns a modified copy the RenderTextureDescriptor used by the context object. 
+        /// </summary>
+        /// <param name="depthBufferBits">The number of bits to use for the depth buffer</param>
+        /// <param name="colorFormat">The render texture format</param>
+        /// <param name="readWrite">The color space conversion mode</param>
+        /// <returns>A RenderTextureDescriptor object</returns>
+        public RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
             var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height,
                                                                                 m_sourceDescriptor.colorFormat, depthBufferBits);
@@ -336,6 +343,11 @@ namespace UnityEngine.Rendering.PostProcessing
             modifiedDesc.autoGenerateMips = m_sourceDescriptor.autoGenerateMips;
             modifiedDesc.enableRandomWrite = m_sourceDescriptor.enableRandomWrite;
             modifiedDesc.shadowSamplingMode = m_sourceDescriptor.shadowSamplingMode;
+
+#if UNITY_2019_1_OR_NEWER     
+            if (m_Camera.allowDynamicResolution)           
+                modifiedDesc.useDynamicScale = true;
+#endif
 
             if (colorFormat != RenderTextureFormat.Default)
                 modifiedDesc.colorFormat = colorFormat;
@@ -380,8 +392,14 @@ namespace UnityEngine.Rendering.PostProcessing
             //intermediates in VR are unchanged
             if (stereoActive && desc.dimension == Rendering.TextureDimension.Tex2DArray)
                desc.dimension = Rendering.TextureDimension.Tex2D;
-          
+            
+#if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, desc, filter);
+#elif UNITY_2017_3_OR_NEWER
+            cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless, m_Camera.allowDynamicResolution);
+#else
+            cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless);
+#endif
 #else
             int actualWidth = width;
             int actualHeight = height;
