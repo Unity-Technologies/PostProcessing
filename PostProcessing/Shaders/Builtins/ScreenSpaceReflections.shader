@@ -8,6 +8,8 @@ Shader "Hidden/PostProcessing/ScreenSpaceReflections"
         #include "UnityCG.cginc"
         #pragma target 5.0
 
+		#pragma multi_compile _ _UseMotionVectors
+        
         // Ported from StdLib, we can't include it as it'll conflict with internal Unity includes
         struct AttributesDefault
         {

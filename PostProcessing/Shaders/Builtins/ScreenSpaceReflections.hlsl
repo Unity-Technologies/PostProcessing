@@ -54,8 +54,11 @@ Texture2D _MainTex; SamplerState sampler_MainTex;
 Texture2D _History; SamplerState sampler_History;
 
 Texture2D _CameraDepthTexture; SamplerState sampler_CameraDepthTexture;
-Texture2D _CameraMotionVectorsTexture; SamplerState sampler_CameraMotionVectorsTexture;
 Texture2D _CameraReflectionsTexture; SamplerState sampler_CameraReflectionsTexture;
+
+#ifdef _UseMotionVectors
+Texture2D _CameraMotionVectorsTexture; SamplerState sampler_CameraMotionVectorsTexture;
+#endif
 
 Texture2D _CameraGBufferTexture0; // albedo = g[0].rgb
 Texture2D _CameraGBufferTexture1; // roughness = g[1].a
@@ -302,8 +305,12 @@ float4 FragResolve(VaryingsDefault i) : SV_Target
 
 float4 FragReproject(VaryingsDefault i) : SV_Target
 {
-    float2 motion = _CameraMotionVectorsTexture.SampleLevel(sampler_CameraMotionVectorsTexture, i.texcoordStereo, 0).xy;
-    float2 uv = i.texcoord - motion;
+#ifdef _UseMotionVectors	
+	float2 motion = _CameraMotionVectorsTexture.SampleLevel(sampler_CameraMotionVectorsTexture, i.texcoordStereo, 0).xy;
+	float2 uv = i.texcoord - motion;
+#else
+	float2 uv = i.texcoord;
+#endif
 
     const float2 k = SSR_COLOR_NEIGHBORHOOD_SAMPLE_SPREAD * _MainTex_TexelSize.xy;
 
@@ -339,7 +346,11 @@ float4 FragReproject(VaryingsDefault i) : SV_Target
     float4 history = _History.SampleLevel(sampler_History, UnityStereoTransformScreenSpaceTex(uv), 0);
     history = clamp(history, minimum, maximum);
 
+#ifdef _UseMotionVectors	
     color.a = saturate(smoothstep(0.002 * _MainTex_TexelSize.z, 0.0035 * _MainTex_TexelSize.z, length(motion)));
+#else
+	color.a = saturate(smoothstep(0.002 * _MainTex_TexelSize.z, 0.0035 * _MainTex_TexelSize.z, 0));
+#endif
 
     float weight = clamp(lerp(SSR_FINAL_BLEND_STATIC_FACTOR, SSR_FINAL_BLEND_DYNAMIC_FACTOR,
         history.a * 100.0), SSR_FINAL_BLEND_DYNAMIC_FACTOR, SSR_FINAL_BLEND_STATIC_FACTOR);
