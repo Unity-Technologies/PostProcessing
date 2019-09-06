@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Potential fp16 overflow in Depth of Field that could cause NaN on some platforms.
 - Error with Screen-space Reflections when HDR is disabled.
+- Internal "copy" materials were recreated on every frame after the asset bundle-related fix from 2.1.7.
 
 ## [2.1.7] - 2019-06-12
 
