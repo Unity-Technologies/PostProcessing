@@ -146,12 +146,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
+            bool isSinglePassStereo = camera.stereoEnabled && RuntimeUtilities.isSinglePassStereoEnabled;
+
             // Base size
 #if UNITY_2017_3_OR_NEWER
-            m_ScaledWidths[0] = camera.scaledPixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            m_ScaledWidths[0] = camera.scaledPixelWidth * (isSinglePassStereo ? 2 : 1);
             m_ScaledHeights[0] = camera.scaledPixelHeight;
 #else
-            m_ScaledWidths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            m_ScaledWidths[0] = camera.pixelWidth * (isSinglePassStereo ? 2 : 1);
             m_ScaledHeights[0] = camera.pixelHeight;       
 #endif
             
@@ -170,10 +172,10 @@ namespace UnityEngine.Rendering.PostProcessing
             PushDownsampleCommands(cmd, camera, depthMap, isMSAA);
 
             float tanHalfFovH = CalculateTanHalfFovHeight(camera);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH, isMSAA);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH, isMSAA);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH, isMSAA);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA, isSinglePassStereo);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH, isMSAA, isSinglePassStereo);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH, isMSAA, isSinglePassStereo);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH, isMSAA, isSinglePassStereo);
 
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth4, ShaderIDs.Occlusion4, ShaderIDs.LowDepth3,   ShaderIDs.Occlusion3, ShaderIDs.Combined3, GetSize(MipLevel.L4), GetSize(MipLevel.L3), isMSAA);
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth3, ShaderIDs.Combined3,  ShaderIDs.LowDepth2,   ShaderIDs.Occlusion2, ShaderIDs.Combined2, GetSize(MipLevel.L3), GetSize(MipLevel.L2), isMSAA);
@@ -290,7 +292,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.DispatchCompute(cs, kernel, m_ScaledWidths[(int)MipLevel.L6], m_ScaledHeights[(int)MipLevel.L6], 1);
         }
 
-        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH, bool isMSAA)
+        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH, bool isMSAA, bool isSinglePassStereo)
         {
             // Here we compute multipliers that convert the center depth value into (the reciprocal
             // of) sphere thicknesses at each sample location. This assumes a maximum sample radius
@@ -309,7 +311,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // ScreenspaceDiameter: Diameter of sample sphere in pixel units
             // ScreenspaceDiameter / BufferWidth: Ratio of the screen width that the sphere actually covers
             float thicknessMultiplier = 2f * tanHalfFovH * kScreenspaceDiameter / sourceSize.x;
-            if (RuntimeUtilities.isSinglePassStereoEnabled)
+            if (isSinglePassStereo)
                 thicknessMultiplier *= 2f;
 
             // This will transform a depth value from [0, thickness] to [0, 1].
