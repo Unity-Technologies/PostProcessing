@@ -120,10 +120,6 @@ namespace UnityEngine.Rendering.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
-        // Some juggling needed to track down reference to the resource asset when loaded from asset
-        // bundle (guid conflict)
-        PostProcessResources m_OldResources;
-
         // UI states
 #if UNITY_2017_1_OR_NEWER
         [UnityEngine.Scripting.Preserve]
@@ -425,13 +421,10 @@ namespace UnityEngine.Rendering.PostProcessing
             // when ResetProjectionMatrix() is called and will break transparent rendering if TAA
             // is switched off and the FOV or any other camera property changes.
 
-            if (m_CurrentContext.IsTemporalAntialiasingActive())
-            {
 #if UNITY_2018_2_OR_NEWER
             if (!m_Camera.usePhysicalProperties)
 #endif
                 m_Camera.ResetProjectionMatrix();
-            }
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
 #if ENABLE_VR
@@ -605,7 +598,15 @@ namespace UnityEngine.Rendering.PostProcessing
             if (RequiresInitialBlit(m_Camera, context) || forceNanKillPass)
             {
                 tempRt = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
+                // https://github.com/Unity-Technologies/PostProcessing/issues/844
+                if (!context.stereoActive)
+                {
+                    context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
+                }
+                else
+                {
+                    context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB, FilterMode.Bilinear, context.width * 2, context.height);
+                }
                 m_LegacyCmdBuffer.BuiltinBlit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
                 if (!m_NaNKilled)
                     m_NaNKilled = stopNaNPropagation;
@@ -811,13 +812,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void SetupContext(PostProcessRenderContext context)
         {
-            // Juggling required when a scene with post processing is loaded from an asset bundle
-            // See #1148230
-            if (m_OldResources != m_Resources)
-            {
-                RuntimeUtilities.UpdateResources(m_Resources);
-                m_OldResources = m_Resources;
-            }
+            RuntimeUtilities.UpdateResources(m_Resources);
 
             m_IsRenderingInSceneView = context.camera.cameraType == CameraType.SceneView;
             context.isSceneView = m_IsRenderingInSceneView;
