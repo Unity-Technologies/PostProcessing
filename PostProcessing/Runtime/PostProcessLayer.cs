@@ -108,7 +108,8 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public Fog fog;
 
-        Dithering dithering;
+
+        internal Dithering dithering;
 
         /// <summary>
         /// The debug layer is reponsible for rendering debugging information on the screen. It will
@@ -274,7 +275,6 @@ namespace UnityEngine.Rendering.PostProcessing
             RuntimeUtilities.CreateIfNull(ref subpixelMorphologicalAntialiasing);
             RuntimeUtilities.CreateIfNull(ref fastApproximateAntialiasing);
             RuntimeUtilities.CreateIfNull(ref dithering);
-            RuntimeUtilities.CreateIfNull(ref fog);
             RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
@@ -515,6 +515,11 @@ namespace UnityEngine.Rendering.PostProcessing
             TextureLerper.instance.BeginFrame(context);
             UpdateVolumeSystem(context.camera, context.command);
 
+            // Fog effect settings
+            var fogBundle = GetBundle<Fog>();
+            var fogRenderer = fogBundle.CastRenderer<FogRenderer>();
+            fogRenderer.ApplySettings(context);
+
             // Lighting & opaque-only effects
             var aoBundle = GetBundle<AmbientOcclusion>();
             var aoSettings = aoBundle.CastSettings<AmbientOcclusion>();
@@ -549,7 +554,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 aoRenderer.Get().RenderAfterOpaque(context);
             }
 
-            bool isFogActive = fog.IsEnabledAndSupported(context);
+            bool isFogActive = fogRenderer.settings.IsEnabledAndSupported(context);
             bool hasCustomOpaqueOnlyEffects = HasOpaqueOnlyEffects(context);
             int opaqueOnlyEffects = 0;
             opaqueOnlyEffects += isScreenSpaceReflectionsActive ? 1 : 0;
@@ -585,7 +590,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (isFogActive)
                 {
-                    fog.Render(context);
+                    fogRenderer.Render(context);
                     opaqueOnlyEffects--;
                     UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
@@ -644,6 +649,13 @@ namespace UnityEngine.Rendering.PostProcessing
             // Unused in scriptable render pipelines
             if (RuntimeUtilities.scriptableRenderPipelineActive)
                 return;
+
+            // Restore original fog settings
+            var fogBundle = GetBundle<Fog>();
+            if (fogBundle != null)
+            {
+                fogBundle.CastRenderer<FogRenderer>().RestoreSettings();
+            }
 
             if (m_CurrentContext.IsTemporalAntialiasingActive())
             {
@@ -744,9 +756,6 @@ namespace UnityEngine.Rendering.PostProcessing
             // Special case for AA & lighting effects
             if (context.IsTemporalAntialiasingActive())
                 flags |= temporalAntialiasing.GetCameraFlags();
-
-            if (fog.IsEnabledAndSupported(context))
-                flags |= fog.GetCameraFlags();
 
             if (debugLayer.debugOverlay != DebugOverlay.None)
                 flags |= debugLayer.GetCameraFlags();

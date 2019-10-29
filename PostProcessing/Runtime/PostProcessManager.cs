@@ -306,10 +306,7 @@ namespace UnityEngine.Rendering.PostProcessing
             foreach (var settings in m_BaseSettings)
             {
                 var target = postProcessLayer.GetBundle(settings.GetType()).settings;
-                int count = settings.parameters.Count;
-
-                for (int i = 0; i < count; i++)
-                    target.parameters[i].SetValue(settings.parameters[i]);
+                target.Reset(settings);
             }
         }
 

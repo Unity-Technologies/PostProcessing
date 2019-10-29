@@ -9,27 +9,20 @@ namespace UnityEngine.Rendering.PostProcessing
     [UnityEngine.Scripting.Preserve]
 #endif
     [Serializable]
-    public sealed class Fog
+    [PostProcess(typeof(FogRenderer), "Unity/Fog")]
+    public sealed class Fog : PostProcessEffectSettings
     {
-        /// <summary>
-        /// If <c>true</c>, enables the internal deferred fog pass. Actual fog settings should be
-        /// set in the Lighting panel.
-        /// </summary>
-        [Tooltip("Enables the internal deferred fog pass. Actual fog settings should be set in the Lighting panel.")]
-        public bool enabled = true;
+        [Serializable]
+        public sealed class FogModeParameter : ParameterOverride<FogMode> { }
 
-        /// <summary>
-        /// Should the fog affect the skybox?
-        /// </summary>
-        [Tooltip("Mark true for the fog to ignore the skybox")]
-        public bool excludeSkybox = true;
+        public BoolParameter excludeSkybox = new BoolParameter { value = true };
+        public ColorParameter color = new ColorParameter { value = Color.gray };
+        public FloatParameter density = new FloatParameter { value = 0.01f };
+        public FloatParameter startDistance = new FloatParameter { value = 100 };
+        public FloatParameter endDistance = new FloatParameter { value = 200 };
+        public FogModeParameter mode = new FogModeParameter { value = FogMode.Exponential };
 
-        internal DepthTextureMode GetCameraFlags()
-        {
-            return DepthTextureMode.Depth;
-        }
-
-        internal bool IsEnabledAndSupported(PostProcessRenderContext context)
+        public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled
                 && RenderSettings.fog
@@ -39,7 +32,29 @@ namespace UnityEngine.Rendering.PostProcessing
                 && context.camera.actualRenderingPath == RenderingPath.DeferredShading;  // In forward fog is already done at shader level
         }
 
-        internal void Render(PostProcessRenderContext context)
+        public override void Reset(PostProcessEffectSettings defaultSettings)
+        {
+            base.Reset(defaultSettings);
+
+            enabled.value = RenderSettings.fog;
+            color.value = RenderSettings.fogColor;
+            density.value = RenderSettings.fogDensity;
+            startDistance.value = RenderSettings.fogStartDistance;
+            endDistance.value = RenderSettings.fogEndDistance;
+            mode.value = RenderSettings.fogMode;
+        }
+    }
+
+    public sealed class FogRenderer : PostProcessEffectRenderer<Fog>
+    {
+        Fog m_backupSettings = ScriptableObject.CreateInstance<Fog>();
+
+        public override DepthTextureMode GetCameraFlags()
+        {
+            return DepthTextureMode.Depth;
+        }
+
+        public override void Render(PostProcessRenderContext context)
         {
             var sheet = context.propertySheets.Get(context.resources.shaders.deferredFog);
             sheet.ClearKeywords();
@@ -49,7 +64,48 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetVector(ShaderIDs.FogParams, new Vector3(RenderSettings.fogDensity, RenderSettings.fogStartDistance, RenderSettings.fogEndDistance));
 
             var cmd = context.command;
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, excludeSkybox ? 1 : 0);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, settings.excludeSkybox ? 1 : 0);
+        }
+
+        static void Load(Fog settings)
+        {
+            RenderSettings.fog = settings.enabled;
+            RenderSettings.fogColor = settings.color;
+            RenderSettings.fogDensity = settings.density;
+            RenderSettings.fogStartDistance = settings.startDistance;
+            RenderSettings.fogEndDistance = settings.endDistance;
+            RenderSettings.fogMode = settings.mode;
+        }
+
+        static void Store(Fog result)
+        {
+            result.enabled.value = RenderSettings.fog;
+            result.color.value = RenderSettings.fogColor;
+            result.density.value = RenderSettings.fogDensity;
+            result.startDistance.value = RenderSettings.fogStartDistance;
+            result.endDistance.value = RenderSettings.fogEndDistance;
+            result.mode.value = RenderSettings.fogMode;
+        }
+
+        public void ApplySettings(PostProcessRenderContext context)
+        {
+            // Backup settings
+            Store(m_backupSettings);
+
+            // Apply settings
+            Load(settings);
+
+#if UNITY_EDITOR
+            if (context.isSceneView && !UnityEditor.SceneView.currentDrawingSceneView.sceneViewState.showFog)
+            {
+                RenderSettings.fog = false;
+            }
+#endif
+        }
+
+        public void RestoreSettings()
+        {
+            Load(m_backupSettings);
         }
     }
 }

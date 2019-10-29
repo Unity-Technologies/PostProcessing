@@ -30,9 +30,6 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedProperty m_FxaaFastMode;
         SerializedProperty m_FxaaKeepAlpha;
 
-        SerializedProperty m_FogEnabled;
-        SerializedProperty m_FogExcludeSkybox;
-
         SerializedProperty m_ShowToolkit;
         SerializedProperty m_ShowCustomSorter;
 
@@ -74,9 +71,6 @@ namespace UnityEditor.Rendering.PostProcessing
             m_FxaaFastMode = FindProperty(x => x.fastApproximateAntialiasing.fastMode);
             m_FxaaKeepAlpha = FindProperty(x => x.fastApproximateAntialiasing.keepAlpha);
 
-            m_FogEnabled = FindProperty(x => x.fog.enabled);
-            m_FogExcludeSkybox = FindProperty(x => x.fog.excludeSkybox);
-
             m_ShowToolkit = serializedObject.FindProperty("m_ShowToolkit");
             m_ShowCustomSorter = serializedObject.FindProperty("m_ShowCustomSorter");
 
@@ -94,8 +88,6 @@ namespace UnityEditor.Rendering.PostProcessing
         {
             serializedObject.Update();
 
-            var camera = m_Target.GetComponent<Camera>();
-
             #if !UNITY_2017_2_OR_NEWER
             if (RuntimeUtilities.isSinglePassStereoSelected)
                 EditorGUILayout.HelpBox("Unity 2017.2+ required for full Single-pass stereo rendering support.", MessageType.Warning);
@@ -103,7 +95,6 @@ namespace UnityEditor.Rendering.PostProcessing
 
             DoVolumeBlending();
             DoAntialiasing();
-            DoFog(camera);
 
             EditorGUILayout.PropertyField(m_StopNaNPropagation, EditorUtilities.GetContent("Stop NaN Propagation|Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will slightly affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms."));
 
@@ -197,27 +188,6 @@ namespace UnityEditor.Rendering.PostProcessing
 
                     if (!m_FxaaFastMode.boolValue && EditorUtilities.isTargetingConsolesOrMobiles)
                         EditorGUILayout.HelpBox("For performance reasons it is recommended to use Fast Mode on mobile and console platforms.", MessageType.Warning);
-                }
-            }
-            EditorGUI.indentLevel--;
-
-            EditorGUILayout.Space();
-        }
-
-        void DoFog(Camera camera)
-        {
-            if (camera == null || camera.actualRenderingPath != RenderingPath.DeferredShading)
-                return;
-
-            EditorGUILayout.LabelField(EditorUtilities.GetContent("Deferred Fog"), EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-            {
-                EditorGUILayout.PropertyField(m_FogEnabled);
-
-                if (m_FogEnabled.boolValue)
-                {
-                    EditorGUILayout.PropertyField(m_FogExcludeSkybox);
-                    EditorGUILayout.HelpBox("This adds fog compatibility to the deferred rendering path; actual fog settings should be set in the Lighting panel.", MessageType.Info);
                 }
             }
             EditorGUI.indentLevel--;
