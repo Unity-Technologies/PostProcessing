@@ -4,6 +4,14 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2019-11-05
+
+### Fixed
+- Fixed a compilation warning with Unity 2019.3 and 2020.1.
+
+### Changed
+- Following a change in the compilation pipeline, this version is only compatible with Unity 2017.2 and up.
+
 ## [2.1.9] - 2019-10-24
 
 ### Fixed

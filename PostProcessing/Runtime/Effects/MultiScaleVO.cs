@@ -5,7 +5,6 @@ namespace UnityEngine.Rendering.PostProcessing
     // Multi-scale volumetric obscurance
     // TODO: Fix VR support
 
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
     [Serializable]
     internal sealed class MultiScaleVO : IAmbientOcclusionMethod
@@ -537,42 +536,4 @@ namespace UnityEngine.Rendering.PostProcessing
             m_AmbientOnlyAO = null;
         }
     }
-#else
-    [Serializable]
-    public sealed class MultiScaleVO : IAmbientOcclusionMethod
-    {
-        public MultiScaleVO(AmbientOcclusion settings)
-        {
-        }
-
-        public void SetResources(PostProcessResources resources)
-        {
-        }
-
-        public DepthTextureMode GetCameraFlags()
-        {
-            return DepthTextureMode.None;
-        }
-
-        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
-        {
-        }
-
-        public void RenderAfterOpaque(PostProcessRenderContext context)
-        {
-        }
-
-        public void RenderAmbientOnly(PostProcessRenderContext context)
-        {
-        }
-
-        public void CompositeAmbientOnly(PostProcessRenderContext context)
-        {
-        }
-
-        public void Release()
-        {
-        }
-    }
-#endif
 }

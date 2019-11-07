@@ -5,10 +5,8 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-#if UNITY_2017_2_OR_NEWER && ENABLE_VR
+#if ENABLE_VR
     using XRSettings = UnityEngine.XR.XRSettings;
-#elif UNITY_5_6_OR_NEWER && ENABLE_VR
-    using XRSettings = UnityEngine.VR.VRSettings;
 #endif
 
     /// <summary>
@@ -125,15 +123,11 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_OldResources;
 
         // UI states
-#if UNITY_2017_1_OR_NEWER
         [UnityEngine.Scripting.Preserve]
-#endif
         [SerializeField]
         bool m_ShowToolkit;
 
-#if UNITY_2017_1_OR_NEWER
         [UnityEngine.Scripting.Preserve]
-#endif
         [SerializeField]
         bool m_ShowCustomSorter;
 

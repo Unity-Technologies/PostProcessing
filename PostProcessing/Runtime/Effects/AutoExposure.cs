@@ -86,10 +86,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 && context.resources.computeShaders.exposureHistogram;
         }
     }
-
-#if UNITY_2017_1_OR_NEWER
+    
     [UnityEngine.Scripting.Preserve]
-#endif
     internal sealed class AutoExposureRenderer : PostProcessEffectRenderer<AutoExposure>
     {
         const int k_NumEyes = 2;

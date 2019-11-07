@@ -3,9 +3,7 @@ using System;
 namespace UnityEngine.Rendering.PostProcessing
 {
     // Scalable ambient obscurance
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
-#endif
     [Serializable]
     internal sealed class ScalableAO : IAmbientOcclusionMethod
     {
