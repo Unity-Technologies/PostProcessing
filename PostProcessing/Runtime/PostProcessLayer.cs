@@ -453,6 +453,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
         {
+            // [ImageEffectUsesCommandBuffer] is currently broken, FIXME
+            return true;
+
+            /*
 #if UNITY_2019_1_OR_NEWER
             if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
                 return true;
@@ -463,6 +467,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #else
             return true;
 #endif
+            */
         }
 
         void UpdateSrcDstForOpaqueOnly(ref int src, ref int dst, PostProcessRenderContext context, RenderTargetIdentifier cameraTarget, int opaqueOnlyEffectsRemaining)
