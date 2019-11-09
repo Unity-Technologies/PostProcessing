@@ -84,12 +84,29 @@ namespace UnityEngine.Rendering.PostProcessing
             CleanBaseTypes();
 
             // Rebuild the base type map
+            /*
             var types = RuntimeUtilities.GetAllAssemblyTypes()
                             .Where(
                                 t => t.IsSubclassOf(typeof(PostProcessEffectSettings))
                                   && t.IsDefined(typeof(PostProcessAttribute), false)
                                   && !t.IsAbstract
                             );
+            */
+            var types = new[]
+            {
+                typeof(UnityEngine.Rendering.PostProcessing.AmbientOcclusion),
+                typeof(UnityEngine.Rendering.PostProcessing.AutoExposure),
+                typeof(UnityEngine.Rendering.PostProcessing.Bloom),
+                typeof(UnityEngine.Rendering.PostProcessing.ChromaticAberration),
+                typeof(UnityEngine.Rendering.PostProcessing.ColorGrading),
+                typeof(UnityEngine.Rendering.PostProcessing.DepthOfField),
+                typeof(UnityEngine.Rendering.PostProcessing.Grain),
+                typeof(UnityEngine.Rendering.PostProcessing.LensDistortion),
+                typeof(UnityEngine.Rendering.PostProcessing.MotionBlur),
+                typeof(UnityEngine.Rendering.PostProcessing.ScreenSpaceReflections),
+                typeof(UnityEngine.Rendering.PostProcessing.Vignette),
+                typeof(UnityEngine.Rendering.PostProcessing.Blur), // legacy shader
+            };
 
             foreach (var type in types)
             {
