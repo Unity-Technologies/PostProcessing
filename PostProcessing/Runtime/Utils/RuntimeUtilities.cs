@@ -772,13 +772,13 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 #endif
 
-                /// <summary>
-                /// Returns <c>true</c> if single-pass stereo rendering is active, <c>false</c> otherwise.
-                /// </summary>
-                /// <remarks>
-                /// This property only works in the editor.
-                /// </remarks>
-                // TODO: Check for SPSR support at runtime
+        /// <summary>
+        /// Returns <c>true</c> if single-pass stereo rendering is active, <c>false</c> otherwise.
+        /// </summary>
+        /// <remarks>
+        /// This property only works in the editor.
+        /// </remarks>
+        // TODO: Check for SPSR support at runtime
         public static bool isSinglePassStereoEnabled
         {
             get
