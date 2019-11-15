@@ -751,7 +751,7 @@ namespace UnityEngine.Rendering.PostProcessing
             get { return scriptableRenderPipelineActive || GraphicsSettings.GetShaderMode(BuiltinShaderType.DepthNormals) != BuiltinShaderMode.Disabled; }
         }
 
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
         /// <summary>
         /// Returns <c>true</c> if single-pass stereo rendering is selected, <c>false</c> otherwise.
         /// </summary>
