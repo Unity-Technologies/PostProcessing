@@ -762,8 +762,12 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-                return PlayerSettings.virtualRealitySupported
+#if ENABLE_VR && !UNITY_2020_1_OR_NEWER
+                return UnityEditorInternal.VR.VREditor.GetVREnabledOnTargetGroup(BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget))
                     && PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+#else
+                return false;
+#endif
             }
         }
 #endif
@@ -796,8 +800,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-#if UNITY_EDITOR
-                return UnityEditor.PlayerSettings.virtualRealitySupported;
+#if ENABLE_VR && UNITY_EDITOR && !UNITY_2020_1_OR_NEWER
+                return UnityEditorInternal.VR.VREditor.GetVREnabledOnTargetGroup(BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget));
 #elif UNITY_XBOXONE || !ENABLE_VR
                 return false;
 #else
