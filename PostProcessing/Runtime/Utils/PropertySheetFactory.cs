@@ -54,7 +54,7 @@ namespace UnityEngine.Rendering.PostProcessing
             PropertySheet sheet;
 
             if (shader == null)
-                throw new ArgumentException(string.Format("Invalid shader ({0})", shader));
+                throw new ArgumentException("Shader cannot be null.");
 
             if (m_Sheets.TryGetValue(shader, out sheet))
                 return sheet;
