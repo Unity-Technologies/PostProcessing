@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Fixed deprecated XR API usage.
+- Fix for XR multipass and legacy built-in renderer (case 1197855, 1152584)
 
 ## [2.2.1] - 2019-11-07
 
