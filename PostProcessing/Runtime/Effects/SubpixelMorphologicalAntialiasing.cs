@@ -5,9 +5,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <summary>
     /// This class holds settings for the Subpixel Morphological Anti-aliasing (SMAA) effect.
     /// </summary>
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
-#endif
     [Serializable]
     public sealed class SubpixelMorphologicalAntialiasing
     {

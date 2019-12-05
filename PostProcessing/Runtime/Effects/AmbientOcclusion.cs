@@ -173,7 +173,6 @@ namespace UnityEngine.Rendering.PostProcessing
             }
             else if (mode.value == AmbientOcclusionMode.MultiScaleVolumetricObscurance)
             {
-#if UNITY_2017_1_OR_NEWER
                 if (context != null)
                 {
                     state &= context.resources.shaders.multiScaleAO
@@ -189,9 +188,6 @@ namespace UnityEngine.Rendering.PostProcessing
                       && RenderTextureFormat.RFloat.IsSupported()
                       && RenderTextureFormat.RHalf.IsSupported()
                       && RenderTextureFormat.R8.IsSupported();
-#else
-                state = false;
-#endif
             }
 
             return state;
@@ -206,10 +202,8 @@ namespace UnityEngine.Rendering.PostProcessing
         void CompositeAmbientOnly(PostProcessRenderContext context);
         void Release();
     }
-
-#if UNITY_2017_1_OR_NEWER
+    
     [UnityEngine.Scripting.Preserve]
-#endif
     internal sealed class AmbientOcclusionRenderer : PostProcessEffectRenderer<AmbientOcclusion>
     {
         IAmbientOcclusionMethod[] m_Methods;

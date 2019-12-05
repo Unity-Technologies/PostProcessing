@@ -2,17 +2,9 @@
 #if ((UNITY_XBOXONE || UNITY_SWITCH || UNITY_PSP2) && !UNITY_2018_3_OR_NEWER)  && !UNITY_EDITOR
 using System;
 
-#if UNITY_2017_2_OR_NEWER
 namespace UnityEngine.XR
-#else
-namespace UnityEngine.VR
-#endif
 {
-#if UNITY_2017_2_OR_NEWER
     public static class XRSettings
-#elif UNITY_5_6_OR_NEWER
-    public static class VRSettings
-#endif
     {
         public static bool enabled { get; set; }
         public static bool isDeviceActive { get; private set; }

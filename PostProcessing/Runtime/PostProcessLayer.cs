@@ -5,10 +5,8 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-#if UNITY_2017_2_OR_NEWER && ENABLE_VR
+#if ENABLE_VR
     using XRSettings = UnityEngine.XR.XRSettings;
-#elif UNITY_5_6_OR_NEWER && ENABLE_VR
-    using XRSettings = UnityEngine.VR.VRSettings;
 #endif
 
     /// <summary>
@@ -121,15 +119,11 @@ namespace UnityEngine.Rendering.PostProcessing
         PostProcessResources m_Resources;
 
         // UI states
-#if UNITY_2017_1_OR_NEWER
         [UnityEngine.Scripting.Preserve]
-#endif
         [SerializeField]
         bool m_ShowToolkit;
 
-#if UNITY_2017_1_OR_NEWER
         [UnityEngine.Scripting.Preserve]
-#endif
         [SerializeField]
         bool m_ShowCustomSorter;
 
@@ -456,6 +450,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool RequiresInitialBlit(Camera camera, PostProcessRenderContext context)
         {
+            // [ImageEffectUsesCommandBuffer] is currently broken, FIXME
+            return true;
+
+            /*
 #if UNITY_2019_1_OR_NEWER
             if (camera.allowMSAA) // this shouldn't be necessary, but until re-tested on older Unity versions just do the blits
                 return true;
@@ -466,6 +464,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #else
             return true;
 #endif
+            */
         }
 
         void UpdateSrcDstForOpaqueOnly(ref int src, ref int dst, PostProcessRenderContext context, RenderTargetIdentifier cameraTarget, int opaqueOnlyEffectsRemaining)

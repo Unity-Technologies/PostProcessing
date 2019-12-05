@@ -38,14 +38,6 @@ namespace UnityEditor.Rendering.PostProcessing
                 return;
             }
 
-#if !UNITY_2017_1_OR_NEWER
-            if (aoMode == (int)AmbientOcclusionMode.MultiScaleVolumetricObscurance)
-            {
-                EditorGUILayout.HelpBox("Multi-scale volumetric obscurance requires Unity 2017.1 or more.", MessageType.Warning);
-                return;
-            }
-#endif
-
             PropertyField(m_Intensity);
 
             if (aoMode == (int)AmbientOcclusionMode.ScalableAmbientObscurance)

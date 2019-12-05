@@ -2,10 +2,8 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-#if UNITY_2017_2_OR_NEWER && ENABLE_VR
+#if ENABLE_VR
     using XRSettings = UnityEngine.XR.XRSettings;
-#elif UNITY_5_6_OR_NEWER && ENABLE_VR
-    using XRSettings = UnityEngine.VR.VRSettings;
 #endif
 
     /// <summary>
@@ -31,7 +29,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #if !UNITY_SWITCH && ENABLE_VR
                 if (m_Camera.stereoEnabled)
                 {
-#if UNITY_2017_2_OR_NEWER
                     var xrDesc = XRSettings.eyeTextureDesc;
                     stereoRenderingMode = StereoRenderingMode.SinglePass;
 
@@ -60,15 +57,6 @@ namespace UnityEngine.Rendering.PostProcessing
                     width = xrDesc.width;
                     height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
-#else
-                    // Single-pass is only supported with 2017.2+ because
-                    // that is when XRSettings.eyeTextureDesc is available.
-                    // Without it, we don't have a robust method of determining
-                    // if we are in single-pass.  Users can just double the width
-                    // here if they KNOW they are using single-pass.
-                    width = XRSettings.eyeTextureWidth;
-                    height = XRSettings.eyeTextureHeight;
-#endif
 
                     if (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         xrActiveEye = (int)Camera.StereoscopicEye.Right;
@@ -88,11 +76,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     width = m_Camera.pixelWidth;
                     height = m_Camera.pixelHeight;
-
-#if UNITY_2017_2_OR_NEWER
                     m_sourceDescriptor.width = width;
                     m_sourceDescriptor.height = height;
-#endif
                     screenWidth = width;
                     screenHeight = height;
                     stereoActive = false;
@@ -244,10 +229,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera = null;
             width = 0;
             height = 0;
-
-#if UNITY_2017_2_OR_NEWER
             m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
-#endif
 #if UNITY_2018_2_OR_NEWER
             physicalCamera = false;
 #endif
@@ -320,7 +302,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // TODO: Change w/h name to texture w/h in order to make
         // size usages explicit
-#if UNITY_2017_2_OR_NEWER
         RenderTextureDescriptor m_sourceDescriptor;
         internal RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
@@ -358,7 +339,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             return modifiedDesc;
         }
-#endif
 
         /// <summary>
         /// Grabs a temporary render target with the current display size.
@@ -375,7 +355,6 @@ namespace UnityEngine.Rendering.PostProcessing
                                             int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default,
                                             FilterMode filter = FilterMode.Bilinear, int widthOverride = 0, int heightOverride = 0)
         {
-#if UNITY_2017_2_OR_NEWER
             var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
             if (widthOverride > 0)
                 desc.width = widthOverride;
@@ -393,18 +372,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #else
             cmd.GetTemporaryRT(nameID, desc.width, desc.height, desc.depthBufferBits, filter, desc.colorFormat, readWrite, desc.msaaSamples, desc.enableRandomWrite, desc.memoryless);
 #endif
-#else
-            int actualWidth = width;
-            int actualHeight = height;
-            if (widthOverride > 0)
-                actualWidth = widthOverride;
-            if (heightOverride > 0)
-                actualHeight = heightOverride;
-
-            cmd.GetTemporaryRT(nameID, actualWidth, actualHeight, depthBufferBits, filter, colorFormat, readWrite);
-            // TODO: How to handle MSAA for XR in older versions?  Query cam?
-            // TODO: Pass in vrUsage into the args
-#endif
         }
 
         /// <summary>
@@ -419,7 +386,6 @@ namespace UnityEngine.Rendering.PostProcessing
         public RenderTexture GetScreenSpaceTemporaryRT(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default,
                                                         RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default, int widthOverride = 0, int heightOverride = 0)
         {
-#if UNITY_2017_2_OR_NEWER
             var desc = GetDescriptor(depthBufferBits, colorFormat, readWrite);
             if (widthOverride > 0)
                 desc.width = widthOverride;
@@ -427,16 +393,6 @@ namespace UnityEngine.Rendering.PostProcessing
                 desc.height = heightOverride;
 
             return RenderTexture.GetTemporary(desc);
-#else
-            int actualWidth = width;
-            int actualHeight = height;
-            if (widthOverride > 0)
-                actualWidth = widthOverride;
-            if (heightOverride > 0)
-                actualHeight = heightOverride;
-
-            return RenderTexture.GetTemporary(actualWidth, actualHeight, depthBufferBits, colorFormat, readWrite);
-#endif
         }
     }
 }
