@@ -120,6 +120,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // Some juggling needed to track down reference to the resource asset when loaded from asset
         // bundle (guid conflict)
+        [NonSerialized]
         PostProcessResources m_OldResources;
 
         // UI states
