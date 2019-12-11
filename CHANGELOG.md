@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Fix for XR multipass and legacy built-in renderer (case 1197855, 1152584)
+- Optimized type lookup on domain reload in the editor (case 1203325)
 
 ## [2.2.2] - 2019-11-18
 

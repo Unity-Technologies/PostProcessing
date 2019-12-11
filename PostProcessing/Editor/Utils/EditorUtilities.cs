@@ -80,10 +80,9 @@ namespace UnityEditor.Rendering.PostProcessing
             s_AttributeDecorators.Clear();
 
             // Look for all the valid attribute decorators
-            var types = RuntimeUtilities.GetAllAssemblyTypes()
+            var types = RuntimeUtilities.GetAllTypesDerivedFrom<AttributeDecorator>()
                             .Where(
-                                t => t.IsSubclassOf(typeof(AttributeDecorator))
-                                  && t.IsDefined(typeof(DecoratorAttribute), false)
+                                t => t.IsDefined(typeof(DecoratorAttribute), false)
                                   && !t.IsAbstract
                             );
 
