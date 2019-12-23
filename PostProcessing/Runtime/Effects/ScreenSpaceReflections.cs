@@ -97,12 +97,19 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Fades reflections close to the screen edges.")]
         public FloatParameter vignette = new FloatParameter { value = 0.5f };
 
+
+        /// <summary>
+        /// Enables the use of motion vectors to slightly improve visual quality.
+        /// </summary>
+        [Tooltip("Enables the use of motion vectors to slightly improve visual quality.")]
+        public BoolParameter useMotionVectors = new BoolParameter { value = false };
+
         /// <inheritdoc />
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled
                 && context.camera.actualRenderingPath == RenderingPath.DeferredShading
-                && SystemInfo.supportsMotionVectors
+                && (!useMotionVectors.value || SystemInfo.supportsMotionVectors)
                 && SystemInfo.supportsComputeShaders
                 && SystemInfo.copyTextureSupport > CopyTextureSupport.None
                 && context.resources.shaders.screenSpaceReflections
@@ -146,7 +153,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override DepthTextureMode GetCameraFlags()
         {
-            return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+            if(settings.useMotionVectors.value)
+            {
+                return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+            }
+            else
+            {
+                return DepthTextureMode.Depth;
+            }
         }
 
         internal void CheckRT(ref RenderTexture rt, int width, int height, FilterMode filterMode, bool useMipMap)
@@ -205,6 +219,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
+
+            if (settings.useMotionVectors.value)
+            {
+                sheet.EnableKeyword("_UseMotionVectors");
+            }
+            else
+            {
+                sheet.DisableKeyword("_UseMotionVectors");
+            }
+
             sheet.properties.SetTexture(ShaderIDs.Noise, noiseTex);
 
             var screenSpaceProjectionMatrix = new Matrix4x4();
