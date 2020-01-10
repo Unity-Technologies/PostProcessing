@@ -264,5 +264,16 @@ namespace UnityEngine.Rendering.PostProcessing
         /// All the compute shaders used by post-processing.
         /// </summary>
         public ComputeShaders computeShaders;
+
+#if UNITY_EDITOR
+        public delegate void ChangeHandler();
+        public ChangeHandler changeHandler;
+
+        void OnValidate()
+        {
+            if (changeHandler != null)
+                changeHandler();
+        }
+#endif
     }
 }
