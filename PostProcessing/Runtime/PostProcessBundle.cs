@@ -3,9 +3,20 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
+    /// <summary>
+    /// A tuple-like class that holds reference to an effect settings and its associated attribute
+    /// and renderer.
+    /// </summary>
     public sealed class PostProcessBundle
     {
+        /// <summary>
+        /// The attribute set on the effect.
+        /// </summary>
         public PostProcessAttribute attribute { get; private set; }
+
+        /// <summary>
+        /// The settings for the effect.
+        /// </summary>
         public PostProcessEffectSettings settings { get; private set; }
 
         internal PostProcessEffectRenderer renderer

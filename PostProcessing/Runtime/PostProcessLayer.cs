@@ -141,15 +141,23 @@ namespace UnityEngine.Rendering.PostProcessing
         // Pre-ordered custom user effects
         // These are automatically populated and made to work properly with the serialization
         // system AND the editor. Modify at your own risk.
+
+        /// <summary>
+        /// A wrapper around bundles to allow their serialization in lists.
+        /// </summary>
         [Serializable]
         public sealed class SerializedBundleRef
         {
-            // We can't serialize Type so use assemblyQualifiedName instead, we only need this at
-            // init time anyway so it's fine
-            public string assemblyQualifiedName;
+            /// <summary>
+            /// The assembly qualified name used for serialization as we can't serialize the types
+            /// themselves.
+            /// </summary>
+            public string assemblyQualifiedName; // We only need this at init time anyway so it's fine
 
-            // Not serialized, is set/reset when deserialization kicks in
-            public PostProcessBundle bundle;
+            /// <summary>
+            /// A reference to the bundle itself.
+            /// </summary>
+            public PostProcessBundle bundle; // Not serialized, is set/reset when deserialization kicks in
         }
 
         [SerializeField]
@@ -161,14 +169,24 @@ namespace UnityEngine.Rendering.PostProcessing
         [SerializeField]
         List<SerializedBundleRef> m_AfterStackBundles;
 
+        /// <summary>
+        /// Pre-ordered effects mapped to available injection points.
+        /// </summary>
         public Dictionary<PostProcessEvent, List<SerializedBundleRef>> sortedBundles { get; private set; }
 
+        /// <summary>
+        /// The current flags set on the camera for the built-in render pipeline.
+        /// </summary>
         public DepthTextureMode cameraDepthFlags { get; private set; }
 
         // We need to keep track of bundle initialization because for some obscure reason, on
         // assembly reload a MonoBehavior's Editor OnEnable will be called BEFORE the MonoBehavior's
         // own OnEnable... So we'll use it to pre-init bundles if the layer inspector is opened and
         // the component hasn't been enabled yet.
+
+        /// <summary>
+        /// Returns <c>true</c> if the bundles have been initialized properly.
+        /// </summary>
         public bool haveBundlesBeenInited { get; private set; }
 
         // Settings/Renderer bundles mapped to settings types
@@ -273,6 +291,9 @@ namespace UnityEngine.Rendering.PostProcessing
             RuntimeUtilities.CreateIfNull(ref debugLayer);
         }
 
+        /// <summary>
+        /// Initializes all the effect bundles. This is called automatically by the framework.
+        /// </summary>
         public void InitBundles()
         {
             if (haveBundlesBeenInited)
@@ -663,12 +684,22 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        /// <summary>
+        /// Grabs the bundle for the given effect type.
+        /// </summary>
+        /// <typeparam name="T">An effect type.</typeparam>
+        /// <returns>The bundle for the effect of type <typeparam name="T"></typeparam></returns>
         public PostProcessBundle GetBundle<T>()
             where T : PostProcessEffectSettings
         {
             return GetBundle(typeof(T));
         }
 
+        /// <summary>
+        /// Grabs the bundle for the given effect type.
+        /// </summary>
+        /// <param name="settingsType">An effect type.</param>
+        /// <returns>The bundle for the effect of type <typeparam name="type"></typeparam></returns>
         public PostProcessBundle GetBundle(Type settingsType)
         {
             Assert.IsTrue(m_Bundles.ContainsKey(settingsType), "Invalid type");

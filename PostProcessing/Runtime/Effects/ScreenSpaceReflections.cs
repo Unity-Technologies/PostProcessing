@@ -8,7 +8,45 @@ namespace UnityEngine.Rendering.PostProcessing
     /// </summary>
     public enum ScreenSpaceReflectionPreset
     {
-        Lower, Low, Medium, High, Higher, Ultra, Overkill, Custom
+        /// <summary>
+        /// Lowest quality.
+        /// </summary>
+        Lower,
+
+        /// <summary>
+        /// Low quality.
+        /// </summary>
+        Low,
+
+        /// <summary>
+        /// Medium quality.
+        /// </summary>
+        Medium,
+
+        /// <summary>
+        /// High quality.
+        /// </summary>
+        High,
+
+        /// <summary>
+        /// Higher quality.
+        /// </summary>
+        Higher,
+
+        /// <summary>
+        /// Ultra quality.
+        /// </summary>
+        Ultra,
+
+        /// <summary>
+        /// Overkill (as in: don't use) quality.
+        /// </summary>
+        Overkill,
+
+        /// <summary>
+        /// Custom, tweakable quality settings.
+        /// </summary>
+        Custom
     }
 
     /// <summary>
@@ -97,7 +135,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Fades reflections close to the screen edges.")]
         public FloatParameter vignette = new FloatParameter { value = 0.5f };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled

@@ -42,9 +42,14 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 0.99f)]
         public float motionBlending = 0.85f;
 
-        // For custom jittered matrices - use at your own risks
+        /// <summary>
+        /// Sets a custom function that will be called to generate the jittered projection matrice.
+        /// </summary>
         public Func<Camera, Vector2, Matrix4x4> jitteredMatrixFunc;
 
+        /// <summary>
+        /// The current jitter amount
+        /// </summary>
         public Vector2 jitter { get; private set; }
 
         enum Pass
@@ -57,6 +62,10 @@ namespace UnityEngine.Rendering.PostProcessing
         bool m_ResetHistory = true;
 
         const int k_SampleCount = 8;
+
+        /// <summary>
+        /// The current sample index.
+        /// </summary>
         public int sampleIndex { get; private set; }
 
         // Ping-pong between two history textures as we can't read & write the same target in the
@@ -67,6 +76,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         readonly int[] m_HistoryPingPong = new int [k_NumEyes];
 
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public bool IsSupported()
         {
             return SystemInfo.supportedRenderTargetCount >= 2
@@ -102,6 +115,11 @@ namespace UnityEngine.Rendering.PostProcessing
             return offset;
         }
 
+        /// <summary>
+        /// Generates a jittered projection matrix for a given camera.
+        /// </summary>
+        /// <param name="camera">The camera to get a jittered projection matrix for.</param>
+        /// <returns>A jittered projection matrix.</returns>
         public Matrix4x4 GetJitteredProjectionMatrix(Camera camera)
         {
             Matrix4x4 cameraProj;
@@ -123,6 +141,10 @@ namespace UnityEngine.Rendering.PostProcessing
             return cameraProj;
         }
 
+        /// <summary>
+        /// Prepares the jittered and non jittered projection matrices.
+        /// </summary>
+        /// <param name="context">The current post-processing context.</param>
         public void ConfigureJitteredProjectionMatrix(PostProcessRenderContext context)
         {
             var camera = context.camera;
@@ -131,6 +153,10 @@ namespace UnityEngine.Rendering.PostProcessing
             camera.useJitteredProjectionMatrixForTransparentRendering = false;
         }
 
+        /// <summary>
+        /// Prepares the jittered and non jittered projection matrices for stereo rendering.
+        /// </summary>
+        /// <param name="context">The current post-processing context.</param>
         // TODO: We'll probably need to isolate most of this for SRPs
         public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
         {

@@ -28,8 +28,12 @@ namespace UnityEngine.Rendering.PostProcessing
         [FormerlySerializedAs("mobileOptimized")]
         [Tooltip("Boost performances by lowering the effect quality. This settings is meant to be used on mobile and other low-end platforms but can also provide a nice performance boost on desktops and consoles.")]
         public BoolParameter fastMode = new BoolParameter { value = false };
-        
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value

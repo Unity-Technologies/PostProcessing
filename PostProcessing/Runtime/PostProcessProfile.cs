@@ -15,7 +15,10 @@ namespace UnityEngine.Rendering.PostProcessing
         [Tooltip("A list of all settings currently stored in this profile.")]
         public List<PostProcessEffectSettings> settings = new List<PostProcessEffectSettings>();
 
-        // Editor only, doesn't have any use outside of it
+        /// <summary>
+        /// Sets to <c>true</c> if the content of the profile has changed. This is only really used
+        /// in the editor to handle inspector refreshes.
+        /// </summary>
         [NonSerialized]
         public bool isDirty = true;
 

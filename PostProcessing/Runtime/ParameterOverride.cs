@@ -154,8 +154,11 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             value = parameter.GetValue<T>();
         }
-        
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Returns the computed hash code for this parameter.
+        /// </summary>
+        /// <returns>A computed hash code</returns>
         public override int GetHash()
         {
             unchecked
@@ -171,6 +174,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="ParameterOverride{T}"/> and its value type.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A value of type <typeparam name="T">.</typeparam></returns>
         public static implicit operator T(ParameterOverride<T> prop)
         {
             return prop.value;
@@ -188,7 +192,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class FloatParameter : ParameterOverride<float>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(float from, float to, float t)
         {
             value = from + (to - from) * t;
@@ -205,7 +219,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class IntParameter : ParameterOverride<int>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(int from, int to, float t)
         {
             // Int snapping interpolation. Don't use this for enums as they don't necessarily have
@@ -230,7 +254,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class ColorParameter : ParameterOverride<Color>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Color from, Color to, float t)
         {
             // Lerping color values is a sensitive subject... We looked into lerping colors using
@@ -247,6 +281,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="ColorParameter"/> and a <see cref="Vector4"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector4</c>.</returns>
         public static implicit operator Vector4(ColorParameter prop)
         {
             return prop.value;
@@ -263,7 +298,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class Vector2Parameter : ParameterOverride<Vector2>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Vector2 from, Vector2 to, float t)
         {
             value.x = from.x + (to.x - from.x) * t;
@@ -274,6 +319,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector2Parameter"/> and a <see cref="Vector3"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector3</c>.</returns>
         public static implicit operator Vector3(Vector2Parameter prop)
         {
             return prop.value;
@@ -283,6 +329,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector2Parameter"/> and a <see cref="Vector4"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector4</c>.</returns>
         public static implicit operator Vector4(Vector2Parameter prop)
         {
             return prop.value;
@@ -299,7 +346,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class Vector3Parameter : ParameterOverride<Vector3>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Vector3 from, Vector3 to, float t)
         {
             value.x = from.x + (to.x - from.x) * t;
@@ -311,6 +368,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector3Parameter"/> and a <see cref="Vector2"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector2</c>.</returns>
         public static implicit operator Vector2(Vector3Parameter prop)
         {
             return prop.value;
@@ -320,6 +378,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector3Parameter"/> and a <see cref="Vector4"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector4</c>.</returns>
         public static implicit operator Vector4(Vector3Parameter prop)
         {
             return prop.value;
@@ -336,7 +395,17 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class Vector4Parameter : ParameterOverride<Vector4>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Vector4 from, Vector4 to, float t)
         {
             value.x = from.x + (to.x - from.x) * t;
@@ -349,6 +418,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector4Parameter"/> and a <see cref="Vector2"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector2</c>.</returns>
         public static implicit operator Vector2(Vector4Parameter prop)
         {
             return prop.value;
@@ -358,6 +428,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Implicit conversion between <see cref="Vector4Parameter"/> and a <see cref="Vector3"/>.
         /// </summary>
         /// <param name="prop">The parameter to implicitly cast</param>
+        /// <returns>A <c>Vector3</c>.</returns>
         public static implicit operator Vector3(Vector4Parameter prop)
         {
             return prop.value;
@@ -374,7 +445,14 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class SplineParameter : ParameterOverride<Spline>
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// This method is called right after the parent <see cref="PostProcessEffectSettings"/> has
+        /// been initialized. This is used in case you need to access fields or properties that
+        /// can't be accessed in the constructor of a <see cref="ScriptableObject"/>
+        /// (<c>ParameterOverride</c> objects are generally declared and initialized in a
+        /// <see cref="PostProcessEffectSettings"/>).
+        /// </summary>
+        /// <seealso cref="OnDisable"/>
         protected internal override void OnEnable()
         {
             if (value != null)
@@ -388,8 +466,18 @@ namespace UnityEngine.Rendering.PostProcessing
             if (value != null)
                 value.Cache(Time.renderedFrameCount);
         }
-        
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Spline from, Spline to, float t)
         {
             if (from == null || to == null)
@@ -451,9 +539,20 @@ namespace UnityEngine.Rendering.PostProcessing
     [Serializable]
     public sealed class TextureParameter : ParameterOverride<Texture>
     {
+        /// <summary>The default state &amp; type for the texture.</summary>
         public TextureParameterDefault defaultState = TextureParameterDefault.Black;
-        
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Interpolates between two values given an interpolation factor <paramref name="t"/>.
+        /// </summary>
+        /// <param name="from">The value to interpolate from</param>
+        /// <param name="to">The value to interpolate to</param>
+        /// <param name="t">An interpolation factor (generally in range <c>[0,1]</c>)</param>
+        /// <remarks>
+        /// By default this method does a "snap" interpolation, meaning it will return the value
+        /// <paramref name="to"/> if <paramref name="t"/> is higher than 0, <paramref name="from"/>
+        /// otherwise.
+        /// </remarks>
         public override void Interp(Texture from, Texture to, float t)
         {
             // Both are null, do nothing
