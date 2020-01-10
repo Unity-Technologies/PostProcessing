@@ -266,7 +266,14 @@ namespace UnityEngine.Rendering.PostProcessing
         public ComputeShaders computeShaders;
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// A delegate used to track resource changes.
+        /// </summary>
         public delegate void ChangeHandler();
+
+        /// <summary>
+        /// Set this callback to be notified of resource changes.
+        /// </summary>
         public ChangeHandler changeHandler;
 
         void OnValidate()
