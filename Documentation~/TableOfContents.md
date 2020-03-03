@@ -1,7 +1,7 @@
 * [Post-Processing Stack v2](index)
 * [Requirements](requirements)
 * [Installation](Installation)
-* [Quick-start](Quick-Start)
+* [Getting started](Quick-Start)
 * Effects
   * [Ambient Occlusion](Ambient-Occlusion)
   * [Anti-aliasing](Anti-aliasing)
@@ -16,7 +16,7 @@
   * [Motion Blur](Motion-Blur)
   * [Screen Space Reflections](Screen-Space-Reflections)
   * [Vignette](Vignette)
-* Scripting
-    * [Manipulating the Stack](Manipulating-the-Stack)
-    * [Writing Custom Effects](Writing-Custom-Effects)
-* [Troubleshooting](Troubleshooting)
+* Scripting reference
+    * [Manipulating effects](Manipulating-the-Stack)
+    * [Writing custom effects](Writing-Custom-Effects)
+* [Known issues](known-issues)

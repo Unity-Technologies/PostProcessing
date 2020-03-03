@@ -4,6 +4,8 @@
 
 You can use post-processing effects to simulate physical camera and film properties.
 
+For information about requirements and compatibility, see section [Requirements](requirements.html).
+
 The images below demonstrate a scene with and without post-processing.
 
 ![](images/home-before.png)

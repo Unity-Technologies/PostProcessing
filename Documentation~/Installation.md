@@ -1,16 +1,12 @@
 # Installation
 
-## Package
-
-To install post-processing or update to the latest version, use the Package Manager that comes with Unity 2018.1.
-
-> **Note:** if you've installed one of the [scriptable render pipelines](https://docs.unity3d.com/Manual/ScriptableRenderPipeline.html) in your project then the post-processing package will already be installed.
+Use the Package Manager to install the package or to update to the latest version.
 
 Go to `Window > Package Manager` and switch the view from `In Project` to `All`. Select `Postprocessing` in the list. In the right panel you'll find information about the package and a button to install or update to the latest available version for the version of Unity you are running.
 
-## Sources
+## Downloads
 
-You can also use the bleeding edge version of post-processing, but only packaged versions are officially supported. If you're not familiar with Git, download [Github Desktop](https://desktop.github.com/) as it's easy to use and integrates well with Github.
+You can also use the bleeding edge version of post-processing, but only packaged versions are officially supported. If you're not familiar with Git, download [Github Desktop](https://desktop.github.com/) as it's easy to use and integrates well with GitHub.
 
 Before installing, make sure you don't already have the `Postprocessing` package installed or it will conflict with a source installation. If you have the package already installed, you can remove it using the Package Manager (`Window > Package Manager`).
 

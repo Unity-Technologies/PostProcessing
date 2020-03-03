@@ -1,4 +1,4 @@
-# Quick-start
+# Getting started
 > **Note:** if you created a project using one of the template that includes Post-processing then you don't need to go through most of these steps although we recommend you read them to understand how everything works.
 
 ## Post-process Layer
