@@ -1,4 +1,4 @@
-## Home
+## Post-Processing Stack v2 overview
 
 **Post-processing** is the process of applying full-screen filters and effects to a camera’s image buffer before it is displayed to screen. It can drastically improve the visuals of your product with little setup time.
 

@@ -1,4 +1,5 @@
-* [Home](index)
+* [Post-Processing Stack v2](index)
+* [Requirements](requirements)
 * [Installation](Installation)
 * [Quick-start](Quick-Start)
 * Effects
