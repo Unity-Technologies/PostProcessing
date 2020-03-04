@@ -16,7 +16,7 @@
   * [Motion Blur](Motion-Blur)
   * [Screen Space Reflections](Screen-Space-Reflections)
   * [Vignette](Vignette)
-* Scripting reference
+* Scripting
     * [Manipulating effects](Manipulating-the-Stack)
     * [Writing custom effects](Writing-Custom-Effects)
 * [Known issues](known-issues)
