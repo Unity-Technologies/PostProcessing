@@ -1,4 +1,4 @@
-# Manipulating the Stack
+# Manipulating effects
 
 ## Quick Volumes
 
