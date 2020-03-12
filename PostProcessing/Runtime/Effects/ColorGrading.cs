@@ -409,6 +409,31 @@ namespace UnityEngine.Rendering.PostProcessing
         const int k_Lut2DSize = 32;
         const int k_Lut3DSize = 33;
 
+        int m_NoKernel = -1;
+        int m_NeutralKernel = -1;
+        int m_AcesKernel = -1;
+        int m_CustomKernel = -1;
+
+        readonly int m_OutputPropID = Shader.PropertyToID("_Output");
+        readonly int m_SizePropID = Shader.PropertyToID("_Size");
+        readonly int m_ColorBalancePropID = Shader.PropertyToID("_ColorBalance");
+        readonly int m_ColorFilterPropID = Shader.PropertyToID("_ColorFilter");
+        readonly int m_HueSatConPropID = Shader.PropertyToID("_HueSatCon");
+        readonly int m_ChannelMixerRedPropID = Shader.PropertyToID("_ChannelMixerRed");
+        readonly int m_ChannelMixerGreenPropID = Shader.PropertyToID("_ChannelMixerGreen");
+        readonly int m_ChannelMixerBluePropID = Shader.PropertyToID("_ChannelMixerBlue");
+        readonly int m_LiftPropID = Shader.PropertyToID("_Lift");
+        readonly int m_InvGammaPropID = Shader.PropertyToID("_InvGamma");
+        readonly int m_GainPropID = Shader.PropertyToID("_Gain");
+        readonly int m_CurvesPropID = Shader.PropertyToID("_Curves");
+        readonly int m_CustomToneCurvePropID = Shader.PropertyToID("_CustomToneCurve");
+        readonly int m_ToeSegmentAPropID = Shader.PropertyToID("_ToeSegmentA");
+        readonly int m_ToeSegmentBPropID = Shader.PropertyToID("_ToeSegmentB");
+        readonly int m_MidSegmentAPropID = Shader.PropertyToID("_MidSegmentA");
+        readonly int m_MidSegmentBPropID = Shader.PropertyToID("_MidSegmentB");
+        readonly int m_ShoSegmentAPropID = Shader.PropertyToID("_ShoSegmentA");
+        readonly int m_ShoSegmentBPropID = Shader.PropertyToID("_ShoSegmentB");
+
         readonly HableCurve m_HableCurve = new HableCurve();
 
         public override void Render(PostProcessRenderContext context)
@@ -467,44 +492,44 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 switch (settings.tonemapper.value)
                 {
-                    case Tonemapper.None: kernel = compute.FindKernel("KGenLut3D_NoTonemap");
+                    case Tonemapper.None: kernel = m_NoKernel = m_NoKernel != -1 ? m_NoKernel : compute.FindKernel("KGenLut3D_NoTonemap");
                         break;
-                    case Tonemapper.Neutral: kernel = compute.FindKernel("KGenLut3D_NeutralTonemap");
+                    case Tonemapper.Neutral: kernel = m_NeutralKernel = m_NeutralKernel != -1 ? m_NeutralKernel : compute.FindKernel("KGenLut3D_NeutralTonemap");
                         break;
-                    case Tonemapper.ACES: kernel = compute.FindKernel("KGenLut3D_AcesTonemap");
+                    case Tonemapper.ACES: kernel = m_AcesKernel = m_AcesKernel != -1 ? m_AcesKernel : compute.FindKernel("KGenLut3D_AcesTonemap");
                         break;
-                    case Tonemapper.Custom: kernel = compute.FindKernel("KGenLut3D_CustomTonemap");
+                    case Tonemapper.Custom: kernel = m_CustomKernel = m_CustomKernel != -1 ? m_CustomKernel : compute.FindKernel("KGenLut3D_CustomTonemap");
                         break;
                 }
 
                 var cmd = context.command;
-                cmd.SetComputeTextureParam(compute, kernel, "_Output", m_InternalLogLut);
-                cmd.SetComputeVectorParam(compute, "_Size", new Vector4(k_Lut3DSize, 1f / (k_Lut3DSize - 1f), 0f, 0f));
+                cmd.SetComputeTextureParam(compute, kernel, m_OutputPropID, m_InternalLogLut);
+                cmd.SetComputeVectorParam(compute, m_SizePropID, new Vector4(k_Lut3DSize, 1f / (k_Lut3DSize - 1f), 0f, 0f));
 
                 var colorBalance = ColorUtilities.ComputeColorBalance(settings.temperature.value, settings.tint.value);
-                cmd.SetComputeVectorParam(compute, "_ColorBalance", colorBalance);
-                cmd.SetComputeVectorParam(compute, "_ColorFilter", settings.colorFilter.value);
+                cmd.SetComputeVectorParam(compute, m_ColorBalancePropID, colorBalance);
+                cmd.SetComputeVectorParam(compute, m_ColorFilterPropID, settings.colorFilter.value);
 
                 float hue = settings.hueShift.value / 360f;         // Remap to [-0.5;0.5]
                 float sat = settings.saturation.value / 100f + 1f;  // Remap to [0;2]
                 float con = settings.contrast.value / 100f + 1f;    // Remap to [0;2]
-                cmd.SetComputeVectorParam(compute, "_HueSatCon", new Vector4(hue, sat, con, 0f));
+                cmd.SetComputeVectorParam(compute, m_HueSatConPropID, new Vector4(hue, sat, con, 0f));
 
                 var channelMixerR = new Vector4(settings.mixerRedOutRedIn, settings.mixerRedOutGreenIn, settings.mixerRedOutBlueIn, 0f);
                 var channelMixerG = new Vector4(settings.mixerGreenOutRedIn, settings.mixerGreenOutGreenIn, settings.mixerGreenOutBlueIn, 0f);
                 var channelMixerB = new Vector4(settings.mixerBlueOutRedIn, settings.mixerBlueOutGreenIn, settings.mixerBlueOutBlueIn, 0f);
-                cmd.SetComputeVectorParam(compute, "_ChannelMixerRed", channelMixerR / 100f); // Remap to [-2;2]
-                cmd.SetComputeVectorParam(compute, "_ChannelMixerGreen", channelMixerG / 100f);
-                cmd.SetComputeVectorParam(compute, "_ChannelMixerBlue", channelMixerB / 100f);
+                cmd.SetComputeVectorParam(compute, m_ChannelMixerRedPropID, channelMixerR / 100f); // Remap to [-2;2]
+                cmd.SetComputeVectorParam(compute, m_ChannelMixerGreenPropID, channelMixerG / 100f);
+                cmd.SetComputeVectorParam(compute, m_ChannelMixerBluePropID, channelMixerB / 100f);
 
                 var lift = ColorUtilities.ColorToLift(settings.lift.value * 0.2f);
                 var gain = ColorUtilities.ColorToGain(settings.gain.value * 0.8f);
                 var invgamma = ColorUtilities.ColorToInverseGamma(settings.gamma.value * 0.8f);
-                cmd.SetComputeVectorParam(compute, "_Lift", new Vector4(lift.x, lift.y, lift.z, 0f));
-                cmd.SetComputeVectorParam(compute, "_InvGamma", new Vector4(invgamma.x, invgamma.y, invgamma.z, 0f));
-                cmd.SetComputeVectorParam(compute, "_Gain", new Vector4(gain.x, gain.y, gain.z, 0f));
+                cmd.SetComputeVectorParam(compute, m_LiftPropID, new Vector4(lift.x, lift.y, lift.z, 0f));
+                cmd.SetComputeVectorParam(compute, m_InvGammaPropID, new Vector4(invgamma.x, invgamma.y, invgamma.z, 0f));
+                cmd.SetComputeVectorParam(compute, m_GainPropID, new Vector4(gain.x, gain.y, gain.z, 0f));
 
-                cmd.SetComputeTextureParam(compute, kernel, "_Curves", GetCurveTexture(true));
+                cmd.SetComputeTextureParam(compute, kernel, m_CurvesPropID, GetCurveTexture(true));
 
                 if (settings.tonemapper.value == Tonemapper.Custom)
                 {
@@ -517,13 +542,13 @@ namespace UnityEngine.Rendering.PostProcessing
                         settings.toneCurveGamma.value
                     );
 
-                    cmd.SetComputeVectorParam(compute, "_CustomToneCurve", m_HableCurve.uniforms.curve);
-                    cmd.SetComputeVectorParam(compute, "_ToeSegmentA", m_HableCurve.uniforms.toeSegmentA);
-                    cmd.SetComputeVectorParam(compute, "_ToeSegmentB", m_HableCurve.uniforms.toeSegmentB);
-                    cmd.SetComputeVectorParam(compute, "_MidSegmentA", m_HableCurve.uniforms.midSegmentA);
-                    cmd.SetComputeVectorParam(compute, "_MidSegmentB", m_HableCurve.uniforms.midSegmentB);
-                    cmd.SetComputeVectorParam(compute, "_ShoSegmentA", m_HableCurve.uniforms.shoSegmentA);
-                    cmd.SetComputeVectorParam(compute, "_ShoSegmentB", m_HableCurve.uniforms.shoSegmentB);
+                    cmd.SetComputeVectorParam(compute, m_CustomToneCurvePropID, m_HableCurve.uniforms.curve);
+                    cmd.SetComputeVectorParam(compute, m_ToeSegmentAPropID, m_HableCurve.uniforms.toeSegmentA);
+                    cmd.SetComputeVectorParam(compute, m_ToeSegmentBPropID, m_HableCurve.uniforms.toeSegmentB);
+                    cmd.SetComputeVectorParam(compute, m_MidSegmentAPropID, m_HableCurve.uniforms.midSegmentA);
+                    cmd.SetComputeVectorParam(compute, m_MidSegmentBPropID, m_HableCurve.uniforms.midSegmentB);
+                    cmd.SetComputeVectorParam(compute, m_ShoSegmentAPropID, m_HableCurve.uniforms.shoSegmentA);
+                    cmd.SetComputeVectorParam(compute, m_ShoSegmentBPropID, m_HableCurve.uniforms.shoSegmentB);
                 }
 
                 // Generate the lut
