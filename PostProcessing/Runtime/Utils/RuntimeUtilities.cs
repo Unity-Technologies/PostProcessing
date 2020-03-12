@@ -588,7 +588,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="cmd">The command buffer to use</param>
         /// <param name="source">The source render target</param>
         /// <param name="destination">The destination render target</param>
-        /// <param name="depth">The depth render target</param>
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
@@ -1099,8 +1098,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         /// <returns>A list of all currently available assembly types</returns>
         /// <remarks>
-        /// This method is slow and should be use with extreme caution.
+        /// This method is slow and should be use with extreme caution. We recommend you use
+        /// <see cref="GetAllTypesDerivedFrom{T}"/> instead if possible.
         /// </remarks>
+        /// <seealso cref="GetAllTypesDerivedFrom{T}"/>
         public static IEnumerable<Type> GetAllAssemblyTypes()
         {
             if (m_AssemblyTypes == null)
@@ -1120,6 +1121,20 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             return m_AssemblyTypes;
+        }
+
+        /// <summary>
+        /// Gets all currently available assembly types derived from type <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type to look for</typeparam>
+        /// <returns>A list of all currently available assembly types derived from type <typeparamref name="T"/></returns>
+        public static IEnumerable<Type> GetAllTypesDerivedFrom<T>()
+        {
+#if UNITY_EDITOR && UNITY_2019_2_OR_NEWER
+            return UnityEditor.TypeCache.GetTypesDerivedFrom<T>();
+#else
+            return GetAllAssemblyTypes().Where(t => t.IsSubclassOf(typeof(T)));
+#endif
         }
 
         /// <summary>

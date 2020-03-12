@@ -47,7 +47,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0.01f, 5f), Tooltip("Global screen scaling.")]
         public FloatParameter scale = new FloatParameter { value = 1f };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value

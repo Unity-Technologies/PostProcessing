@@ -77,7 +77,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// The ambient occlusion method to use.
         /// </summary>
         [Tooltip("The ambient occlusion method to use. \"Multi Scale Volumetric Obscurance\" is higher quality and faster on desktop & console platforms but requires compute shader support.")]
-        
         public AmbientOcclusionModeParameter mode = new AmbientOcclusionModeParameter { value = AmbientOcclusionMode.MultiScaleVolumetricObscurance };
 
         /// <summary>
@@ -90,7 +89,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// A custom color to use for the ambient occlusion.
         /// </summary>
         [ColorUsage(false), Tooltip("The custom color to use for the ambient occlusion. The default is black.")]
-        
         public ColorParameter color = new ColorParameter { value = Color.black };
 
         /// <summary>
@@ -138,6 +136,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public FloatParameter directLightingStrength = new FloatParameter { value = 0f };
 
         // SAO-only parameters
+
         /// <summary>
         /// Radius of sample points, which affects extent of darkened areas.
         /// </summary>
@@ -145,7 +144,7 @@ namespace UnityEngine.Rendering.PostProcessing
         public FloatParameter radius = new FloatParameter { value = 0.25f };
 
         /// <summary>
-        /// The number of sample points, which affects quality and performance. Lowest, Low & Medium
+        /// The number of sample points, which affects quality and performance. Lowest, Low and Medium
         /// passes are downsampled. High and Ultra are not and should only be used on high-end
         /// hardware.
         /// </summary>
@@ -155,7 +154,12 @@ namespace UnityEngine.Rendering.PostProcessing
         // SRPs can call this method without a context set (see HDRP).
         // We need a better way to handle this than checking for a null context, context should
         // never be null.
-        /// <inheritdoc />
+
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             bool state = enabled.value

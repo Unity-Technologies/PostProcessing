@@ -1,18 +1,10 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-//using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering.PostProcessing;
 
 class PostProcessingTests
 {
-    // All the other tests are currently disabled to track down an instability on trunk
-    [Test]
-    public void DummyTest()
-    {
-        Assert.IsTrue(true);
-    }
-
-    /*
     [Test]
     public void Profile_AddSettings()
     {
@@ -89,5 +81,4 @@ class PostProcessingTests
     {
         UnityEngine.Object.DestroyImmediate(profile);
     }
-    */
 }

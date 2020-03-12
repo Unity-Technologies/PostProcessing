@@ -1,4 +1,4 @@
-# Writing Custom Effects
+# Writing custom effects
 
 This framework allows you to write custom post-processing effects and plug them to the stack without having to modify the codebase. Of course, all effects written against the framework will work out-of-the-box with volume blending, and unless you need loop-dependent features they'll also automatically work with upcoming  [Scriptable Render Pipelines](https://github.com/Unity-Technologies/ScriptableRenderLoop)!
 

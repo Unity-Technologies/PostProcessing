@@ -22,7 +22,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(4, 32), Tooltip("The amount of sample points. This affects quality and performance.")]
         public IntParameter sampleCount = new IntParameter { value = 10 };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value

@@ -175,9 +175,24 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public enum StereoRenderingMode
         {
+            /// <summary>
+            /// Multi-pass.
+            /// </summary>
             MultiPass = 0,
+
+            /// <summary>
+            /// Single-pass.
+            /// </summary>
             SinglePass,
+
+            /// <summary>
+            /// Single-pass instanced.
+            /// </summary>
             SinglePassInstanced,
+
+            /// <summary>
+            /// Single-pass multi-view.
+            /// </summary>
             SinglePassMultiview
         }
 

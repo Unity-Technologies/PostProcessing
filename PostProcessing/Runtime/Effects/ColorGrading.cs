@@ -40,16 +40,16 @@ namespace UnityEngine.Rendering.PostProcessing
         None,
 
         /// <summary>
-        /// This method only does range-remapping with minimal impact on color hue & saturation and
+        /// This method only does range-remapping with minimal impact on color hue &amp; saturation and
         /// is generally a great starting point for extensive color grading.
         /// </summary>
         Neutral,
 
         /// <summary>
         /// This method uses a close approximation of the reference ACES tonemapper for a more
-        /// filmic look. Because of that, it is more contrasted than <see cref="Neutral"/>and has an
-        /// effect on actual color hue & saturation. Note that if you enable this tonemapper all the
-        /// grading operations will be done in the ACES color spaces for optimal precision and
+        /// filmic look. Because of that, it is more contrasted than <see cref="Neutral"/> and has
+        /// an effect on actual color hue &amp; saturation. Note that if you enable this tonemapper all
+        /// the grading operations will be done in the ACES color spaces for optimal precision and
         /// results.
         /// </summary>
         ACES,
@@ -374,7 +374,11 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public SplineParameter lumVsSatCurve = new SplineParameter { value = new Spline(new AnimationCurve(), 0.5f, false, new Vector2(0f, 1f)) };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             if (gradingMode.value == GradingMode.External)
