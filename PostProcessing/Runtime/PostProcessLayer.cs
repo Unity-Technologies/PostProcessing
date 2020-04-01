@@ -620,7 +620,8 @@ namespace UnityEngine.Rendering.PostProcessing
             // Post-transparency stack
             int tempRt = -1;
             bool forceNanKillPass = (!m_NaNKilled && stopNaNPropagation && RuntimeUtilities.isFloatingPointFormat(sourceFormat));
-            if (RequiresInitialBlit(m_Camera, context) || forceNanKillPass)
+            bool vrSinglePassInstancingEnabled = context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced;
+            if (!vrSinglePassInstancingEnabled && (RequiresInitialBlit(m_Camera, context) || forceNanKillPass))
             {
                 tempRt = m_TargetPool.Get();
                 context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
