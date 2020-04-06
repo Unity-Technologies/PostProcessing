@@ -38,7 +38,7 @@ namespace UnityEngine.Rendering.PostProcessing
                         stereoRenderingMode = StereoRenderingMode.MultiPass;
 #endif
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if UNITY_STANDALONE || UNITY_EDITOR || UNITY_PS4
                     if (xrDesc.dimension == TextureDimension.Tex2DArray)
                         stereoRenderingMode = StereoRenderingMode.SinglePassInstanced;
 #endif
