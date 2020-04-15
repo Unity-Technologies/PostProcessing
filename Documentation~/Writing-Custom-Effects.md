@@ -171,9 +171,9 @@ Other than that, the rest is standard shader code. Here we compute the luminance
 
 ## Effect ordering
 
-Builtin effects are automatically ordered, but what about custom effects? As soon as you create a new effect or import it into your project it'll be added to the `Custom Effect Sorting` lists in the `Post Process Layer` component on your camera(s).
+Built-in effects are automatically sorted, but what about custom effects? As soon as you create a new effect or import it into your project it'll be added to the `Custom Effect Sorting` list in the `Post Process Layer` component on a Camera.
 
-> **TODO:** editor UI screenshot
+![Order of custom effects](images/custom-effect-sorting.png)
 
 They will be pre-sorted by injection point but you can re-order these at will. The order is per-layer, which means you can use different ordering schemes per-camera.
 
