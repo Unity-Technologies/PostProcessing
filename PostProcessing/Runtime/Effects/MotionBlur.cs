@@ -22,7 +22,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(4, 32), Tooltip("The amount of sample points. This affects quality and performance.")]
         public IntParameter sampleCount = new IntParameter { value = 10 };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
@@ -38,9 +42,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
-#endif
     internal sealed class MotionBlurRenderer : PostProcessEffectRenderer<MotionBlur>
     {
         enum Pass
@@ -56,6 +58,21 @@ namespace UnityEngine.Rendering.PostProcessing
         public override DepthTextureMode GetCameraFlags()
         {
             return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+        }
+
+        private void CreateTemporaryRT(PostProcessRenderContext context, int nameID, int width, int height, RenderTextureFormat RTFormat)
+        {
+            var cmd = context.command;
+            var rtDesc = context.GetDescriptor(0, RTFormat, RenderTextureReadWrite.Linear);
+            rtDesc.width = width;
+            rtDesc.height = height;
+#if UNITY_2019_1_OR_NEWER
+            cmd.GetTemporaryRT(nameID, rtDesc, FilterMode.Point);
+#elif UNITY_2017_3_OR_NEWER
+            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, context.camera.allowDynamicResolution);
+#else            
+            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless);
+#endif
         }
 
         public override void Render(PostProcessRenderContext context)
@@ -92,27 +109,23 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.RcpMaxBlurRadius, 1f / maxBlurPixels);
 
             int vbuffer = ShaderIDs.VelocityTex;
-            cmd.GetTemporaryRT(vbuffer, context.width, context.height, 0, FilterMode.Point,
-                packedRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, vbuffer, context.width, context.height, packedRTFormat);
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, vbuffer, sheet, (int)Pass.VelocitySetup);
 
             // Pass 2 - First TileMax filter (1/2 downsize)
             int tile2 = ShaderIDs.Tile2RT;
-            cmd.GetTemporaryRT(tile2, context.width / 2, context.height / 2, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, tile2, context.width / 2, context.height / 2, vectorRTFormat);
             cmd.BlitFullscreenTriangle(vbuffer, tile2, sheet, (int)Pass.TileMax1);
 
             // Pass 3 - Second TileMax filter (1/2 downsize)
             int tile4 = ShaderIDs.Tile4RT;
-            cmd.GetTemporaryRT(tile4, context.width / 4, context.height / 4, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, tile4, context.width / 4, context.height / 4, vectorRTFormat);
             cmd.BlitFullscreenTriangle(tile2, tile4, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile2);
 
             // Pass 4 - Third TileMax filter (1/2 downsize)
             int tile8 = ShaderIDs.Tile8RT;
-            cmd.GetTemporaryRT(tile8, context.width / 8, context.height / 8, 0, FilterMode.Point,
-                vectorRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, tile8, context.width / 8, context.height / 8, vectorRTFormat);
             cmd.BlitFullscreenTriangle(tile4, tile8, sheet, (int)Pass.TileMax2);
             cmd.ReleaseTemporaryRT(tile4);
 
@@ -122,17 +135,13 @@ namespace UnityEngine.Rendering.PostProcessing
             sheet.properties.SetFloat(ShaderIDs.TileMaxLoop, (int)(tileSize / 8f));
 
             int tile = ShaderIDs.TileVRT;
-            cmd.GetTemporaryRT(tile, context.width / tileSize, context.height / tileSize, 0,
-                FilterMode.Point, vectorRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, tile, context.width / tileSize, context.height / tileSize, vectorRTFormat);
             cmd.BlitFullscreenTriangle(tile8, tile, sheet, (int)Pass.TileMaxV);
             cmd.ReleaseTemporaryRT(tile8);
 
             // Pass 6 - NeighborMax filter
             int neighborMax = ShaderIDs.NeighborMaxTex;
-            int neighborMaxWidth = context.width / tileSize;
-            int neighborMaxHeight = context.height / tileSize;
-            cmd.GetTemporaryRT(neighborMax, neighborMaxWidth, neighborMaxHeight, 0,
-                FilterMode.Point, vectorRTFormat, RenderTextureReadWrite.Linear);
+            CreateTemporaryRT(context, neighborMax, context.width / tileSize, context.height / tileSize, vectorRTFormat);
             cmd.BlitFullscreenTriangle(tile, neighborMax, sheet, (int)Pass.NeighborMax);
             cmd.ReleaseTemporaryRT(tile);
 

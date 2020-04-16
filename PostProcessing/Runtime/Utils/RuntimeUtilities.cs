@@ -587,7 +587,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="cmd">The command buffer to use</param>
         /// <param name="source">The source render target</param>
         /// <param name="destination">The destination render target</param>
-        /// <param name="depth">The depth render target</param>
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
@@ -762,8 +761,12 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-                return PlayerSettings.virtualRealitySupported
+#if ENABLE_VR && !UNITY_2020_1_OR_NEWER
+                return UnityEditorInternal.VR.VREditor.GetVREnabledOnTargetGroup(BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget))
                     && PlayerSettings.stereoRenderingPath == UnityEditor.StereoRenderingPath.SinglePass;
+#else
+                return false;
+#endif
             }
         }
 #endif
@@ -783,10 +786,8 @@ namespace UnityEngine.Rendering.PostProcessing
                 return isSinglePassStereoSelected && Application.isPlaying;
 #elif !ENABLE_VR
                 return false;
-#elif UNITY_2017_2_OR_NEWER
-                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #else
-                return false;
+                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #endif
             }
         }
@@ -798,14 +799,12 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             get
             {
-#if UNITY_EDITOR
-                return UnityEditor.PlayerSettings.virtualRealitySupported;
+#if ENABLE_VR && UNITY_EDITOR && !UNITY_2020_1_OR_NEWER
+                return UnityEditorInternal.VR.VREditor.GetVREnabledOnTargetGroup(BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget));
 #elif UNITY_XBOXONE || !ENABLE_VR
                 return false;
-#elif UNITY_2017_2_OR_NEWER
+#else
                 return UnityEngine.XR.XRSettings.enabled;
-#elif UNITY_5_6_OR_NEWER
-                return UnityEngine.VR.VRSettings.enabled;
 #endif
             }
         }
@@ -1069,7 +1068,6 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <returns>A jittered projection matrix</returns>
         public static Matrix4x4 GenerateJitteredProjectionMatrixFromOriginal(PostProcessRenderContext context, Matrix4x4 origProj, Vector2 jitter)
         {
-#if UNITY_2017_2_OR_NEWER
             var planes = origProj.decomposeProjection;
 
             float vertFov = Math.Abs(planes.top) + Math.Abs(planes.bottom);
@@ -1086,48 +1084,6 @@ namespace UnityEngine.Rendering.PostProcessing
             var jitteredMatrix = Matrix4x4.Frustum(planes);
 
             return jitteredMatrix;
-#else
-            var rTan = (1.0f + origProj[0, 2]) / origProj[0, 0];
-            var lTan = (-1.0f + origProj[0, 2]) / origProj[0, 0];
-
-            var tTan = (1.0f + origProj[1, 2]) / origProj[1, 1];
-            var bTan = (-1.0f + origProj[1, 2]) / origProj[1, 1];
-
-            float tanVertFov = Math.Abs(tTan) + Math.Abs(bTan);
-            float tanHorizFov = Math.Abs(lTan) + Math.Abs(rTan);
-
-            jitter.x *= tanHorizFov / context.screenWidth;
-            jitter.y *= tanVertFov / context.screenHeight;
-
-            float left = jitter.x + lTan;
-            float right = jitter.x + rTan;
-            float top = jitter.y + tTan;
-            float bottom = jitter.y + bTan;
-
-            var jitteredMatrix = new Matrix4x4();
-
-            jitteredMatrix[0, 0] = 2f / (right - left);
-            jitteredMatrix[0, 1] = 0f;
-            jitteredMatrix[0, 2] = (right + left) / (right - left);
-            jitteredMatrix[0, 3] = 0f;
-
-            jitteredMatrix[1, 0] = 0f;
-            jitteredMatrix[1, 1] = 2f / (top - bottom);
-            jitteredMatrix[1, 2] = (top + bottom) / (top - bottom);
-            jitteredMatrix[1, 3] = 0f;
-
-            jitteredMatrix[2, 0] = 0f;
-            jitteredMatrix[2, 1] = 0f;
-            jitteredMatrix[2, 2] = origProj[2, 2];
-            jitteredMatrix[2, 3] = origProj[2, 3];
-
-            jitteredMatrix[3, 0] = 0f;
-            jitteredMatrix[3, 1] = 0f;
-            jitteredMatrix[3, 2] = -1f;
-            jitteredMatrix[3, 3] = 0f;
-
-            return jitteredMatrix;
-#endif
         }
 
         #endregion
@@ -1141,8 +1097,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         /// <returns>A list of all currently available assembly types</returns>
         /// <remarks>
-        /// This method is slow and should be use with extreme caution.
+        /// This method is slow and should be use with extreme caution. We recommend you use
+        /// <see cref="GetAllTypesDerivedFrom{T}"/> instead if possible.
         /// </remarks>
+        /// <seealso cref="GetAllTypesDerivedFrom{T}"/>
         public static IEnumerable<Type> GetAllAssemblyTypes()
         {
             if (m_AssemblyTypes == null)
@@ -1162,6 +1120,20 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             return m_AssemblyTypes;
+        }
+
+        /// <summary>
+        /// Gets all currently available assembly types derived from type <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type to look for</typeparam>
+        /// <returns>A list of all currently available assembly types derived from type <typeparamref name="T"/></returns>
+        public static IEnumerable<Type> GetAllTypesDerivedFrom<T>()
+        {
+#if UNITY_EDITOR && UNITY_2019_2_OR_NEWER
+            return UnityEditor.TypeCache.GetTypesDerivedFrom<T>();
+#else
+            return GetAllAssemblyTypes().Where(t => t.IsSubclassOf(typeof(T)));
+#endif
         }
 
         /// <summary>

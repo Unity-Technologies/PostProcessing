@@ -359,7 +359,7 @@ float4 FragComposite(VaryingsDefault i) : SV_Target
     float4 gbuffer1 = _CameraGBufferTexture1.Load(int3(i.vertex.xy, 0));
     float4 gbuffer2 = _CameraGBufferTexture2.Load(int3(i.vertex.xy, 0));
 
-    float oneMinusReflectivity = 0.0;
+    half oneMinusReflectivity = 0.0;
     EnergyConservationBetweenDiffuseAndSpecular(gbuffer0.rgb, gbuffer1.rgb, oneMinusReflectivity);
 
     float3 normal = 2.0 * gbuffer2.rgb - 1.0;

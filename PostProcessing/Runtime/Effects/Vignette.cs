@@ -85,7 +85,11 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 1f), Tooltip("Mask opacity.")]
         public FloatParameter opacity = new FloatParameter { value = 1f };
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns <c>true</c> if the effect is currently enabled and supported.
+        /// </summary>
+        /// <param name="context">The current post-processing render context</param>
+        /// <returns><c>true</c> if the effect is currently enabled and supported</returns>
         public override bool IsEnabledAndSupported(PostProcessRenderContext context)
         {
             return enabled.value
@@ -94,9 +98,7 @@ namespace UnityEngine.Rendering.PostProcessing
         }
     }
 
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
-#endif
     internal sealed class VignetteRenderer : PostProcessEffectRenderer<Vignette>
     {
         public override void Render(PostProcessRenderContext context)

@@ -5,7 +5,6 @@ namespace UnityEngine.Rendering.PostProcessing
     // Multi-scale volumetric obscurance
     // TODO: Fix VR support
 
-#if UNITY_2017_1_OR_NEWER
     [UnityEngine.Scripting.Preserve]
     [Serializable]
     internal sealed class MultiScaleVO : IAmbientOcclusionMethod
@@ -40,8 +39,9 @@ namespace UnityEngine.Rendering.PostProcessing
         readonly float[] m_InvThicknessTable = new float[12];
         readonly float[] m_SampleWeightTable = new float[12];
 
-        readonly int[] m_Widths = new int[7];
-        readonly int[] m_Heights = new int[7];
+        // Scaled dimensions used with dynamic resolution
+        readonly int[] m_ScaledWidths = new int[7];
+        readonly int[] m_ScaledHeights = new int[7];
 
         AmbientOcclusion m_Settings;
         PropertySheet m_PropertySheet;
@@ -79,8 +79,8 @@ namespace UnityEngine.Rendering.PostProcessing
             int sizeId = (int)size;
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
-                width = m_Widths[sizeId],
-                height = m_Heights[sizeId],
+                width = m_ScaledWidths[sizeId],
+                height = m_ScaledHeights[sizeId],
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 1,
@@ -97,8 +97,8 @@ namespace UnityEngine.Rendering.PostProcessing
             int sizeId = (int)size;
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
-                width = m_Widths[sizeId],
-                height = m_Heights[sizeId],
+                width = m_ScaledWidths[sizeId],
+                height = m_ScaledHeights[sizeId],
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 16,
@@ -135,28 +135,33 @@ namespace UnityEngine.Rendering.PostProcessing
 
         Vector2 GetSize(MipLevel mip)
         {
-            return new Vector2(m_Widths[(int)mip], m_Heights[(int)mip]);
+            return new Vector2(m_ScaledWidths[(int)mip], m_ScaledHeights[(int)mip]);
         }
 
         Vector3 GetSizeArray(MipLevel mip)
         {
-            return new Vector3(m_Widths[(int)mip], m_Heights[(int)mip], 16);
+            return new Vector3(m_ScaledWidths[(int)mip], m_ScaledHeights[(int)mip], 16);
         }
 
         public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
         {
-            bool isSinglePassStereo = camera.stereoEnabled && RuntimeUtilities.isSinglePassStereoEnabled;
+            bool isSinglePassDoubleWide = camera.stereoEnabled && RuntimeUtilities.isSinglePassStereoEnabled && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
 
             // Base size
-            m_Widths[0] = camera.pixelWidth * (isSinglePassStereo ? 2 : 1);
-            m_Heights[0] = camera.pixelHeight;
+#if UNITY_2017_3_OR_NEWER
+            m_ScaledWidths[0] = camera.scaledPixelWidth * (isSinglePassDoubleWide ? 2 : 1);
+            m_ScaledHeights[0] = camera.scaledPixelHeight;
+#else
+            m_ScaledWidths[0] = camera.pixelWidth * (isSinglePassDoubleWide  ? 2 : 1);
+            m_ScaledHeights[0] = camera.pixelHeight;       
+#endif
 
             // L1 -> L6 sizes
             for (int i = 1; i < 7; i++)
             {
                 int div = 1 << i;
-                m_Widths[i]  = (m_Widths[0]  + (div - 1)) / div;
-                m_Heights[i] = (m_Heights[0] + (div - 1)) / div;
+                m_ScaledWidths[i]  = (m_ScaledWidths[0]  + (div - 1)) / div;
+                m_ScaledHeights[i] = (m_ScaledHeights[0] + (div - 1)) / div;
             }
 
             // Allocate temporary textures
@@ -167,10 +172,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
 
             float tanHalfFovH = CalculateTanHalfFovHeight(camera);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA, isSinglePassStereo);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH, isMSAA, isSinglePassStereo);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH, isMSAA, isSinglePassStereo);
-            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH, isMSAA, isSinglePassStereo);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA, isSinglePassDoubleWide);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth2, ShaderIDs.Occlusion2, GetSizeArray(MipLevel.L4), tanHalfFovH, isMSAA, isSinglePassDoubleWide);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth3, ShaderIDs.Occlusion3, GetSizeArray(MipLevel.L5), tanHalfFovH, isMSAA, isSinglePassDoubleWide);
+            PushRenderCommands(cmd, ShaderIDs.TiledDepth4, ShaderIDs.Occlusion4, GetSizeArray(MipLevel.L6), tanHalfFovH, isMSAA, isSinglePassDoubleWide);
 
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth4, ShaderIDs.Occlusion4, ShaderIDs.LowDepth3,   ShaderIDs.Occlusion3, ShaderIDs.Combined3, GetSize(MipLevel.L4), GetSize(MipLevel.L3), isMSAA);
             PushUpsampleCommands(cmd, ShaderIDs.LowDepth3, ShaderIDs.Combined3,  ShaderIDs.LowDepth2,   ShaderIDs.Occlusion2, ShaderIDs.Combined2, GetSize(MipLevel.L3), GetSize(MipLevel.L2), isMSAA);
@@ -269,7 +274,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeVectorParam(cs, "ZBufferParams", CalculateZBufferParams(camera));
             cmd.SetComputeTextureParam(cs, kernel, "Depth", depthMapId);
 
-            cmd.DispatchCompute(cs, kernel, m_Widths[(int)MipLevel.L4], m_Heights[(int)MipLevel.L4], 1);
+            cmd.DispatchCompute(cs, kernel, m_ScaledWidths[(int)MipLevel.L4], m_ScaledHeights[(int)MipLevel.L4], 1);
 
             if (needDepthMapRelease)
                 Release(cmd, ShaderIDs.DepthCopy);
@@ -284,10 +289,10 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeTextureParam(cs, kernel, "DS8xAtlas", ShaderIDs.TiledDepth3);
             cmd.SetComputeTextureParam(cs, kernel, "DS16xAtlas", ShaderIDs.TiledDepth4);
 
-            cmd.DispatchCompute(cs, kernel, m_Widths[(int)MipLevel.L6], m_Heights[(int)MipLevel.L6], 1);
+            cmd.DispatchCompute(cs, kernel, m_ScaledWidths[(int)MipLevel.L6], m_ScaledHeights[(int)MipLevel.L6], 1);
         }
 
-        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH, bool isMSAA, bool isSinglePassStereo)
+        void PushRenderCommands(CommandBuffer cmd, int source, int destination, Vector3 sourceSize, float tanHalfFovH, bool isMSAA, bool isSinglePassDoubleWide)
         {
             // Here we compute multipliers that convert the center depth value into (the reciprocal
             // of) sphere thicknesses at each sample location. This assumes a maximum sample radius
@@ -306,7 +311,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // ScreenspaceDiameter: Diameter of sample sphere in pixel units
             // ScreenspaceDiameter / BufferWidth: Ratio of the screen width that the sphere actually covers
             float thicknessMultiplier = 2f * tanHalfFovH * kScreenspaceDiameter / sourceSize.x;
-            if (isSinglePassStereo)
+            if (isSinglePassDoubleWide)
                 thicknessMultiplier *= 2f;
 
             // This will transform a depth value from [0, thickness] to [0, 1].
@@ -454,7 +459,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void CheckAOTexture(PostProcessRenderContext context)
         {
-            if (m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height)
+            bool AOUpdateNeeded = m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height;
+#if UNITY_2017_3_OR_NEWER                
+            AOUpdateNeeded = AOUpdateNeeded || m_AmbientOnlyAO.useDynamicScale != context.camera.allowDynamicResolution;
+#endif                  
+            if (AOUpdateNeeded)
             {
                 RuntimeUtilities.Destroy(m_AmbientOnlyAO);
 
@@ -462,7 +471,10 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     hideFlags = HideFlags.DontSave,
                     filterMode = FilterMode.Point,
-                    enableRandomWrite = true
+                    enableRandomWrite = true,
+#if UNITY_2017_3_OR_NEWER
+                    useDynamicScale = context.camera.allowDynamicResolution
+#endif
                 };
                 m_AmbientOnlyAO.Create();
             }
@@ -527,42 +539,4 @@ namespace UnityEngine.Rendering.PostProcessing
             m_AmbientOnlyAO = null;
         }
     }
-#else
-    [Serializable]
-    public sealed class MultiScaleVO : IAmbientOcclusionMethod
-    {
-        public MultiScaleVO(AmbientOcclusion settings)
-        {
-        }
-
-        public void SetResources(PostProcessResources resources)
-        {
-        }
-
-        public DepthTextureMode GetCameraFlags()
-        {
-            return DepthTextureMode.None;
-        }
-
-        public void GenerateAOMap(CommandBuffer cmd, Camera camera, RenderTargetIdentifier destination, RenderTargetIdentifier? depthMap, bool invert, bool isMSAA)
-        {
-        }
-
-        public void RenderAfterOpaque(PostProcessRenderContext context)
-        {
-        }
-
-        public void RenderAmbientOnly(PostProcessRenderContext context)
-        {
-        }
-
-        public void CompositeAmbientOnly(PostProcessRenderContext context)
-        {
-        }
-
-        public void Release()
-        {
-        }
-    }
-#endif
 }

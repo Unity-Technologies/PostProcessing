@@ -28,7 +28,7 @@ half3 _TaaParams; // Jitter.x, Jitter.y, Blending
 half4 FragCoC(VaryingsDefault i) : SV_Target
 {
     float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, i.texcoordStereo));
-    half coc = (depth - _Distance) * _LensCoeff / max(depth, 1e-5);
+    half coc = (depth - _Distance) * _LensCoeff / max(depth, 1e-4);
     return saturate(coc * 0.5 * _RcpMaxCoC + 0.5);
 }
 
@@ -130,7 +130,7 @@ half4 FragPrefilter(VaryingsDefault i) : SV_Target
 
     // Weighted average of the color samples
     half3 avg = c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3;
-    avg /= max(w0 + w1 + w2 + w3, 1e-5);
+    avg /= max(w0 + w1 + w2 + w3, 1e-4);
 
     // Select the largest CoC value
     half coc_min = min(coc0, Min3(coc1, coc2, coc3));
