@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix for VR Single Pass Instancing (SPI) not working with the built-in renderers. Only effects that currently support SPI for use with SRP will work correctly (so AO for example will not work with SPI even with this fix) (case 1187257)
 
+### Changed
+- Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
+
 ## [2.3.0] - 2020-01-10
 
 ### Fixed
