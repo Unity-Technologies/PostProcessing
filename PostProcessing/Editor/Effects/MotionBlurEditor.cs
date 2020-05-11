@@ -2,13 +2,13 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace UnityEditor.Rendering.PostProcessing
 {
-    [PostProcessEditor(typeof(LensDistortion))]
-    internal sealed class LensDistortionEditor : DefaultPostProcessEffectEditor
+    [PostProcessEditor(typeof(MotionBlur))]
+    internal sealed class MotionBlurEditor : DefaultPostProcessEffectEditor
     {
         public override void OnInspectorGUI()
         {
             if (RuntimeUtilities.isVREnabled)
-                EditorGUILayout.HelpBox("Lens Distortion is available only for non-stereo cameras.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Motion Blur is available only for non-stereo cameras.", MessageType.Warning);
 
             base.OnInspectorGUI();
         }
