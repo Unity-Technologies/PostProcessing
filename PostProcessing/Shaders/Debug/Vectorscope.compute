@@ -1,8 +1,8 @@
 #pragma warning(disable : 3568)
 #pragma exclude_renderers gles gles3 d3d11_9x
 
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
 
 RWStructuredBuffer<uint> _VectorscopeBuffer;
 Texture2D<float4> _Source;

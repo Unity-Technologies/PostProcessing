@@ -25,7 +25,7 @@
 #pragma kernel MultiScaleVODownsample1              main=MultiScaleVODownsample1
 #pragma kernel MultiScaleVODownsample1_MSAA         main=MultiScaleVODownsample1_MSAA           MSAA
 
-#include "../StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
 #ifdef MSAA
 // Output textures

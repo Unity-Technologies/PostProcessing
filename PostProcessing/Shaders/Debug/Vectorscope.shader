@@ -4,8 +4,8 @@ Shader "Hidden/PostProcessing/Debug/Vectorscope"
         
         #pragma exclude_renderers gles gles3 d3d11_9x
         #pragma target 4.5
-        #include "../StdLib.hlsl"
-        #include "../Colors.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
 
         StructuredBuffer<uint> _VectorscopeBuffer;
         float3 _Params; // x: width, y: height, z: exposure, w: unused

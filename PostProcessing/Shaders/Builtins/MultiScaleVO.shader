@@ -5,8 +5,8 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         #pragma exclude_renderers gles gles3 d3d11_9x
         #pragma target 4.5
 
-        #include "../StdLib.hlsl"
-        #include "Fog.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Fog.hlsl"
 
         TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
         TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);

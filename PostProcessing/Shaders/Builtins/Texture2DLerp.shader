@@ -2,7 +2,7 @@ Shader "Hidden/PostProcessing/Texture2DLerp"
 {
     HLSLINCLUDE
 
-        #include "../StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex); // From
         TEXTURE2D_SAMPLER2D(_To, sampler_To);

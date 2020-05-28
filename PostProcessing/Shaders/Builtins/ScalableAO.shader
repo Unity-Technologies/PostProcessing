@@ -21,7 +21,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
                 #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_DEPTH
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -36,7 +36,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
                 #pragma multi_compile _ APPLY_FORWARD_FOG
                 #pragma multi_compile _ FOG_LINEAR FOG_EXP FOG_EXP2
                 #define SOURCE_GBUFFER
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -51,7 +51,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
                 #define SOURCE_DEPTHNORMALS
                 #define BLUR_HORIZONTAL
                 #define BLUR_SAMPLE_CENTER_NORMAL
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -66,7 +66,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
                 #define SOURCE_GBUFFER
                 #define BLUR_HORIZONTAL
                 #define BLUR_SAMPLE_CENTER_NORMAL
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -79,7 +79,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define BLUR_VERTICAL
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -93,7 +93,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragComposition
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -107,7 +107,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragCompositionGBuffer
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }
@@ -119,7 +119,7 @@ Shader "Hidden/PostProcessing/ScalableAO"
 
                 #pragma vertex VertDefault
                 #pragma fragment FragDebugOverlay
-                #include "ScalableAO.hlsl"
+                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ScalableAO.hlsl"
 
             ENDHLSL
         }

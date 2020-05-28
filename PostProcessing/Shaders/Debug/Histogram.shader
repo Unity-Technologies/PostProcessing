@@ -4,7 +4,7 @@ Shader "Hidden/PostProcessing/Debug/Histogram"
 
         #pragma exclude_renderers gles gles3 d3d11_9x
         #pragma target 4.5
-        #include "../StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
         #if SHADER_API_GLES3
             #define HISTOGRAM_BINS 128

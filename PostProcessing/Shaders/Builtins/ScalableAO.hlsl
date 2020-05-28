@@ -1,9 +1,9 @@
 #ifndef UNITY_POSTFX_AMBIENT_OCCLUSION
 #define UNITY_POSTFX_AMBIENT_OCCLUSION
 
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
-#include "Fog.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/Fog.hlsl"
 
 // --------
 // Options for further customization

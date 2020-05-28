@@ -4,13 +4,15 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.3.1] - 2020-XX-XX
+## [2.4.0] - 2020-05-28
 
 ### Fixed
 - Fix for VR Single Pass Instancing (SPI) not working with the built-in renderers. Only effects that currently support SPI for use with SRP will work correctly (so AO for example will not work with SPI even with this fix) (case 1187257)
+- Fix for shader compilation errors when importing the 3D+Extras template (case 1234411)
 
 ### Changed
 - Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
+- Minimum Unity version for this version has been bumped to 2018.3.
 
 ## [2.3.0] - 2020-01-10
 

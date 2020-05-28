@@ -1,6 +1,6 @@
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
-#include "../ACES.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/ACES.hlsl"
 
 #pragma kernel KGenLut3D_NoTonemap      TONEMAPPING_NONE
 #pragma kernel KGenLut3D_AcesTonemap    TONEMAPPING_ACES

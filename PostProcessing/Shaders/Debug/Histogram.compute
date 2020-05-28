@@ -5,8 +5,8 @@
 #define GROUP_SIZE_X 16
 #define GROUP_SIZE_Y 16
 
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
 
 RWStructuredBuffer<uint> _HistogramBuffer;
 Texture2D<float4> _Source;

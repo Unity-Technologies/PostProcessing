@@ -34,7 +34,7 @@
 #pragma kernel MultiScaleVOUpSample_MSAA_blendout           MAIN=MultiScaleVOUpSample_MSAA_blendout             MSAA BLEND_WITH_HIGHER_RESOLUTION
 #pragma kernel MultiScaleVOUpSample_MSAA_premin_blendout    MAIN=MultiScaleVOUpSample_MSAA_premin_blendout      MSAA COMBINE_LOWER_RESOLUTIONS BLEND_WITH_HIGHER_RESOLUTION
 
-#include "../StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
 
 #ifdef MSAA
