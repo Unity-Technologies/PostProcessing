@@ -729,7 +729,11 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public static bool scriptableRenderPipelineActive
         {
-            get { return GraphicsSettings.renderPipelineAsset != null; } // 5.6+ only
+#if UNITY_2019_3_OR_NEWER
+            get { return GraphicsSettings.currentRenderPipeline != null; }
+#else
+            get { return GraphicsSettings.renderPipelineAsset != null; }
+#endif
         }
 
         /// <summary>

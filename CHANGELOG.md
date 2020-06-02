@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix for VR Single Pass Instancing (SPI) not working with the built-in renderers. Only effects that currently support SPI for use with SRP will work correctly (so AO for example will not work with SPI even with this fix) (case 1187257)
 - Fix for shader compilation errors when importing the 3D+Extras template (case 1234411)
 - Fix Duplicated RenderTextures when using MultiScaleVO on Xbox (case 1235888)
+- Fix for the rendering being broken when an SRP is in use and its asset comes from quality settings instead of graphics settings.
 
 ### Changed
 - Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
