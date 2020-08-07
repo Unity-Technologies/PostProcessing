@@ -22,7 +22,7 @@
 #pragma warning(disable : 3568)
 #pragma exclude_renderers gles gles3 d3d11_9x
 
-#include "../StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
 Texture2D<float4> _Source;
 RWTexture2D<float4> _Result;

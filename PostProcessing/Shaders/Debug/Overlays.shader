@@ -2,8 +2,8 @@ Shader "Hidden/PostProcessing/Debug/Overlays"
 {
     HLSLINCLUDE
 
-        #include "../StdLib.hlsl"
-        #include "../Colors.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
         #pragma target 3.0
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);

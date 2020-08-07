@@ -27,7 +27,7 @@
 #pragma kernel MultiScaleVORender_MSAA                      MAIN=MultiScaleVORender_MSAA                MSAA
 #pragma kernel MultiScaleVORender_MSAA_interleaved          MAIN=MultiScaleVORender_MSAA_interleaved    MSAA INTERLEAVE_RESULT
 
-#include "../StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
 #ifndef INTERLEAVE_RESULT
 #define WIDE_SAMPLING 1

@@ -4,7 +4,7 @@ Shader "Hidden/PostProcessing/Debug/Waveform"
 
         #pragma exclude_renderers gles gles3 d3d11_9x
         #pragma target 4.5
-        #include "../StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
         StructuredBuffer<uint4> _WaveformBuffer;
         float3 _Params; // x: buffer width, y: buffer height, z: exposure, w: unused

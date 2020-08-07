@@ -3,7 +3,7 @@ Shader "Hidden/PostProcessing/MotionBlur"
     HLSLINCLUDE
 
         #pragma target 3.0
-        #include "../StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
         float4 _MainTex_TexelSize;

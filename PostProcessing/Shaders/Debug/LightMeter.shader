@@ -4,8 +4,8 @@ Shader "Hidden/PostProcessing/Debug/LightMeter"
 
         #pragma exclude_renderers gles gles3 d3d11_9x
         #pragma target 4.5
-        #include "../StdLib.hlsl"
-        #include "../Builtins/ExposureHistogram.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/ExposureHistogram.hlsl"
         #pragma multi_compile __ COLOR_GRADING_HDR
         #pragma multi_compile __ AUTO_EXPOSURE
 

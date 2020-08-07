@@ -25,7 +25,7 @@
 #pragma kernel MultiScaleVODownsample2              main=MultiScaleVODownsample2
 #pragma kernel MultiScaleVODownsample2_MSAA         main=MultiScaleVODownsample2_MSAA       MSAA
 
-#include "../StdLib.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 
 #ifdef MSAA
 Texture2D<float2> DS4x;
