@@ -1,7 +1,7 @@
 #ifndef __FXAA3_INC__
 #define __FXAA3_INC__
 
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/xRLib.hlsl"
+#include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/xRLib.hlsl"
 
 /*============================================================================
 
