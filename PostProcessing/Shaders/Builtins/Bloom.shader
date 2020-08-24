@@ -2,13 +2,13 @@ Shader "Hidden/PostProcessing/Bloom"
 {
     HLSLINCLUDE
 
-        #include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-        #include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/Colors.hlsl"
-        #include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/Sampling.hlsl"
+#include "../StdLib.hlsl"
+#include "../Colors.hlsl"
+#include "../Sampling.hlsl"
 
 #pragma multi_compile __ HUD_BLOOM
 
-    TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
     TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
     TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
 

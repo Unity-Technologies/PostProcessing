@@ -1,7 +1,7 @@
 #ifndef UNITY_POSTFX_SMAA_BRIDGE
 #define UNITY_POSTFX_SMAA_BRIDGE
 
-#include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+#include "../StdLib.hlsl"
 
 TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 TEXTURE2D_SAMPLER2D(_BlendTex, sampler_BlendTex);
@@ -15,7 +15,7 @@ float4 _MainTex_TexelSize;
 #define LinearSampler sampler_MainTex
 #define PointSampler sampler_MainTex
 
-#include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/Builtins/SubpixelMorphologicalAntialiasing.hlsl"
+#include "SubpixelMorphologicalAntialiasing.hlsl"
 
 // ----------------------------------------------------------------------------------------
 // Edge Detection

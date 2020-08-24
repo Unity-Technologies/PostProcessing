@@ -38,7 +38,7 @@ Shader "Hidden/PostProcessing/ScreenSpaceReflections"
 		return o;
 	}
 
-#include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/Builtins/ScreenSpaceReflections.hlsl"
+#include "ScreenSpaceReflections.hlsl"
 
 	ENDCG
 

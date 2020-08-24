@@ -86,7 +86,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 volumeDepth = 1,
                 autoGenerateMips = false,
                 msaaSamples = 1,
+#if UNITY_2019_1_OR_NEWER
                 mipCount = 1,
+#endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2D,
                 sRGB = false
@@ -105,7 +107,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 volumeDepth = 16,
                 autoGenerateMips = false,
                 msaaSamples = 1,
+#if UNITY_2019_1_OR_NEWER
                 mipCount = 1,
+#endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2DArray,
                 sRGB = false
@@ -461,9 +465,9 @@ namespace UnityEngine.Rendering.PostProcessing
         void CheckAOTexture(PostProcessRenderContext context)
         {
             bool AOUpdateNeeded = m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height;
-#if UNITY_2017_3_OR_NEWER                
+#if UNITY_2017_3_OR_NEWER
             AOUpdateNeeded = AOUpdateNeeded || m_AmbientOnlyAO.useDynamicScale != context.camera.allowDynamicResolution;
-#endif                  
+#endif
             if (AOUpdateNeeded)
             {
                 RuntimeUtilities.Destroy(m_AmbientOnlyAO);

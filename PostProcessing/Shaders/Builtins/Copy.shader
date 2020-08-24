@@ -2,7 +2,7 @@ Shader "Hidden/PostProcessing/Copy"
 {
     HLSLINCLUDE
 
-        #include "Packages/com.pgac.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+        #include "../StdLib.hlsl"
 
         TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 
