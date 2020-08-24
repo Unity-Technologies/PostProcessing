@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix Duplicated RenderTextures when using MultiScaleVO on Xbox (case 1235888)
 - Fix for the rendering being broken when an SRP is in use and its asset comes from quality settings instead of graphics settings.
 - Fix for burger buttons on volume components being misaligned on 2019.3+ (case 1238461)
+- Fix for depth buffer being discarded when using deferred fog with Vulkan (case 1271512)
 
 ### Changed
 - Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
