@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-#if ENABLE_VR
+#if (ENABLE_VR_MODULE && ENABLE_VR)
     using XRSettings = UnityEngine.XR.XRSettings;
 #endif
 
@@ -447,7 +447,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
-#if ENABLE_VR
+#if (ENABLE_VR_MODULE && ENABLE_VR)
             if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
