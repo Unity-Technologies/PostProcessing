@@ -415,5 +415,29 @@ namespace UnityEngine.Rendering.PostProcessing
 
             return RenderTexture.GetTemporary(desc);
         }
+
+        /// <summary>
+        /// Update current single-pass stereo state for TAA
+        /// </summary>
+        public void UpdateStereoTAA()
+        {
+#if UNITY_2019_1_OR_NEWER
+            screenWidth = XRSettings.eyeTextureWidth;
+
+            if (stereoRenderingMode == StereoRenderingMode.SinglePass)
+            {
+                //When TAA is active, disable XR single-pass interface
+                if (IsTemporalAntialiasingActive())
+                {
+                    numberOfEyes = 1;
+                }
+                else
+                {
+                    numberOfEyes = 2;
+                    screenWidth /= 2;
+                }
+            }
+#endif
+        }
     }
 }
