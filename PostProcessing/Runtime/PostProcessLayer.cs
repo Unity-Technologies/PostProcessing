@@ -623,8 +623,14 @@ namespace UnityEngine.Rendering.PostProcessing
             bool vrSinglePassInstancingEnabled = context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced;
             if (!vrSinglePassInstancingEnabled && (RequiresInitialBlit(m_Camera, context) || forceNanKillPass))
             {
+                int width = context.width;
+#if UNITY_2019_1_OR_NEWER
+                var xrDesc = XRSettings.eyeTextureDesc;
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
+                   width = xrDesc.width;
+#endif
                 tempRt = m_TargetPool.Get();
-                context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
+                context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB, FilterMode.Bilinear, width);
                 m_LegacyCmdBuffer.BuiltinBlit(cameraTarget, tempRt, RuntimeUtilities.copyStdMaterial, stopNaNPropagation ? 1 : 0);
                 if (!m_NaNKilled)
                     m_NaNKilled = stopNaNPropagation;
