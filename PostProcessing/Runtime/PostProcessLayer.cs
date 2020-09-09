@@ -939,6 +939,9 @@ namespace UnityEngine.Rendering.PostProcessing
             RenderTargetIdentifier cameraTexture = context.source;
 
 #if UNITY_2019_1_OR_NEWER
+            if (context.stereoActive)
+                context.UpdateStereoTAA();
+
             if (context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
             {
                 cmd.SetSinglePassStereo(SinglePassStereoMode.None);
