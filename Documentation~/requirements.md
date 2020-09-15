@@ -1,10 +1,10 @@
 # Requirements and compatibility
 
-This page contains information on system requirements and compatibility of this module.
+This page contains information on system requirements and compatibility of this Post-processing module.
 
 ## Unity Editor compatibility
 
-This package is compatible with the following versions of the Unity Editor:
+The **Post processing** package is compatible with the following versions of the Unity Editor:
 
 * Unity 2018.1 and later.
 
@@ -18,6 +18,6 @@ This package is compatible with the following render pipeline versions:
 
 ## Unity Player system requirements
 
-This package does not add any platform-specific requirements. For more information on Unity system requirements, see [System requirements for Unity](https://docs.unity3d.com/Manual/system-requirements.html).
+This package does not add any platform-specific requirements to Unity. For more information on Unity system requirements, see [System requirements for Unity](https://docs.unity3d.com/Manual/system-requirements.html).
 
-Certain effects might have extra requirements in addition to the common Unity Player system requirements. See the pages describing the effects for details.
+Some **Post Processing** effects have extra requirements in addition to the common Unity Player system requirements. For system requirements for each effect, see the specific effect page.

@@ -1,12 +1,21 @@
 # Grain
 
-The **Grain** effect emulates the effect that real-world cameras produce where small particles in the camera’s film give the image a coarse, unprocessed effect. The **Grain** effect available in Unity is based on a coherent gradient noise. 
+The **Grain** effect overlays film noise onto your image. Film noise is the effect that real-world cameras produce when small particles in the camera’s film give the image a coarse, unprocessed effect.
+Unity’s **Grain** effect is based on a coherent gradient noise. This gives your game a gritty effect that simulates the imperfections of film.
 
+The **Grain** effect available in Unity is based on a coherent gradient noise. 
 
-![](images/grain.png)
+![Grain_image_0.png](images\Grain_image_1.png.jpg)
 
+Scene without **Grain**.
+
+![Grain_image_0.png](images\Grain_image_0.png.jpg)
+
+Scene with **Grain**.
 
 ### Properties
+
+![](images/grain.png)
 
 | Property               | Function                                                     |
 | :---------------------- | :------------------------------------------------------------ |
@@ -17,10 +26,8 @@ The **Grain** effect emulates the effect that real-world cameras produce where s
 
 ### Performance
 
-Disabling `Colored` will make the Grain effect run faster.
+Disabling **Colored** makes the Grain effect run faster.
 
 ### Requirements
 
 - Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

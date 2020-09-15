@@ -17,6 +17,8 @@
   * [Screen Space Reflections](Screen-Space-Reflections)
   * [Vignette](Vignette)
 * Scripting
-    * [Manipulating effects](Manipulating-the-Stack)
+    * [Controlling effects using scripts](Manipulating-the-Stack)
     * [Writing custom effects](Writing-Custom-Effects)
 * [Known issues](known-issues)
+* [Debugging Post-processing effects](Debugging-Post-processing-effects)
+
