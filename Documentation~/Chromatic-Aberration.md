@@ -1,13 +1,20 @@
 # Chromatic Aberration
 
-The Chromatic Aberration effect mimics the effect a real-world camera produces when its lens fails to join all colors to the same point. Unity provides support for red/blue and green/purple fringing, and you can define fringing colors by using an input texture.
+The **Chromatic Aberration** effect splits color along boundaries in an image into their red, green, and blue channels. This reproduces the effect a real-world camera produces when light refracts and causes the wavelengths to disperse in the lens.
 
-For more information on the **Chromatic Aberration** effect, read the documentation on [Chromatic Aberration](https://docs.unity3d.com/Manual/PostProcessing-ChromaticAberration.html) in the Unity manual.
+Unity provides support for red/blue and green/purple fringing. You can define fringing colors by using an input texture.
 
-![](images/chroma.png)
+![PostProcessing-ChromaticAberration-1](images\PostProcessing-ChromaticAberration-1.jpg)
 
+Scene without **Chromatic Aberration**.
+
+![PostProcessing-ChromaticAberration-0](images\PostProcessing-ChromaticAberration-0.jpg)
+
+Scene with **Chromatic Aberration**.
 
 ### Properties
+
+![](images/chroma.png)
 
 | Property     | Function                                                     |
 | :------------ | :------------------------------------------------------------ |
@@ -24,18 +31,16 @@ For more information on the **Chromatic Aberration** effect, read the documentat
 - Green/Purple
 - Purple/Green
 
-You can create custom spectral textures in any image editing software. While the resolution size of spectral textures are not limited, small sizes such as th 3x1 textures provided work best. 
+You can create custom spectral textures in any image editing software. While the resolution size of spectral textures are not limited, small sizes like the 3x1 textures provided work best. 
 
-You can achieve a rougher effect by manually setting the `Filter Mode` of the input texture to `Point (no filter)`.
+You can achieve a rougher effect by manually setting the **Filter Mode** of the input texture to **Point (no filter)** in the [Texture Import Settings](https://docs.unity3d.com/Manual/class-TextureImporter.html) window.
 
 ### Performance
 
-The performance of the **Chromatic Aberration** effect depends on the `Intensity` value. If the `Intensity` value is set high, the render will be slower as it will need more samples to render smooth chromatic aberrations.
+The performance of the **Chromatic Aberration** effect depends on its `Intensity` value. If the `Intensity` value is high, the render uses more samples to render smooth chromatic aberrations. This makes the process take more time.
 
-Enabling `Fast Mode` is recommended where possible as it's a lot faster, but not as smooth as the regular mode.
+**Fast Mode** is the quickest mode and recommended where possible. However, it's not as smooth as the regular mode.
 
 ### Requirements
 
 - Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

@@ -1,10 +1,8 @@
 # Auto Exposure
 
-The **Auto Exposure** effect dynamically adjusts the exposure of an image according to the range of brightness levels the image contains. 
+The **Auto Exposure** effect simulates how the human eye adjusts to changes in brightness in real-time. To do this, it dynamically adjusts the exposure of an image to match its mid-tone.
 
-For more information on the **Auto Exposure** effect and its use in Unity, see the [Auto Exposure](https://docs.unity3d.com/Manual/PostProcessing-AutoExposure.html) documentation in the Unity manual.
-
-In Unity, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram and the **Auto Exposure** effect requires [Compute shader](https://docs.unity3d.com/Manual/ComputeShaders.html) support.
+In Unity, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram and the **Auto Exposure** effect requires [Compute shader](https://docs.unity3d.com/Manual/class-ComputeShader.html) support.
 
 
 ![](images/autoexposure.png)
@@ -37,11 +35,15 @@ Use the `Filtering` range to exclude the darkest and brightest part of the image
 
 You can set the `Type` to `Fixed` and it will behave like an auto-exposure setting.
 
-Use the **Light Meter** [monitor](https://github.com/Unity-Technologies/PostProcessing/wiki/Debugging) when setting up this effect.
+You can debug the exposure in your scene with the **Post-process Debug** component. To do this, add the **Post-process Debug** component to your Camera and enable the **Light Meter** monitor.
+
+The Light Meter monitor creates a logarithmic histogram that appears in the **Game** window. This displays information about the exposure in your scene in real time. For more information, see [Debugging](Debugging). 
+
+![](Images/Ppv2 _ Debugging_Light meter_Graph.png)
+
+The Light Meter monitor.
 
 ### Requirements
 
 - Compute shader
 - Shader model 5
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
