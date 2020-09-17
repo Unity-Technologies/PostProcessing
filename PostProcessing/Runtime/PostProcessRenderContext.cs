@@ -421,7 +421,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// </summary>
         public void UpdateStereoTAA()
         {
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && ENABLE_VR_MODULE && ENABLE_VR
             screenWidth = XRSettings.eyeTextureWidth;
 
             if (stereoRenderingMode == StereoRenderingMode.SinglePass)

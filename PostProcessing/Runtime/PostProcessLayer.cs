@@ -624,7 +624,7 @@ namespace UnityEngine.Rendering.PostProcessing
             if (!vrSinglePassInstancingEnabled && (RequiresInitialBlit(m_Camera, context) || forceNanKillPass))
             {
                 int width = context.width;
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER && ENABLE_VR_MODULE && ENABLE_VR
                 var xrDesc = XRSettings.eyeTextureDesc;
                 if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
                    width = xrDesc.width;
