@@ -4,7 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.4.0] - 2020-09-09
+## [2.4.0] - 2020-09-17
 
 ### Fixed
 - Fix for VR Single Pass Instancing (SPI) not working with the built-in renderers. Only effects that currently support SPI for use with SRP will work correctly (so AO for example will not work with SPI even with this fix) (case 1187257)
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix for compilation errors when the built-in VR package is disabled (case 1266931)
 - Fix for Temporal Anti-Aliasing produces artifacts on the edges of objects when using VR (case 1167219)
 - Fix for blurry image when using the Post Process Layer in single-pass VR (case 1173697)
+- Fix for ambient occlusion is misaligned when using single pass rendering VR mode (case 1217583)
 
 ### Changed
 - Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
