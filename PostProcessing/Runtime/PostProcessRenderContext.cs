@@ -45,21 +45,6 @@ namespace UnityEngine.Rendering.PostProcessing
                     if (stereoRenderingMode == StereoRenderingMode.SinglePassInstanced)
                         numberOfEyes = 2;
 
-#if UNITY_2019_1_OR_NEWER
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                    {
-                        numberOfEyes = 2;
-                        xrDesc.width /= 2;
-                        xrDesc.vrUsage = VRTextureUsage.None;
-                    }
-#else
-                    //before 2019.1 double-wide still issues two drawcalls
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                    {
-                        numberOfEyes = 1;
-                    }
-#endif
-
                     width = xrDesc.width;
                     height = xrDesc.height;
                     m_sourceDescriptor = xrDesc;
@@ -69,11 +54,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     screenWidth = XRSettings.eyeTextureWidth;
                     screenHeight = XRSettings.eyeTextureHeight;
-
-#if UNITY_2019_1_OR_NEWER
-                    if (stereoRenderingMode == StereoRenderingMode.SinglePass)
-                        screenWidth /= 2;
-#endif
                     stereoActive = true;
 
                 }
