@@ -551,6 +551,10 @@ namespace UnityEngine.Rendering.PostProcessing
             var ssrRenderer = ssrBundle.renderer;
             bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
 
+#if UNITY_2019_1_OR_NEWER
+            if (context.stereoActive)
+                context.UpdateSinglePassStereoState(context.IsTemporalAntialiasingActive(), aoSupported, isScreenSpaceReflectionsActive);
+#endif
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
@@ -945,9 +949,6 @@ namespace UnityEngine.Rendering.PostProcessing
             RenderTargetIdentifier cameraTexture = context.source;
 
 #if UNITY_2019_1_OR_NEWER
-            if (context.stereoActive)
-                context.UpdateStereoTAA();
-
             if (context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
             {
                 cmd.SetSinglePassStereo(SinglePassStereoMode.None);
