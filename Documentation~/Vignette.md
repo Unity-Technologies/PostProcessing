@@ -1,16 +1,24 @@
 # Vignette
 
-The **Vignette** effect darkens the edges of an image, leaving the center of the image brighter. For more information on the Vignette effect, see the [Vignette](https://docs.unity3d.com/Manual/PostProcessing-Vignette.html) documentation in the Unity manual.
+The **Vignette** effect darkens the edges of an image. This simulates the effect in a real-world camera lens caused by thick or stacked filters, secondary lenses, or an improper lens hood. You can use the **Vignette** effect to draw attention to the center of an image. 
+
+![](images\PostProcessing-Vignette-1.png)
+
+Scene without Vignette.
+
+![PostProcessing-Vignette-2](images\PostProcessing-Vignette-2.png)
+
+Scene with Vignette.
 
 The Vignette effect in the post-processing stack has two modes:
 
 - [Classic](#classic)
 - [Masked](#masked)
 
-
+<a name="classic"></a>
 ## Classic
 
-Classic mode has parametric controls for the position, shape and intensity of the Vignette. This is the most common way to use the effect.
+**Classic** mode has parametric controls for the position, shape and intensity of the Vignette. This is the most common way to use the effect.
 
 
 ![](images/vignette-1.png)
@@ -27,10 +35,10 @@ Classic mode has parametric controls for the position, shape and intensity of th
 | Roundness  | Set the value to round the Vignette. Lower values will make a more squared vignette.              |
 | Rounded    | Enable this checkbox to make the vignette perfectly round. When disable, the Vignette effect is dependent on the current aspect ratio. |
 
+<a name="masked"></a>
 ## Masked
 
-Masked mode multiplies a custom texture mask over the screen to create a Vignette effect. This mode can be used to achieve less common or irregular vignetting effects.
-
+**Masked** mode uses a custom texture mask and multiplies it over the scene to create a Vignette effect. This mode can be used to create less common or irregular vignetting effects.
 
 ![](images/vignette-2.png)
 
@@ -46,5 +54,3 @@ Masked mode multiplies a custom texture mask over the screen to create a Vignett
 ### Requirements
 
 - Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

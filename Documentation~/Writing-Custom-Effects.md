@@ -1,74 +1,82 @@
 # Writing custom effects
 
-This framework allows you to write custom post-processing effects and plug them to the stack without having to modify the codebase. Of course, all effects written against the framework will work out-of-the-box with volume blending, and unless you need loop-dependent features they'll also automatically work with upcoming  [Scriptable Render Pipelines](https://github.com/Unity-Technologies/ScriptableRenderLoop)!
+This quick-start guide demonstrates how to write a custom [post-processing effect](https://docs.unity3d.com/Manual/PostProcessingOverview.html) and include it in the post-processing stack. This process does not require you to modify the codebase.
 
-Let's write a very simple grayscale effect to show it off.
+Custom post-processing effects require a minimum of two files: 
 
-Custom effects need a minimum of two files: a C# and a HLSL source files (note that HLSL gets cross-compiled to GLSL, Metal and others API by Unity so it doesn't mean it's restricted to DirectX).
+- A C# source file
+- An [HLSL](https://en.wikipedia.org/wiki/High-Level_Shading_Language) source file
 
-> **Note:** this quick-start guide requires moderate knowledge of C# and shader programming. We won't go over every detail here, consider it as an overview more than an in-depth tutorial.
+Unity cross-compiles HLSL to [GLSL](https://docs.unity3d.com/Manual/30_search.html?q=GLSL), [Metal](https://docs.unity3d.com/Manual/Metal.html), and other APIs. This means it is not restricted to DirectX.
 
-## C#
+This quick-start guide requires a basic knowledge of programming C# in Unity and HLSL shader programming.
 
-Full code listing:
+## C# source code
+
+The following example demonstrates how to use a C# script to create a custom grayscale post-processing effect. The script in this example calls APIs from the Post Processing framework and works with volume blending. This example is compatible with versions of Unity from 2018 onwards. It is not compatible with [HDRP](https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest?subfolder=/manual/):
 
 ```csharp
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
- 
+
 [Serializable]
 [PostProcess(typeof(GrayscaleRenderer), PostProcessEvent.AfterStack, "Custom/Grayscale")]
 public sealed class Grayscale : PostProcessEffectSettings
 {
-    [Range(0f, 1f), Tooltip("Grayscale effect intensity.")]
-    public FloatParameter blend = new FloatParameter { value = 0.5f };
+  [Range(0f, 1f), Tooltip("Grayscale effect intensity.")]
+   public FloatParameter blend = new FloatParameter { value = 0.5f };
 }
- 
 public sealed class GrayscaleRenderer : PostProcessEffectRenderer<Grayscale>
 {
-    public override void Render(PostProcessRenderContext context)
-    {
-        var sheet = context.propertySheets.Get(Shader.Find("Hidden/Custom/Grayscale"));
-        sheet.properties.SetFloat("_Blend", settings.blend);
-        context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
-    }
+   public override void Render(PostProcessRenderContext context)
+  {
+       var sheet = context.propertySheets.Get(Shader.Find("Hidden/Custom/Grayscale"));
+       sheet.properties.SetFloat("_Blend", settings.blend);
+       context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
+  }
 }
 ```
 
-> **Important**: this code has to be stored in a file named `Grayscale.cs`. Because of how serialization works in Unity, you have to make sure that the file is named after your settings class name or it won't be serialized properly.
+> **Important**: This file name of this script must match the name of its class for it to serialize correctly. In this case, the script must be stored in a file named `Grayscale.cs`.
 
-We need two classes, one to store settings (data) and another one to handle the rendering part (logic).
+### Classes
 
-### Settings
+A custom post-processing effect script requires two classes:
 
-The settings class holds the data for our effect. These are all the user-facing fields you'll see in the volume inspector.
+- a data class to store settings
+- a logic class to render the effect
+
+### Data class
+
+The data class holds all the settings fields the user sees in the Inspector window for that volume profile. Here is how the data class works in the example script described in [C# source code](https://docs.google.com/document/d/1pVuCcjMJ9HVETWARW29j5TYBd6nh025ayoJDC9UNzy4/edit?ts=5f5a3d2b#heading=h.hzftdvnzv4dh):
 
 ```csharp
-[Serializable]
+//The Serializable attribute allows Unity to serialize this class and extend PostProcessEffectSettings.
+[Serializable] 
+// The [PostProcess()] attribute tells Unity that this class holds post-processing data. The first parameter links the settings to a renderer. The second parameter creates the injection point for the effect. The third parameter is the menu entry for the effect. You can use a forward slash (/) to create sub-menu categories. 
 [PostProcess(typeof(GrayscaleRenderer), PostProcessEvent.AfterStack, "Custom/Grayscale")]
 public sealed class Grayscale : PostProcessEffectSettings
 {
-    [Range(0f, 1f), Tooltip("Grayscale effect intensity.")]
-    public FloatParameter blend = new FloatParameter { value = 0.5f };
+ // You can create boxed fields to override or blend parameters. This example uses a FloatParameter with a fixed range from 0 to 1.
+  [Range(0f, 1f), Tooltip("Grayscale effect intensity.")] 
+  public FloatParameter blend = new FloatParameter { value = 0.5f };
 }
 ```
 
-First, you need to make sure this class extends `PostProcessEffectSettings` and can be serialized, so don't forget the `[Serializable]` attribute!
+#### Notes:
 
-Second, you'll need to tell Unity that this is a class that holds post-processing data. That's what the `[PostProcess()]` attribute is for. First parameter links the settings to a renderer (more about that in the next section). Second parameter is the injection point for the effect. Right now you have 3 of those available:
+The second parameter of the `[PostProcess()]` attribute is the injection point for the effect. There are three injection points available:
 
-- `BeforeTransparent`: the effect will only be applied to opaque objects before the transparent pass is done.
-- `BeforeStack`: the effect will be applied before the built-in stack kicks-in. That includes anti-aliasing, depth-of-field, tonemapping etc.
-- `AfterStack`: the effect will be applied after the builtin stack and before FXAA (if it's enabled) & final-pass dithering.
+- `BeforeTransparent`: Unity only applies the effect to opaque objects before Unity runs the transparent pass.
+- `BeforeStack`: Unity injects the effect before applying the built-in stack. This applies to all post processing effects except [Temporal anti-aliasing (TAA),](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing.html) which Unity applies before any injection points.
+- `AfterStack`: Unity applies the effect after the built-in stack and before [FXAA](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing#fast-approximate-anti-aliasing.html) (if it's enabled) and final-pass dithering.
 
-The third parameter is the menu entry for the effect. You can use `/` to create sub-menu categories.
+The `[PostProcess()]` attribute has an optional fourth parameter called `allowInSceneView`. You can use this parameter to enable or disable the effect in the scene. It's set to true by default, but you can disable it for temporal effects or effects that get in the way of editing the scene easily.
 
-Finally, there's an optional fourth parameter `allowInSceneView` which, as its name suggests, enables the effect in the scene view or not. It's set to `true` by default but you may want to disable it for temporal effects or effects that make level editing hard.
+For a full list of built-in parameter classes, see the `ParameterOverride.cs` source file in **/PostProcessing/Runtime/**.
 
-For parameters themselves you can use any type you need, but if you want these to be overridable and blendable in volumes you'll have to use boxed fields. In our case we'll simply add a `FloatParameter` with a fixed range going from `0` to `1`. You can get a full list of builtin parameter classes by browsing through the `ParameterOverride.cs` source file in `/PostProcessing/Runtime/`, or you can create your own quite easily by following the way it's done in that same source file.
-
-Note that you can also override the `IsEnabledAndSupported()` method of `PostProcessEffectSettings` to set your own requirements for the effect (in case it requires specific hardware) or even to silently disable the effect until a condition is met. For example, in our case we could automatically disable the effect if the blend parameter is `0` like this:
+If you want to set your own requirements for the effect or disable it until a condition is met, you can override the `IsEnabledAndSupported()` method of `PostProcessEffectSettings`. For example, the following script automatically disables an effect if the blend parameter is `0`:
 
 ```csharp
 public override bool IsEnabledAndSupported(PostProcessRenderContext context)
@@ -78,112 +86,122 @@ public override bool IsEnabledAndSupported(PostProcessRenderContext context)
 }
 ```
 
-That way the effect won't be executed at all unless `blend > 0`.
+### Logic class
 
-### Renderer
-
-Let's look at the rendering logic now. Our renderer extends `PostProcessEffectRenderer<T>`, with `T` being the settings type to attach to this renderer.
+The logic class tells Unity how to render this post-processing effect. Here is how the logic class works in the example script described in [C# source code](https://docs.google.com/document/d/1pVuCcjMJ9HVETWARW29j5TYBd6nh025ayoJDC9UNzy4/edit?ts=5f5a3d2b#heading=h.hzftdvnzv4dh):
 
 ```csharp
+// This renderer extends PostProcessEffectRenderer<T>, where T is the settings type Unity attaches to this renderer.
 public sealed class GrayscaleRenderer : PostProcessEffectRenderer<Grayscale>
 {
-    public override void Render(PostProcessRenderContext context)
-    {
-        var sheet = context.propertySheets.Get(Shader.Find("Hidden/Custom/Grayscale"));
-        sheet.properties.SetFloat("_Blend", settings.blend);
-        context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
-    }
+  // Everything that happens in the Render() method takes a PostProcessRenderContext as parameter.
+ public override void Render(PostProcessRenderContext context)
+  {
+// Request a PropertySheet for our shader and set the uniform within it.
+       var sheet = context.propertySheets.Get(Shader.Find("Hidden/Custom/Grayscale"));
+// Send the blend parameter value to the shader.       
+       sheet.properties.SetFloat("_Blend", settings.blend);
+ // This context provides a command buffer which you can use to blit a fullscreen pass using a source image as an input with a destination for the shader, sheet and pass number.
+      context.command.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
+  }
 }
 ```
 
-Everything happens in the `Render()` method that takes a `PostProcessRenderContext` as parameter. This context holds useful data that you can use and is passed around effects when they are rendered. Look into `/PostProcessing/Runtime/PostProcessRenderContext.cs` for a list of what's available (the file is heavily commented).
+#### Notes:
 
-`PostProcessEffectRenderer<T>` also have a few other methods you can override, such as:
+The `PostProcessRenderContext` context holds data that Unity passes around effects when it renders them. You can find out what data is available in **/PostProcessing/Runtime/PostProcessRenderContext.cs**.
 
-- `void Init()`: called when the renderer is created.
-- `DepthTextureMode GetLegacyCameraFlags()`: used to set camera flags and request depth map, motion vectors, etc.
-- `void ResetHistory()`: called when a "reset history" event is dispatched. Mainly used for temporal effects to clear history buffers and whatnot.
-- `void Release()`: called when the renderer is destroyed. Do your cleanup there if you need it.
+The example grayscale effect script only uses [command buffers](https://docs.unity3d.com/ScriptReference/Rendering.CommandBuffer.html) which means the system relies on `MaterialPropertyBlock` to store shader data. Unity’s framework automatically pools the shader data to save time and optimize performance. This script requests a `PropertySheet` for the shader and sets the uniform inside it, so that you do not need to create `MaterialPropertyBlock` manually.
 
-Our effect is quite simple. We need two things:
+`PostProcessEffectRenderer<T>` has the following methods you can override:
 
-- Send the `blend` parameter value to the shader.
-- Blit a fullscreen pass with the shader to a destination using our source image as an input.
+| Method                                    | Description                                                  |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| `void Init()`                             | This method is called when the renderer is created           |
+| `DepthTextureMode GetLegacyCameraFlags()` | This method sets Camera flags and requests depth maps, motion vectors, etc. |
+| `void ResetHistory()`                     | This method is called when a "reset history" event is dispatched. Use this to clear history buffers for temporal effects. |
+| `void Release()`                          | This method is called when the renderer is destroyed. You can perform a cleanup here |
 
-Because we only use command buffers, the system relies on `MaterialPropertyBlock` to store shader data. You don't need to create those yourself as the framework does automatic pooling for you to save time and make sure performances are optimal. So we'll just request a `PropertySheet` for our shader and set the uniform in it.
+## HLSL source code
 
-Finally we use the `CommandBuffer` provided by the context to blit a fullscreen pass with our source, destination, sheet and pass number.
+Unity uses the HLSL programming language for shader programs. For more information, see [Shading language used in Unity](https://docs.unity3d.com/Manual/SL-ShadingLanguage.html).
 
-And that's it for the C# part.
-
-## Shader
-
-Writing custom effect shaders is fairly straightforward as well, but there are a few things you should know before you get to it. This framework makes heavy use of macros to abstract platform differences and make your life easier. Compatibility is key, even more so with the upcoming Scriptable Render Pipelines.
-
-Full code listing:
+The following example demonstrates how to create an HLSL script for a custom grayscale post-processing effect: 
 
 ```hlsl
 Shader "Hidden/Custom/Grayscale"
 {
-    HLSLINCLUDE
-
-        #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-        float _Blend;
-
-        float4 Frag(VaryingsDefault i) : SV_Target
-        {
-            float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
-            float luminance = dot(color.rgb, float3(0.2126729, 0.7151522, 0.0721750));
-            color.rgb = lerp(color.rgb, luminance.xxx, _Blend.xxx);
-            return color;
-        }
-
-    ENDHLSL
-
-    SubShader
-    {
-        Cull Off ZWrite Off ZTest Always
-
-        Pass
-        {
-            HLSLPROGRAM
-
-                #pragma vertex VertDefault
-                #pragma fragment Frag
-
-            ENDHLSL
-        }
-    }
+  HLSLINCLUDE 
+// StdLib.hlsl holds pre-configured vertex shaders (VertDefault), varying structs (VaryingsDefault), and most of the data you need to write common effects.
+      #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+      TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+// Lerp the pixel color with the luminance using the _Blend uniform.      
+      float _Blend;
+      float4 Frag(VaryingsDefault i) : SV_Target
+      {
+          float4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+// Compute the luminance for the current pixel
+          float luminance = dot(color.rgb, float3(0.2126729, 0.7151522, 0.0721750));
+          color.rgb = lerp(color.rgb, luminance.xxx, _Blend.xxx);
+// Return the result
+          return color;
+      }
+  ENDHLSL
+  SubShader
+  {
+      Cull Off ZWrite Off ZTest Always
+      Pass
+      {
+          HLSLPROGRAM
+              #pragma vertex VertDefault
+              #pragma fragment Frag
+          ENDHLSL
+      }
+  }
 }
+
 ```
 
-First thing to note: we don't use `CG` blocks anymore. If future compatibility with Scriptable Render Pipelines is important to you, do not use them as they'll break the shader when switching over because `CG` blocks add hidden code you don't want to the shader. Instead, use `HLSL` blocks.
+#### Notes: 
 
-At a minimum you'll need to include `StdLib.hlsl`. This holds pre-configured vertex shaders and varying structs (`VertDefault`, `VaryingsDefault`) and most of the data you need to write common effects.
+This framework uses [shader preprocessor macros](https://docs.unity3d.com/Manual/SL-BuiltinMacros.html) to define platform differences. This helps to maintain compatibility across platforms and render pipelines.
 
-Texture declaration is done using macros. To get a list of available macros we recommend you look into one of the api files in `/PostProcessing/Shaders/API/`.
+This script also uses macros to declare textures. For a list of available macros, see the API files in **/PostProcessing/Shaders/API/**.
 
-Other than that, the rest is standard shader code. Here we compute the luminance for the current pixel, we lerp the pixel color with the luminance using the `_Blend` uniform and we return the result.
+This script uses HLSL blocks instead of CG blocks to avoid compatibility issues between render pipelines. Inside the HLSL block is the varying structs parameter, `VaryingsDefault i`. This parameter can use the following variables:
+```hlsl
+struct VaryingsDefault
+{
+   float4 vertex : SV_POSITION;
+   float2 texcoord : TEXCOORD0;
+   float2 texcoordStereo : TEXCOORD1;
+#if STEREO_INSTANCING_ENABLED
+   uint stereoTargetEyeIndex : SV_RenderTargetArrayIndex;
+#endif
+};
+```
 
-> **Important:** if the shader is never referenced in any of your scenes it won't get built and the effect will not work when running the game outside of the editor. Either add it to a [Resources folder](https://docs.unity3d.com/Manual/LoadingResourcesatRuntime.html) or put it in the **Always Included Shaders** list in `Edit -> Project Settings -> Graphics`.
+- `vertex`: The vertex position.
+- `texcoord`: The uv coordinate for the fragment.
+- `texcoordStereo`: The uv coordinate for the fragment in stereo mode
+- `stereoTargetEyeIndex`: The current eye index (only available with VR + stereo instancing).
 
-## Effect ordering
+Unity cannot build a shader if it is not referenced in a scene. This means the effect does not work when the application is running outside of the Editor. To fix this, add your shader to a[ Resources folder](https://docs.unity3d.com/Manual/LoadingResourcesatRuntime.html) or include it in the [**Always Included Shaders**](https://docs.unity3d.com/Manual/class-GraphicsSettings.html#Always) list in **Edit > Project Settings > Graphics**.
 
-Built-in effects are automatically sorted, but what about custom effects? As soon as you create a new effect or import it into your project it'll be added to the `Custom Effect Sorting` list in the `Post Process Layer` component on a Camera.
+## Ordering post-processing effects
 
-![Order of custom effects](images/custom-effect-sorting.png)
+Unity automatically sorts built-in effects, but it handles custom effects differently. When you create a new effect or import it into your project, Unity does the following: 
 
-They will be pre-sorted by injection point but you can re-order these at will. The order is per-layer, which means you can use different ordering schemes per-camera.
+- Adds the custom effect to the Custom Effect Sorting list in the Post Process Layer component on a Camera.
+- Sorts each custom effect by its injection point. You can change the order of the custom effects in the [Post Process Layer](https://docs.unity3d.com/Packages/com.unity.postprocessing@2.3/manual/Quick-start.html) component using **Custom Effect Sorting**.
 
-## Custom editor
+Unity orders custom effects within each layer, which means you can order your custom effects differently for each Camera.
 
-By default editors for settings classes are automatically created for you. But sometimes you'll want more control over how fields are displayed. Like classic Unity components, you have the ability to create custom editors.
+## Creating a custom editor
 
-> **Important:** like classic editors, you'll have to put these in an `Editor` folder.
+Unity automatically creates editors for settings classes. If you want to control how Unity displays certain fields, you can create a custom editor.
 
-If we were to replicate the default editor for our `Grayscale` effect, it would look like this:
+The following example uses the default editor script to create a custom editor for a `Grayscale` effect:
 
 ```csharp
 using UnityEngine.Rendering.PostProcessing;
@@ -206,6 +224,20 @@ public sealed class GrayscaleEditor : PostProcessEffectEditor<Grayscale>
 }
 ```
 
-## Additional notes
+#### Notes: 
 
-For performance reasons, FXAA expects the LDR luminance value of each pixel to be stored in the alpha channel of its source target. If you need FXAA and wants to inject custom effects at the `AfterStack` injection point, make sure that the last executed effect contains LDR luminance in the alpha channel (or simply copy alpha from the incoming source). If it's not FXAA won't work correctly.
+For Unity to recognise your custom editor, it has to be in an Editor folder.
+
+## FXAA compatibility with custom effects 
+
+If you apply [**FXAA**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing.html) in a scene with custom effects, the order of your post-processing effects might stop it from working correctly. This is because FXAA looks for the LDR (Low dynamic range) luminance value of each pixel in the alpha channel of its source target to optimise performance.
+
+If you inject custom effects at the `AfterStack` injection point, as demonstrated in the example above, FXAA looks for LDR luminance in the last executed effect. If it can’t find it, FXAA won’t work correctly.
+
+You can fix this in your custom shader in one of two ways: 
+
+- Make sure that the last executed effect contains LDR luminance in the alpha channel.
+- Copy the alpha from the incoming source.
+
+
+

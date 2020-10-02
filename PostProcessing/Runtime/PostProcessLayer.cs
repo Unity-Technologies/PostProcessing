@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 
 namespace UnityEngine.Rendering.PostProcessing
 {
-#if ENABLE_VR
+#if (ENABLE_VR_MODULE && ENABLE_VR)
     using XRSettings = UnityEngine.XR.XRSettings;
 #endif
 
@@ -118,8 +118,12 @@ namespace UnityEngine.Rendering.PostProcessing
         [SerializeField]
         PostProcessResources m_Resources;
 
+        // Some juggling needed to track down reference to the resource asset when loaded from asset
+        // bundle (guid conflict)
         [NonSerialized]
-        PostProcessResources m_OldResources;        // UI states
+        PostProcessResources m_OldResources;
+
+        // UI states
         [UnityEngine.Scripting.Preserve]
         [SerializeField]
         bool m_ShowToolkit;
@@ -440,11 +444,10 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2018_2_OR_NEWER
             if (!m_Camera.usePhysicalProperties)
 #endif
-            if (m_CurrentContext.IsTemporalAntialiasingActive())
                 m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
-#if ENABLE_VR
+#if (ENABLE_VR_MODULE && ENABLE_VR)
             if (m_Camera.stereoEnabled)
             {
                 m_Camera.ResetStereoProjectionMatrices();
@@ -548,6 +551,10 @@ namespace UnityEngine.Rendering.PostProcessing
             var ssrRenderer = ssrBundle.renderer;
             bool isScreenSpaceReflectionsActive = ssrSettings.IsEnabledAndSupported(context);
 
+#if UNITY_2019_1_OR_NEWER
+            if (context.stereoActive)
+                context.UpdateSinglePassStereoState(context.IsTemporalAntialiasingActive(), aoSupported, isScreenSpaceReflectionsActive);
+#endif
             // Ambient-only AO is a special case and has to be done in separate command buffers
             if (isAmbientOcclusionDeferred)
             {
@@ -620,11 +627,17 @@ namespace UnityEngine.Rendering.PostProcessing
             bool vrSinglePassInstancingEnabled = context.stereoActive && context.numberOfEyes > 1 && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePassInstanced;
             if (!vrSinglePassInstancingEnabled && (RequiresInitialBlit(m_Camera, context) || forceNanKillPass))
             {
+                int width = context.width;
+#if UNITY_2019_1_OR_NEWER && ENABLE_VR_MODULE && ENABLE_VR
+                var xrDesc = XRSettings.eyeTextureDesc;
+                if (context.stereoActive && context.stereoRenderingMode == PostProcessRenderContext.StereoRenderingMode.SinglePass)
+                   width = xrDesc.width;
+#endif
                 tempRt = m_TargetPool.Get();
                 // https://github.com/Unity-Technologies/PostProcessing/issues/844
                 if (!context.stereoActive)
                 {
-                    context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB);
+                    context.GetScreenSpaceTemporaryRT(m_LegacyCmdBuffer, tempRt, 0, sourceFormat, RenderTextureReadWrite.sRGB, FilterMode.Bilinear, width);
                 }
                 else
                 {
@@ -845,7 +858,13 @@ namespace UnityEngine.Rendering.PostProcessing
 
         void SetupContext(PostProcessRenderContext context)
         {
-            RuntimeUtilities.UpdateResources(m_Resources);
+            // Juggling required when a scene with post processing is loaded from an asset bundle
+            // See #1148230
+            if (m_OldResources != m_Resources)
+            {
+                RuntimeUtilities.UpdateResources(m_Resources);
+                m_OldResources = m_Resources;
+            }
 
             m_IsRenderingInSceneView = context.camera.cameraType == CameraType.SceneView;
             context.isSceneView = m_IsRenderingInSceneView;

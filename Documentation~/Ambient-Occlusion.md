@@ -1,8 +1,8 @@
 # Ambient Occlusion
 
-The **Ambient Occlusion** post-processing effect darkens creases, holes, intersections and surfaces that are close to each other.
+The **Ambient Occlusion** effect calculates points in your scene that are exposed to ambient lighting. It then darkens areas that are hidden from the ambient light, such as creases, holes, and spaces between objects which are close together.
 
-For further information on the **Ambient Occlusion** effect, refer to the [Ambient Occlusion](https://docs.unity3d.com/Manual/PostProcessing-AmbientOcclusion.html) documentation in the Unity manual.
+You can achieve the **Ambient Occlusion** effect in two ways: in real-time as a full-screen post-processing effect, or as a baked lighting effect (see [Baked Ambient Occlusion](https://docs.unity3d.com/Manual/LightingBakedAmbientOcclusion.html)). The real-time **Ambient Occlusion** effect can be resource-intensive, which makes it better for desktop or console platforms. Its impact on processing time depends on screen resolution and effects properties.
 
 The **Ambient Occlusion** effect in this package has two modes:
 
@@ -11,11 +11,11 @@ The **Ambient Occlusion** effect in this package has two modes:
 
 ## Scalable Ambient Obscurance
 
-This is a standard implementation of ambient obscurance that works on older platforms. If you need to target a compute-enabled platform, use the **Multi-scale Volumetric Occlusion** mode instead.
+This is a standard implementation of ambient obscurance that works on older platforms. If you need to target a compute-enabled platform, use the [**Multi-scale Volumetric Occlusion**](multi-scale-volumetric-occlusion) mode instead.
 
 ### Performance
 
-The **Scalable Ambient Obscurance** mode can be resource-intensive, especially when viewed very close to the Camera. To improve performance, use a low `Radius` setting, to sample pixels that are close and in clip space to the source pixel. This makes cacheing more efficent. Using a higher `Radius` setting generates samples further away from the source pixel and won’t benefit from caching, which slows down the effect. 
+The **Scalable Ambient Obscurance** mode can be resource-intensive, especially when viewed very close to the Camera. To improve performance, use a low `Radius` setting, to sample pixels that are close and in clip space to the source pixel. This makes caching more efficient. Using a higher `Radius` setting generates samples further away from the source pixel and won’t benefit from caching, which slows down the effect. 
 
 Because of the Camera’s perspective, objects near the front plane use larger radiuses than those far away, so computing the ambient occlusion pass for an object close to the camera will be slower than for an object further away that only occupies a few pixels on screen.
 
@@ -27,8 +27,6 @@ Dropping the `Quality` setting down will improve performance too.
 
 - Depth & Normals textures
 - Shader model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
 
 
 ![](images/ssao-1.png)
@@ -44,6 +42,8 @@ See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/
 | Color        | Set the tint color of the ambient occlusion.                               |
 | Ambient Only | Enable this checkbox to make the **Ambient Occlusion** effect only affect ambient lighting. This option is only available with the Deferred rendering path and HDR rendering. |
 
+<a name="multi-scale-volumetric-occlusion"></a>
+
 ## Multi-scale Volumetric Occlusion
 
 This mode is optimized for consoles and desktop platforms. It has better graphics and runs faster than **Scalable Ambient Obscurance** on these platforms but requires [compute shader support](https://docs.unity3d.com/Manual/class-ComputeShader.html).
@@ -52,8 +52,6 @@ This mode is optimized for consoles and desktop platforms. It has better graphic
 
 - Compute shader support
 - Shader model 4.5
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
 
 ![](images/ssao-2.png)
 

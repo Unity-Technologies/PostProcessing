@@ -1,14 +1,15 @@
 # Bloom
 
-The **Bloom** effect creates fringes of light extending from the borders of bright areas in an image, contributing to the illusion of an extremely bright light overwhelming the Camera.
+The **Bloom** effect makes bright areas in your image glow. To do this, it creates fringes of light that extend from bright areas in your image. This simulates the effect a real-world camera gives when light overwhelms the lens.
 
-You can also use **Lens Dirt** to apply a full-screen layer of smudges or dust to diffract the Bloom effect.
+The Bloom effect also has a **Dirtiness** feature, which you can use to apply a full-screen layer of smudges or dust to diffract the Bloom effect.
 
 
-![](images/bloom.png)
-
+![PostProcessing-Bloom-0](images\PostProcessing-Bloom-0.jpg)
 
 ### Properties
+
+![](images/bloom.png)
 
 **Bloom** settings:
 
@@ -32,16 +33,15 @@ You can also use **Lens Dirt** to apply a full-screen layer of smudges or dust t
 
 ### Details
 
-With properly exposed HDR scenes, the `Threshold` should be set to ~1 so that only pixels with values above 1 leak into surrounding objects. Drop this value when working in LDR or the effect won’t be visible.
+With properly exposed HDR scenes, the `Threshold` should be set to ~1 so that only pixels with values above 1 leak into surrounding objects. Lower this value when working in LDR or the Bloom effect won’t be visible.
 
 ### Performance
 
 Lowering the `Diffusion` parameter will make the effect faster. The further away `Anamorphic Ratio` is from 0, the slower it will be. Enable `Fast Mode` if you are developing for mobile or low-end platforms to get a significant boost in performance.
 
-Smaller lens dirt textures will result in faster lookup and blending across volumes.
+Lower resolution lens dirt textures  result in faster lookup and blending across volumes.
 
 ### Requirements
 
 - Shader model 3
 
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

@@ -1,12 +1,13 @@
 # Motion Blur
 
-The **Motion Blur** effect blurs an image when GameObjects are moving faster than the camera’s exposure time. For more information on the Motion Blur effect, see the [Motion Blur](https://docs.unity3d.com/Manual/PostProcessing-MotionBlur.html) documentation in the Unity manual.
+The **Motion Blur** effect blurs the image in the direction of the **Camera’s** movement. This simulates the blur effect a real-world camera creates when it moves with the lens aperture open, or when it captures an object moving faster than the camera’s exposure time.
 
 
-![](images/motionblur.png)
-
+![screenshot-motionblur](images\screenshot-motionblur.png)
 
 ### Properties
+
+![](images/motionblur.png)
 
 | Property      | Function                                                     |
 | :------------- | :------------------------------------------------------------ |
@@ -26,5 +27,3 @@ Using a lower `Sample Count` will improve performance.
 - Motion vectors
 - Depth texture
 - Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.

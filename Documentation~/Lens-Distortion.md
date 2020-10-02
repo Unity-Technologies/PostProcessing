@@ -1,6 +1,6 @@
 # Lens Distortion
 
-The **Lens Distortion** effect simulates the shape of a real-world camera lens by distorting or undistorting the final rendered picture.
+The **Lens Distortion** effect simulates distortion caused by the shape of a real-world camera lens. You can adjust the intensity of this effect between barrel distortion and pincushion distortion.
 
 ![](images/lensdistortion.png)
 
@@ -23,5 +23,3 @@ The **Lens Distortion** effect simulates the shape of a real-world camera lens b
 ### Requirements
 
 - Shader Model 3
-
-See the [Graphics Hardware Capabilities and Emulation](https://docs.unity3d.com/Manual/GraphicsEmulation.html) page for further details and a list of compliant hardware.
