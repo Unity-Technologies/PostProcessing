@@ -383,7 +383,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal static void UpdateResources(PostProcessResources resources)
         {
-            Destroy(s_CopyMaterial);
+            // https://github.com/Unity-Technologies/PostProcessing/issues/826
+            /*Destroy(s_CopyMaterial);
             Destroy(s_CopyStdMaterial);
             Destroy(s_CopyFromTexArrayMaterial);
             Destroy(s_CopyStdFromDoubleWideMaterial);
@@ -394,7 +395,7 @@ namespace UnityEngine.Rendering.PostProcessing
             s_CopyStdFromDoubleWideMaterial = null;
 
             s_CopySheet = null;
-            s_CopyFromTexArraySheet = null;
+            s_CopyFromTexArraySheet = null;*/
 
             s_Resources = resources;
         }

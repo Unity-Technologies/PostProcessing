@@ -189,7 +189,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 context.GetScreenSpaceTemporaryRT(cmd, mipDown, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
                 context.GetScreenSpaceTemporaryRT(cmd, mipUp, 0, context.sourceFormat, RenderTextureReadWrite.Default, FilterMode.Bilinear, tw_stereo, th);
-                cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass);
+                cmd.BlitFullscreenTriangle(lastDown, mipDown, sheet, pass, RuntimeUtilities.isVREnabled);
 
                 lastDown = mipDown;
                 tw_stereo = (singlePassDoubleWide && ((tw_stereo / 2) % 2 > 0)) ? 1 + tw_stereo / 2 : tw_stereo / 2;

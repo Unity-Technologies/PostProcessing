@@ -6,7 +6,7 @@ namespace UnityEngine.Rendering.PostProcessing
     /// <summary>
     /// Screen-space Reflections quality presets.
     /// </summary>
-    public enum ScreenSpaceReflectionPreset
+	public enum ScreenSpaceReflectionPreset
     {
         /// <summary>
         /// Lowest quality.
@@ -136,6 +136,13 @@ namespace UnityEngine.Rendering.PostProcessing
         public FloatParameter vignette = new FloatParameter { value = 0.5f };
 
         /// <summary>
+        /// Enables the use of motion vectors to slightly improve visual quality.
+        /// </summary>
+        [Tooltip("Enables the use of motion vectors to slightly improve visual quality.")]
+        public BoolParameter useMotionVectors = new BoolParameter { value = false };
+
+
+        /// <summary>
         /// Returns <c>true</c> if the effect is currently enabled and supported.
         /// </summary>
         /// <param name="context">The current post-processing render context</param>
@@ -144,7 +151,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             return enabled
                 && context.camera.actualRenderingPath == RenderingPath.DeferredShading
-                && SystemInfo.supportsMotionVectors
+                && (!useMotionVectors || SystemInfo.supportsMotionVectors)
                 && SystemInfo.supportsComputeShaders
                 && SystemInfo.copyTextureSupport > CopyTextureSupport.None
                 && context.resources.shaders.screenSpaceReflections
@@ -188,7 +195,14 @@ namespace UnityEngine.Rendering.PostProcessing
 
         public override DepthTextureMode GetCameraFlags()
         {
-            return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+            if (settings.useMotionVectors.value)
+            {
+                return DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+            }
+            else
+            {
+                return DepthTextureMode.Depth;
+            }
         }
 
         internal void CheckRT(ref RenderTexture rt, int width, int height, FilterMode filterMode, bool useMipMap)
@@ -247,6 +261,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
             var noiseTex = context.resources.blueNoise256[0];
             var sheet = context.propertySheets.Get(context.resources.shaders.screenSpaceReflections);
+
+            if (settings.useMotionVectors.value)
+            {
+                sheet.EnableKeyword("_UseMotionVectors");
+            }
+            else
+            {
+                sheet.DisableKeyword("_UseMotionVectors");
+            }
+
             sheet.properties.SetTexture(ShaderIDs.Noise, noiseTex);
 
             var screenSpaceProjectionMatrix = new Matrix4x4();

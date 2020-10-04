@@ -230,7 +230,7 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Camera = null;
             width = 0;
             height = 0;
-            m_sourceDescriptor = new RenderTextureDescriptor(0, 0);
+            m_sourceDescriptor = new RenderTextureDescriptor(0, 0) { colorFormat = RenderTextureFormat.Default, msaaSamples = 1 };
 #if UNITY_2018_2_OR_NEWER
             physicalCamera = false;
 #endif
@@ -303,21 +303,11 @@ namespace UnityEngine.Rendering.PostProcessing
 
         // TODO: Change w/h name to texture w/h in order to make
         // size usages explicit
-        RenderTextureDescriptor m_sourceDescriptor;
+        RenderTextureDescriptor m_sourceDescriptor = new RenderTextureDescriptor(0, 0) { colorFormat = RenderTextureFormat.Default, msaaSamples = 1 };
         internal RenderTextureDescriptor GetDescriptor(int depthBufferBits = 0, RenderTextureFormat colorFormat = RenderTextureFormat.Default, RenderTextureReadWrite readWrite = RenderTextureReadWrite.Default)
         {
-            var modifiedDesc = new RenderTextureDescriptor(m_sourceDescriptor.width, m_sourceDescriptor.height,
-                                                                                m_sourceDescriptor.colorFormat, depthBufferBits);
-            modifiedDesc.dimension = m_sourceDescriptor.dimension;
-            modifiedDesc.volumeDepth = m_sourceDescriptor.volumeDepth;
-            modifiedDesc.vrUsage = m_sourceDescriptor.vrUsage;
-            modifiedDesc.msaaSamples = m_sourceDescriptor.msaaSamples;
-            modifiedDesc.memoryless = m_sourceDescriptor.memoryless;
-
-            modifiedDesc.useMipMap = m_sourceDescriptor.useMipMap;
-            modifiedDesc.autoGenerateMips = m_sourceDescriptor.autoGenerateMips;
-            modifiedDesc.enableRandomWrite = m_sourceDescriptor.enableRandomWrite;
-            modifiedDesc.shadowSamplingMode = m_sourceDescriptor.shadowSamplingMode;
+            var modifiedDesc = m_sourceDescriptor;
+            modifiedDesc.depthBufferBits = depthBufferBits;
 
 #if UNITY_2019_1_OR_NEWER     
             if (m_Camera.allowDynamicResolution)           

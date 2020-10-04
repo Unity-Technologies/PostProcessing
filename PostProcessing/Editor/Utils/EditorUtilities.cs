@@ -78,14 +78,23 @@ namespace UnityEditor.Rendering.PostProcessing
         static void ReloadDecoratorTypes()
         {
             s_AttributeDecorators.Clear();
-
+            /*
             // Look for all the valid attribute decorators
             var types = RuntimeUtilities.GetAllTypesDerivedFrom<AttributeDecorator>()
                             .Where(
                                 t => t.IsDefined(typeof(DecoratorAttribute), false)
                                   && !t.IsAbstract
                             );
-
+            */
+            Type[] types = new[]
+            {
+                typeof(UnityEditor.Rendering.PostProcessing.RangeDecorator),
+                typeof(UnityEditor.Rendering.PostProcessing.MinDecorator),
+                typeof(UnityEditor.Rendering.PostProcessing.MaxDecorator),
+                typeof(UnityEditor.Rendering.PostProcessing.MinMaxDecorator),
+                typeof(UnityEditor.Rendering.PostProcessing.ColorUsageDecorator),
+                typeof(UnityEditor.Rendering.PostProcessing.TrackballDecorator),
+            };
             // Store them
             foreach (var type in types)
             {

@@ -15,7 +15,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragCoC
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -27,7 +27,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 5.0
                 #pragma vertex VertDefault
                 #pragma fragment FragTempFilter
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -39,7 +39,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 5.0
                 #pragma vertex VertDefault
                 #pragma fragment FragPrefilter
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -52,7 +52,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_SMALL
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -65,7 +65,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_MEDIUM
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -78,7 +78,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_LARGE
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -91,7 +91,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_VERYLARGE
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -103,7 +103,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragPostBlur
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -115,7 +115,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragCombine
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -127,7 +127,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragDebugOverlay
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
     }
@@ -146,7 +146,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragCoC
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -158,7 +158,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragTempFilter
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -170,7 +170,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragPrefilter
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -183,7 +183,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_SMALL
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -196,7 +196,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_MEDIUM
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -209,7 +209,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_LARGE
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -222,7 +222,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma vertex VertDefault
                 #pragma fragment FragBlur
                 #define KERNEL_VERYLARGE
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -234,7 +234,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragPostBlur
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -246,7 +246,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragCombine
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
 
@@ -258,7 +258,7 @@ Shader "Hidden/PostProcessing/DepthOfField"
                 #pragma target 3.5
                 #pragma vertex VertDefault
                 #pragma fragment FragDebugOverlay
-                #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DepthOfField.hlsl"
+                #include "DepthOfField.hlsl"
             ENDHLSL
         }
     }
