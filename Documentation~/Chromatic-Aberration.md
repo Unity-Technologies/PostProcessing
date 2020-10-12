@@ -4,11 +4,11 @@ The **Chromatic Aberration** effect splits color along boundaries in an image in
 
 Unity provides support for red/blue and green/purple fringing. You can define fringing colors by using an input texture.
 
-![PostProcessing-ChromaticAberration-1](images\PostProcessing-ChromaticAberration-1.jpg)
+![PostProcessing-ChromaticAberration-1](images\PostProcessing-ChromaticAberration-1.png)
 
 Scene without **Chromatic Aberration**.
 
-![PostProcessing-ChromaticAberration-0](images\PostProcessing-ChromaticAberration-0.jpg)
+![PostProcessing-ChromaticAberration-0](images\PostProcessing-ChromaticAberration-0.png)
 
 Scene with **Chromatic Aberration**.
 

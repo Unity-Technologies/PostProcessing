@@ -5,11 +5,11 @@ Unity’s **Grain** effect is based on a coherent gradient noise. This gives you
 
 The **Grain** effect available in Unity is based on a coherent gradient noise. 
 
-![Grain_image_0.png](images\Grain_image_1.png.jpg)
+![Grain_image_0.png](images\Grain_image_1.png)
 
 Scene without **Grain**.
 
-![Grain_image_0.png](images\Grain_image_0.png.jpg)
+![Grain_image_0.png](images\Grain_image_0.png)
 
 Scene with **Grain**.
 

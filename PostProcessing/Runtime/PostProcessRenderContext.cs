@@ -399,6 +399,9 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// Update current single-pass stereo state for TAA, AO, etc.
         /// </summary>
+        /// <param name="isTAAEnabled">The enabled state of Temporal Anti-aliasing</param>
+        /// <param name="isAOEnabled">The enabled state of Ambient Occlusion</param>
+        /// <param name="isSSREnabled">The enabled state of Screen-space Reflections</param>
         public void UpdateSinglePassStereoState(bool isTAAEnabled, bool isAOEnabled, bool isSSREnabled)
         {
 #if UNITY_2019_1_OR_NEWER && ENABLE_VR_MODULE && ENABLE_VR
