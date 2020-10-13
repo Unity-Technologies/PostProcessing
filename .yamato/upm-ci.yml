@@ -49,7 +49,7 @@ test_trigger:
   agent:
     type: Unity::VM
     image: package-ci/win10:stable
-    flavor: m1.large
+    flavor: b1.large
   commands:
     - dir
   triggers:
