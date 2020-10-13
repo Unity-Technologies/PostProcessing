@@ -468,46 +468,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="cmd">The command buffer to use</param>
         /// <param name="source">The source render target</param>
         /// <param name="destination">The destination render target</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, false, null, false);
-        }
-
-        /// <summary>
-        /// Does a copy of source to destination using a fullscreen triangle.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="clear">Should the destination target be cleared?</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, clear, null, false);
-        }
-
-        /// <summary>
-        /// Does a copy of source to destination using a fullscreen triangle.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="clear">Should the destination target be cleared?</param>
-        /// <param name="viewport">An optional viewport to consider for the blit</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear, Rect? viewport)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, clear, viewport, false);
-        }
-
-        /// <summary>
-        /// Does a copy of source to destination using a fullscreen triangle.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
         /// <param name="clear">Should the destination target be cleared?</param>
         /// <param name="viewport">An optional viewport to consider for the blit</param>
         /// <param name="preserveDepth">Should the depth buffer be preserved?</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear, Rect? viewport, bool preserveDepth)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, bool clear = false, Rect? viewport = null, bool preserveDepth = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
             var colorLoad = viewport == null ? LoadAction.DontCare : LoadAction.Load;
@@ -531,38 +495,9 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
         /// <param name="loadAction">The load action for this blit</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, loadAction, null, false);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle using a given material.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="loadAction">The load action for this blit</param>
-        /// <param name="viewport">An optional viewport to consider for the blit</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction, Rect? viewport)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, loadAction, viewport, false);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle using a given material.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="loadAction">The load action for this blit</param>
         /// <param name="viewport">An optional viewport to consider for the blit</param>
         /// <param name="preserveDepth">Should the depth buffer be preserved?</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction, Rect? viewport, bool preserveDepth)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, RenderBufferLoadAction loadAction, Rect? viewport = null, bool preserveDepth = false)
         {
             cmd.SetGlobalTexture(ShaderIDs.MainTex, source);
             #if UNITY_2018_2_OR_NEWER
@@ -594,52 +529,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <param name="destination">The destination render target</param>
         /// <param name="propertySheet">The property sheet to use</param>
         /// <param name="pass">The pass from the material to use</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, false, null, false);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle using a given material.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="clear">Should the destination target be cleared?</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, clear, null, false);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle using a given material.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
-        /// <param name="clear">Should the destination target be cleared?</param>
-        /// <param name="viewport">An optional viewport to consider for the blit</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear, Rect? viewport)
-        {
-            cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, clear, viewport, false);
-        }
-
-        /// <summary>
-        /// Blits a fullscreen triangle using a given material.
-        /// </summary>
-        /// <param name="cmd">The command buffer to use</param>
-        /// <param name="source">The source render target</param>
-        /// <param name="destination">The destination render target</param>
-        /// <param name="propertySheet">The property sheet to use</param>
-        /// <param name="pass">The pass from the material to use</param>
         /// <param name="clear">Should the destination target be cleared?</param>
         /// <param name="viewport">An optional viewport to consider for the blit</param>
         /// <param name="preserveDepth">Should the depth buffer be preserved?</param>
-        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear, Rect? viewport, bool preserveDepth)
+        public static void BlitFullscreenTriangle(this CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, PropertySheet propertySheet, int pass, bool clear = false, Rect? viewport = null, bool preserveDepth = false)
         {
             #if UNITY_2018_2_OR_NEWER
             cmd.BlitFullscreenTriangle(source, destination, propertySheet, pass, clear ? LoadAction.Clear : LoadAction.DontCare, viewport, preserveDepth);
