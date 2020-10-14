@@ -1,5 +1,9 @@
 test_editors:
-  - version: trunk
+  - trunk
+  - 2020.2
+  - 2020.1
+  - 2019.4
+  - 2018.4
 test_platforms:
   - name: win
     type: Unity::VM
@@ -26,15 +30,15 @@ pack:
 
 {% for editor in test_editors %}
 {% for platform in test_platforms %}
-test_{{ platform.name }}_{{ editor.version }}:
-  name : Test {{ editor.version }} on {{ platform.name }}
+test_{{ platform.name }}_{{ editor }}:
+  name : Test {{ editor }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
     - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
-    - upm-ci package test --unity-version {{ editor.version }}
+    - upm-ci package test --unity-version {{ editor }}
   artifacts:
     logs:
       paths:
@@ -67,7 +71,7 @@ test_trigger:
     - .yamato/upm-ci.yml#pack
     {% for editor in test_editors %}
     {% for platform in test_platforms %}
-    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/upm-ci.yml#test_{{platform.name}}_{{editor}}
     {% endfor %}
     {% endfor %}
 
@@ -92,6 +96,6 @@ publish:
     - .yamato/upm-ci.yml#pack
     {% for editor in test_editors %}
     {% for platform in test_platforms %}
-    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor.version }}
+    - .yamato/upm-ci.yml#test_{{ platform.name }}_{{ editor }}
     {% endfor %}
     {% endfor %}

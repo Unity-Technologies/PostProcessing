@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Motion Blur and Lens Distortion are disabled only when rendering with stereo cameras instead of having VR enabled in the project.
-- Minimum Unity version for this version has been bumped to 2018.3.
+- Minimum Unity version for this version has been bumped to 2018.4.
 
 ## [2.3.0] - 2020-01-10
 
