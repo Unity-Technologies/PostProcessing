@@ -86,7 +86,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 volumeDepth = 1,
                 autoGenerateMips = false,
                 msaaSamples = 1,
+#if UNITY_2019_2_OR_NEWER
                 mipCount = 1,
+#endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2D,
                 sRGB = false
@@ -105,7 +107,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 volumeDepth = 16,
                 autoGenerateMips = false,
                 msaaSamples = 1,
+#if UNITY_2019_2_OR_NEWER
                 mipCount = 1,
+#endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2DArray,
                 sRGB = false
