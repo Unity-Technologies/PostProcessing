@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
 #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/builtins/DiskKernels.hlsl"
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Builtins/DiskKernels.hlsl"
 
 TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 float4 _MainTex_TexelSize;
