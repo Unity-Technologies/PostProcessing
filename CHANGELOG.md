@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2020-10-16
+### Fixed
+- Fix for MSVO when used with dynamic resolution reallocating temp render targets whenever the dynamic resolution scale was changed. Now those temp targets will use dynamic scaling as well. This will require a matching fix in Unity to work correctly (ADD COMPATIBLE VERSIONS HERE). (case XXXXXX).
+
 ## [3.0.0] - 2020-10-13
 
 ### Fixed
