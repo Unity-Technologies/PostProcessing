@@ -81,10 +81,16 @@ namespace UnityEngine.Rendering.PostProcessing
         void Alloc(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav, bool dynamicScale)
         {
             int sizeId = (int)size;
+
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
+#if UNITY_2019_4_OR_NEWER
                 width = m_Widths[sizeId],
                 height = m_Heights[sizeId],
+#else
+                width = m_ScaledWidths[sizeId],
+                height = m_ScaledHeights[sizeId],
+#endif
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 1,
@@ -93,7 +99,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_2_OR_NEWER
                 mipCount = 1,
 #endif
-#if UNITY_2017_3_OR_NEWER
+#if UNITY_2019_4_OR_NEWER
                 useDynamicScale = dynamicScale,
 #endif
                 enableRandomWrite = uav,
@@ -105,10 +111,16 @@ namespace UnityEngine.Rendering.PostProcessing
         void AllocArray(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav, bool dynamicScale)
         {
             int sizeId = (int)size;
+
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
+#if UNITY_2019_4_OR_NEWER
                 width = m_Widths[sizeId],
                 height = m_Heights[sizeId],
+#else
+                width = m_ScaledWidths[sizeId],
+                height = m_ScaledHeights[sizeId],
+#endif
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 16,
@@ -117,7 +129,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_2_OR_NEWER
                 mipCount = 1,
 #endif
-#if UNITY_2017_3_OR_NEWER
+#if UNITY_2019_4_OR_NEWER
                 useDynamicScale = dynamicScale,
 #endif
                 enableRandomWrite = uav,
