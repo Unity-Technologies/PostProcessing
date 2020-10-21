@@ -180,16 +180,19 @@ namespace UnityEngine.Rendering.PostProcessing
             // Adjust the scaled dimensions based off the dynamic resolution resolution used at the moment.
             m_ScaledWidths[0] = camera.scaledPixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
             m_ScaledHeights[0] = camera.scaledPixelHeight;
-#endif
-
+#endif            
+            float widthScalingFactor = ScalableBufferManager.widthScaleFactor;
+            float heightScalingFactor = ScalableBufferManager.heightScaleFactor;
             // L1 -> L6 sizes
             for (int i = 1; i < 7; i++)
             {
                 int div = 1 << i;
                 m_Widths[i] = (m_Widths[0] + (div - 1)) / div;
                 m_Heights[i] = (m_Heights[0] + (div - 1)) / div;
-                m_ScaledWidths[i]  = (m_ScaledWidths[0]  + (div - 1)) / div;
-                m_ScaledHeights[i] = (m_ScaledHeights[0] + (div - 1)) / div;
+                // Scaled width and heights have to match their calculations like will happen with dynamic resolution otherwise with odd numbers you can get a difference between what the dynamic resolution version
+                // generates and what we use here.
+                m_ScaledWidths[i] = Mathf.CeilToInt(m_Widths[i] * widthScalingFactor);
+                m_ScaledHeights[i] = Mathf.CeilToInt(m_Heights[i] * heightScalingFactor);
             }
 
             // Allocate temporary textures
