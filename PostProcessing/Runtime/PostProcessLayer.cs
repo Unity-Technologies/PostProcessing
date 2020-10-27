@@ -444,7 +444,8 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2018_2_OR_NEWER
             if (!m_Camera.usePhysicalProperties)
 #endif
-                m_Camera.ResetProjectionMatrix();
+		if (m_CurrentContext.IsTemporalAntialiasingActive())
+                	m_Camera.ResetProjectionMatrix();
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
 #if (ENABLE_VR_MODULE && ENABLE_VR)
