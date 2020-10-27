@@ -4,29 +4,29 @@ The **Post-process Debug** component displays real-time data about post-processi
 
 When you attach the Post-Process Debug component to a GameObject with a Camera component, the Post-Process Debug component displays its data on top of that Camera's output. You can use the Post-process Debug component in the Unity Editor, or when your application is running on a device.
 
-![img](https://lh4.googleusercontent.com/WC4CXG9PIhEjfZghmKNKtCph-yz83-JULF3FhhFn26JXym15y846WWvF5l2m2aBTfnbG4w0PkOLJNYiD-764W2cxHORDXYJhf0jkcvvdLf17YWlzZnBI-aRd3j8f68WNQP6sx1Wc)The **Histogram** monitor as it appears in the Game window. 
+![The Histogram monitor as it appears in the Game window.](Images\Ppv2_Debugging_Histogram.png)
 
 ## Using the Post-Process Debug component
 
-1. Create the **Post-process Debug** component on a GameObject. To do this, go to the Inspector window and select **Add component** > **Post-process Debug.**2. Use **Post Process Layer** to choose the post-processing layer that you want to view debug information for. If you create the Post-process Debug component on the Main Camera, Unity automatically assigns Main Camera to this field.2. To view an overlay that shows the state of an intermediate pass:
-a. Select an intermediate pass from the **Debug Overlay** drop-down menu. Unity displays the overlay in the Game window.
-3. To use the Light Meter Monitor:
-a. Enable [**Light Meter**](#light-meter).
-b. Unity displays a logarithmic histogram in the Game view that represents exposure. If you have the [**Auto Exposure**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Auto-Exposure.html) post processing effect enabled, the histogram contains a thin line that indicates the current exposure. There is also a translucent area between the maximum and minimum exposure values. You can configure these exposure values in the **Auto Exposure** effect. The result of your changes appear in the Light Meter monitor in real-time.
-4. To view tonemapping curves in the Light Meter histogram, enable **Show Curves**.
-6. To use the Histogram monitor:
-	a. Enable [**Histogram**](#histogram).
-	b. Unity displays a linear Gamma histogram in the Game view that represents exposure data in real-time in the rendered image. **Histogram** displays exposure data in more detail than **Light Meter**.
-c. Use the **Channel** drop-down menu to select the color data the Histogram displays.
-7. To use Waveform monitor:
-    a. Enable [**Waveform**](#waveform)
-    b. Unity displays a waveform in the Game view which represents the full spectrum of Luma (brightness) data in real-time in the rendered image.
+To use the Post-Process Debug component, create a **Post-process Debug** component on a GameObject. To do this, go to the Inspector window and select **Add component** > **Post-process Debug.**
 
-## Post-Process Debug Inspector reference
+![](images/Ppv2_Post-processing-Debug.png)
+
+Use **Post Process Layer** to choose the post-processing layer that you want to view debug information for. If you create the Post-process Debug component on the Main Camera, Unity automatically assigns Main Camera to this field.
+To view an overlay that shows the state of an intermediate pass,  select an intermediate pass from the **Debug Overlay** drop-down menu. Unity displays the overlay in the Game window.
+
+To use the [Light Meter](#light-meter) monitor, enable **Light Meter**. Unity displays a logarithmic histogram in the Game view that represents exposure. If you have the [**Auto Exposure**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Auto-Exposure.html) post processing effect enabled, the histogram contains a thin line that indicates the current exposure. There is also a translucent area between the maximum and minimum exposure values. You can configure these exposure values in the **Auto Exposure** effect. The result of your changes appear in the Light Meter monitor in real-time.
+
+To view tonemapping curves in the Light Meter histogram, enable **Show Curves**.
+
+To use the [Histogram](#histogram) monitor, enable **Histogram**. Unity displays a linear Gamma histogram in the Game view that represents exposure data in real-time in the rendered image. **Histogram** displays exposure data in more detail than **Light Meter**. Use the **Channel** drop-down menu to select the color data the Histogram displays.
+
+To use [Waveform](#waveform) monitor, enable **Waveform**. Unity displays a waveform in the Game view which represents the full spectrum of Luma (brightness) data in real-time in the rendered image.
+
+## Properties
 
 This section describes the settings that the Unity Editor displays in the Inspector for the **Post-Process Debug** component.
 
-**![img](https://lh6.googleusercontent.com/a6OUvrj73gsZlf5NSQ2tx3fbCn2v60U2lEx3WBuIvknEsHyrA3ToGbyoF-MW6cqaLOlb8FdtZjHP6k-8LSRI1V0puzKzhFZGhZTVeeW-iUW5SUCjmd8A_XMusEtr-c8IaqtxOUzQ)**
 | **Property**       | **Description** |
 |--------------------|-----------------|
 | Post Process Layer | Select the post-processing layer that the Post-process Debug component uses.|

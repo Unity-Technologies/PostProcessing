@@ -7,7 +7,7 @@ Custom post-processing effects require a minimum of two files:
 - A C# source file
 - An [HLSL](https://en.wikipedia.org/wiki/High-Level_Shading_Language) source file
 
-Unity cross-compiles HLSL to [GLSL](https://docs.unity3d.com/Manual/30_search.html?q=GLSL), [Metal](https://docs.unity3d.com/Manual/Metal.html), and other APIs. This means it is not restricted to DirectX.
+Unity cross-compiles HLSL to [GLSL](https://docs.unity3d.com/Manual/SL-GLSLShaderPrograms.html), [Metal](https://docs.unity3d.com/Manual/Metal.html), and other APIs. This means it is not restricted to DirectX.
 
 This quick-start guide requires a basic knowledge of programming C# in Unity and HLSL shader programming.
 
@@ -49,7 +49,7 @@ A custom post-processing effect script requires two classes:
 
 ### Data class
 
-The data class holds all the settings fields the user sees in the Inspector window for that volume profile. Here is how the data class works in the example script described in [C# source code](https://docs.google.com/document/d/1pVuCcjMJ9HVETWARW29j5TYBd6nh025ayoJDC9UNzy4/edit?ts=5f5a3d2b#heading=h.hzftdvnzv4dh):
+The data class holds all the settings fields the user sees in the Inspector window for that volume profile. Here is how the data class works in the example script described in C# source code:
 
 ```csharp
 //The Serializable attribute allows Unity to serialize this class and extend PostProcessEffectSettings.
@@ -88,7 +88,7 @@ public override bool IsEnabledAndSupported(PostProcessRenderContext context)
 
 ### Logic class
 
-The logic class tells Unity how to render this post-processing effect. Here is how the logic class works in the example script described in [C# source code](https://docs.google.com/document/d/1pVuCcjMJ9HVETWARW29j5TYBd6nh025ayoJDC9UNzy4/edit?ts=5f5a3d2b#heading=h.hzftdvnzv4dh):
+The logic class tells Unity how to render this post-processing effect. Here is how the logic class works in the example script described in C# source code:
 
 ```csharp
 // This renderer extends PostProcessEffectRenderer<T>, where T is the settings type Unity attaches to this renderer.
@@ -182,8 +182,8 @@ struct VaryingsDefault
 ```
 
 - `vertex`: The vertex position.
-- `texcoord`: The uv coordinate for the fragment.
-- `texcoordStereo`: The uv coordinate for the fragment in stereo mode
+- `texcoord`: The UV coordinate for the fragment.
+- `texcoordStereo`: The UV coordinate for the fragment in stereo mode
 - `stereoTargetEyeIndex`: The current eye index (only available with VR + stereo instancing).
 
 Unity cannot build a shader if it is not referenced in a scene. This means the effect does not work when the application is running outside of the Editor. To fix this, add your shader to a[ Resources folder](https://docs.unity3d.com/Manual/LoadingResourcesatRuntime.html) or include it in the [**Always Included Shaders**](https://docs.unity3d.com/Manual/class-GraphicsSettings.html#Always) list in **Edit > Project Settings > Graphics**.
@@ -193,7 +193,7 @@ Unity cannot build a shader if it is not referenced in a scene. This means the e
 Unity automatically sorts built-in effects, but it handles custom effects differently. When you create a new effect or import it into your project, Unity does the following: 
 
 - Adds the custom effect to the Custom Effect Sorting list in the Post Process Layer component on a Camera.
-- Sorts each custom effect by its injection point. You can change the order of the custom effects in the [Post Process Layer](https://docs.unity3d.com/Packages/com.unity.postprocessing@2.3/manual/Quick-start.html) component using **Custom Effect Sorting**.
+- Sorts each custom effect by its injection point. You can change the order of the custom effects in the [Post Process Layer](#Quick-start) component using **Custom Effect Sorting**.
 
 Unity orders custom effects within each layer, which means you can order your custom effects differently for each Camera.
 
@@ -230,7 +230,7 @@ For Unity to recognise your custom editor, it has to be in an Editor folder.
 
 ## FXAA compatibility with custom effects 
 
-If you apply [**FXAA**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing.html) in a scene with custom effects, the order of your post-processing effects might stop it from working correctly. This is because FXAA looks for the LDR (Low dynamic range) luminance value of each pixel in the alpha channel of its source target to optimise performance.
+If you apply [**FXAA**](Anti-aliasing#fast-approximate-anti-aliasing.html) in a scene with custom effects, the order of your post-processing effects might stop it from working correctly. This is because FXAA looks for the LDR (Low dynamic range) luminance value of each pixel in the alpha channel of its source target to optimise performance.
 
 If you inject custom effects at the `AfterStack` injection point, as demonstrated in the example above, FXAA looks for LDR luminance in the last executed effect. If it can’t find it, FXAA won’t work correctly.
 

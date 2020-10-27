@@ -4,16 +4,13 @@ The **Screen Space Reflection** effect creates subtle reflections that simulate 
 
 Screen Space Reflection replaces specular highlights on a surface, which makes it an ideal effect to limit the amount of [specular light](https://docs.unity3d.com/Manual/shader-NormalSpecular.html) leaking.
 
+![Scene with Screen Space Reflections](images\screenshot-ssr.png)
 
 
-
-![](images/ssr.png)
-
-![](C:\Users\Vic Cooper\Documents\GitHub\PostProcessing\Documentation~\images\screenshot-ssr.png)
-
-Scene with Screen Space Reflections.
 
 ### Properties
+
+![](images/ssr.png)
 
 | Property                | Function                                                     |
 | :----------------------- | :------------------------------------------------------------ |

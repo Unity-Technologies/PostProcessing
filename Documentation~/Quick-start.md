@@ -1,4 +1,4 @@
-Getting started with post-processing
+# Getting started with post-processing
 
 This page explains how to set up the components required to create post-processing effects in your scene. 
 
@@ -29,9 +29,9 @@ You can use local Volumes to change environment settings, such as fog color and 
 
 ### Anti-aliasing
 
-[**Anti-aliasing**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing.html) reduces the appearance of jagged edges in your scene..
+[**Anti-aliasing**](Anti-aliasing.html) reduces the appearance of jagged edges in your scene..
 
-The Post-process Layer component allows you to set up the anti-aliasing effect per-camera. You can use this to optimize the anti-aliasing in your scene. For example, you can enable [**Temporal Anti-aliasing (TAA)**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing#temporal-anti-aliasing.html) on your Main Camera, and a less resource-intensive form of anti-aliasing like [**Fast approximate anti-aliasing** **(FXAA)**](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Anti-aliasing#fast-approximate-anti-aliasing.html) on another camera.
+The Post-process Layer component allows you to set up the anti-aliasing effect per-camera. You can use this to optimize the anti-aliasing in your scene. For example, you can enable [**Temporal Anti-aliasing (TAA)**](Anti-aliasing#temporal-anti-aliasing.html) on your Main Camera, and a less resource-intensive form of anti-aliasing like [**Fast approximate anti-aliasing** **(FXAA)**](Anti-aliasing#fast-approximate-anti-aliasing.html) on another camera.
 
 You can use this setting to optimize your cameras to only use anti-aliasing when needed. 
 
@@ -53,16 +53,19 @@ The Toolkit section comes with a few utilities.
 **Custom Effect Sorting** allows you to change the rendering order of custom effects. Custom effects in your scene appear here in a reorderable list from first to last. You can drag and drop each setting to change their order.
 
 For more information on custom effects, see [Writing Custom Effects](https://docs.unity3d.com/Packages/com.unity.postprocessing@latest?subfolder=/manual/Writing-Custom-Effects.html).
+
+<a name="post-process-volume"></a>
+
 ## Post Process Volume
 
-The Post-process Volume component allows you to control the priority and blending of each local and global volume. You can also create a set of effect overrides to automatically blend post-processing settings in your scene. 
+The **Post-process Volume** component allows you to control the priority and blending of each local and global volume. You can also create a set of effect overrides to automatically blend post-processing settings in your scene. 
 
 For example, if you have a global light vignette effect, you could control the **Intensity** setting of the vignette when the player enters a cave to make it darker, while the other post-processing settings are unchanged.
 
-You can add the **Post Process Volume** component to any GameObject, including the Main Camera GameObject. However, the optimal way to use this component is to create a dedicated GameObject for each volume. To do this: 
+You can add the Post Process Volume component to any GameObject, including the Main Camera GameObject. However, the optimal way to use this component is to create a dedicated GameObject for each volume. To do this: 
 
 - Create an empty GameObject.
-- Add the **Post-process Volume** component to your new GameObject in the Inspector. To do this, select **Add** **Component > Post-process Volume.**
+- Add the Post-process Volume component to your new GameObject in the Inspector. To do this, select **Add** **Component > Post-process Volume.**
 - View your Main Camera’s Inspector, and in the Post-process Layer component, set **Layer** to the new GameObject you have just created.
 
 
@@ -82,7 +85,7 @@ The **Post Process Volume** component is empty by default. Each post-process vol
 | Profile        | Defines the profile for this volume. You can create a new profile using **New** or clone an existing profile.<br/>When you assign a profile to this field, the **Clone** button appears. You can use this to duplicate the assigned profile and assign it to this volume. |
 
 ## Adding post-processing effects to the stack
-Once you have assigned a post-processing profile to the **Post Process Volume** component, you can add post-processing effects to the stack. To do this, select **Add effect** and choose the post-processing effect you want to use from the drop-down list. The Post Process Volume component displays all applied post-processing effects, and their properties, in a list at the bottom of the component’s Inspector.
+Once you have assigned a post-processing profile to the [Post Process Volume](#post-process-volume) component, you can add post-processing effects to the stack. To do this, click the **Add effect** button at the bottom of the component, and choose the post-processing effect you want to use from the drop-down list. The Post Process Volume component displays all applied post-processing effects, and their properties, in a list at the bottom of the component’s Inspector.
 
 The Post Process Volume component displays the following settings for each post-processing effect in the list:
 

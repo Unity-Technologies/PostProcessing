@@ -5,7 +5,7 @@ The **Auto Exposure** effect simulates how the human eye adjusts to changes in b
 In Unity, this effect generates a histogram on every frame and filters it to find the average luminance value. This histogram and the **Auto Exposure** effect requires [Compute shader](https://docs.unity3d.com/Manual/class-ComputeShader.html) support.
 
 
-![](images/autoexposure.png)
+![](images\autoexposure.png)
 
 
 ### Properties
@@ -37,7 +37,7 @@ You can set the `Type` to `Fixed` and it will behave like an auto-exposure setti
 
 You can debug the exposure in your scene with the **Post-process Debug** component. To do this, add the **Post-process Debug** component to your Camera and enable the **Light Meter** monitor.
 
-The Light Meter monitor creates a logarithmic histogram that appears in the **Game** window. This displays information about the exposure in your scene in real time. For more information, see [Debugging](Debugging). 
+The Light Meter monitor creates a logarithmic histogram that appears in the **Game** window. This displays information about the exposure in your scene in real time. For more information, see [Debugging](#Debugging). 
 
 ![](Images/Ppv2 _ Debugging_Light meter_Graph.png)
 

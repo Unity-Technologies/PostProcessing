@@ -2,17 +2,13 @@
 
 The **Color Grading** effect alters or corrects the color and luminance of the final image that Unity produces. You can use this to alter the look and feel of your application.
 
-![screenshot-grading](images\screenshot-grading.png)
+![](images\screenshot-grading.png)
 
 The **Color Grading** effect comes with three modes:
 
 - **Low Definition Range (LDR):** ideal for lower-end platforms. Grading is applied to the final rendered frame clamped in a [0,1] range and stored in a standard LUT.
 - **High Definition Range (HDR):** ideal for platforms that support HDR rendering. All color operations are applied in HDR and stored into a 3D log-encoded LUT to ensure a sufficient range coverage and precision (Alexa LogC El1000).
 - **External:** for use with custom 3D LUTs authored in external software.
-
-### Requirements
-
-- Shader Model 3
 
 ## Global Settings
 
@@ -166,3 +162,9 @@ Use **Lum vs Sat** to adjust the saturation of areas of certain luminance. This 
 
 
 ![](images/grading-10.png)
+
+
+
+### Requirements
+
+- Shader Model 3

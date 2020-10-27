@@ -2,7 +2,7 @@
 
 The **Depth of Field** effect blurs the background of your image while the objects in the foreground stay in focus. This simulates the focal properties of a real-world camera lens.
 
- ![screenshot-dof](C:\Users\Vic Cooper\Documents\GitHub\PostProcessing\Documentation~\images\screenshot-dof.png)
+ ![ A scene with the Depth of Field effect applied](images/screenshot-dof.png)
 
 A real-world **camera** can focus sharply on an object at a specific distance. Objects nearer or farther from the **camera’s** focal point appear slightly out of focus or blurred. This blurring gives a visual cue about an object’s distance, and introduces “bokeh” which refers to visual artifacts that appear around bright areas of the image as they fall out of focus.
 

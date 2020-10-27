@@ -8,8 +8,8 @@ For information about requirements and compatibility, see section [Requirements]
 
 The images below demonstrate a scene with and without post-processing:
 
-![](images/home-before.png)
-</br>Without post-processing
+![Without post-processing](images/home-before.png)
+</br>
 
-![](images/home-after.png)
-</br>With post-processing
+![With post-processing](images/home-after.png)
+</br>

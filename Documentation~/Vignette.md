@@ -2,13 +2,9 @@
 
 The **Vignette** effect darkens the edges of an image. This simulates the effect in a real-world camera lens caused by thick or stacked filters, secondary lenses, or an improper lens hood. You can use the **Vignette** effect to draw attention to the center of an image. 
 
-![](images\PostProcessing-Vignette-1.png)
+![Scene without Vignette](images\PostProcessing-Vignette-1.png)
 
-Scene without Vignette.
-
-![PostProcessing-Vignette-2](images\PostProcessing-Vignette-2.png)
-
-Scene with Vignette.
+![Scene with Vignette](images\PostProcessing-Vignette-2.png)
 
 The Vignette effect in the post-processing stack has two modes:
 
@@ -21,7 +17,7 @@ The Vignette effect in the post-processing stack has two modes:
 **Classic** mode has parametric controls for the position, shape and intensity of the Vignette. This is the most common way to use the effect.
 
 
-![](images/vignette-1.png)
+![](images\vignette-1.png)
 
 
 ### Properties
