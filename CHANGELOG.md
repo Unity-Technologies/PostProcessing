@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [3.0.2] - XXXX-XX-XX
 
+### Changed
+- ResetProjection isn't being called anymore if Temporal Anti-aliasing isn't enabled, allowing the use of custom projection matrices.
+
 ## [3.0.1] - 2020-10-15
 
 ### Fixed
