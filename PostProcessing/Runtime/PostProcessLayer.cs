@@ -854,7 +854,11 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             // Juggling required when a scene with post processing is loaded from an asset bundle
             // See #1148230
-            if (m_OldResources != m_Resources)
+            // Additional !RuntimeUtilities.isValidResources() for fixing issue #1262826
+            // The static member s_Resources is unset by addressable. The code is ill formed as it is not made to handle multiple scene.
+            // As the PPV2 is not develop anymore we will not rewrite the system but instead we force a re-init of this value so it is 
+            // in a correct state.
+            if (m_OldResources != m_Resources || !RuntimeUtilities.isValidResources())
             {
                 RuntimeUtilities.UpdateResources(m_Resources);
                 m_OldResources = m_Resources;

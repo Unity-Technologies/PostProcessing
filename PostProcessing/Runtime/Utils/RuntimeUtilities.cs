@@ -381,6 +381,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        internal static bool isValidResources()
+        {
+            return s_Resources != null;
+        }
+
         internal static void UpdateResources(PostProcessResources resources)
         {
             Destroy(s_CopyMaterial);
