@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [3.0.2] - XXXX-XX-XX
 
+### Fixed
+- Fix for issue throw upon unloading a scene from AssetBundle - "Invalid pass number (1) for Graphics.Blit error" (case 1262826)
+
 ### Changed
 - ResetProjection isn't being called anymore if Temporal Anti-aliasing isn't enabled, allowing the use of custom projection matrices.
 
