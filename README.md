@@ -1,5 +1,7 @@
 # Post-processing Stack v2
 
+**Note: development has moved to the [main Graphics repository](https://github.com/Unity-Technologies/Graphics).**
+
 This branch is under maintenance and holds the current version of the post-processing stack for the built-in render pipelines.
 
 Instructions
