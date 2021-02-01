@@ -2,13 +2,13 @@ Shader "Hidden/PostProcessing/Bloom"
 {
     HLSLINCLUDE
 
-#include "../StdLib.hlsl"
-#include "../Colors.hlsl"
-#include "../Sampling.hlsl"
+    #include "../StdLib.hlsl"
+    #include "../Colors.hlsl"
+    #include "../Sampling.hlsl"
 
-#pragma multi_compile __ HUD_BLOOM
+    #pragma multi_compile __ HUD_BLOOM
 
-        TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
+    TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
     TEXTURE2D_SAMPLER2D(_BloomTex, sampler_BloomTex);
     TEXTURE2D_SAMPLER2D(_AutoExposureTex, sampler_AutoExposureTex);
 
@@ -35,22 +35,22 @@ Shader "Hidden/PostProcessing/Bloom"
 
     half4 FragPrefilter13(VaryingsDefault i) : SV_Target
     {
-        half hudColor = 1;
-    #if HUD_BLOOM
-        hudColor += SAMPLE_TEXTURE2D(_HUD_RT, sampler_HUD_RT, UnityStereoTransformScreenSpaceTex(i.texcoord)).r * _HudBloomIntensity;
-    #endif
         half4 color = DownsampleBox13Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-        return Prefilter(SafeHDR(color * hudColor), i.texcoord);
+    #if HUD_BLOOM
+        half hudColor = SAMPLE_TEXTURE2D(_HUD_RT, sampler_HUD_RT, UnityStereoTransformScreenSpaceTex(i.texcoord)).r;
+        color = color * (1 + hudColor * _HudBloomIntensity);
+    #endif
+        return Prefilter(SafeHDR(color), i.texcoord);
     }
 
-        half4 FragPrefilter4(VaryingsDefault i) : SV_Target
+    half4 FragPrefilter4(VaryingsDefault i) : SV_Target
     {
-        half hudColor = 1;
-    #if HUD_BLOOM
-        hudColor += SAMPLE_TEXTURE2D(_HUD_RT, sampler_HUD_RT, UnityStereoTransformScreenSpaceTex(i.texcoord)).r * _HudBloomIntensity;
-    #endif
         half4 color = DownsampleBox4Tap(TEXTURE2D_PARAM(_MainTex, sampler_MainTex), i.texcoord, UnityStereoAdjustedTexelSize(_MainTex_TexelSize).xy);
-        return Prefilter(SafeHDR(color * hudColor), i.texcoord);
+    #if HUD_BLOOM
+        half hudColor = SAMPLE_TEXTURE2D(_HUD_RT, sampler_HUD_RT, UnityStereoTransformScreenSpaceTex(i.texcoord)).r;
+        color = color * (1 + hudColor * _HudBloomIntensity);
+    #endif
+        return Prefilter(SafeHDR(color), i.texcoord);
     }
 
         // ----------------------------------------------------------------------------------------

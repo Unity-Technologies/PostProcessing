@@ -63,11 +63,11 @@ namespace UnityEngine.Rendering.PostProcessing
                         hideFlags = HideFlags.DontSave
                     };
 
-                    m_InternalSpectralLut.SetPixels(new []
+                    m_InternalSpectralLut.SetPixels32(new[]
                     {
-                        new Color(1f, 0f, 0f),
-                        new Color(0f, 1f, 0f),
-                        new Color(0f, 0f, 1f)
+                        new Color32(255, 0, 0, 255),
+                        new Color32(0, 255, 0, 255),
+                        new Color32(0, 0, 255, 255)
                     });
 
                     m_InternalSpectralLut.Apply();
