@@ -380,6 +380,11 @@ namespace UnityEngine.Rendering.PostProcessing
             }
         }
 
+        internal static bool isValidResources()
+        {
+            return s_Resources != null;
+        }
+
         internal static void UpdateResources(PostProcessResources resources)
         {
             // https://github.com/Unity-Technologies/PostProcessing/issues/826

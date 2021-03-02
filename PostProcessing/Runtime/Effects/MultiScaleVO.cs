@@ -39,6 +39,9 @@ namespace UnityEngine.Rendering.PostProcessing
         readonly float[] m_InvThicknessTable = new float[12];
         readonly float[] m_SampleWeightTable = new float[12];
 
+        readonly int[] m_Widths = new int[7];
+        readonly int[] m_Heights = new int[7];
+
         // Scaled dimensions used with dynamic resolution
         readonly int[] m_ScaledWidths = new int[7];
         readonly int[] m_ScaledHeights = new int[7];
@@ -74,13 +77,18 @@ namespace UnityEngine.Rendering.PostProcessing
             m_Resources = resources;
         }
 
-        void Alloc(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav)
+        void Alloc(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav, bool dynamicScale)
         {
             int sizeId = (int)size;
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
+#if UNITY_2019_4_OR_NEWER
+                width = m_Widths[sizeId],
+                height = m_Heights[sizeId],
+#else
                 width = m_ScaledWidths[sizeId],
                 height = m_ScaledHeights[sizeId],
+#endif
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 1,
@@ -89,19 +97,27 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_1_OR_NEWER
                 mipCount = 1,
 #endif
+#if UNITY_2019_4_OR_NEWER
+                useDynamicScale = dynamicScale,
+#endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2D,
                 sRGB = false
             }, FilterMode.Point);
         }
 
-        void AllocArray(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav)
+        void AllocArray(CommandBuffer cmd, int id, MipLevel size, RenderTextureFormat format, bool uav, bool dynamicScale)
         {
             int sizeId = (int)size;
             cmd.GetTemporaryRT(id, new RenderTextureDescriptor
             {
+#if UNITY_2019_4_OR_NEWER
+                width = m_Widths[sizeId],
+                height = m_Heights[sizeId],
+#else
                 width = m_ScaledWidths[sizeId],
                 height = m_ScaledHeights[sizeId],
+#endif
                 colorFormat = format,
                 depthBufferBits = 0,
                 volumeDepth = 16,
@@ -109,6 +125,9 @@ namespace UnityEngine.Rendering.PostProcessing
                 msaaSamples = 1,
 #if UNITY_2019_1_OR_NEWER
                 mipCount = 1,
+#endif
+#if UNITY_2019_4_OR_NEWER
+                useDynamicScale = dynamicScale,
 #endif
                 enableRandomWrite = uav,
                 dimension = TextureDimension.Tex2DArray,
@@ -154,27 +173,29 @@ namespace UnityEngine.Rendering.PostProcessing
             bool isSinglePassStereo = camera.stereoEnabled && RuntimeUtilities.isSinglePassStereoEnabled;
 
             // Base size
+            m_Widths[0] = m_ScaledWidths[0] = camera.pixelWidth * (RuntimeUtilities.isSinglePassStereoEnabled ? 2 : 1);
+            m_Heights[0] = m_ScaledHeights[0] = camera.pixelHeight;
 #if UNITY_2017_3_OR_NEWER
             m_ScaledWidths[0] = camera.scaledPixelWidth * (isSinglePassStereo ? 2 : 1);
-            m_ScaledHeights[0] = camera.scaledPixelHeight;
-#else
-            m_ScaledWidths[0] = camera.pixelWidth * (isSinglePassStereo ? 2 : 1);
-            m_ScaledHeights[0] = camera.pixelHeight;       
+            m_ScaledHeights[0] = camera.scaledPixelHeight;     
 #endif
-            
+            float widthScalingFactor = ScalableBufferManager.widthScaleFactor;
+            float heightScalingFactor = ScalableBufferManager.heightScaleFactor;
             // L1 -> L6 sizes
             for (int i = 1; i < 7; i++)
             {
                 int div = 1 << i;
-                m_ScaledWidths[i]  = (m_ScaledWidths[0]  + (div - 1)) / div;
-                m_ScaledHeights[i] = (m_ScaledHeights[0] + (div - 1)) / div;
+                m_Widths[i] = (m_Widths[0] + (div - 1)) / div;
+                m_Heights[i] = (m_Heights[0] + (div - 1)) / div;
+                m_ScaledWidths[i] = Mathf.CeilToInt(m_Widths[i] * widthScalingFactor);
+                m_ScaledHeights[i] = Mathf.CeilToInt(m_Heights[i] * heightScalingFactor);
             }
 
             // Allocate temporary textures
             PushAllocCommands(cmd, isMSAA);
 
             // Render logic
-            PushDownsampleCommands(cmd, camera, depthMap, isMSAA);
+            PushDownsampleCommands(cmd, camera, depthMap, isMSAA, camera);
 
             float tanHalfFovH = CalculateTanHalfFovHeight(camera);
             PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA, isSinglePassStereo);
@@ -191,53 +212,53 @@ namespace UnityEngine.Rendering.PostProcessing
             PushReleaseCommands(cmd);
         }
 
-        void PushAllocCommands(CommandBuffer cmd, bool isMSAA)
+        void PushAllocCommands(CommandBuffer cmd, bool isMSAA, Camera camera)
         {
             if(isMSAA)
             {
-                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RGHalf, true);
+                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RGHalf, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RGFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RGFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RGFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RGFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RGFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RGFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RGFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RGFloat, true, camera.allowDynamicResolution);
 
-                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RGHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RGHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RGHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RGHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RGHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RGHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RGHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RGHalf, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.RG16, true);
-                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.RG16, true);
-                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.RG16, true);
-                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.RG16, true);
-                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.RG16, true);
-                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.RG16, true);
+                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.RG16, true, camera.allowDynamicResolution);
             }
             else
             {
-                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RHalf, true);
+                Alloc(cmd, ShaderIDs.LinearDepth, MipLevel.Original, RenderTextureFormat.RHalf, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RFloat, true);
-                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RFloat, true);
+                Alloc(cmd, ShaderIDs.LowDepth1, MipLevel.L1, RenderTextureFormat.RFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth2, MipLevel.L2, RenderTextureFormat.RFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth3, MipLevel.L3, RenderTextureFormat.RFloat, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.LowDepth4, MipLevel.L4, RenderTextureFormat.RFloat, true, camera.allowDynamicResolution);
 
-                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RHalf, true);
-                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RHalf, true);
+                AllocArray(cmd, ShaderIDs.TiledDepth1, MipLevel.L3, RenderTextureFormat.RHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth2, MipLevel.L4, RenderTextureFormat.RHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth3, MipLevel.L5, RenderTextureFormat.RHalf, true, camera.allowDynamicResolution);
+                AllocArray(cmd, ShaderIDs.TiledDepth4, MipLevel.L6, RenderTextureFormat.RHalf, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.R8, true);
-                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.R8, true);
-                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.R8, true);
-                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Occlusion1, MipLevel.L1, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion2, MipLevel.L2, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion3, MipLevel.L3, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Occlusion4, MipLevel.L4, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
 
-                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.R8, true);
-                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.R8, true);
-                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.R8, true);
+                Alloc(cmd, ShaderIDs.Combined1, MipLevel.L1, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Combined2, MipLevel.L2, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
+                Alloc(cmd, ShaderIDs.Combined3, MipLevel.L3, RenderTextureFormat.R8, true, camera.allowDynamicResolution);
             }
         }
 
@@ -256,7 +277,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // buffer (it's only available in some specific situations).
                 if (!RuntimeUtilities.IsResolvedDepthAvailable(camera))
                 {
-                    Alloc(cmd, ShaderIDs.DepthCopy, MipLevel.Original, RenderTextureFormat.RFloat, false);
+                    Alloc(cmd, ShaderIDs.DepthCopy, MipLevel.Original, RenderTextureFormat.RFloat, false, camera.allowDynamicResolution);
                     depthMapId = new RenderTargetIdentifier(ShaderIDs.DepthCopy);
                     cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, depthMapId, m_PropertySheet, (int)Pass.DepthCopy);
                     needDepthMapRelease = true;
