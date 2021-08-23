@@ -164,6 +164,8 @@ namespace UnityEngine.Rendering.PostProcessing
             return m_InternalProfile != null;
         }
 
+        internal int previousLayer => m_PreviousLayer;
+
         int m_PreviousLayer;
         float m_PreviousPriority;
         List<Collider> m_TempColliders;

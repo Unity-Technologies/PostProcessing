@@ -274,6 +274,7 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             Assert.IsTrue(prevLayer >= 0 && prevLayer <= k_MaxLayerCount, "Invalid layer bit");
             Unregister(volume, prevLayer);
+            Unregister(volume, newLayer);
             Register(volume, newLayer);
         }
 
@@ -317,8 +318,8 @@ namespace UnityEngine.Rendering.PostProcessing
 
         internal void Unregister(PostProcessVolume volume)
         {
-            int layer = volume.gameObject.layer;
-            Unregister(volume, layer);
+            Unregister(volume, volume.previousLayer);
+            Unregister(volume, volume.gameObject.layer);
         }
 
         // Faster version of OverrideSettings to force replace values in the global state
