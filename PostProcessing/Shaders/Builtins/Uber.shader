@@ -220,13 +220,13 @@ Shader "Hidden/PostProcessing/Uber"
 
             #if COLOR_GRADING_HDR_3D
             {
-                color *= _PostExposure;
+                color.rgb *= _PostExposure;
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
                 color.rgb = ApplyLut3D(TEXTURE3D_PARAM(_Lut3D, sampler_Lut3D), colorLutSpace, _Lut3D_Params);
             }
             #elif COLOR_GRADING_HDR_2D
             {
-                color *= _PostExposure;
+                color.rgb *= _PostExposure;
                 float3 colorLutSpace = saturate(LUT_SPACE_ENCODE(color.rgb));
                 color.rgb = ApplyLut2D(TEXTURE2D_PARAM(_Lut2D, sampler_Lut2D), colorLutSpace, _Lut2D_Params);
             }
