@@ -604,7 +604,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 if (isScreenSpaceReflectionsActive)
                 {
-                    ssrRenderer.Render(context);
+                    ssrRenderer.RenderOrLog(context);
                     opaqueOnlyEffects--;
                     UpdateSrcDstForOpaqueOnly(ref srcTarget, ref dstTarget, context, cameraTarget, opaqueOnlyEffects);
                 }
@@ -1130,7 +1130,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // If there's only one active effect, we can simply execute it and skip the rest
             if (count == 1)
             {
-                m_ActiveEffects[0].Render(context);
+                m_ActiveEffects[0].RenderOrLog(context);
             }
             else
             {
@@ -1155,7 +1155,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     context.source = m_Targets[i];
                     context.destination = m_Targets[i + 1];
-                    m_ActiveEffects[i].Render(context);
+                    m_ActiveEffects[i].RenderOrLog(context);
                 }
 
                 cmd.ReleaseTemporaryRT(tempTarget1);
@@ -1373,7 +1373,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
             if (!useTempTarget)
             {
-                effect.renderer.Render(context);
+                effect.renderer.RenderOrLog(context);
                 return -1;
             }
 
@@ -1381,7 +1381,7 @@ namespace UnityEngine.Rendering.PostProcessing
             var tempTarget = m_TargetPool.Get();
             context.GetScreenSpaceTemporaryRT(context.command, tempTarget, 0, context.sourceFormat);
             context.destination = tempTarget;
-            effect.renderer.Render(context);
+            effect.renderer.RenderOrLog(context);
             context.source = tempTarget;
             context.destination = finalDestination;
             return tempTarget;
