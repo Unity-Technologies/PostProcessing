@@ -22,7 +22,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Set this to <c>true</c> if you need to keep the alpha channel untouched. Else it will
         /// use this channel to store internal data used to speed up and improve visual quality.
         /// </summary>
-        [Tooltip("Keep alpha channel. This will slightly lower the effect quality but allows rendering against a transparent background.")]
+        [Tooltip("Keep alpha channel. This will slightly lower the effect quality but allows rendering against a transparent background.\nThis setting has no effect if the camera render target has no alpha channel.")]
         public bool keepAlpha = false;
     }
 }
