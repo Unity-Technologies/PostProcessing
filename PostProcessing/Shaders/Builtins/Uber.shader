@@ -165,8 +165,10 @@ Shader "Hidden/PostProcessing/Uber"
                 // Additive bloom (artist friendly)
                 bloom *= _Bloom_Settings.y;
                 dirt *= _Bloom_Settings.z;
+                half a = color.a;
                 color += bloom * half4(_Bloom_Color, 1.0);
                 color += dirt * bloom;
+                color.a = a;
             }
             #endif
 
