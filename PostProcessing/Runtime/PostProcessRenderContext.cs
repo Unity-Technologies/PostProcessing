@@ -143,7 +143,7 @@ namespace UnityEngine.Rendering.PostProcessing
         /// <summary>
         /// The current active rendering eye (for XR).
         /// </summary>
-        public int xrActiveEye { get; private set; }
+        public int xrActiveEye { get; set; }
 
         /// <summary>
         /// The number of eyes for XR outputs.

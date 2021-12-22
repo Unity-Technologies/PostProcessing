@@ -7,7 +7,7 @@ namespace UnityEditor.Rendering.PostProcessing
     {
         public override void OnInspectorGUI()
         {
-            if (RuntimeUtilities.isVREnabled)
+            if (EditorUtilities.isVREnabled)
                 EditorGUILayout.HelpBox("Lens Distortion is available only for non-stereo cameras.", MessageType.Warning);
 
             base.OnInspectorGUI();

@@ -7,7 +7,7 @@ namespace UnityEditor.Rendering.PostProcessing
     {
         public override void OnInspectorGUI()
         {
-            if (RuntimeUtilities.isVREnabled)
+            if (EditorUtilities.isVREnabled)
                 EditorGUILayout.HelpBox("Motion Blur is available only for non-stereo cameras.", MessageType.Warning);
 
             base.OnInspectorGUI();

@@ -192,10 +192,10 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Allocate temporary textures
-            PushAllocCommands(cmd, isMSAA);
+            PushAllocCommands(cmd, isMSAA, camera);
 
             // Render logic
-            PushDownsampleCommands(cmd, camera, depthMap, isMSAA, camera);
+            PushDownsampleCommands(cmd, camera, depthMap, isMSAA);
 
             float tanHalfFovH = CalculateTanHalfFovHeight(camera);
             PushRenderCommands(cmd, ShaderIDs.TiledDepth1, ShaderIDs.Occlusion1, GetSizeArray(MipLevel.L3), tanHalfFovH, isMSAA, isSinglePassStereo);

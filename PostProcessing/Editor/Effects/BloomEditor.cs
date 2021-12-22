@@ -54,7 +54,7 @@ namespace UnityEditor.Rendering.PostProcessing
             PropertyField(m_DirtTexture);
             PropertyField(m_DirtIntensity);
 
-            if (RuntimeUtilities.isVREnabled)
+            if (EditorUtilities.isVREnabled)
             {
                 if ((m_DirtIntensity.overrideState.boolValue && m_DirtIntensity.value.floatValue > 0f)
                  || (m_DirtTexture.overrideState.boolValue && m_DirtTexture.value.objectReferenceValue != null))
