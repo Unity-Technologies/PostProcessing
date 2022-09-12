@@ -248,7 +248,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     var c = (BoxCollider)collider;
                     Gizmos.DrawCube(c.center, c.size);
-                    Gizmos.DrawWireCube(c.center, c.size + invScale * blendDistance * 4f);
+                    Gizmos.DrawWireCube(c.center, c.size + 4f * blendDistance * invScale);
                 }
                 else if (type == typeof(SphereCollider))
                 {
@@ -266,7 +266,7 @@ namespace UnityEngine.Rendering.PostProcessing
 
                     // Mesh pivot should be centered or this won't work
                     Gizmos.DrawMesh(c.sharedMesh);
-                    Gizmos.DrawWireMesh(c.sharedMesh, Vector3.zero, Quaternion.identity, Vector3.one + invScale * blendDistance * 4f);
+                    Gizmos.DrawWireMesh(c.sharedMesh, Vector3.zero, Quaternion.identity, Vector3.one + 4f * blendDistance * invScale);
                 }
 
                 // Nothing for capsule (DrawCapsule isn't exposed in Gizmo), terrain, wheel and

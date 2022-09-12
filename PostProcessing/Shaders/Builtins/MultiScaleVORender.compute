@@ -80,11 +80,12 @@ CBUFFER_START(CB1)
     float4 gInvThicknessTable[3];
     float4 gSampleWeightTable[3];
     float4 gInvSliceDimension;
-    float2 AdditionalParams;
+    float3 AdditionalParams;
 CBUFFER_END
 
 #define gRejectFadeoff AdditionalParams.x
 #define gIntensity AdditionalParams.y
+#define zBias AdditionalParams.z
 
 #ifdef MSAA
 float2 TestSamplePair(float frontDepth, float2 invRange, uint base, int offset)
@@ -249,10 +250,10 @@ void MAIN(uint3 Gid : SV_GroupID, uint GI : SV_GroupIndex, uint3 GTid : SV_Group
 #endif
 
 #ifdef MSAA
-    const float2 invThisDepth = float2(1.0 / DepthSamples[thisIdx].x, 1.0 / DepthSamples[thisIdx].y);
+    const float2 invThisDepth = float2(1.0 / (DepthSamples[thisIdx].x - zBias), 1.0 / (DepthSamples[thisIdx].y - zBias));
     float2 ao = 0.0;
 #else
-    const float invThisDepth = 1.0 / DepthSamples[thisIdx];
+    const float invThisDepth = 1.0 / (DepthSamples[thisIdx] - zBias);
     float ao = 0.0;
 #endif
 

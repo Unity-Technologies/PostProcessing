@@ -456,14 +456,20 @@ namespace UnityEngine.Rendering.PostProcessing
                             m_Camera.CopyStereoDeviceProjectionMatrixToNonJittered(Camera.StereoscopicEye.Right);
                             m_Camera.projectionMatrix = m_Camera.GetStereoNonJitteredProjectionMatrix(Camera.StereoscopicEye.Right);
                             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
-                            m_Camera.SetStereoProjectionMatrix(Camera.StereoscopicEye.Right, m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right));
+                            if (XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.MultiPass)
+                            {
+                                m_Camera.SetStereoProjectionMatrix(Camera.StereoscopicEye.Right, m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right));
+                            }
                         }
                         else if (m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Left || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Mono)
                         {
                             m_Camera.CopyStereoDeviceProjectionMatrixToNonJittered(Camera.StereoscopicEye.Left); // device to unjittered
                             m_Camera.projectionMatrix = m_Camera.GetStereoNonJitteredProjectionMatrix(Camera.StereoscopicEye.Left);
                             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
-                            m_Camera.SetStereoProjectionMatrix(Camera.StereoscopicEye.Left, m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left));
+                            if (XRSettings.stereoRenderingMode == XRSettings.StereoRenderingMode.MultiPass)
+                            {
+                                m_Camera.SetStereoProjectionMatrix(Camera.StereoscopicEye.Left, m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left));
+                            }
                         }
                     }
 #endif
@@ -717,6 +723,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 {
                     // The camera must be reset on precull and post render to avoid issues with alpha when toggling TAA.
                     m_Camera.ResetProjectionMatrix();
+#if (ENABLE_VR_MODULE && ENABLE_VR)
                     if (m_CurrentContext.stereoActive)
                     {
                         if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
@@ -727,6 +734,7 @@ namespace UnityEngine.Rendering.PostProcessing
                                 m_Camera.projectionMatrix = m_Camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
                         }
                     }
+#endif
                 }
             }
         }
@@ -1232,7 +1240,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 context.destination = tempTarget;
 
                 // Handle FXAA's keep alpha mode
-                if (antialiasingMode == Antialiasing.FastApproximateAntialiasing && !fastApproximateAntialiasing.keepAlpha)
+                if (antialiasingMode == Antialiasing.FastApproximateAntialiasing && !fastApproximateAntialiasing.keepAlpha && RuntimeUtilities.hasAlpha(context.sourceFormat))
                     uberSheet.properties.SetFloat(ShaderIDs.LumaInAlpha, 1f);
             }
 
@@ -1349,8 +1357,13 @@ namespace UnityEngine.Rendering.PostProcessing
                         : "FXAA"
                     );
 
-                    if (fastApproximateAntialiasing.keepAlpha)
-                        uberSheet.EnableKeyword("FXAA_KEEP_ALPHA");
+                    if (RuntimeUtilities.hasAlpha(context.sourceFormat))
+                    {
+                        if (fastApproximateAntialiasing.keepAlpha)
+                            uberSheet.EnableKeyword("FXAA_KEEP_ALPHA");
+                    }
+                    else
+                        uberSheet.EnableKeyword("FXAA_NO_ALPHA");
                 }
                 else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported())
                 {

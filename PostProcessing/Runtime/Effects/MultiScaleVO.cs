@@ -391,7 +391,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.SetComputeFloatParams(cs, "gInvThicknessTable", m_InvThicknessTable);
             cmd.SetComputeFloatParams(cs, "gSampleWeightTable", m_SampleWeightTable);
             cmd.SetComputeVectorParam(cs, "gInvSliceDimension", new Vector2(1f / sourceSize.x, 1f / sourceSize.y));
-            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector2(-1f / m_Settings.thicknessModifier.value, m_Settings.intensity.value));
+            cmd.SetComputeVectorParam(cs, "AdditionalParams", new Vector3(-1f / m_Settings.thicknessModifier.value, m_Settings.intensity.value, m_Settings.zBias.value));
             cmd.SetComputeTextureParam(cs, kernel, "DepthTex", source);
             cmd.SetComputeTextureParam(cs, kernel, "Occlusion", destination);
 

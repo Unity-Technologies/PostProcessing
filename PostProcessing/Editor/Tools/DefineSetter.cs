@@ -12,8 +12,7 @@ namespace UnityEditor.Rendering.PostProcessing
         {
             var targets = Enum.GetValues(typeof(BuildTargetGroup))
                 .Cast<BuildTargetGroup>()
-                .Where(x => x != BuildTargetGroup.Unknown)
-                .Where(x => !IsObsolete(x));
+                .Where(x => x != BuildTargetGroup.Unknown && !IsObsolete(x));
 
             foreach (var target in targets)
             {

@@ -284,7 +284,6 @@ namespace UnityEngine.Rendering.PostProcessing
 
             sheet.properties.SetMatrix(ShaderIDs.ViewMatrix, context.camera.worldToCameraMatrix);
             sheet.properties.SetMatrix(ShaderIDs.InverseViewMatrix, context.camera.worldToCameraMatrix.inverse);
-            sheet.properties.SetMatrix(ShaderIDs.InverseProjectionMatrix, projectionMatrix.inverse);
             sheet.properties.SetMatrix(ShaderIDs.ScreenSpaceProjectionMatrix, screenSpaceProjectionMatrix);
             sheet.properties.SetVector(ShaderIDs.Params, new Vector4((float)settings.vignette.value, settings.distanceFade.value, settings.maximumMarchDistance.value, lodCount));
             sheet.properties.SetVector(ShaderIDs.Params2, new Vector4((float)context.width / (float)context.height, (float)size / (float)noiseTex.width, settings.thickness.value, settings.maximumIterationCount.value));
@@ -353,7 +352,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 cmd.ReleaseTemporaryRT(m_MipIDs[i]);
 
             sheet.properties.SetTexture(ShaderIDs.Resolve, m_Resolve);
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Composite);
+            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, (int)Pass.Composite, preserveDepth: true);
             cmd.EndSample("Screen-space Reflections");
         }
 

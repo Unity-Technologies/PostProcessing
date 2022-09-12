@@ -631,7 +631,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
                     for (int i = 1; i < hLines; i++)
                     {
-                        var offset = i * Vector2.right * gridOffset;
+                        var offset = gridOffset * i * Vector2.right;
                         offset.x += gridPadding;
                         Handles.DrawLine(innerRect.position + offset, new Vector2(innerRect.x, innerRect.yMax - 1) + offset);
                     }
@@ -642,7 +642,7 @@ namespace UnityEditor.Rendering.PostProcessing
 
                     for (int i = 1; i < vLines; i++)
                     {
-                        var offset = i * Vector2.up * gridOffset;
+                        var offset = gridOffset * i * Vector2.up;
                         offset.y += gridPadding;
                         Handles.DrawLine(innerRect.position + offset, new Vector2(innerRect.xMax - 1, innerRect.y) + offset);
                     }

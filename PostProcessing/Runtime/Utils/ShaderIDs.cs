@@ -46,7 +46,6 @@ namespace UnityEngine.Rendering.PostProcessing
         internal static readonly int History                         = Shader.PropertyToID("_History");
         internal static readonly int ViewMatrix                      = Shader.PropertyToID("_ViewMatrix");
         internal static readonly int InverseViewMatrix               = Shader.PropertyToID("_InverseViewMatrix");
-        internal static readonly int InverseProjectionMatrix         = Shader.PropertyToID("_InverseProjectionMatrix");
         internal static readonly int ScreenSpaceProjectionMatrix     = Shader.PropertyToID("_ScreenSpaceProjectionMatrix");
         internal static readonly int Params2                         = Shader.PropertyToID("_Params2");
 

@@ -52,8 +52,7 @@ namespace UnityEngine.Rendering.PostProcessing
             // frame so keep them in the same order
             if (m_Actives.Count > 0)
             {
-                foreach (var rt in m_Actives)
-                    m_Recycled.Add(rt);
+                m_Recycled.AddRange(m_Actives);
 
                 m_Actives.Clear();
             }

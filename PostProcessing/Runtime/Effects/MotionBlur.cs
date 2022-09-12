@@ -130,7 +130,7 @@ namespace UnityEngine.Rendering.PostProcessing
             cmd.ReleaseTemporaryRT(tile4);
 
             // Pass 5 - Fourth TileMax filter (reduce to tileSize)
-            var tileMaxOffs = Vector2.one * (tileSize / 8f - 1f) * -0.5f;
+            var tileMaxOffs = (tileSize / 8f - 1f) * -0.5f * Vector2.one;
             sheet.properties.SetVector(ShaderIDs.TileMaxOffs, tileMaxOffs);
             sheet.properties.SetFloat(ShaderIDs.TileMaxLoop, (int)(tileSize / 8f));
 
