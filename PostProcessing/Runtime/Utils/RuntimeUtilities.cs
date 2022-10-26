@@ -824,7 +824,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #elif !(ENABLE_VR_MODULE && ENABLE_VR)
                 return false;
 #else
-                return UnityEngine.XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
+                return XR.XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
 #endif
             }
         }
@@ -844,6 +844,19 @@ namespace UnityEngine.Rendering.PostProcessing
                 return UnityEngine.XR.XRSettings.enabled;
 #endif
             }
+        }
+
+        public static bool IsSinglePassStereoEnabledOnCamera(Camera camera)
+        {
+            bool result = false;
+            if(isSinglePassStereoEnabled)
+            {
+                if(camera.stereoEnabled)
+                {
+                    result = true;
+                }
+            }
+            return result;
         }
 
         /// <summary>

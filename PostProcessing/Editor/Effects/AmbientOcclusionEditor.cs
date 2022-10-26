@@ -12,6 +12,7 @@ namespace UnityEditor.Rendering.PostProcessing
         SerializedParameterOverride m_AmbientOnly;
         SerializedParameterOverride m_ThicknessModifier;
         SerializedParameterOverride m_ZBias;
+        SerializedParameterOverride m_disableOnVRCameras;
         SerializedParameterOverride m_DirectLightingStrength;
         SerializedParameterOverride m_Quality;
         SerializedParameterOverride m_Radius;
@@ -24,6 +25,7 @@ namespace UnityEditor.Rendering.PostProcessing
             m_AmbientOnly = FindParameterOverride(x => x.ambientOnly);
             m_ThicknessModifier = FindParameterOverride(x => x.thicknessModifier);
             m_ZBias = FindParameterOverride(x => x.zBias);
+            m_disableOnVRCameras = FindParameterOverride(x => x.disableOnVRCameras);
             m_DirectLightingStrength = FindParameterOverride(x => x.directLightingStrength);
             m_Quality = FindParameterOverride(x => x.quality);
             m_Radius = FindParameterOverride(x => x.radius);
@@ -56,6 +58,7 @@ namespace UnityEditor.Rendering.PostProcessing
                 PropertyField(m_ZBias);
                 if (RuntimeUtilities.scriptableRenderPipelineActive)
                     PropertyField(m_DirectLightingStrength);
+                PropertyField(m_disableOnVRCameras);
             }
 
             PropertyField(m_Color);

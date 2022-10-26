@@ -47,9 +47,10 @@ namespace UnityEngine.Rendering.PostProcessing
         /// Checks if the effect is supported on the target platform.
         /// </summary>
         /// <returns><c>true</c> if the anti-aliasing filter is supported, <c>false</c> otherwise</returns>
-        public bool IsSupported()
+        public bool IsSupported(Camera camera)
         {
-            return !RuntimeUtilities.isSinglePassStereoEnabled;
+            //return !RuntimeUtilities.isSinglePassStereoEnabled;
+            return !RuntimeUtilities.IsSinglePassStereoEnabledOnCamera(camera);
         }
 
         internal void Render(PostProcessRenderContext context)

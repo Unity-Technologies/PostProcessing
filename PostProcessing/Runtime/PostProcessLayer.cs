@@ -726,7 +726,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if (ENABLE_VR_MODULE && ENABLE_VR)
                     if (m_CurrentContext.stereoActive)
                     {
-                        if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                        if (RuntimeUtilities.IsSinglePassStereoEnabledOnCamera(m_Camera) || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
                         {
                             m_Camera.ResetStereoProjectionMatrices();
                             // copy the left eye onto the projection matrix so that we're using the correct projection matrix after calling m_Camera.ResetProjectionMatrix(); above.
@@ -1084,7 +1084,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 bool hasBeforeStackEffects = HasActiveEffects(PostProcessEvent.BeforeStack, context);
                 bool hasAfterStackEffects = HasActiveEffects(PostProcessEvent.AfterStack, context) && !breakBeforeColorGrading;
                 bool needsFinalPass = (hasAfterStackEffects
-                    || (antialiasingMode == Antialiasing.FastApproximateAntialiasing) || (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported()))
+                    || (antialiasingMode == Antialiasing.FastApproximateAntialiasing) || (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported(context.camera)))
                     && !breakBeforeColorGrading;
 
                 // Right before the builtin stack
@@ -1365,7 +1365,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     else
                         uberSheet.EnableKeyword("FXAA_NO_ALPHA");
                 }
-                else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported())
+                else if (antialiasingMode == Antialiasing.SubpixelMorphologicalAntialiasing && subpixelMorphologicalAntialiasing.IsSupported(context.camera))
                 {
                     tempTarget = m_TargetPool.Get();
                     var finalDestination = context.destination;

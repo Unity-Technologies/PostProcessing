@@ -394,7 +394,6 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_1_OR_NEWER && ENABLE_VR_MODULE && ENABLE_VR
             var xrDesc = XRSettings.eyeTextureDesc;
             screenWidth = XRSettings.eyeTextureWidth;
-
             if (stereoRenderingMode == StereoRenderingMode.SinglePass)
             {
                 //For complex effects, it's more efficient to disable XR single-pass interface

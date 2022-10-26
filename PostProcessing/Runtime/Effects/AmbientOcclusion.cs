@@ -57,13 +57,13 @@ namespace UnityEngine.Rendering.PostProcessing
     /// A volume parameter holding a <see cref="AmbientOcclusionMode"/> value.
     /// </summary>
     [Serializable]
-    public sealed class AmbientOcclusionModeParameter : ParameterOverride<AmbientOcclusionMode> {}
+    public sealed class AmbientOcclusionModeParameter : ParameterOverride<AmbientOcclusionMode> { }
 
     /// <summary>
     /// A volume parameter holding a <see cref="AmbientOcclusionQuality"/> value.
     /// </summary>
     [Serializable]
-    public sealed class AmbientOcclusionQualityParameter : ParameterOverride<AmbientOcclusionQuality> {}
+    public sealed class AmbientOcclusionQualityParameter : ParameterOverride<AmbientOcclusionQuality> { }
 
     /// <summary>
     /// This class holds settings for the Ambient Occlusion effect.
@@ -133,6 +133,9 @@ namespace UnityEngine.Rendering.PostProcessing
         [Range(0f, 0.001f), Tooltip("Add a bias distance to sampled depth in AO to reduce self-shadowing aliasing artifacts.")]
         public FloatParameter zBias = new FloatParameter { value = 0.001f };
 
+        [Tooltip("Disables the calculation of MSVO on VR cameras (since it's not working...)")]
+        public BoolParameter disableOnVRCameras = new BoolParameter { value = false };
+
         // HDRP-only parameters
 
         /// <summary>
@@ -199,6 +202,11 @@ namespace UnityEngine.Rendering.PostProcessing
                       && RenderTextureFormat.RFloat.IsSupported()
                       && RenderTextureFormat.RHalf.IsSupported()
                       && RenderTextureFormat.R8.IsSupported();
+
+                if (disableOnVRCameras)
+                {
+                    state &= !context.camera.stereoEnabled;
+                }
             }
 
             return state;
@@ -213,7 +221,7 @@ namespace UnityEngine.Rendering.PostProcessing
         void CompositeAmbientOnly(PostProcessRenderContext context);
         void Release();
     }
-    
+
     [UnityEngine.Scripting.Preserve]
     internal sealed class AmbientOcclusionRenderer : PostProcessEffectRenderer<AmbientOcclusion>
     {
