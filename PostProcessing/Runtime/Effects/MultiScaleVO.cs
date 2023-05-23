@@ -192,7 +192,8 @@ namespace UnityEngine.Rendering.PostProcessing
             }
 
             // Allocate temporary textures
-            PushAllocCommands(cmd, isMSAA, camera.allowDynamicResolution);
+            bool dynamicResolutionEnabled = RuntimeUtilities.IsDynamicResolutionEnabled(camera);
+            PushAllocCommands(cmd, isMSAA, dynamicResolutionEnabled);
 
             // Render logic
             PushDownsampleCommands(cmd, camera, depthMap, isMSAA);
@@ -293,7 +294,7 @@ namespace UnityEngine.Rendering.PostProcessing
                 // buffer (it's only available in some specific situations).
                 if (!RuntimeUtilities.IsResolvedDepthAvailable(camera))
                 {
-                    Alloc(cmd, ShaderIDs.DepthCopy, MipLevel.Original, RenderTextureFormat.RFloat, false, camera.allowDynamicResolution);
+                    Alloc(cmd, ShaderIDs.DepthCopy, MipLevel.Original, RenderTextureFormat.RFloat, false, RuntimeUtilities.IsDynamicResolutionEnabled(camera));
                     depthMapId = new RenderTargetIdentifier(ShaderIDs.DepthCopy);
                     cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, depthMapId, m_PropertySheet, (int)Pass.DepthCopy);
                     needDepthMapRelease = true;
@@ -490,7 +491,8 @@ namespace UnityEngine.Rendering.PostProcessing
         {
             bool AOUpdateNeeded = m_AmbientOnlyAO == null || !m_AmbientOnlyAO.IsCreated() || m_AmbientOnlyAO.width != context.width || m_AmbientOnlyAO.height != context.height;
 #if UNITY_2017_3_OR_NEWER
-            AOUpdateNeeded = AOUpdateNeeded || m_AmbientOnlyAO.useDynamicScale != context.camera.allowDynamicResolution;
+            bool dynamicResolutionEnabled = RuntimeUtilities.IsDynamicResolutionEnabled(context.camera);
+            AOUpdateNeeded = AOUpdateNeeded || m_AmbientOnlyAO.useDynamicScale != dynamicResolutionEnabled;
 #endif
             if (AOUpdateNeeded)
             {
@@ -502,7 +504,7 @@ namespace UnityEngine.Rendering.PostProcessing
                     filterMode = FilterMode.Point,
                     enableRandomWrite = true,
 #if UNITY_2017_3_OR_NEWER
-                    useDynamicScale = context.camera.allowDynamicResolution
+                    useDynamicScale = dynamicResolutionEnabled
 #endif
                 };
                 m_AmbientOnlyAO.Create();

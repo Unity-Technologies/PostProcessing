@@ -257,7 +257,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_1_OR_NEWER
         bool DynamicResolutionAllowsFinalBlitToCameraTarget()
         { 
-            return (!m_Camera.allowDynamicResolution || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0));
+            return (!RuntimeUtilities.IsDynamicResolutionEnabled(m_Camera) || (ScalableBufferManager.heightScaleFactor == 1.0 && ScalableBufferManager.widthScaleFactor == 1.0));
         }
 #endif
 

@@ -69,7 +69,7 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2019_1_OR_NEWER
             cmd.GetTemporaryRT(nameID, rtDesc, FilterMode.Point);
 #elif UNITY_2017_3_OR_NEWER
-            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, context.camera.allowDynamicResolution);
+            cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless, RuntimeUtilities.IsDynamicResolutionEnabled(context.camera));
 #else            
             cmd.GetTemporaryRT(nameID, rtDesc.width, rtDesc.height, rtDesc.depthBufferBits, FilterMode.Point, rtDesc.colorFormat, RenderTextureReadWrite.Linear, rtDesc.msaaSamples, rtDesc.enableRandomWrite, rtDesc.memoryless);
 #endif

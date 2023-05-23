@@ -1012,6 +1012,18 @@ namespace UnityEngine.Rendering.PostProcessing
                 && layer.temporalAntialiasing.IsSupported();
         }
 
+#if UNITY_2017_3_OR_NEWER
+        /// <summary>
+        /// Checks if dynamic resolution is enabled on a given camera.
+        /// </summary>
+        /// <param name="camera">The camera to check</param>
+        /// <returns><c>true</c> if dynamic resolution is enabled, <c>false</c> otherwise</returns>
+        public static bool IsDynamicResolutionEnabled(Camera camera)
+        {
+            return camera.allowDynamicResolution || (camera.targetTexture != null && camera.targetTexture.useDynamicScale);
+        }
+#endif
+
         /// <summary>
         /// Gets all scene objects in the hierarchy, including inactive objects. This method is slow
         /// on large scenes and should be used with extreme caution.

@@ -166,7 +166,7 @@ namespace UnityEditor.Rendering.PostProcessing
                         EditorGUILayout.HelpBox("TAA requires Unity 2017.3+ for Single-pass stereo rendering support.", MessageType.Warning);
                     #endif
                     #if UNITY_2017_3_OR_NEWER
-                    if (m_TargetCameraComponent != null && m_TargetCameraComponent.allowDynamicResolution)
+                    if (m_TargetCameraComponent != null && RuntimeUtilities.IsDynamicResolutionEnabled(m_TargetCameraComponent))
                         EditorGUILayout.HelpBox("TAA is not supported with Dynamic Resolution.", MessageType.Warning);
                     #endif
 
