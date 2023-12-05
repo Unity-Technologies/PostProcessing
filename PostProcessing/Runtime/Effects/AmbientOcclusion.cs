@@ -199,9 +199,16 @@ namespace UnityEngine.Rendering.PostProcessing
 
                 state &= SystemInfo.supportsComputeShaders
                       && !RuntimeUtilities.isAndroidOpenGL
-                      && RenderTextureFormat.RFloat.IsSupported()
-                      && RenderTextureFormat.RHalf.IsSupported()
-                      && RenderTextureFormat.R8.IsSupported();
+                      && !RuntimeUtilities.isWebGL
+#if UNITY_2023_2_OR_NEWER
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R32_SFloat, GraphicsFormatUsage.Render)
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, GraphicsFormatUsage.Render)
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R8_UNorm, GraphicsFormatUsage.Render);
+#else
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R32_SFloat, FormatUsage.Render)
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, FormatUsage.Render)
+                      && SystemInfo.IsFormatSupported(GraphicsFormat.R8_UNorm, FormatUsage.Render);
+#endif
 
                 if (disableOnVRCameras)
                 {

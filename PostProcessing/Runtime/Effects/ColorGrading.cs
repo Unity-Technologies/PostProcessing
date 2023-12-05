@@ -813,7 +813,10 @@ namespace UnityEngine.Rendering.PostProcessing
 
         static bool IsRenderTextureFormatSupportedForLinearFiltering(RenderTextureFormat format)
         {
-#if UNITY_2019_1_OR_NEWER
+#if UNITY_2023_2_OR_NEWER
+            var gFormat = GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Linear);
+            return SystemInfo.IsFormatSupported(gFormat, GraphicsFormatUsage.Linear);
+#elif UNITY_2019_1_OR_NEWER
             var gFormat = GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Linear);
             return SystemInfo.IsFormatSupported(gFormat, FormatUsage.Linear);
 #else

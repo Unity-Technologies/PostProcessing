@@ -48,6 +48,7 @@ namespace UnityEngine.Rendering.PostProcessing
             return requested
                 && SystemInfo.supportsComputeShaders
                 && !RuntimeUtilities.isAndroidOpenGL
+                && !RuntimeUtilities.isWebGL
                 && ShaderResourcesAvailable(context);
         }
 

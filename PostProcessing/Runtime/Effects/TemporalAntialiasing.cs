@@ -87,7 +87,11 @@ namespace UnityEngine.Rendering.PostProcessing
 #if !UNITY_2017_3_OR_NEWER
                 && !RuntimeUtilities.isVREnabled
 #endif
+#if !UNITY_2023_1_OR_NEWER
                 && SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
+#else
+                ;
+#endif
         }
 
         internal DepthTextureMode GetCameraFlags()
@@ -160,7 +164,7 @@ namespace UnityEngine.Rendering.PostProcessing
         // TODO: We'll probably need to isolate most of this for SRPs
         public void ConfigureStereoJitteredProjectionMatrices(PostProcessRenderContext context)
         {
-#if  UNITY_2017_3_OR_NEWER
+#if UNITY_2017_3_OR_NEWER
             var camera = context.camera;
             jitter = GenerateRandomOffset();
             jitter *= jitterSpread;

@@ -869,6 +869,21 @@ namespace UnityEngine.Rendering.PostProcessing
         }
 
         /// <summary>
+        /// Returns <c>true</c> if the target platform is WebGL,
+        /// <c>false</c> otherwise.
+        /// </summary>
+        public static bool isWebGL
+        {
+            get {
+#if UNITY_WEBGL
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        /// <summary>
         /// Gets the default HDR render texture format for the current target platform.
         /// </summary>
         public static RenderTextureFormat defaultHDRRenderTextureFormat

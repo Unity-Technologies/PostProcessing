@@ -13,21 +13,16 @@ namespace UnityEditor.Rendering.PostProcessing
 
         static DefineSetter()
         {
-#if UNITY_2021_3_OR_NEWER
-            var targets = Enum.GetValues(typeof(NamedBuildTarget))
-                .Cast<NamedBuildTarget>()
-                .Where(x => x != NamedBuildTarget.Unknown && !IsObsolete(x));
-#else
             var targets = Enum.GetValues(typeof(BuildTargetGroup))
                 .Cast<BuildTargetGroup>()
                 .Where(x => x != BuildTargetGroup.Unknown)
                 .Where(x => !IsObsolete(x));
-#endif
 
             foreach (var target in targets)
             {
 #if UNITY_2021_3_OR_NEWER
-                var defines = PlayerSettings.GetScriptingDefineSymbols(target).Trim();
+                var namedTarget = NamedBuildTarget.FromBuildTargetGroup(target);
+                var defines = PlayerSettings.GetScriptingDefineSymbols(namedTarget).Trim();
 #else
                 var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(target).Trim();
 #endif
@@ -43,23 +38,13 @@ namespace UnityEditor.Rendering.PostProcessing
                 defines = list.Aggregate((a, b) => a + ";" + b);
 
 #if UNITY_2021_3_OR_NEWER
-                PlayerSettings.SetScriptingDefineSymbols(target, defines);
+                PlayerSettings.SetScriptingDefineSymbols(namedTarget, defines);
 #else
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(target, defines);
 #endif
             }
         }
 
-#if UNITY_2021_3_OR_NEWER
-        static bool IsObsolete(NamedBuildTarget namedBuildTarget)
-        {
-            var attrs = typeof(NamedBuildTarget)
-                .GetField(namedBuildTarget.ToString())
-                .GetCustomAttributes(typeof(ObsoleteAttribute), false);
-
-            return attrs != null && attrs.Length > 0;
-        }
-#else
         static bool IsObsolete(BuildTargetGroup group)
         {
             var attrs = typeof(BuildTargetGroup)
@@ -68,6 +53,5 @@ namespace UnityEditor.Rendering.PostProcessing
 
             return attrs != null && attrs.Length > 0;
         }
-#endif
     }
 }
